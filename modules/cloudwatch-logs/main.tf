@@ -1,0 +1,82 @@
+locals {
+  function_name = "Coralogix-CloudWatch-${random_string.this.result}"
+  coralogix_regions = {
+    Europe    = "api.coralogix.com"
+    Europe2   = "api.eu2.coralogix.com"
+    India     = "api.app.coralogix.in"
+    Singapore = "api.coralogixsg.com"
+    US        = "api.coralogix.us"
+  }
+  tags = {
+    Provider = "Coralogix"
+    License  = "Apache-2.0"
+  }
+}
+
+data "aws_cloudwatch_log_group" "this" {
+  name = var.log_group
+}
+
+resource "random_string" "this" {
+  length  = 12
+  special = false
+}
+
+module "lambda" {
+  source                 = "terraform-aws-modules/lambda/aws"
+  version                = "2.34.0"
+
+  function_name          = local.function_name
+  description            = "Send CloudWatch logs to Coralogix."
+  handler                = "index.handler"
+  runtime                = "nodejs12.x"
+  architectures          = [var.architecture]
+  memory_size            = var.memory_size
+  timeout                = var.timeout
+  create_package         = false
+  local_existing_package = "${path.module}/dist/package.zip"
+  destination_on_failure = aws_sns_topic.this.arn
+  environment_variables = {
+    CORALOGIX_URL   = lookup(local.coralogix_regions, var.coralogix_region, "Europe")
+    private_key     = var.private_key
+    app_name        = var.application_name
+    sub_name        = var.subsystem_name
+    newline_pattern = var.newline_pattern
+    buffer_charset  = var.buffer_charset
+    sampling        = var.sampling_rate
+  }
+  policy_path            = "/coralogix/"
+  role_path              = "/coralogix/"
+  role_name              = "${local.function_name}-Role"
+  role_description       = "Role for ${local.function_name} Lambda Function."
+  create_current_version_allowed_triggers = false
+  create_async_event_config               = true
+  attach_async_event_policy                = true
+  allowed_triggers = {
+    AllowExecutionFromCloudWatch = {
+      principal  = "logs.amazonaws.com"
+      source_arn = "${data.aws_cloudwatch_log_group.this.arn}:*"
+    }
+  }
+  tags = merge(var.tags, local.tags)
+}
+
+resource "aws_cloudwatch_log_subscription_filter" "this" {
+  name            = "${module.lambda.lambda_function_name}-Subscription"
+  log_group_name  = data.aws_cloudwatch_log_group.this.name
+  destination_arn = module.lambda.lambda_function_arn
+  filter_pattern  = ""
+}
+
+resource "aws_sns_topic" "this" {
+  name_prefix  = "${module.lambda.lambda_function_name}-Failure"
+  display_name = "${module.lambda.lambda_function_name}-Failure"
+  tags         = merge(var.tags, local.tags)
+}
+
+resource "aws_sns_topic_subscription" "this" {
+  count     = var.notification_email != null ? 1 : 0
+  topic_arn = aws_sns_topic.this.arn
+  protocol  = "email"
+  endpoint  = var.notification_email
+}
