@@ -27,10 +27,16 @@ variable "newline_pattern" {
   default     = "(?:\\r\\n|\\r|\\n)"
 }
 
-variable "buffer_charset" {
-  description = "The charset to use for buffer decoding, possible options are [utf8, ascii]"
+variable "blocking_pattern" {
+  description = "The pattern for lines blocking"
   type        = string
-  default     = "utf8"
+  default     = ""
+}
+
+variable "buffer_size" {
+  description = "Coralogix logger buffer size"
+  type        = number
+  default     = 134217728
 }
 
 variable "sampling_rate" {
@@ -39,9 +45,27 @@ variable "sampling_rate" {
   default     = 1
 }
 
-variable "log_groups" {
-  description = "The names of the CloudWatch log groups to watch"
-  type        = list(string)
+variable "debug" {
+  description = "Coralogix logger debug mode"
+  type        = bool
+  default     = false
+}
+
+variable "s3_bucket_name" {
+  description = "The name of the S3 bucket to watch"
+  type        = string
+}
+
+variable "s3_key_prefix" {
+  description = "The S3 path prefix to watch"
+  type        = string
+  default     = null
+}
+
+variable "s3_key_suffix" {
+  description = "The S3 path suffix to watch"
+  type        = string
+  default     = null
 }
 
 variable "memory_size" {

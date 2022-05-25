@@ -4,7 +4,7 @@ variable "private_key" {
   sensitive   = true
 }
 
-variable "log_groups" {
-  description = "The names of the CloudWatch log groups to watch"
-  type        = list(string)
+variable "s3_bucket_name" {
+  description = "The name of the S3 bucket to watch"
+  type        = string
 }
