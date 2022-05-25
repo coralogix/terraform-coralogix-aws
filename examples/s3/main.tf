@@ -2,17 +2,18 @@ provider "aws" {
   region = "eu-west-1"
 }
 
-module "cloudwatch_logs" {
-  source = "../../modules/cloudwatch-logs"
+module "s3" {
+  source = "../../modules/s3"
 
   coralogix_region   = "Europe"
   private_key        = var.private_key
-  application_name   = "cloudwatch"
+  application_name   = "s3"
   subsystem_name     = "logs"
   newline_pattern    = "(?:\\r\\n|\\r|\\n)"
-  buffer_charset     = "utf8"
+  buffer_size        = 134217728
   sampling_rate      = 1
-  log_groups         = var.log_groups
+  debug              = false
+  s3_bucket_name     = var.s3_bucket_name
   memory_size        = 1024
   timeout            = 300
   architecture       = "x86_64"

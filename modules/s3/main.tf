@@ -1,5 +1,5 @@
 locals {
-  function_name = "Coralogix-CloudWatch-${random_string.this.result}"
+  function_name = "Coralogix-S3-${random_string.this.result}"
   coralogix_regions = {
     Europe    = "api.coralogix.com"
     Europe2   = "api.eu2.coralogix.com"
@@ -13,9 +13,8 @@ locals {
   }
 }
 
-data "aws_cloudwatch_log_group" "this" {
-  count    = length(var.log_groups)
-  name     = element(var.log_groups, count.index)
+data "aws_s3_bucket" "this" {
+  bucket = var.s3_bucket_name
 }
 
 resource "random_string" "this" {
@@ -28,7 +27,7 @@ module "lambda" {
   version                = "3.2.1"
 
   function_name          = local.function_name
-  description            = "Send CloudWatch logs to Coralogix."
+  description            = "Send logs from S3 bucket to Coralogix."
   handler                = "index.handler"
   runtime                = "nodejs12.x"
   architectures          = [var.architecture]
@@ -38,13 +37,15 @@ module "lambda" {
   local_existing_package = "${path.module}/dist/package.zip"
   destination_on_failure = aws_sns_topic.this.arn
   environment_variables = {
-    CORALOGIX_URL   = lookup(local.coralogix_regions, var.coralogix_region, "Europe")
-    private_key     = var.private_key
-    app_name        = var.application_name
-    sub_name        = var.subsystem_name
-    newline_pattern = var.newline_pattern
-    buffer_charset  = var.buffer_charset
-    sampling        = tostring(var.sampling_rate)
+    CORALOGIX_URL         = "https://${lookup(local.coralogix_regions, var.coralogix_region, "Europe")}/api/v1/logs"
+    CORALOGIX_BUFFER_SIZE = tostring(var.buffer_size)
+    private_key           = var.private_key
+    app_name              = var.application_name
+    sub_name              = var.subsystem_name
+    newline_pattern       = var.newline_pattern
+    blocking_pattern      = var.blocking_pattern
+    sampling              = tostring(var.sampling_rate)
+    debug                 = tostring(var.debug)
   }
   policy_path            = "/coralogix/"
   role_path              = "/coralogix/"
@@ -53,21 +54,31 @@ module "lambda" {
   create_current_version_allowed_triggers = false
   create_async_event_config               = true
   attach_async_event_policy               = true
+  attach_policy_statements                = true
+  policy_statements = {
+    S3 = {
+      effect    = "Allow"
+      actions   = ["s3:GetObject"]
+      resources = ["${data.aws_s3_bucket.this.arn}/*"]
+    }
+  }
   allowed_triggers = {
-    for index in range(length(var.log_groups)) : "AllowExecutionFromCloudWatch-${index}" => {
-      principal  = "logs.amazonaws.com"
-      source_arn = "${data.aws_cloudwatch_log_group.this[index].arn}:*"
+    AllowExecutionFromS3 = {
+      principal  = "s3.amazonaws.com"
+      source_arn = data.aws_s3_bucket.this.arn
     }
   }
   tags = merge(var.tags, local.tags)
 }
 
-resource "aws_cloudwatch_log_subscription_filter" "this" {
-  count           = length(var.log_groups)
-  name            = "${module.lambda.lambda_function_name}-Subscription-${count.index}"
-  log_group_name  = data.aws_cloudwatch_log_group.this[count.index].name
-  destination_arn = module.lambda.lambda_function_arn
-  filter_pattern  = ""
+resource "aws_s3_bucket_notification" "this" {
+  bucket = data.aws_s3_bucket.this.bucket
+  lambda_function {
+    lambda_function_arn = module.lambda.lambda_function_arn
+    events              = ["s3:ObjectCreated:*"]
+    filter_prefix       = var.s3_key_prefix
+    filter_suffix       = var.s3_key_suffix
+  }
 }
 
 resource "aws_sns_topic" "this" {

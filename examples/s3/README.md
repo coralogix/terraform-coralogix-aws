@@ -1,6 +1,6 @@
-# cloudwatch-logs example
+# s3 example
 
-Setup the application which retrieves `CloudWatch` log group and sends them to your *Coralogix* account.
+Setup the application which retrieves logs from `S3` bucket and sends them to your *Coralogix* account.
 
 # Usage
 
@@ -11,7 +11,7 @@ $ terraform init
 $ terraform plan
 $ terraform apply \
     -var private_key="45f10c5c-d2e2-4f42-9a35-ae1e21ed1e0c" \
-    -var 'log_groups=["my-log-group"]'
+    -var s3_bucket_name="my-bucket"
 ```
 
 Run `terraform destroy` when you don't need these resources.
@@ -27,14 +27,14 @@ Run `terraform destroy` when you don't need these resources.
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 3.69 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.15.1 |
 | <a name="provider_random"></a> [random](#provider\_random) | >= 3.1.0 |
 
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_cloudwatch_logs"></a> [cloudwatch\_logs](#module\_cloudwatch\_logs) | ../../modules/cloudwatch-logs | n/a |
+| <a name="module_s3"></a> [s3](#module\_s3) | ../../modules/s3 | n/a |
 
 ## Resources
 
@@ -45,7 +45,7 @@ No resources.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_private_key"></a> [private\_key](#input\_private\_key) | The Coralogix private key which is used to validate your authenticity | `string` | n/a | yes |
-| <a name="input_log_groups"></a> [log\_groups](#input\_log\_groups) | The names of the CloudWatch log groups to watch | `list(string)` | n/a | yes |
+| <a name="input_s3_bucket_name"></a> [s3\_bucket\_name](#input\_s3\_bucket\_name) | The name of the S3 bucket to watch | `string` | n/a | yes |
 
 ## Outputs
 
