@@ -2,6 +2,20 @@
 
 ## Usage
 
+`cloudtrail`:
+
+```hcl
+module "cloudtrail" {
+  source = "coralogix/aws/coralogix//modules/cloudtrail"
+
+  coralogix_region   = "Europe"
+  private_key        = "2f55c873-c0cf-4523-82d4-c3b68ee6cb46"
+  application_name   = "cloudtrail"
+  subsystem_name     = "logs"
+  s3_bucket_name     = "test-bucket-name"
+}
+```
+
 `cloudwatch-logs`:
 
 ```hcl
@@ -32,8 +46,9 @@ module "s3" {
 
 ## Examples
 
-- [cloudwatch-logs](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/cloudwatch-logs) - Send `CloudWatch` logs.
-- [s3](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/s3) - Send `S3` logs.
+- [s3](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/cloudtrail) - Send `CloudTrail` logs from `S3` bucket.
+- [cloudwatch-logs](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/cloudwatch-logs) - Send logs from `CloudWatch`.
+- [s3](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/s3) - Send logs from `S3` bucket.
 
 ## Authors
 

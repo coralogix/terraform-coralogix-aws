@@ -20,42 +20,6 @@ variable "subsystem_name" {
   type        = string
 }
 
-variable "package_path" {
-  description = "The path to custom function's bundle"
-  type        = string
-  default     = null
-}
-
-variable "newline_pattern" {
-  description = "The pattern for lines splitting"
-  type        = string
-  default     = "(?:\\r\\n|\\r|\\n)"
-}
-
-variable "blocking_pattern" {
-  description = "The pattern for lines blocking"
-  type        = string
-  default     = ""
-}
-
-variable "buffer_size" {
-  description = "Coralogix logger buffer size"
-  type        = number
-  default     = 134217728
-}
-
-variable "sampling_rate" {
-  description = "Send messages with specific rate"
-  type        = number
-  default     = 1
-}
-
-variable "debug" {
-  description = "Coralogix logger debug mode"
-  type        = bool
-  default     = false
-}
-
 variable "s3_bucket_name" {
   description = "The name of the S3 bucket to watch"
   type        = string
@@ -70,7 +34,7 @@ variable "s3_key_prefix" {
 variable "s3_key_suffix" {
   description = "The S3 path suffix to watch"
   type        = string
-  default     = null
+  default     = ".json.gz"
 }
 
 variable "memory_size" {

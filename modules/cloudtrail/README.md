@@ -1,20 +1,6 @@
-# s3 example
+# cloudtrail
 
-Setup the application which retrieves logs from `S3` bucket and sends them to your *Coralogix* account.
-
-# Usage
-
-To run this example you need to execute:
-
-```bash
-$ terraform init
-$ terraform plan
-$ terraform apply \
-    -var private_key="45f10c5c-d2e2-4f42-9a35-ae1e21ed1e0c" \
-    -var s3_bucket_name="my-bucket"
-```
-
-Run `terraform destroy` when you don't need these resources.
+Manage the application which retrieves `CloudTrail` logs from `S3` bucket and sends them to your *Coralogix* account.
 
 ## Requirements
 
@@ -28,17 +14,12 @@ Run `terraform destroy` when you don't need these resources.
 | Name | Version |
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.15.1 |
-| <a name="provider_random"></a> [random](#provider\_random) | >= 3.1.0 |
 
 ## Modules
 
-| Name | Source | Version |
-|------|--------|---------|
-| <a name="module_s3"></a> [s3](#module\_s3) | ../../modules/s3 | n/a |
-
-## Resources
-
-No resources.
+| Name | Version |
+|------|---------|
+| <a name="module_coralogix_aws_coralogix__modules_s3"></a> [coralogix/aws/coralogix//modules/s3](#module\_coralogix\_aws\_coralogix\_\_modules\_s3) | >= 1.0.2 |
 
 ## Inputs
 
@@ -46,7 +27,16 @@ No resources.
 |------|-------------|------|---------|:--------:|
 | <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | The Coralogix location region, possible options are [`Europe`, `Europe2`, `India`, `Singapore`, `US`] | `string` | `Europe` | no |
 | <a name="input_private_key"></a> [private\_key](#input\_private\_key) | The Coralogix private key which is used to validate your authenticity | `string` | n/a | yes |
+| <a name="input_application_name"></a> [application\_name](#input\_application\_name) | The name of your application | `string` | n/a | yes |
+| <a name="input_subsystem_name"></a> [subsystem\_name](#input\_subsystem\_name) | The subsystem name of your application | `string` | n/a | yes |
 | <a name="input_s3_bucket_name"></a> [s3\_bucket\_name](#input\_s3\_bucket\_name) | The name of the S3 bucket to watch | `string` | n/a | yes |
+| <a name="input_s3_key_prefix"></a> [s3\_key\_prefix](#input\_s3\_key\_prefix) | The S3 path prefix to watch | `string` | `AWSLogs/<aws_account_id>/CloudTrail/` | no |
+| <a name="input_s3_key_suffix"></a> [s3\_key\_suffix](#input\_s3\_key\_suffix) | The S3 path suffix to watch | `string` | `.json.gz` | no |
+| <a name="input_memory_size"></a> [memory\_size](#input\_memory\_size) | Lambda function memory limit | `number` | `1024` | no |
+| <a name="input_timeout"></a> [timeout](#input\_timeout) | Lambda function timeout limit | `number` | `300` | no |
+| <a name="input_architecture"></a> [architecture](#input\_architecture) | Lambda function architecture | `string` | `x86_64` | no |
+| <a name="input_notification_email"></a> [notification_email](#input\_notification\_email) | Failure notification email address | `string` | `null` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to add to all resources | `map(string)` | `{}` | no |
 
 ## Outputs
 
