@@ -5,7 +5,7 @@ provider "aws" {
 module "s3" {
   source = "../../modules/s3"
 
-  coralogix_region   = "Europe"
+  coralogix_region   = var.coralogix_region
   private_key        = var.private_key
   application_name   = "s3"
   subsystem_name     = "logs"

@@ -1,3 +1,9 @@
+variable "coralogix_region" {
+  description = "The Coralogix location region, possible options are [Europe, Europe2, India, Singapore, US]"
+  type        = string
+  default     = "Europe"
+}
+
 variable "private_key" {
   description = "The Coralogix private key which is used to validate your authenticity"
   type        = string
