@@ -16,6 +16,10 @@ locals {
 data "aws_caller_identity" "current_identity" {}
 data "aws_region" "current_region" {}
 
+################################################################################
+# Firehose Delivery Stream
+################################################################################
+
 resource "aws_cloudwatch_log_group" "firehose_loggroup" {
   name              = "/aws/kinesisfirehose/${var.firehose_stream}"
   retention_in_days = 1
@@ -120,6 +124,48 @@ resource "aws_iam_role_policy" "firehose_to_http_metric_policy" {
 EOF
 }
 
+resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream" {
+  name        = "coralogix-${var.firehose_stream}"
+  destination = "http_endpoint"
+
+  s3_configuration {
+    role_arn           = aws_iam_role.firehose_to_coralogix.arn
+    bucket_arn         = aws_s3_bucket.firehose_bucket.arn
+    buffer_size        = 5
+    buffer_interval    = 300
+    compression_format = "GZIP"
+  }
+
+  http_endpoint_configuration {
+    url                = var.endpoint_url
+    name               = "Coralogix"
+    access_key         = var.privatekey
+    buffering_size     = 6
+    buffering_interval = 60
+    s3_backup_mode     = "FailedDataOnly"
+    role_arn           = aws_iam_role.firehose_to_coralogix.arn
+    retry_duration     = 30
+    cloudwatch_logging_options {
+      enabled         = "true"
+      log_group_name  = aws_cloudwatch_log_group.firehose_loggroup.name
+      log_stream_name = aws_cloudwatch_log_stream.firehose_logstream_dest.name
+    }
+
+    request_configuration {
+      content_encoding = "GZIP"
+
+      common_attributes {
+        name  = "integrationType"
+        value = local.integration_type
+      }
+    }
+  }
+}
+
+################################################################################
+# CloudWatch Metrics Stream
+################################################################################
+
 ### IAM role for CloudWatch metric streams
 resource "aws_iam_role" "metric_streams_to_firehose" {
   count              = var.enable_cloudwatch_metricstream == true ? 1 : 0
@@ -162,44 +208,6 @@ resource "aws_iam_role_policy" "metric_streams_to_firehose_policy" {
     ]
 }
 EOF
-}
-
-resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream" {
-  name        = "coralogix-${var.firehose_stream}"
-  destination = "http_endpoint"
-
-  s3_configuration {
-    role_arn           = aws_iam_role.firehose_to_http.arn
-    bucket_arn         = aws_s3_bucket.firehose_bucket.arn
-    buffer_size        = 5
-    buffer_interval    = 300
-    compression_format = "GZIP"
-  }
-
-  http_endpoint_configuration {
-    url                = var.endpoint_url
-    name               = "Coralogix"
-    access_key         = var.privatekey
-    buffering_size     = 6
-    buffering_interval = 60
-    s3_backup_mode     = "FailedDataOnly"
-    role_arn           = aws_iam_role.firehose_to_http.arn
-    retry_duration     = 30
-    cloudwatch_logging_options {
-      enabled         = "true"
-      log_group_name  = aws_cloudwatch_log_group.firehose_loggroup.name
-      log_stream_name = aws_cloudwatch_log_stream.firehose_logstream_dest.name
-    }
-
-    request_configuration {
-      content_encoding = "GZIP"
-
-      common_attributes {
-        name  = "integrationType"
-        value = local.integration_type
-      }
-    }
-  }
 }
 
 # Creating one metric stream for all namespaces
