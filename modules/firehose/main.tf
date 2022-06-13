@@ -10,6 +10,7 @@ provider "aws" {
 
 locals {
   output_format = "opentelemetry0.7"
+  integration_type = "CloudWatch_Metrics_OpenTelemetry070"
 }
 
 data "aws_caller_identity" "current_identity" {}
@@ -35,8 +36,8 @@ resource "aws_s3_bucket" "firehose_bucket" {
 }
 
 ### IAM role for s3 configuration
-resource "aws_iam_role" "firehose_to_http" {
-  name               = "firehose_to_http"
+resource "aws_iam_role" "firehose_to_coralogix" {
+  name               = var.coralogix_firehose_stream_name
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -56,7 +57,7 @@ EOF
 
 resource "aws_iam_role_policy" "firehose_to_http_metric_policy" {
   name   = "firehose_to_http_policy"
-  role   = aws_iam_role.firehose_to_http.id
+  role   = aws_iam_role.firehose_to_coralogix.id
   policy = <<EOF
 {
     "Version": "2012-10-17",
@@ -121,6 +122,7 @@ EOF
 
 ### IAM role for CloudWatch metric streams
 resource "aws_iam_role" "metric_streams_to_firehose" {
+  count              = var.enable_cloudwatch_metricstream == true ? 1 : 0
   name               = "metric_streams_to_firehose_role"
   assume_role_policy = <<EOF
 {
@@ -140,8 +142,9 @@ EOF
 }
 
 resource "aws_iam_role_policy" "metric_streams_to_firehose_policy" {
+  count  = var.enable_cloudwatch_metricstream == true ? 1 : 0
   name   = "metrics_streams_to_firehose_policy"
-  role   = aws_iam_role.metric_streams_to_firehose.id
+  role   = aws_iam_role.metric_streams_to_firehose[0].id
   policy = <<EOF
 {
     "Version": "2012-10-17",
@@ -193,7 +196,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream" {
 
       common_attributes {
         name  = "integrationType"
-        value = var.integration_type
+        value = local.integration_type
       }
     }
   }
@@ -201,18 +204,18 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream" {
 
 # Creating one metric stream for all namespaces
 resource "aws_cloudwatch_metric_stream" "cloudwatch_metric_stream_all_ns" {
-  count         = var.include_all_namespaces == true ? 1 : 0
+  count         = var.include_all_namespaces && var.enable_cloudwatch_metricstream ? 1 : 0
   name          = "cloudwatch_metrics"
-  role_arn      = aws_iam_role.metric_streams_to_firehose.arn
+  role_arn      = aws_iam_role.metric_streams_to_firehose[0].arn
   firehose_arn  = aws_kinesis_firehose_delivery_stream.coralogix_stream.arn
   output_format = local.output_format
 }
 
 # Creating metric streams only for specific namespaces
 resource "aws_cloudwatch_metric_stream" "cloudwatch_metric_stream_included_ns" {
-  count         = var.include_all_namespaces == false ? 1 : 0
-  name          = "cloudwatch_metrics_selected_namespaces"
-  role_arn      = aws_iam_role.metric_streams_to_firehose.arn
+  count         = !var.include_all_namespaces && var.enable_cloudwatch_metricstream ? 1 : 0
+  name          = var.firehose_stream
+  role_arn      = aws_iam_role.metric_streams_to_firehose[0].arn
   firehose_arn  = aws_kinesis_firehose_delivery_stream.coralogix_stream.arn
   output_format = local.output_format
   dynamic "include_filter" {

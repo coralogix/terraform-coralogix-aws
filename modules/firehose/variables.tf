@@ -1,14 +1,17 @@
 variable "firehose_stream" {
   description = "AWS Kinesis firehose delivery stream name"
   type        = string
+  default     = "firehose-deliverystream"
 }
 
 variable "privatekey" {
-  description = "Coralogix account private key"
+  description = "Coralogix account logs private key"
+  sensitive   = true
+
 }
 
 variable "endpoint_url" {
-  description = "Firehose endpoint, please see [Coralogix endpoints](https://github.com/coralogix/eng-integrations/blob/master/metrics/firehose/README.md#Coralogix Endpoints)"
+  description = "Firehose endpoint, see https://github.com/coralogix/terraform-coralogix-aws/blob/master/modules/firehose/README.md#Coralogix"
   type        = string
 }
 
@@ -19,13 +22,14 @@ variable "include_all_namespaces" {
 }
 
 variable "include_metric_stream_namespaces" {
-  description = "List of specific namespaces to include in the CloudWatch metric stream"
+  description = "List of specific namespaces to include in the CloudWatch metric stream, see https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html"
   type        = list(string)
   default     = []
 }
 
-variable "integration_type" {
-  description = "The integration type attribute value"
-  type = string
-  default = "CloudWatch_Metrics_OpenTelemetry070"
+variable "enable_cloudwatch_metricstream" {
+  description = "Should be true if you want to create a new Cloud Watch metric stream and attach it to Firehose"
+  type        = bool
+  default     = true
 }
+
