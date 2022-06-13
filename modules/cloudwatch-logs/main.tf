@@ -24,7 +24,7 @@ resource "random_string" "this" {
 }
 
 module "lambda" {
-  source                 = "registry.terraform.io/terraform-aws-modules/lambda/aws"
+  source                 = "terraform-aws-modules/lambda/aws"
   version                = "3.2.1"
 
   function_name          = local.function_name
@@ -63,7 +63,13 @@ module "lambda" {
 }
 
 resource "aws_cloudwatch_log_subscription_filter" "this" {
-  depends_on      = [ module.lambda ] # Required for allowed_triggers (aws_lambda_permission) to be created before this filter is created.
+
+  # depends_on is required here for the above allowed_triggers
+  # (aws_lambda_permission resources) to be created before this filter.
+  # Otherwise the apply will often fail when there are multiple log_groups due
+  # to missing permissions.
+  depends_on      = [ module.lambda ]
+
   count           = length(var.log_groups)
   name            = "${module.lambda.lambda_function_name}-Subscription-${count.index}"
   log_group_name  = data.aws_cloudwatch_log_group.this[count.index].name
