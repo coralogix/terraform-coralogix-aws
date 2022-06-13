@@ -193,7 +193,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream" {
 
       common_attributes {
         name  = "integrationType"
-        value = "CloudWatch_Metrics_OpenTelemetry070"
+        value = var.integration_type
       }
     }
   }

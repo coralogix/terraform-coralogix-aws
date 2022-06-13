@@ -23,3 +23,9 @@ variable "include_metric_stream_namespaces" {
   type        = list(string)
   default     = []
 }
+
+variable "integration_type" {
+  description = "The integration type attribute value"
+  type = string
+  default = "CloudWatch_Metrics_OpenTelemetry070"
+}
