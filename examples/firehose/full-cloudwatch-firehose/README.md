@@ -1,4 +1,4 @@
-# Firehose Delivery Stream
+# Firehose Delivery Stream with CloudWatch metrics stream including all namespaces 
 Configuration in this directory creates a firehose delivery stream, and a CloudWatch metrics stream. 
 The CloudWatch metrics stream in this example includes all avilable namespaces under the same stream.   
 
