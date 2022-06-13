@@ -41,7 +41,7 @@ resource "aws_s3_bucket" "firehose_bucket" {
 
 ### IAM role for s3 configuration
 resource "aws_iam_role" "firehose_to_coralogix" {
-  name               = var.coralogix_firehose_stream_name
+  name               = var.firehose_stream
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
