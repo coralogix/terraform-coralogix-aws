@@ -1,1 +1,1 @@
-![alt text](https://github.com/coralogix/terraform-coralogix-aws/blob/firehoseModule/modules/firehose/image.jpg?raw=true)
+![alt text](https://github.com/coralogix/terraform-coralogix-aws/blob/firehoseModule/modules/firehose/namespaces.jpg?raw=true)
