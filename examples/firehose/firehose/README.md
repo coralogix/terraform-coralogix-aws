@@ -9,7 +9,5 @@ In this example you need to configure the following variables:
 * endpoint_url --> The url of the Coralogix endpoint, see [Coralogix Endpoints](https://github.com/coralogix/terraform-coralogix-aws/blob/master/modules/firehose/README.md)
 * privatekey --> Coralogix account logs privatekey
 Since the privatekey is private and we cant put it hardcoded, it can be exported instead of insert it as an input each time:
-```
 export TF_VAR_coralogix_privatekey="your-coralogix-private-key"
-```
 * enable_cloudwatch_metricstream --> this variable needs to be set to 'false' to disable the creation of metric streams
