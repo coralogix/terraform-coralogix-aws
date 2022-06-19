@@ -7,7 +7,7 @@ In this example it includes a metric stream including all namespaces.
 
 In this example you need to configure the following variables:
 * firehose_stream --> The name of the Firehose delivery stream
-* endpoint_region --> The region of Coralogix account
+* coralogix_region --> The region of Coralogix account
 * privatekey --> Coralogix account logs privatekey
 Since the privatekey is private and we cant put it hardcoded, it can be exported instead of insert it as an input each time:
 export TF_VAR_coralogix_privatekey="your-coralogix-private-key"
