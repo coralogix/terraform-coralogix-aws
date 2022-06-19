@@ -10,5 +10,5 @@ module "cloudwatch_firehose_coralogix" {
   privatekey                       = var.coralogix_privatekey
   include_all_namespaces           = var.include_all_namespaces
   include_metric_stream_namespaces = var.include_metric_stream_namespaces
-  endpoint_region                  = var.coralogix_region
+  coralogix_region                 = var.coralogix_region
 }

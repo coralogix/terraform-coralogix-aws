@@ -131,7 +131,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream" {
   }
 
   http_endpoint_configuration {
-    url                = var.endpoint_url[var.endpoint_region].url
+    url                = var.endpoint_url[var.coralogix_region].url
     name               = "Coralogix"
     access_key         = var.privatekey
     buffering_size     = 6

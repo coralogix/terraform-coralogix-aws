@@ -1,5 +1,5 @@
 variable "coralogix_streams" {
-  type = list(string)
+  type    = list(string)
   default = ["stream-1", "stream-2"]
 }
 
@@ -11,5 +11,5 @@ variable "coralogix_region" {
 variable "coralogix_privatekey" {
   type        = string
   description = "Coralogix account logs private key"
-  sensitive = true
+  sensitive   = true
 }

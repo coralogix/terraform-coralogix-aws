@@ -1,7 +1,7 @@
 variable "coralogix_firehose_stream_name" {
   description = "Coralogix firehose delivery stream name"
   type        = string
-  default = "coralogix-firehose"
+  default     = "coralogix-firehose"
 }
 
 variable "coralogix_region" {
@@ -12,13 +12,13 @@ variable "coralogix_region" {
 variable "coralogix_privatekey" {
   type        = string
   description = "Coralogix account logs private key"
-  sensitive = true
+  sensitive   = true
 }
 
 variable "include_all_namespaces" {
-  type = bool
+  type        = bool
   description = "If set to true, the CloudWatch metric stream will include all available namespaces"
-  default = false
+  default     = false
 }
 
 variable "include_metric_stream_namespaces" {

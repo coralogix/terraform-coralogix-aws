@@ -9,8 +9,8 @@ variable "privatekey" {
 
 }
 
-variable "endpoint_region" {
-  description = "Coralogix account region: us, singapore, ireland, india, stockholm"
+variable "coralogix_region" {
+  description = "Coralogix account region: us, singapore, ireland, india, stockholm [in lower-case letterד]"
 }
 
 variable "endpoint_url" {
