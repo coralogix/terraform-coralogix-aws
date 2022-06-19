@@ -10,3 +10,12 @@ When Using the variable 'include_metric_stream_namespaces' - the chosen namespac
  | Ireland   | `https://firehose-ingress.coralogix.com/firehose`               |
  | India     | `https://firehose-ingress.app.coralogix.in/firehose`            |
  | Stockholm | `https://firehose-ingress.coralogix.eu2.coralogix.com/firehose` |
+
+# Metrics Output Format
+Coralogix suppots both 'JSON' format and 'OpenTelemtry' format. 
+The default format configured here is 'OpenTelemtry'. 
+
+#### Note
+if using 'Json' in the firehose output format, which is configured via the 'integration_type' variable,
+then the CloudWatch metric stream must be configured with the same format, configured via the 'output_format' variable.
+
