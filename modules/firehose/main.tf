@@ -7,11 +7,6 @@ terraform {
   }
 }
 
-locals {
-  output_format = "json" #"opentelemetry0.7"
-  integration_type = "CloudWatch_Metrics_JSON" #CloudWatch_Metrics_OpenTelemetry070 
-}
-
 data "aws_caller_identity" "current_identity" {}
 data "aws_region" "current_region" {}
 
@@ -155,7 +150,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream" {
 
       common_attributes {
         name  = "integrationType"
-        value = local.integration_type
+        value = var.integration_type
       }
     }
   }
@@ -215,7 +210,7 @@ resource "aws_cloudwatch_metric_stream" "cloudwatch_metric_stream_all_ns" {
   name          = "cloudwatch_metrics"
   role_arn      = aws_iam_role.metric_streams_to_firehose[0].arn
   firehose_arn  = aws_kinesis_firehose_delivery_stream.coralogix_stream.arn
-  output_format = local.output_format
+  output_format = var.output_format
 }
 
 # Creating metric streams only for specific namespaces
@@ -224,7 +219,7 @@ resource "aws_cloudwatch_metric_stream" "cloudwatch_metric_stream_included_ns" {
   name          = var.firehose_stream
   role_arn      = aws_iam_role.metric_streams_to_firehose[0].arn
   firehose_arn  = aws_kinesis_firehose_delivery_stream.coralogix_stream.arn
-  output_format = local.output_format
+  output_format = var.output_format
   dynamic "include_filter" {
     for_each = var.include_metric_stream_namespaces
     content {
