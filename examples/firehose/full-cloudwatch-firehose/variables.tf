@@ -4,9 +4,9 @@ variable "coralogix_firehose_stream_name" {
   default = "coralogix-firehose"
 }
 
-variable "coralogix_endpoint_url" {
+variable "coralogix_region" {
   type        = string
-  description = "Coralogix endpoint url"
+  description = "The region of the Coralogix account"
 }
 
 variable "coralogix_privatekey" {

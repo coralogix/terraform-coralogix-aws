@@ -3,9 +3,9 @@ variable "coralogix_streams" {
   default = ["stream-1", "stream-2"]
 }
 
-variable "coralogix_endpoint_url" {
+variable "coralogix_region" {
   type        = string
-  description = "Coralogix endpoint url"
+  description = "The region of the Coralogix account"
 }
 
 variable "coralogix_privatekey" {

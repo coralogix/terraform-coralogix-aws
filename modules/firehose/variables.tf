@@ -9,9 +9,30 @@ variable "privatekey" {
 
 }
 
+variable "endpoint_region" {
+  description = "Coralogix account region: us, singapore, ireland, india, stockholm"
+}
+
 variable "endpoint_url" {
-  description = "Firehose endpoint, see https://github.com/coralogix/terraform-coralogix-aws/blob/master/modules/firehose/README.md#Coralogix"
-  type        = string
+  description = "Firehose Coralogix endpoint"
+  type        = map(any)
+  default = {
+    "us" = {
+      url   = "https://firehose-ingress.coralogix.us/firehose"
+    }
+    "singapore" = {
+      url   = "https://firehose-ingress.coralogixsg.com/firehose"
+    }
+    "ireland" = {
+      url   = "https://firehose-ingress.coralogix.com/firehose"
+    }
+    "india" = {
+      url   = "https://firehose-ingress.coralogix.in/firehose"
+    }
+    "stockholm" = {
+      url   = "https://firehose-ingress.eu2.coralogix.com/firehose"
+    }
+  }
 }
 
 variable "include_all_namespaces" {
