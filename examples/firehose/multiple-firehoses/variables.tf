@@ -1,12 +1,11 @@
 variable "coralogix_streams" {
   type = list(string)
-  default = ["json-to-eu2"]
+  default = ["stream-1", "stream-2"]
 }
 
 variable "coralogix_endpoint_url" {
   type        = string
   description = "Coralogix endpoint url"
-  default = "https://firehose-ingress.eu2.coralogix.com/firehose"
 }
 
 variable "coralogix_privatekey" {
