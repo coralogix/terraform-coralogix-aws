@@ -49,11 +49,12 @@ module "cloudwatch_firehose_coralogix" {
 ```
 
 # Coralogix account region
-us
-singapore
-ireland
-india
-stockholm
+The coralogix region variable accepts one of the following:
+* us
+* singapore
+* ireland
+* india
+* stockholm
 
 # Metrics Output Format
 Coralogix suppots both 'JSON' format and 'OpenTelemtry' format. 
