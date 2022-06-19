@@ -1,7 +1,6 @@
 variable "firehose_stream" {
   description = "AWS Kinesis firehose delivery stream name"
   type        = string
-  default     = "firehose-deliverystream"
 }
 
 variable "privatekey" {

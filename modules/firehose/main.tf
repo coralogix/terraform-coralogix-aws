@@ -1,16 +1,15 @@
-provider "aws" {
-  default_tags {
-    tags = {
-      terraform-module         = "kinesis-firehose-to-coralogix"
-      terraform-module-version = "v0.0.1"
-      managed-by               = "coralogix-terraform"
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.17.1"
     }
   }
 }
 
 locals {
-  output_format = "opentelemetry0.7"
-  integration_type = "CloudWatch_Metrics_OpenTelemetry070"
+  output_format = "json" #"opentelemetry0.7"
+  integration_type = "CloudWatch_Metrics_JSON" #CloudWatch_Metrics_OpenTelemetry070 
 }
 
 data "aws_caller_identity" "current_identity" {}
@@ -169,7 +168,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream" {
 ### IAM role for CloudWatch metric streams
 resource "aws_iam_role" "metric_streams_to_firehose" {
   count              = var.enable_cloudwatch_metricstream == true ? 1 : 0
-  name               = "metric_streams_to_firehose_role"
+  name               = "${var.firehose_stream}_metric_streams_role"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",

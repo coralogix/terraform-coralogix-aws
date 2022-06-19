@@ -7,7 +7,6 @@ variable "coralogix_firehose_stream_name" {
 variable "coralogix_endpoint_url" {
   type        = string
   description = "Coralogix endpoint url"
-  default = "https://firehose-ingress.eu2.coralogix.com/firehose"
 }
 
 variable "coralogix_privatekey" {

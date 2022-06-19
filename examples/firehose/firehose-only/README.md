@@ -10,4 +10,4 @@ In this example you need to configure the following variables:
 * privatekey --> Coralogix account logs privatekey
 Since the privatekey is private and we cant put it hardcoded, it can be exported instead of insert it as an input each time:
 export TF_VAR_coralogix_privatekey="your-coralogix-private-key"
-* enable_cloudwatch_metricstream --> this variable needs to be set to 'false' to disable the creation of metric streams
+* enable_cloudwatch_metricstream --> the creation of a [cloudwatch metrics stream](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html) can be disabled by setting this variable to 'false'

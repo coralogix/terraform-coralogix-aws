@@ -2,6 +2,7 @@
 Configuration in this directory creates a firehose delivery stream, and a CloudWatch metrics stream. 
 The CloudWatch metrics stream in this example includes only specific namespaces that are inserted in the list.   
 All of the namespaces are created under one metric stream, for example:
+[](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html)
 ```
 coralogix-metric-stream:
 AWS/EC2
