@@ -35,9 +35,11 @@ variable "enable_cloudwatch_metricstream" {
 variable "output_format" {
   description = "The output format of the cloudwatch metric stream: 'json' or 'opentelemetry0.7'"
   type = string
+  default = "opentelemetry0.7"
 }
 
 variable "integration_type" {
   description = "The integration type of the firehose delivery stream: 'CloudWatch_Metrics_JSON' or 'CloudWatch_Metrics_OpenTelemetry070'"
   type = string
+  default = "CloudWatch_Metrics_OpenTelemetry070"
 }
