@@ -65,6 +65,8 @@ The coralogix region variable accepts one of the following regions:
 * india
 * stockholm
 
+### All of the regions must be written with lower-case letters. 
+
 | Region    | Metrics Endpoint
 |-----------|-----------------------------------------------------------------|
 | US        | `https://firehose-ingress.coralogix.us/firehose`                |
@@ -72,8 +74,6 @@ The coralogix region variable accepts one of the following regions:
 | Ireland   | `https://firehose-ingress.coralogix.com/firehose`               |
 | India     | `https://firehose-ingress.app.coralogix.in/firehose`            |
 | Stockholm | `https://firehose-ingress.coralogix.eu2.coralogix.com/firehose` |
-
-All of the regions must be written with lower-case letters. 
 
 # Metrics Output Format
 Coralogix suppots both 'JSON' format and 'OpenTelemtry' format. 
@@ -133,25 +133,4 @@ No outputs.
 <!-- END_TF_DOCS -->
 
 ## Authors
-Module is maintained by [Coralogix platform team](https://github.com/orgs/coralogix/people/amit-mazor)
-
-## License 
-See [LICENSE](https://github.com/coralogix/terraform-coralogix-aws/blob/master/LICENSE) for full details.
-```
-Licensed to the Apache Software Foundation (ASF) under one
-or more contributor license agreements.  See the NOTICE file
-distributed with this work for additional information
-regarding copyright ownership.  The ASF licenses this file
-to you under the Apache License, Version 2.0 (the
-"License"); you may not use this file except in compliance
-with the License.  You may obtain a copy of the License at
-
-  https://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing,
-software distributed under the License is distributed on an
-"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-KIND, either express or implied.  See the License for the
-specific language governing permissions and limitations
-under the License.
-```
+Module is maintained by [Amit Mazor](https://github.com/orgs/coralogix/people/amit-mazor)
