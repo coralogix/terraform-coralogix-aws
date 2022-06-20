@@ -111,9 +111,8 @@ then the CloudWatch metric stream must be configured with the same format, confi
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | Coralogix account region: us, singapore, ireland, india, stockholm [in lower-case letterד] | `any` | n/a | yes |
+| <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | Coralogix account region: us, singapore, ireland, india, stockholm [in lower-case letter] | `any` | n/a | yes |
 | <a name="input_enable_cloudwatch_metricstream"></a> [enable\_cloudwatch\_metricstream](#input\_enable\_cloudwatch\_metricstream) | Should be true if you want to create a new Cloud Watch metric stream and attach it to Firehose | `bool` | `true` | no |
-| <a name="input_endpoint_url"></a> [endpoint\_url](#input\_endpoint\_url) | Firehose Coralogix endpoint | `map(any)` | <pre>{<br>  "india": {<br>    "url": "https://firehose-ingress.coralogix.in/firehose"<br>  },<br>  "ireland": {<br>    "url": "https://firehose-ingress.coralogix.com/firehose"<br>  },<br>  "singapore": {<br>    "url": "https://firehose-ingress.coralogixsg.com/firehose"<br>  },<br>  "stockholm": {<br>    "url": "https://firehose-ingress.eu2.coralogix.com/firehose"<br>  },<br>  "us": {<br>    "url": "https://firehose-ingress.coralogix.us/firehose"<br>  }<br>}</pre> | no |
 | <a name="input_firehose_stream"></a> [firehose\_stream](#input\_firehose\_stream) | AWS Kinesis firehose delivery stream name | `string` | n/a | yes |
 | <a name="input_include_all_namespaces"></a> [include\_all\_namespaces](#input\_include\_all\_namespaces) | If set to true, the CloudWatch metric stream will include all available namespaces | `bool` | `true` | no |
 | <a name="input_include_metric_stream_namespaces"></a> [include\_metric\_stream\_namespaces](#input\_include\_metric\_stream\_namespaces) | List of specific namespaces to include in the CloudWatch metric stream, see https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html | `list(string)` | `[]` | no |
