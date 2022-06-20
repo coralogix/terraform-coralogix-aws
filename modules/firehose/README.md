@@ -1,7 +1,7 @@
 # Firehose Module
 
 ## Usage
-Provision an AWS firehose delivery stream for streaming metrics to Coralogix:
+Provision a firehose delivery stream for streaming metrics to Coralogix:
 ```
 module "cloudwatch_firehose_coralogix" {
   source                         = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
@@ -12,8 +12,8 @@ module "cloudwatch_firehose_coralogix" {
 }
 ```
 
-Provision the firehose delivery stream with CloudWatch metric stream that includes all namespaces [AWS/EC2, AWS/EBS, etc..]
-to send metrics from CloudWatch to Coralogix:
+Provision a firehose delivery stream with CloudWatch metric stream.
+The metric stream includes all namespaces [AWS/EC2, AWS/EBS, etc..], and sends the metrics to Coralogix:
 ```
 module "cloudwatch_firehose_coralogix" {
   source           = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
@@ -23,8 +23,11 @@ module "cloudwatch_firehose_coralogix" {
 }
 ```
 
-Provision the firehose delivery stream with CloudWatch metric stream that includes only selected namespaces [AWS/EC2, AWS/EBS, etc..]
-to send metrics from CloudWatch to Coralogix:
+Provision a firehose delivery stream with CloudWatch metric stream.
+The metric stream includes only selected namespaces and sends the metrics to Coralogix:
+### note:
+When Using the variable 'include_metric_stream_namespaces' - the chosen namespaces are case-sensitive, therefore they must appear exactly like they appear in AWS, please see the [AWS namespaces list]: 
+(https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html)
 ```
 module "cloudwatch_firehose_coralogix" {
   source                           = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
@@ -35,11 +38,8 @@ module "cloudwatch_firehose_coralogix" {
   coralogix_region                 = var.coralogix_region
 }
 ```
-### note:
-When Using the variable 'include_metric_stream_namespaces' - the chosen namespaces are case-sensitive, therefore they must appear exactly like they appear in AWS, please see the [AWS namespaces list]: 
-(https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html)
 
-Provision multiple firehose delivery streams, which can include the provisioning of CloudWatch metric stream if enabled:
+Provision multiple firehose delivery streams, which can include the provisioning of CloudWatch metric stream if desired:
 ```
 module "cloudwatch_firehose_coralogix" {
   source           = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
@@ -57,11 +57,11 @@ The coralogix region variable accepts one of the following:
 * ireland
 * india
 * stockholm
+All of the regions must be written with lower-case letters. 
 
 # Metrics Output Format
 Coralogix suppots both 'JSON' format and 'OpenTelemtry' format. 
 The default format configured here is 'OpenTelemtry'. 
-#### Note
 if using 'Json' in the firehose output format, which is configured via the 'integration_type' variable,
 then the CloudWatch metric stream must be configured with the same format, configured via the 'output_format' variable.
 
@@ -79,10 +79,6 @@ then the CloudWatch metric stream must be configured with the same format, confi
 | Name | Version |
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 4.17.1 |
-
-## Modules
-
-No modules.
 
 ## Resources
 
