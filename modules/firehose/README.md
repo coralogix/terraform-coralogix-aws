@@ -1,6 +1,9 @@
 # Firehose Module
 
+## `Metrics`
+
 ## Usage
+### Firehose Delivery Stream
 Provision a firehose delivery stream for streaming metrics to Coralogix:
 ```
 module "cloudwatch_firehose_coralogix" {
@@ -12,7 +15,8 @@ module "cloudwatch_firehose_coralogix" {
 }
 ```
 
-Provision a firehose delivery stream with CloudWatch metric stream.
+### Firehose Delivery Stream with CloudWatch metric stream including all metrics namespaces
+Provision a firehose delivery stream with [CloudWatch metric stream](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html).
 The metric stream includes all namespaces [AWS/EC2, AWS/EBS, etc..], and sends the metrics to Coralogix:
 ```
 module "cloudwatch_firehose_coralogix" {
@@ -23,11 +27,13 @@ module "cloudwatch_firehose_coralogix" {
 }
 ```
 
-Provision a firehose delivery stream with CloudWatch metric stream.
+### Firehose Delivery Stream with CloudWatch metric stream including selected metrics namespaces
+Provision a firehose delivery stream with [CloudWatch metric stream](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html).
 The metric stream includes only selected namespaces and sends the metrics to Coralogix:
-### note:
-When Using the variable 'include_metric_stream_namespaces' - the chosen namespaces are case-sensitive, therefore they must appear exactly like they appear in AWS, please see the [AWS namespaces list]: 
-(https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html)
+When including only specific namespaces, the variable 'include_all_namespaces' needs to disabled,
+and the variable 'include_metric_stream_namespaces' needs to include a list of the desired namespaces,
+which are case-sensitive. please see the [AWS namespaces list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html). 
+In addition, examples can be found under the [examples directory](https://github.com/coralogix/terraform-coralogix-aws/blob/master/examples/firehose/selected-metrics-cloudwatch-firehose)
 ```
 module "cloudwatch_firehose_coralogix" {
   source                           = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
@@ -39,6 +45,7 @@ module "cloudwatch_firehose_coralogix" {
 }
 ```
 
+### Multiple Firehose Delivery Stream
 Provision multiple firehose delivery streams, which can include the provisioning of CloudWatch metric stream if desired:
 ```
 module "cloudwatch_firehose_coralogix" {
