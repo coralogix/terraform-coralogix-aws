@@ -10,7 +10,7 @@ variable "privatekey" {
 }
 
 variable "coralogix_region" {
-  description = "Coralogix account region: us, singapore, ireland, india, stockholm [in lower-case letter]"
+  description = "Coralogix account region: us, singapore, ireland, india, stockholm [in lower-case letters]"
 }
 
 variable "include_all_namespaces" {
