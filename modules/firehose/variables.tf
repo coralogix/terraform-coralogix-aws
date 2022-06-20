@@ -18,19 +18,19 @@ variable "endpoint_url" {
   type        = map(any)
   default = {
     "us" = {
-      url   = "https://firehose-ingress.coralogix.us/firehose"
+      url = "https://firehose-ingress.coralogix.us/firehose"
     }
     "singapore" = {
-      url   = "https://firehose-ingress.coralogixsg.com/firehose"
+      url = "https://firehose-ingress.coralogixsg.com/firehose"
     }
     "ireland" = {
-      url   = "https://firehose-ingress.coralogix.com/firehose"
+      url = "https://firehose-ingress.coralogix.com/firehose"
     }
     "india" = {
-      url   = "https://firehose-ingress.coralogix.in/firehose"
+      url = "https://firehose-ingress.coralogix.in/firehose"
     }
     "stockholm" = {
-      url   = "https://firehose-ingress.eu2.coralogix.com/firehose"
+      url = "https://firehose-ingress.eu2.coralogix.com/firehose"
     }
   }
 }
@@ -55,12 +55,12 @@ variable "enable_cloudwatch_metricstream" {
 
 variable "output_format" {
   description = "The output format of the cloudwatch metric stream: 'json' or 'opentelemetry0.7'"
-  type = string
-  default = "opentelemetry0.7"
+  type        = string
+  default     = "opentelemetry0.7"
 }
 
 variable "integration_type" {
   description = "The integration type of the firehose delivery stream: 'CloudWatch_Metrics_JSON' or 'CloudWatch_Metrics_OpenTelemetry070'"
-  type = string
-  default = "CloudWatch_Metrics_OpenTelemetry070"
+  type        = string
+  default     = "CloudWatch_Metrics_OpenTelemetry070"
 }

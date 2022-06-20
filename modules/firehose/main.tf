@@ -5,7 +5,7 @@ terraform {
       version = "~> 4.17.1"
     }
   }
-} 
+}
 
 provider "aws" {
   default_tags {
