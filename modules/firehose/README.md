@@ -51,12 +51,20 @@ module "cloudwatch_firehose_coralogix" {
 ```
 
 # Coralogix account region
-The coralogix region variable accepts one of the following:
+The coralogix region variable accepts one of the following regions:
 * us
 * singapore
 * ireland
 * india
 * stockholm
+
+| Region    | Metrics Endpoint
+|-----------|-----------------------------------------------------------------|
+| US        | `https://firehose-ingress.coralogix.us/firehose`                |
+| Singapore | `https://firehose-ingress.coralogixsg.com/firehose`             |
+| Ireland   | `https://firehose-ingress.coralogix.com/firehose`               |
+| India     | `https://firehose-ingress.app.coralogix.in/firehose`            |
+| Stockholm | `https://firehose-ingress.coralogix.eu2.coralogix.com/firehose` |
 
 All of the regions must be written with lower-case letters. 
 
@@ -117,6 +125,9 @@ then the CloudWatch metric stream must be configured with the same format, confi
 
 No outputs.
 <!-- END_TF_DOCS -->
+
+## Authors
+Module is maintained by [Coralogix platform team](https://github.com/orgs/coralogix/people/amit-mazor)
 
 ## License 
 See [LICENSE](https://github.com/coralogix/terraform-coralogix-aws/blob/master/LICENSE) for full details.
