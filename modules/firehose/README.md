@@ -57,6 +57,7 @@ The coralogix region variable accepts one of the following:
 * ireland
 * india
 * stockholm
+
 All of the regions must be written with lower-case letters. 
 
 # Metrics Output Format

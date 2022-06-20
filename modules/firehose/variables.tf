@@ -10,29 +10,7 @@ variable "privatekey" {
 }
 
 variable "coralogix_region" {
-  description = "Coralogix account region: us, singapore, ireland, india, stockholm [in lower-case letterד]"
-}
-
-variable "endpoint_url" {
-  description = "Firehose Coralogix endpoint"
-  type        = map(any)
-  default = {
-    "us" = {
-      url = "https://firehose-ingress.coralogix.us/firehose"
-    }
-    "singapore" = {
-      url = "https://firehose-ingress.coralogixsg.com/firehose"
-    }
-    "ireland" = {
-      url = "https://firehose-ingress.coralogix.com/firehose"
-    }
-    "india" = {
-      url = "https://firehose-ingress.coralogix.in/firehose"
-    }
-    "stockholm" = {
-      url = "https://firehose-ingress.eu2.coralogix.com/firehose"
-    }
-  }
+  description = "Coralogix account region: us, singapore, ireland, india, stockholm [in lower-case letter]"
 }
 
 variable "include_all_namespaces" {

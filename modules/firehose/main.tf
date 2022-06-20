@@ -17,6 +17,26 @@ provider "aws" {
   }
 }
 
+locals {
+  endpoint_url = {
+    "us" = {
+      url = "https://firehose-ingress.coralogix.us/firehose"
+    }
+    "singapore" = {
+      url = "https://firehose-ingress.coralogixsg.com/firehose"
+    }
+    "ireland" = {
+      url = "https://firehose-ingress.coralogix.com/firehose"
+    }
+    "india" = {
+      url = "https://firehose-ingress.coralogix.in/firehose"
+    }
+    "stockholm" = {
+      url = "https://firehose-ingress.eu2.coralogix.com/firehose"
+    }
+  }
+}
+
 data "aws_caller_identity" "current_identity" {}
 data "aws_region" "current_region" {}
 
@@ -141,7 +161,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream" {
   }
 
   http_endpoint_configuration {
-    url                = var.endpoint_url[var.coralogix_region].url
+    url                = local.endpoint_url[var.coralogix_region].url
     name               = "Coralogix"
     access_key         = var.privatekey
     buffering_size     = 6
