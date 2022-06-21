@@ -1,6 +1,7 @@
 # Firehose Module
+Firehose module is designed to support CloudWatch metrics and logs.
 
-## Usage
+## Metrics - Usage
 ### Firehose Delivery Stream
 Provision a firehose delivery stream for streaming metrics to Coralogix:
 ```
