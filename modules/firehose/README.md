@@ -1,7 +1,5 @@
 # Firehose Module
 
-## `Metrics`
-
 ## Usage
 ### Firehose Delivery Stream
 Provision a firehose delivery stream for streaming metrics to Coralogix:
@@ -15,7 +13,7 @@ module "cloudwatch_firehose_coralogix" {
 }
 ```
 
-### Firehose Delivery Stream with CloudWatch metric stream including all metrics namespaces
+### Delivering all CloudWatch metrics
 Provision a firehose delivery stream with [CloudWatch metric stream](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html).
 The metric stream includes all namespaces [AWS/EC2, AWS/EBS, etc..], and sends the metrics to Coralogix:
 ```
@@ -27,13 +25,12 @@ module "cloudwatch_firehose_coralogix" {
 }
 ```
 
-### Firehose Delivery Stream with CloudWatch metric stream including selected metrics namespaces
+### Delivering selected CloudWatch metrics
 Provision a firehose delivery stream with [CloudWatch metric stream](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html).
 The metric stream includes only selected namespaces and sends the metrics to Coralogix:
 When including only specific namespaces, the variable 'include_all_namespaces' needs to disabled,
 and the variable 'include_metric_stream_namespaces' needs to include a list of the desired namespaces,
 which are case-sensitive. please see the [AWS namespaces list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html). 
-In addition, examples can be found under the [examples directory](https://github.com/coralogix/terraform-coralogix-aws/blob/master/examples/firehose/selected-metrics-cloudwatch-firehose)
 ```
 module "cloudwatch_firehose_coralogix" {
   source                           = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
@@ -57,6 +54,9 @@ module "cloudwatch_firehose_coralogix" {
 }
 ```
 
+### Examples
+Examples can be found under the [examples directory](https://github.com/coralogix/terraform-coralogix-aws/blob/master/examples/firehose/selected-metrics-cloudwatch-firehose)
+
 # Coralogix account region
 The coralogix region variable accepts one of the following regions:
 * us
@@ -69,17 +69,17 @@ The coralogix region variable accepts one of the following regions:
 
 | Region    | Metrics Endpoint
 |-----------|-----------------------------------------------------------------|
-| US        | `https://firehose-ingress.coralogix.us/firehose`                |
-| Singapore | `https://firehose-ingress.coralogixsg.com/firehose`             |
-| Ireland   | `https://firehose-ingress.coralogix.com/firehose`               |
-| India     | `https://firehose-ingress.app.coralogix.in/firehose`            |
-| Stockholm | `https://firehose-ingress.coralogix.eu2.coralogix.com/firehose` |
+| us        | `https://firehose-ingress.coralogix.us/firehose`                |
+| singapore | `https://firehose-ingress.coralogixsg.com/firehose`             |
+| ireland   | `https://firehose-ingress.coralogix.com/firehose`               |
+| india     | `https://firehose-ingress.app.coralogix.in/firehose`            |
+| stockholm | `https://firehose-ingress.coralogix.eu2.coralogix.com/firehose` |
 
 # Metrics Output Format
-Coralogix suppots both 'JSON' format and 'OpenTelemtry' format. 
-The default format configured here is 'OpenTelemtry'. 
-if using 'Json' in the firehose output format, which is configured via the 'integration_type' variable,
-then the CloudWatch metric stream must be configured with the same format, configured via the 'output_format' variable.
+Coralogix suppots both `JSON` format and `OpenTelemtry` format. 
+The default format configured here is `OpenTelemtry`. 
+if using `Json` in the firehose output format, which is configured via the `integration_type` variable,
+then the CloudWatch metric stream must be configured with the same format, configured via the `output_format` variable.
 
 
 

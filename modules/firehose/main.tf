@@ -7,16 +7,6 @@ terraform {
   }
 }
 
-provider "aws" {
-  default_tags {
-    tags = {
-      terraform-module         = "kinesis-firehose-to-coralogix"
-      terraform-module-version = "v0.0.1"
-      managed-by               = "coralogix-terraform"
-    }
-  }
-}
-
 locals {
   endpoint_url = {
     "us" = {
