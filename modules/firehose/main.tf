@@ -25,6 +25,11 @@ locals {
       url = "https://firehose-ingress.eu2.coralogix.com/firehose"
     }
   }
+  tags = {
+    terraform-module         = "kinesis-firehose-to-coralogix"
+    terraform-module-version = "v0.0.1"
+    managed-by               = "coralogix-terraform"
+  }
 }
 
 data "aws_caller_identity" "current_identity" {}
@@ -35,6 +40,7 @@ data "aws_region" "current_region" {}
 ################################################################################
 
 resource "aws_cloudwatch_log_group" "firehose_loggroup" {
+  tags        = local.tags
   name              = "/aws/kinesisfirehose/${var.firehose_stream}"
   retention_in_days = 1
 }
@@ -50,11 +56,13 @@ resource "aws_cloudwatch_log_stream" "firehose_logstream_backup" {
 }
 
 resource "aws_s3_bucket" "firehose_bucket" {
+  tags   = local.tags
   bucket = "${var.firehose_stream}-backup"
 }
 
 ### IAM role for s3 configuration
 resource "aws_iam_role" "firehose_to_coralogix" {
+  tags               = local.tags
   name               = var.firehose_stream
   assume_role_policy = <<EOF
 {
@@ -139,6 +147,7 @@ EOF
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream" {
+  tags        = local.tags
   name        = "coralogix-${var.firehose_stream}"
   destination = "http_endpoint"
 
@@ -182,6 +191,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream" {
 
 ### IAM role for CloudWatch metric streams
 resource "aws_iam_role" "metric_streams_to_firehose" {
+  tags               = local.tags
   count              = var.enable_cloudwatch_metricstream == true ? 1 : 0
   name               = "${var.firehose_stream}_metric_streams_role"
   assume_role_policy = <<EOF
@@ -226,6 +236,7 @@ EOF
 
 # Creating one metric stream for all namespaces
 resource "aws_cloudwatch_metric_stream" "cloudwatch_metric_stream_all_ns" {
+  tags          = local.tags
   count         = var.include_all_namespaces && var.enable_cloudwatch_metricstream ? 1 : 0
   name          = "cloudwatch_metrics"
   role_arn      = aws_iam_role.metric_streams_to_firehose[0].arn
@@ -235,6 +246,7 @@ resource "aws_cloudwatch_metric_stream" "cloudwatch_metric_stream_all_ns" {
 
 # Creating metric streams only for specific namespaces
 resource "aws_cloudwatch_metric_stream" "cloudwatch_metric_stream_included_ns" {
+  tags          = local.tags
   count         = !var.include_all_namespaces && var.enable_cloudwatch_metricstream ? 1 : 0
   name          = var.firehose_stream
   role_arn      = aws_iam_role.metric_streams_to_firehose[0].arn
