@@ -63,6 +63,13 @@ module "lambda" {
 }
 
 resource "aws_cloudwatch_log_subscription_filter" "this" {
+
+  # The depends_on is required here for the allowed_triggers in the above
+  # lambda module, which create aws_lambda_permission resources that are
+  # prerequisite for these aws_cloudwatch_log_subscription_filter resources, to
+  # finish applying before these start.
+  depends_on      = [ module.lambda ]
+
   count           = length(var.log_groups)
   name            = "${module.lambda.lambda_function_name}-Subscription-${count.index}"
   log_group_name  = data.aws_cloudwatch_log_group.this[count.index].name
