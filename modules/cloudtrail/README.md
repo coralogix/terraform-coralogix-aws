@@ -19,7 +19,7 @@ Manage the application which retrieves `CloudTrail` logs from `S3` bucket and se
 
 | Name | Version |
 |------|---------|
-| <a name="module_coralogix_aws_coralogix__modules_s3"></a> [coralogix/aws/coralogix//modules/s3](#module\_coralogix\_aws\_coralogix\_\_modules\_s3) | >= 1.0.2 |
+| <a name="module_coralogix_aws_coralogix__modules_s3"></a> [coralogix/aws/coralogix//modules/s3](#module\_coralogix\_aws\_coralogix\_\_modules\_s3) | >= 1.0.6 |
 
 ## Inputs
 

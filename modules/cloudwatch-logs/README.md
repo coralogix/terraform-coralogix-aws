@@ -20,7 +20,7 @@ Manage the application which retrieves `CloudWatch` logs and sends them to your 
 
 | Name | Version |
 |------|---------|
-| <a name="module_terraform_aws_modules_lambda_aws"></a> [terraform-aws-modules/lambda/aws](#module\_terraform\_aws\_modules\_lambda\_aws) | >= 3.2.1 |
+| <a name="module_terraform_aws_modules_lambda_aws"></a> [terraform-aws-modules/lambda/aws](#module\_terraform\_aws\_modules\_lambda\_aws) | >= 3.3.1 |
 
 ## Inputs
 

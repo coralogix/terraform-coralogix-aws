@@ -13,6 +13,8 @@ locals {
   }
 }
 
+data "aws_region" "this" {}
+
 data "aws_s3_bucket" "this" {
   bucket = var.s3_bucket_name
 }
@@ -34,7 +36,6 @@ module "lambda" {
   memory_size            = var.memory_size
   timeout                = var.timeout
   create_package         = false
-  local_existing_package = coalesce(var.package_path, "${path.module}/dist/package.zip")
   destination_on_failure = aws_sns_topic.this.arn
   environment_variables = {
     CORALOGIX_URL         = "https://${lookup(local.coralogix_regions, var.coralogix_region, "Europe")}/api/v1/logs"
@@ -46,6 +47,10 @@ module "lambda" {
     blocking_pattern      = var.blocking_pattern
     sampling              = tostring(var.sampling_rate)
     debug                 = tostring(var.debug)
+  }
+  s3_existing_package = {
+    bucket = "coralogix-serverless-repo-${data.aws_region.this.name}"
+    key    = "${var.package_name}.zip"
   }
   policy_path            = "/coralogix/"
   role_path              = "/coralogix/"

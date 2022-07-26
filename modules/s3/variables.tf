@@ -20,10 +20,10 @@ variable "subsystem_name" {
   type        = string
 }
 
-variable "package_path" {
-  description = "The path to custom function's bundle"
+variable "package_name" {
+  description = "The name of the package to use for the function"
   type        = string
-  default     = null
+  default     = "s3"
 }
 
 variable "newline_pattern" {
