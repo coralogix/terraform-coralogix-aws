@@ -13,6 +13,8 @@ locals {
   }
 }
 
+data "aws_region" "this" {}
+
 data "aws_cloudwatch_log_group" "this" {
   count    = length(var.log_groups)
   name     = element(var.log_groups, count.index)
@@ -25,7 +27,7 @@ resource "random_string" "this" {
 
 module "lambda" {
   source                 = "terraform-aws-modules/lambda/aws"
-  version                = "3.2.1"
+  version                = "3.3.1"
 
   function_name          = local.function_name
   description            = "Send CloudWatch logs to Coralogix."
@@ -35,7 +37,6 @@ module "lambda" {
   memory_size            = var.memory_size
   timeout                = var.timeout
   create_package         = false
-  local_existing_package = "${path.module}/dist/package.zip"
   destination_on_failure = aws_sns_topic.this.arn
   environment_variables = {
     CORALOGIX_URL   = lookup(local.coralogix_regions, var.coralogix_region, "Europe")
@@ -45,6 +46,10 @@ module "lambda" {
     newline_pattern = var.newline_pattern
     buffer_charset  = var.buffer_charset
     sampling        = tostring(var.sampling_rate)
+  }
+  s3_existing_package = {
+    bucket = "coralogix-serverless-repo-${data.aws_region.this.name}"
+    key    = "cloudwatch-logs.zip"
   }
   policy_path            = "/coralogix/"
   role_path              = "/coralogix/"
