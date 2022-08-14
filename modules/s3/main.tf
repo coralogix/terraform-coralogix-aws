@@ -77,6 +77,7 @@ module "lambda" {
 }
 
 resource "aws_s3_bucket_notification" "this" {
+  depends_on      = [ module.lambda ]
   bucket = data.aws_s3_bucket.this.bucket
   lambda_function {
     lambda_function_arn = module.lambda.lambda_function_arn
