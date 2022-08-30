@@ -31,7 +31,6 @@ locals {
     managed-by               = "coralogix-terraform"
   }
   application_name = var.application_name == null ? "coralogix-${var.firehose_stream}" : var.application_name
-  subsystem_name   = var.subsystem_name == null ? "cloudwatch_metrics" : var.subsystem_name
 }
 
 data "aws_caller_identity" "current_identity" {}
@@ -187,11 +186,6 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream" {
       common_attributes {
         name  = "applicationName"
         value = local.application_name
-      }
-
-      common_attributes {
-        name  = "subsystemName"
-        value = local.subsystem_name
       }
     }
   }

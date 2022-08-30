@@ -48,9 +48,3 @@ variable "application_name" {
   type        = string
   default     = null
 }
-
-variable "subsystem_name" {
-  description = "The subsystem name of the metrics"
-  type        = string
-  default     = null
-}
