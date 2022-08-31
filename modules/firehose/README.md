@@ -58,6 +58,9 @@ module "cloudwatch_firehose_coralogix" {
 ### Examples
 Examples can be found under the [examples directory](https://github.com/coralogix/terraform-coralogix-aws/blob/master/examples/firehose/selected-metrics-cloudwatch-firehose)
 
+## Override Coralogix applicationName
+The application name by default is the firehose delivery stream name, but it can be overriden by setting an environment variable called `application_name`. 
+
 # Coralogix account region
 The coralogix region variable accepts one of the following regions:
 * us
