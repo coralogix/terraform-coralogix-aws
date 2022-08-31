@@ -4,7 +4,7 @@ variable "firehose_stream" {
 }
 
 variable "privatekey" {
-  description = "Coralogix account logs private key"
+  description = "Coralogix account private key"
   sensitive   = true
 
 }
@@ -41,4 +41,10 @@ variable "integration_type" {
   description = "The integration type of the firehose delivery stream: 'CloudWatch_Metrics_JSON' or 'CloudWatch_Metrics_OpenTelemetry070'"
   type        = string
   default     = "CloudWatch_Metrics_OpenTelemetry070"
+}
+
+variable "application_name" {
+  description = "The application name of the metrics"
+  type        = string
+  default     = null
 }

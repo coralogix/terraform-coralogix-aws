@@ -30,6 +30,7 @@ locals {
     terraform-module-version = "v0.0.1"
     managed-by               = "coralogix-terraform"
   }
+  application_name = var.application_name == null ? "coralogix-${var.firehose_stream}" : var.application_name
 }
 
 data "aws_caller_identity" "current_identity" {}
@@ -40,7 +41,7 @@ data "aws_region" "current_region" {}
 ################################################################################
 
 resource "aws_cloudwatch_log_group" "firehose_loggroup" {
-  tags        = local.tags
+  tags              = local.tags
   name              = "/aws/kinesisfirehose/${var.firehose_stream}"
   retention_in_days = 1
 }
@@ -180,6 +181,11 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream" {
       common_attributes {
         name  = "integrationType"
         value = var.integration_type
+      }
+
+      common_attributes {
+        name  = "applicationName"
+        value = local.application_name
       }
     }
   }
