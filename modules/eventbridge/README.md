@@ -2,71 +2,21 @@
 Configuration in this directory creates eventbridge to send the aws events to your coralogix account.
 
 ## Usage
-### Provision a eventbridge stream for streaming events to Coralogix  Delivery Stream
-
-#### Creating api destination
 ```
-resource "aws_cloudwatch_event_api_destination" "api-connection" {
-  name                             = "toCoralogix"
-  description                      = "EventBridge Api destination to Coralogix"
-  invocation_endpoint              = local.endpoint_url[var.coralogix_region].url
-  http_method                      = "POST"
-  invocation_rate_limit_per_second = 300
-  connection_arn                   = aws_cloudwatch_event_connection.event-connectiong.arn
-}
-```
-#### Connecting api destination to your coralogix account
-```
-esource "aws_cloudwatch_event_connection" "event-connectiong" {
-  name               = "coralogixConnection"
-  description        = "This is Coralogix connection for Evenbridge"
-  authorization_type = "API_KEY"
-
-  auth_parameters {
-    api_key {
-      key   = "x-amz-event-bridge-access-key"
-      value = var.private_key
-    }
-  }
-}
-```
-
-### Delivering all Eventbridge events
-Provision a Eventbridge delivery rule with [Events from AWS services](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-service-event.html).
-and sends the events to Coralogix:
-### Creating Rule for classify the events we want to get
-You can send all event or select certain services that you interested.
-
-```
-resource "aws_cloudwatch_event_rule" "console" {
-  name        = "Eventbridge rule"
-  description = "Capture the main events"
-///A number of services that we think are relevant to monitor, sub-alerts can be changed and classified
-  event_pattern = <<PATTERN
-{
-  "source": [
-    "aws.ec2", "aws.apigateway", "aws.es", "aws.health", "aws.rds", "aws.autoscaling", "aws.s3", "aws.dynamodb", "aws.cloudtrail", "aws.cloudwatch", "aws.managedservices"}
-}
-PATTERN
-}
-```
-
-### Delivering selected Eventbridge events
-
-```
-resource "aws_cloudwatch_event_target" "example" {
-  arn  = aws_cloudwatch_event_api_destination.api-connection.arn
-  rule = aws_cloudwatch_event_rule.console.name
-  role_arn = var.role_to_use
+module "eventbridge_coralogix" {
+  source                         = "github.com/coralogix/terraform-coralogix-aws//modules/eventbridge"
+  eventbridge_stream             = var.coralogix_eventbridge_stream_name
+  sources                        = var.eventbridge_sources
+  role_name                      = var.eventbridge_role_name
+  private_key                    = var.coralogix_privatekey
+  coralogix_region               = var.coralogix_region
 }
 ```
 
 
 ### Examples
-Examples can be found under the [examples directory](https://github.com/coralogix/fork_EventBridge_module)
+Examples can be found under the [examples directory](https://github.com/coralogix/terraform-coralogix-aws/blob/master/examples/eventbridge)
 
-## Override Coralogix applicationName
-The application name by default is the aws account, but it  will be overriden in futuret on setting an environment variable called `application_name`. 
 
 # Coralogix account region
 The coralogix region variable accepts one of the following regions:

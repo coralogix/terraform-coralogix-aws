@@ -9,9 +9,9 @@ variable "role_name"{
 }
 
 variable "private_key" {
-  
   type = string
   description = "Your Coralogix private key"
+  sensitive   = true
 }
 
 variable "coralogix_region" {
