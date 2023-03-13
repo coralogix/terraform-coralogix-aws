@@ -1,4 +1,4 @@
-# EventBridge_module_toCoralogix
+# EventBridge Module
 Configuration in this directory creates eventbridge to send the aws events to your coralogix account.
 
 ## Usage
