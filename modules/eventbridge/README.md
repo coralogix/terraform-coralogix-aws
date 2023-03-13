@@ -75,7 +75,7 @@ No modules.
 | <a name="input_eventbridge_stream"></a> [eventbridge\_stream](#input\_eventbridge\_stream) | AWS eventbridge delivery stream name | `string` | n/a | yes |
 | <a name="input_private_key"></a> [private\_key](#input\_private\_key) | Your Coralogix private key | `string` | n/a | yes |
 | <a name="input_role_name"></a> [role\_name](#input\_role\_name) | Name the role you want to use for the eventbridge | `string` | n/a | yes |
-| <a name="input_sources"></a> [sources](#input\_sources) | The services you want to send there events | `list` | <pre>[<br>  "aws.ec2",<br>  "aws.s3",<br>  "aws.health"<br>]</pre> | no |
+| <a name="input_sources"></a> [sources](#input\_sources) | The services you want to send their events | `list` | <pre>[<br>  "aws.ec2",<br>  "aws.s3",<br>  "aws.health"<br>]</pre> | no |
 
 ## Outputs
 

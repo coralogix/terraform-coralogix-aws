@@ -21,7 +21,7 @@ variable "coralogix_region" {
 
 variable "sources" {
   type = list
-  description = "The services you want to send there events"
+  description = "The services you want to send their events"
   default =["aws.ec2","aws.s3","aws.health"]
 
 }
