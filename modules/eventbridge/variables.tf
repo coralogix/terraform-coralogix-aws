@@ -1,4 +1,3 @@
-
 variable "eventbridge_stream" {
   description = "AWS eventbridge delivery stream name"
   type        = string
@@ -6,7 +5,7 @@ variable "eventbridge_stream" {
 
 variable "role_name"{
   type = string
-  description = "Name the role you want to use for the eventbridge"
+  description = "The name of the eventbridge role"
 }
 
 variable "private_key" {
@@ -21,12 +20,6 @@ variable "coralogix_region" {
 
 variable "sources" {
   type = list
-  description = "The services you want to send their events"
+  description = "The services for which we will send events"
   default =["aws.ec2","aws.s3","aws.health"]
-
-}
-variable "application_name" {
-  description = "The application name of the metrics"
-  type        = string
-  default     = null
 }

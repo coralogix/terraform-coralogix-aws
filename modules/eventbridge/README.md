@@ -70,7 +70,6 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_application_name"></a> [application\_name](#input\_application\_name) | The application name of the metrics | `string` | `null` | no |
 | <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | Coralogix account region: us, singapore, ireland, india, stockholm [in lower-case letters] | `any` | n/a | yes |
 | <a name="input_eventbridge_stream"></a> [eventbridge\_stream](#input\_eventbridge\_stream) | AWS eventbridge delivery stream name | `string` | n/a | yes |
 | <a name="input_private_key"></a> [private\_key](#input\_private\_key) | Your Coralogix private key | `string` | n/a | yes |

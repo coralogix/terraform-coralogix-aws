@@ -26,7 +26,6 @@ locals {
     terraform-module-version = "v0.0.1"
     managed-by               = "coralogix-terraform"
   }
-  application_name = var.application_name == null ? "coralogix-${var.eventbridge_stream}" : var.application_name
 }
 
 data "aws_caller_identity" "current_identity" {}
