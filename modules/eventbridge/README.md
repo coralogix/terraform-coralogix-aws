@@ -1,7 +1,7 @@
 # EventBridge_module_toCoralogix
 Configuration in this directory creates eventbridge to send the aws events to your coralogix account.
 
-## Metrics - Usage
+## Usage
 ### Provision a eventbridge stream for streaming events to Coralogix  Delivery Stream
 
 #### Creating api destination
@@ -78,7 +78,7 @@ The coralogix region variable accepts one of the following regions:
 
 ### All of the regions must be written with lower-case letters. 
 
-| Region    | Metrics Endpoint
+| Region    | Logs Endpoint
 |-----------|-----------------------------------------------------------------|
 | us        | `https://aws-events.coralogix.us/aws/event`                |
 | singapore | `https://aws-events.coralogixsg.com/aws/event`             |
