@@ -3,6 +3,7 @@ variable "eventbridge_stream" {
   description = "AWS eventbridge delivery stream name"
   type        = string
 }
+
 variable "role_name"{
   type = string
   description = "Name the role you want to use for the eventbridge"
@@ -23,7 +24,6 @@ variable "sources" {
   description = "The services you want to send there events"
   default =["aws.ec2","aws.s3","aws.health"]
 
-  
 }
 variable "application_name" {
   description = "The application name of the metrics"
