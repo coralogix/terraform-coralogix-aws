@@ -86,13 +86,6 @@ The coralogix region variable accepts one of the following regions:
 | india     | `https://aws-events.coralogix.in/aws/event`            |
 | stockholm | `https://aws-events.eu2.coralogix.com/aws/event` |
 
-# Metrics Output Format
-Coralogix suppots both `JSON` format and `OpenTelemtry` format. 
-The default format configured here is `OpenTelemtry`. 
-if using `Json` in the firehose output format, which is configured via the `integration_type` variable,
-then the CloudWatch metric stream must be configured with the same format, configured via the `output_format` variable.
-
-
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
