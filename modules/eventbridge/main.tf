@@ -1,7 +1,12 @@
-
-provider "aws" {
-  region = data.aws_region.current_region.name
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.17.1"
+    }
+  }
 }
+
 locals {
   endpoint_url = {
     "us" = {
