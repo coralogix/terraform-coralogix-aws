@@ -21,5 +21,11 @@ variable "coralogix_region" {
 variable "sources" {
   type = list
   description = "The services for which we will send events"
-  default =["aws.ec2","aws.s3","aws.health"]
+  default = ["aws.ec2","aws.autoscaling","aws.ecr","aws.s3","aws.cloudwatch","aws.events","aws.health","aws.rds"]
+}
+
+variable "application_name" {
+  description = "Coralogix application name"
+  type        = string
+  default     = null
 }

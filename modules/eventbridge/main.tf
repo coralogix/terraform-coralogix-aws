@@ -25,12 +25,12 @@ locals {
       url = "https://aws-events.eu2.coralogix.com/aws/event"
     }
   }
-
     tags = {
     terraform-module         = "eventbridge-to-coralogix"
-    terraform-module-version = "v0.0.1"
+    terraform-module-version = "v0.0.2"
     managed-by               = "coralogix-terraform"
   }
+  application_name = var.application_name == null ? "coralogix-${var.eventbridge_stream}" : var.application_name
 }
 
 data "aws_caller_identity" "current_identity" {}
@@ -90,6 +90,12 @@ resource "aws_cloudwatch_event_connection" "event-connectiong" {
       key   = "x-amz-event-bridge-access-key"
       value =var.private_key
     }
+    invocation_http_parameters {
+      header {
+        key             = "cx-application-name"
+        value           = local.application_name
+        is_value_secret = false
+      }
   }
 }
 resource "aws_cloudwatch_event_api_destination" "api-connection" {
