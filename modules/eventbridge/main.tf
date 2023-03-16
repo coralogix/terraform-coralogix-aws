@@ -25,7 +25,7 @@ locals {
       url = "https://aws-events.eu2.coralogix.com/aws/event"
     }
   }
-    tags = {
+  tags = {
     terraform-module         = "eventbridge-to-coralogix"
     terraform-module-version = "v0.0.2"
     managed-by               = "coralogix-terraform"
@@ -37,15 +37,15 @@ data "aws_caller_identity" "current_identity" {}
 data "aws_region" "current_region" {}
 
 resource "aws_iam_policy" "eventbridge_policy" {
-  name        = "EventBridge_policy"
-  policy      = jsonencode({
+  name = "EventBridge_policy"
+  policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
         Effect = "Allow",
         Action = ["events:InvokeApiDestination"],
         Resource = [
-            "arn:aws:events:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_identity.account_id}:api-destination/*"
+          "arn:aws:events:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_identity.account_id}:api-destination/*"
         ]
       },
     ]
@@ -55,7 +55,7 @@ resource "aws_iam_policy" "eventbridge_policy" {
 
 resource "aws_iam_role" "eventbridge_role" {
   name = var.role_name
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -88,7 +88,7 @@ resource "aws_cloudwatch_event_connection" "event-connectiong" {
   auth_parameters {
     api_key {
       key   = "x-amz-event-bridge-access-key"
-      value =var.private_key
+      value = var.private_key
     }
     invocation_http_parameters {
       header {
@@ -96,8 +96,10 @@ resource "aws_cloudwatch_event_connection" "event-connectiong" {
         value           = local.application_name
         is_value_secret = false
       }
+    }
   }
 }
+
 resource "aws_cloudwatch_event_api_destination" "api-connection" {
   name                             = "toCoralogix"
   description                      = "EventBridge Api destination to Coralogix"
@@ -109,8 +111,8 @@ resource "aws_cloudwatch_event_api_destination" "api-connection" {
 
 // Connecting between the rule and the api target
 resource "aws_cloudwatch_event_target" "my_event_target" {
-  arn  = aws_cloudwatch_event_api_destination.api-connection.arn
-  rule = aws_cloudwatch_event_rule.eventbridge_rule.name
+  arn      = aws_cloudwatch_event_api_destination.api-connection.arn
+  rule     = aws_cloudwatch_event_rule.eventbridge_rule.name
   role_arn = aws_iam_role.eventbridge_role.arn
 }
 // Creating Rule for classify the events we want to get
@@ -118,9 +120,9 @@ resource "aws_cloudwatch_event_target" "my_event_target" {
 resource "aws_cloudwatch_event_rule" "eventbridge_rule" {
   name        = "eventbridge_rule"
   description = "Capture the main events"
-///A number of services that we think are relevant to monitor, sub-alerts can be changed and classified
+  ///A number of services that we think are relevant to monitor, sub-alerts can be changed and classified
   event_pattern = jsonencode(
-{
-  "source": var.sources
-})
+    {
+      "source" : var.sources
+  })
 }
