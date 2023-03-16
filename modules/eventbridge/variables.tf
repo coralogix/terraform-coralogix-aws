@@ -3,13 +3,13 @@ variable "eventbridge_stream" {
   type        = string
 }
 
-variable "role_name"{
-  type = string
+variable "role_name" {
+  type        = string
   description = "The name of the eventbridge role"
 }
 
 variable "private_key" {
-  type = string
+  type        = string
   description = "Your Coralogix private key"
   sensitive   = true
 }
@@ -19,9 +19,9 @@ variable "coralogix_region" {
 }
 
 variable "sources" {
-  type = list
+  type        = list(any)
   description = "The services for which we will send events"
-  default = ["aws.ec2","aws.autoscaling","aws.ecr","aws.s3","aws.cloudwatch","aws.events","aws.health","aws.rds"]
+  default     = ["aws.ec2", "aws.autoscaling", "aws.ecr", "aws.s3", "aws.cloudwatch", "aws.events", "aws.health", "aws.rds"]
 }
 
 variable "application_name" {
