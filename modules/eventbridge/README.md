@@ -39,16 +39,17 @@ The coralogix region variable accepts one of the following regions:
 | stockholm | `https://aws-events.eu2.coralogix.com/aws/event` |
 
 
-<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
-No requirements.
+| Name | Version |
+|------|---------|
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 4.17.1 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | n/a |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 4.17.1 |
 
 ## Modules
 
@@ -72,16 +73,16 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_application_name"></a> [application\_name](#input\_application\_name) | Coralogix application name | `string` | `null` | no |
 | <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | Coralogix account region: us, singapore, ireland, india, stockholm [in lower-case letters] | `any` | n/a | yes |
 | <a name="input_eventbridge_stream"></a> [eventbridge\_stream](#input\_eventbridge\_stream) | AWS eventbridge delivery stream name | `string` | n/a | yes |
 | <a name="input_private_key"></a> [private\_key](#input\_private\_key) | Your Coralogix private key | `string` | n/a | yes |
-| <a name="input_role_name"></a> [role\_name](#input\_role\_name) | Name the role you want to use for the eventbridge | `string` | n/a | yes |
-| <a name="input_sources"></a> [sources](#input\_sources) | The services you want to send their events | `list` | <pre>[<br>  "aws.ec2",<br>  "aws.s3",<br>  "aws.health"<br>]</pre> | no |
+| <a name="input_role_name"></a> [role\_name](#input\_role\_name) | The name of the eventbridge role | `string` | n/a | yes |
+| <a name="input_sources"></a> [sources](#input\_sources) | The services for which we will send events | `list(any)` | <pre>[<br>  "aws.ec2",<br>  "aws.autoscaling",<br>  "aws.cloudwatch",<br>  "aws.events",<br>  "aws.health",<br>  "aws.rds"<br>]</pre> | no |
 
 ## Outputs
 
 No outputs.
-<!-- END_TF_DOCS -->
 
 ## Authors
 Module is maintained by [Raz goldenberg](https://github.com/orgs/coralogix/people/Raz-goldenberg)
