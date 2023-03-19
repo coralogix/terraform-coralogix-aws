@@ -13,6 +13,42 @@ module "eventbridge_coralogix" {
 }
 ```
 
+## Events Sources
+### EC2
+* AWS API call via cloudtrail
+* EBS Fast Snapshot Restore State-change Notification
+* EBS Multi-Volume Snapshots Completion Status
+* EBS Snapshot Notification
+* EBS Volume Notification
+* EC2 AMI State Change
+* EC2 Fast Launch State-change Notification
+* EC2 Instance Rebalance Recommendation
+* EC2 Instance State-change Notification
+* EC2 Spot Instance Interruption Warning
+* EC2 Spot Instance Request Fulfillment
+### AutoScaling
+* AWS API call via cloudtrail
+* Instance launch and terminate
+* Instance refresh
+### Cloudwatch
+* AWS API call via cloudtrail
+* CloudWatch alarm state change
+* CloudWatch alarm configuration change
+### Events
+* AWS API call via cloudtrail
+* EventBridge scheduled event
+### Health 
+* AWS API call via cloudtrail
+* Specific health events
+### RDS
+* AWS API call via cloudtrail
+* DB cluster event
+* DB cluster snapshot event
+* DB instance event
+* DB parameter group event
+* DB security group event
+* DB snapshot event
+
 
 ### Examples
 Examples can be found under the [examples directory](https://github.com/coralogix/terraform-coralogix-aws/blob/master/examples/eventbridge)
