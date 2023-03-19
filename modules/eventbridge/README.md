@@ -49,6 +49,7 @@ module "eventbridge_coralogix" {
 * DB security group event
 * DB snapshot event
 
+For further information on additional events sources and event types, see [this AWS doc](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-service-event.html)
 
 ### Examples
 Examples can be found under the [examples directory](https://github.com/coralogix/terraform-coralogix-aws/blob/master/examples/eventbridge)
