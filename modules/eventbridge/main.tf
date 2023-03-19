@@ -27,7 +27,7 @@ locals {
   }
   tags = {
     terraform-module         = "eventbridge-to-coralogix"
-    terraform-module-version = "v0.0.2"
+    terraform-module-version = "v0.0.3"
     managed-by               = "coralogix-terraform"
   }
   application_name = var.application_name == null ? "coralogix-${var.eventbridge_stream}" : var.application_name
