@@ -27,7 +27,7 @@ locals {
   }
   tags = {
     terraform-module         = "kinesis-firehose-to-coralogix"
-    terraform-module-version = "v0.0.1"
+    terraform-module-version = "v0.0.2"
     managed-by               = "coralogix-terraform"
   }
   application_name = var.application_name == null ? "coralogix-${var.firehose_stream}" : var.application_name
@@ -141,10 +141,82 @@ resource "aws_iam_role_policy" "firehose_to_http_metric_policy" {
            "Resource": [
                "${aws_cloudwatch_log_group.firehose_loggroup.arn}"
            ]
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+              "lambda:InvokeFunction",
+              "lambda:GetFunctionConfiguration"
+          ],
+          "Resource": "${aws_lambda_function.lambda_processor.arn}:*"
         }
     ]
 }
 EOF
+}
+
+data "aws_iam_policy_document" "lambda_assume_role" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+resource "aws_iam_role" "lambda_iam" {
+  name               = "cx-cw-metrics-tags-lambda-iam"
+  assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
+}
+
+resource "aws_iam_role_policy" "lambda_iam_policy" {
+  name   = "cx-cw-metrics-tags-lambda-iam-policy"
+  role   = aws_iam_role.lambda_iam.id
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+      {
+          "Action": [
+              "tag:GetResources",
+              "ec2:DescribeTransitGateway*",
+              "ec2:DescribeTags",
+              "ec2:DescribeRegions",
+              "ec2:DescribeInstances",
+              "dms:DescribeReplicationTasks",
+              "dms:DescribeReplicationInstances",
+              "apigateway:GET"
+          ],
+          "Effect": "Allow",
+          "Resource": "*",
+          "Sid": ""
+      },
+      {
+          "Action": [
+              "logs:PutLogEvents",
+              "logs:CreateLogStream",
+              "logs:CreateLogGroup"
+          ],
+          "Effect": "Allow",
+          "Resource": "arn:aws:logs:*:*:*",
+          "Sid": ""
+      }
+  ]
+}
+EOF
+}
+
+resource "aws_lambda_function" "lambda_processor" {
+  filename      = "path/to/function.zip" # TODO: Change to official Coralogix S3 bucket
+  function_name = "cx-cw-metrics-tags-lambda-processor"
+  role          = aws_iam_role.lambda_iam.arn
+  handler       = "function"
+  runtime       = "go1.x"
+  timeout       = "60"
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream" {
@@ -186,6 +258,19 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream" {
       common_attributes {
         name  = "applicationName"
         value = local.application_name
+      }
+    }
+
+    processing_configuration {
+      enabled = "true"
+
+      processors {
+        type = "Lambda"
+
+        parameters {
+          parameter_name  = "LambdaArn"
+          parameter_value = "${aws_lambda_function.lambda_processor.arn}:$LATEST"
+        }
       }
     }
   }
@@ -265,5 +350,3 @@ resource "aws_cloudwatch_metric_stream" "cloudwatch_metric_stream_included_ns" {
     }
   }
 }
-
-
