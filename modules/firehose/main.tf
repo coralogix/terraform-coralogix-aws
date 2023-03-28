@@ -27,7 +27,7 @@ locals {
   }
   tags = {
     terraform-module         = "kinesis-firehose-to-coralogix"
-    terraform-module-version = "v0.0.2"
+    terraform-module-version = "v0.0.3"
     managed-by               = "coralogix-terraform"
   }
   application_name = var.application_name == null ? "coralogix-${var.firehose_stream}" : var.application_name
@@ -169,12 +169,12 @@ data "aws_iam_policy_document" "lambda_assume_role" {
 }
 
 resource "aws_iam_role" "lambda_iam" {
-  name               = "cx-cw-metrics-tags-lambda-iam"
+  name               = "${var.firehose_stream}-transform-lambda-iam"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
 }
 
 resource "aws_iam_role_policy" "lambda_iam_policy" {
-  name   = "cx-cw-metrics-tags-lambda-iam-policy"
+  name   = "${var.firehose_stream}-transform-lambda-iam"
   role   = aws_iam_role.lambda_iam.id
   policy = <<EOF
 {
@@ -211,8 +211,9 @@ EOF
 }
 
 resource "aws_lambda_function" "lambda_processor" {
-  filename      = "path/to/function.zip" # TODO: Change to official Coralogix S3 bucket
-  function_name = "cx-cw-metrics-tags-lambda-processor"
+  s3_bucket = "cx-cw-metrics-tags-lambda-processor-dev-us-east-2" # TODO: Support all regions
+  s3_key = "function.zip"
+  function_name = "${var.firehose_stream}-tags-processor"
   role          = aws_iam_role.lambda_iam.arn
   handler       = "function"
   runtime       = "go1.x"
