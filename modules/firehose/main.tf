@@ -25,11 +25,11 @@ locals {
       url = "https://firehose-ingress.eu2.coralogix.com/firehose"
     }
   }
-  tags = {
+  tags = merge(var.user_supplied_tags, {
     terraform-module         = "kinesis-firehose-to-coralogix"
-    terraform-module-version = "v0.0.3"
+    terraform-module-version = "v0.0.7"
     managed-by               = "coralogix-terraform"
-  }
+  })
   application_name = var.application_name == null ? "coralogix-${var.firehose_stream}" : var.application_name
 }
 
@@ -57,8 +57,17 @@ resource "aws_cloudwatch_log_stream" "firehose_logstream_backup" {
 }
 
 resource "aws_s3_bucket" "firehose_bucket" {
-  tags   = local.tags
+  tags   = merge(local.tags, {Name="${var.firehose_stream}-backup"})
   bucket = "${var.firehose_stream}-backup"
+}
+
+resource "aws_s3_bucket_public_access_block" "firehose_bucket_bucket_access" {
+  bucket = aws_s3_bucket.firehose_bucket.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 ### IAM role for s3 configuration
@@ -170,6 +179,7 @@ data "aws_iam_policy_document" "lambda_assume_role" {
 
 resource "aws_iam_role" "lambda_iam" {
   name               = "${var.firehose_stream}-transform-lambda-iam"
+  tags               = local.tags
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
 }
 
@@ -218,6 +228,7 @@ resource "aws_lambda_function" "lambda_processor" {
   handler       = "function"
   runtime       = "go1.x"
   timeout       = "60"
+  tags          = local.tags
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream" {
@@ -271,6 +282,11 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream" {
         parameters {
           parameter_name  = "LambdaArn"
           parameter_value = "${aws_lambda_function.lambda_processor.arn}:$LATEST"
+        }
+
+        parameters {
+          parameter_name  = "BufferSizeInMBs"
+          parameter_value = "1"
         }
       }
     }
@@ -347,7 +363,7 @@ resource "aws_cloudwatch_metric_stream" "cloudwatch_metric_stream_included_ns" {
   dynamic "include_filter" {
     for_each = var.include_metric_stream_namespaces
     content {
-      namespace = "AWS/${include_filter.value}"
+      namespace = "${include_filter.value}"
     }
   }
 }
