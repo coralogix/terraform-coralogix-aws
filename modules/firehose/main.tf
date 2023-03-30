@@ -27,7 +27,7 @@ locals {
   }
   tags = merge(var.user_supplied_tags, {
     terraform-module         = "kinesis-firehose-to-coralogix"
-    terraform-module-version = "v0.0.7"
+    terraform-module-version = "v0.0.8"
     managed-by               = "coralogix-terraform"
   })
   application_name = var.application_name == null ? "coralogix-${var.firehose_stream}" : var.application_name
@@ -43,7 +43,7 @@ data "aws_region" "current_region" {}
 resource "aws_cloudwatch_log_group" "firehose_loggroup" {
   tags              = local.tags
   name              = "/aws/kinesisfirehose/${var.firehose_stream}"
-  retention_in_days = 1
+  retention_in_days = var.cloudwatch_retention_days
 }
 
 resource "aws_cloudwatch_log_stream" "firehose_logstream_dest" {
@@ -218,6 +218,12 @@ resource "aws_iam_role_policy" "lambda_iam_policy" {
   ]
 }
 EOF
+}
+
+resource "aws_cloudwatch_log_group" "loggroup" {
+  name              = "/aws/lambda/${aws_lambda_function.lambda_processor.function_name}"
+  retention_in_days = var.cloudwatch_retention_days
+  tags              = local.tags
 }
 
 resource "aws_lambda_function" "lambda_processor" {

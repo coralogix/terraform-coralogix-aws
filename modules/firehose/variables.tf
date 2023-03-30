@@ -53,3 +53,9 @@ variable "user_supplied_tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "cloudwatch_retention_days" {
+  description = "Days of retention in Cloudwatch retention days"
+  type        = number
+  default     = 1
+}
