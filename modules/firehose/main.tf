@@ -227,7 +227,7 @@ resource "aws_cloudwatch_log_group" "loggroup" {
 }
 
 resource "aws_lambda_function" "lambda_processor" {
-  s3_bucket = "cx-cw-metrics-tags-lambda-processor-dev-us-east-2" # TODO: Support all regions
+  s3_bucket = "cx-cw-metrics-tags-lambda-processor-${data.aws_region.current_region.name}"
   s3_key = "function.zip"
   function_name = "${var.firehose_stream}-tags-processor"
   role          = aws_iam_role.lambda_iam.arn
