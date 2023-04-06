@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 4.17.1"
+      version = ">= 4.17.1"
     }
   }
 }
@@ -25,11 +25,11 @@ locals {
       url = "https://firehose-ingress.eu2.coralogix.com/firehose"
     }
   }
-  tags = {
+  tags = merge(var.user_supplied_tags, {
     terraform-module         = "kinesis-firehose-to-coralogix"
-    terraform-module-version = "v0.0.1"
+    terraform-module-version = "v0.0.8"
     managed-by               = "coralogix-terraform"
-  }
+  })
   application_name = var.application_name == null ? "coralogix-${var.firehose_stream}" : var.application_name
 }
 
@@ -43,7 +43,7 @@ data "aws_region" "current_region" {}
 resource "aws_cloudwatch_log_group" "firehose_loggroup" {
   tags              = local.tags
   name              = "/aws/kinesisfirehose/${var.firehose_stream}"
-  retention_in_days = 1
+  retention_in_days = var.cloudwatch_retention_days
 }
 
 resource "aws_cloudwatch_log_stream" "firehose_logstream_dest" {
@@ -57,8 +57,17 @@ resource "aws_cloudwatch_log_stream" "firehose_logstream_backup" {
 }
 
 resource "aws_s3_bucket" "firehose_bucket" {
-  tags   = local.tags
+  tags   = merge(local.tags, {Name="${var.firehose_stream}-backup"})
   bucket = "${var.firehose_stream}-backup"
+}
+
+resource "aws_s3_bucket_public_access_block" "firehose_bucket_bucket_access" {
+  bucket = aws_s3_bucket.firehose_bucket.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 ### IAM role for s3 configuration
@@ -141,10 +150,91 @@ resource "aws_iam_role_policy" "firehose_to_http_metric_policy" {
            "Resource": [
                "${aws_cloudwatch_log_group.firehose_loggroup.arn}"
            ]
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+              "lambda:InvokeFunction",
+              "lambda:GetFunctionConfiguration"
+          ],
+          "Resource": "${aws_lambda_function.lambda_processor.arn}:*"
         }
     ]
 }
 EOF
+}
+
+data "aws_iam_policy_document" "lambda_assume_role" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+resource "aws_iam_role" "lambda_iam" {
+  name               = "${var.firehose_stream}-transform-lambda-iam"
+  tags               = local.tags
+  assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
+}
+
+resource "aws_iam_role_policy" "lambda_iam_policy" {
+  name   = "${var.firehose_stream}-transform-lambda-iam"
+  role   = aws_iam_role.lambda_iam.id
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+      {
+          "Action": [
+              "tag:GetResources",
+              "ec2:DescribeTransitGateway*",
+              "ec2:DescribeTags",
+              "ec2:DescribeRegions",
+              "ec2:DescribeInstances",
+              "dms:DescribeReplicationTasks",
+              "dms:DescribeReplicationInstances",
+              "apigateway:GET"
+          ],
+          "Effect": "Allow",
+          "Resource": "*",
+          "Sid": ""
+      },
+      {
+          "Action": [
+              "logs:PutLogEvents",
+              "logs:CreateLogStream",
+              "logs:CreateLogGroup"
+          ],
+          "Effect": "Allow",
+          "Resource": "arn:aws:logs:*:*:*",
+          "Sid": ""
+      }
+  ]
+}
+EOF
+}
+
+resource "aws_cloudwatch_log_group" "loggroup" {
+  name              = "/aws/lambda/${aws_lambda_function.lambda_processor.function_name}"
+  retention_in_days = var.cloudwatch_retention_days
+  tags              = local.tags
+}
+
+resource "aws_lambda_function" "lambda_processor" {
+  s3_bucket = "cx-cw-metrics-tags-lambda-processor-${data.aws_region.current_region.name}"
+  s3_key = "function.zip"
+  function_name = "${var.firehose_stream}-tags-processor"
+  role          = aws_iam_role.lambda_iam.arn
+  handler       = "function"
+  runtime       = "go1.x"
+  timeout       = "60"
+  tags          = local.tags
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream" {
@@ -186,6 +276,24 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream" {
       common_attributes {
         name  = "applicationName"
         value = local.application_name
+      }
+    }
+
+    processing_configuration {
+      enabled = "true"
+
+      processors {
+        type = "Lambda"
+
+        parameters {
+          parameter_name  = "LambdaArn"
+          parameter_value = "${aws_lambda_function.lambda_processor.arn}:$LATEST"
+        }
+
+        parameters {
+          parameter_name  = "BufferSizeInMBs"
+          parameter_value = "1"
+        }
       }
     }
   }
@@ -261,9 +369,7 @@ resource "aws_cloudwatch_metric_stream" "cloudwatch_metric_stream_included_ns" {
   dynamic "include_filter" {
     for_each = var.include_metric_stream_namespaces
     content {
-      namespace = "AWS/${include_filter.value}"
+      namespace = "${include_filter.value}"
     }
   }
 }
-
-

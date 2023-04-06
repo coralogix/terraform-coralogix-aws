@@ -6,7 +6,6 @@ variable "firehose_stream" {
 variable "privatekey" {
   description = "Coralogix account private key"
   sensitive   = true
-
 }
 
 variable "coralogix_region" {
@@ -47,4 +46,16 @@ variable "application_name" {
   description = "The application name of the metrics"
   type        = string
   default     = null
+}
+
+variable "user_supplied_tags" {
+  description = "Tags supplied by the user to populate to all generated resources"
+  type        = map(string)
+  default     = {}
+}
+
+variable "cloudwatch_retention_days" {
+  description = "Days of retention in Cloudwatch retention days"
+  type        = number
+  default     = 1
 }
