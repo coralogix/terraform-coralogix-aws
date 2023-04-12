@@ -24,7 +24,7 @@ variable "include_all_namespaces" {
 variable "include_metric_stream_namespaces" {
   description = "List of specific namespaces to include in the CloudWatch metric stream, see https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html"
   type        = list(string)
-  default     = ["EC2", "DynamoDB"]
+  default     = ["AWS/EC2", "AWS/DynamoDB"]
 }
 
 variable "user_supplied_tags" {
