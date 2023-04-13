@@ -27,7 +27,7 @@ locals {
   }
   tags = merge(var.user_supplied_tags, {
     terraform-module         = "kinesis-firehose-to-coralogix"
-    terraform-module-version = "v0.0.8"
+    terraform-module-version = "v0.0.9"
     managed-by               = "coralogix-terraform"
   })
   application_name = var.application_name == null ? "coralogix-${var.firehose_stream}" : var.application_name
@@ -293,6 +293,11 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream" {
         parameters {
           parameter_name  = "BufferSizeInMBs"
           parameter_value = "1"
+        }
+
+        parameters {
+          parameter_name  = "BufferIntervalInSeconds"
+          parameter_value = "60"
         }
       }
     }
