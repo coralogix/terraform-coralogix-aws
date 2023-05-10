@@ -27,7 +27,7 @@ locals {
   }
   tags = merge(var.user_supplied_tags, {
     terraform-module         = "kinesis-firehose-to-coralogix"
-    terraform-module-version = "v0.0.9"
+    terraform-module-version = "v0.1.0"
     managed-by               = "coralogix-terraform"
   })
   application_name = var.application_name == null ? "coralogix-${var.firehose_stream}" : var.application_name
@@ -251,7 +251,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream" {
   }
 
   http_endpoint_configuration {
-    url                = local.endpoint_url[var.coralogix_region].url
+    url                = var.coralogix_firehose_custom_endpoint != null ? var.coralogix_firehose_custom_endpoint : local.endpoint_url[var.coralogix_region].url
     name               = "Coralogix"
     access_key         = var.privatekey
     buffering_size     = 6

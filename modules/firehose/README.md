@@ -79,6 +79,9 @@ The coralogix region variable accepts one of the following regions:
 | india     | `https://firehose-ingress.app.coralogix.in/firehose`            |
 | stockholm | `https://firehose-ingress.coralogix.eu2.coralogix.com/firehose` |
 
+### Custom endpoints
+It is possible to pass a custom firehose ingress endpoint with by using the `coralogix_firehose_custom_endpoint` variable.
+
 # Metrics Output Format
 Coralogix suppots both `JSON` format and `OpenTelemtry` format. 
 The default format configured here is `OpenTelemtry`. 
