@@ -59,3 +59,9 @@ variable "cloudwatch_retention_days" {
   type        = number
   default     = 1
 }
+
+variable "coralogix_firehose_custom_endpoint" {
+  description = "Custom endpoint for Coralogix firehose integration endpoint (https://firehose-ingress.private.coralogix.net:8443/firehose)"
+  type        = string
+  default     = null
+}
