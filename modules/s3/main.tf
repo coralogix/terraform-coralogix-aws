@@ -121,7 +121,7 @@ module "lambdaSSM" {
       actions   = ["s3:GetObject"]
       resources = ["${data.aws_s3_bucket.this.arn}/*"]
     }
-    gr_policy = {
+    secret_access_policy = {
       effect = "Allow"
       actions = [
         "secretsmanager:DescribeSecret",
