@@ -8,6 +8,7 @@ Manage the application which retrieves `CloudWatch` logs and sends them to your 
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.1 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 2.23 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | Cloudwatch log group|
 
 ## Providers
 
