@@ -9,6 +9,34 @@ Manage the application which retrieves `CloudWatch` logs and sends them to your 
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.1 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 2.23 |
 
+
+## Usage
+
+To run this example you need to save this code in Terraform file, and change the values according to our settings.
+
+```hcl
+module "cloudwatch_logs" {
+  source = "coralogix/aws/coralogix//modules/cloudwatch-logs"
+
+  coralogix_region   = "Europe"
+  CustomDomain       = "https://<your custom doamin>/api/v1/logs"
+  private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  SSM_enable         = "false"
+  LayerARN           = "<you layer arn>"
+  application_name   = "cloudwatch"
+  subsystem_name     = "logs"
+  log_groups         = ["test-log-group"]
+}
+```
+now execute:
+```bash
+$ terraform init
+$ terraform plan
+$ terraform apply
+```
+
+Run `terraform destroy` when you don't need these resources.
+
 ## Providers
 
 | Name | Version |

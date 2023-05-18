@@ -9,6 +9,32 @@ Manage the application which retrieves logs from `S3` bucket and sends them to y
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.1 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 2.23 |
 
+
+## Usage
+
+To run this example you need to save this code in Terraform file, and change the values according to our settings.
+
+```hcl
+module "s3" {
+  source = "coralogix/aws/coralogix//modules/s3"
+
+  coralogix_region   = "Europe"
+  CustomDomain       = "https://<your custom doamin>/api/v1/logs"
+  private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  SSM_enable         = "false"
+  LayerARN           = "<you layer arn>"
+  application_name   = "s3"
+  subsystem_name     = "logs"
+  s3_bucket_name     = "test-bucket-name"
+}
+```
+now execute:
+```bash
+$ terraform init
+$ terraform plan
+$ terraform apply
+```
+
 ## Providers
 
 | Name | Version |
