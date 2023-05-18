@@ -10,8 +10,7 @@ variable "coralogix_region" {
 variable "CustomDomain" {
   description = "Your Custom URL for the Coralogix account. Ignore unless you have a custom URL. Just the FQDN, not the whole URL."
   type        = string
-  default     = ""
-}
+  }
 variable "private_key" {
   description = "The Coralogix private key which is used to validate your authenticity"
   type        = string
