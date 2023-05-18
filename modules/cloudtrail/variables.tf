@@ -3,7 +3,22 @@ variable "coralogix_region" {
   type        = string
   default     = "Europe"
 }
+variable "CustomDomain" {
+  description = "Custom coralogix url"
+  type        = string
 
+}
+
+variable "SSM_enable" {
+  description = "store coralogix private_key as a secret. True/False"
+  type        = string
+  default     = "false"
+
+}
+variable "LayerARN" {
+  description = "Coralogix SSM Layer ARN"
+  type        = string
+}
 variable "private_key" {
   description = "The Coralogix private key which is used to validate your authenticity"
   type        = string
@@ -66,3 +81,4 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+

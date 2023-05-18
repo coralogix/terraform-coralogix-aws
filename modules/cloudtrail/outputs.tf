@@ -17,3 +17,4 @@ output "lambda_role_name" {
   description = "The name of the IAM role created for the Lambda Function"
   value       = module.s3.lambda_role_name
 }
+

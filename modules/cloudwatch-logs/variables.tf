@@ -1,7 +1,17 @@
 variable "coralogix_region" {
-  description = "The Coralogix location region, possible options are [Europe, Europe2, India, Singapore, US]"
+  description = "The Coralogix location region, possible options are [Europe, Europe2, India, Singapore, US, Custom]"
   type        = string
+  validation {
+    condition     = contains(["Europe", "Europe2", "India", "Singapore", "US", "Custom"], var.coralogix_region)
+    error_message = "The coralogix region must be one of these values: [Europe, Europe2, India, Singapore, US, Custom]."
+  }
   default     = "Europe"
+}
+
+variable "CustomDomain" {
+  description = "Your Custom URL for the Coralogix account. Ignore unless you have a custom URL. Just the FQDN, not the whole URL."
+  type        = string
+  default     = ""
 }
 
 variable "private_key" {
@@ -72,4 +82,14 @@ variable "tags" {
   description = "A map of tags to add to all resources"
   type        = map(string)
   default     = {}
+}
+
+variable "SSM_enable" {
+  description = "Use SSM for the private key True/False"
+  type        = string
+}
+
+variable "LayerARN" {
+  description = "Coralogix SSM Layer ARN"
+  type        = string
 }
