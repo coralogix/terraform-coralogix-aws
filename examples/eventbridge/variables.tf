@@ -1,28 +1,31 @@
-variable "coralogix_eventbridge_stream_name" {
-  description = "Coralogix eventbridge delivery stream name"
+variable "eventbridge_stream" {
+  description = "AWS eventbridge delivery stream name"
   type        = string
-  default     = "coralogix-eventbridge"
 }
 
-variable "coralogix_region" {
+variable "role_name" {
   type        = string
-  description = "The region of the Coralogix account"
+  description = "The name of the eventbridge role"
 }
 
-variable "coralogix_privatekey" {
+variable "private_key" {
   type        = string
-  description = "Coralogix account private key"
+  description = "Your Coralogix private key"
   sensitive   = true
 }
 
-variable "eventbridge_role_name" {
-  type = string
-  description = "The name of the eventbridge role"
-  default = "coralogix-eventbridge-role"
+variable "coralogix_region" {
+  description = "Coralogix account region: us, singapore, ireland, india, stockholm [in lower-case letters]"
 }
 
-variable "eventbridge_sources" {
-  type = list
+variable "sources" {
+  type        = list(any)
   description = "The services for which we will send events"
-  default =["aws.ec2"]  
+  default     = ["aws.ec2", "aws.autoscaling", "aws.cloudwatch", "aws.events", "aws.health", "aws.rds"]
+}
+
+variable "application_name" {
+  description = "Coralogix application name"
+  type        = string
+  default     = null
 }

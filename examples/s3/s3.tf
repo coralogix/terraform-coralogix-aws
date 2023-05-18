@@ -1,12 +1,3 @@
-# s3
-
-Manage the application which retrieves logs from `S3` bucket and sends them to your *Coralogix* account.
-
-## Usage
-
-To run this example you need to save this code in Terraform file, and change the values according to our settings.
-
-```hcl
 provider "aws" {
 }
 
@@ -22,12 +13,3 @@ module "s3" {
   subsystem_name     = "logs"
   s3_bucket_name     = "test-bucket-name"
 }
-```
-now execute:
-```bash
-$ terraform init
-$ terraform plan
-$ terraform apply
-```
-Run `terraform destroy` when you don't need these resources.
-
