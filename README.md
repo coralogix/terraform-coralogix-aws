@@ -1,6 +1,6 @@
 # AWS Coralogix Terraform module
 
-## Ecamples
+## Examples
 
 # s3:
 
