@@ -4,7 +4,7 @@ module "s3" {
   source = "coralogix/aws/coralogix//modules/s3"
 
   coralogix_region   = var.coralogix_region
-  CustomDomain       = var.custom_url
+  CustomDomain       = var.CustomDomain
   private_key        = var.private_key
   SSM_enable         = var.SSM_enable
   LayerARN           = var.LayerARN

@@ -9,7 +9,10 @@ module "cloudtrail" {
   source = "coralogix/aws/coralogix//modules/cloudtrail"
 
   coralogix_region   = "Europe"
-  private_key        = "2f55c873-c0cf-4523-82d4-c3b68ee6cb46"
+  CustomDomain       = "https://<your custom doamin>/api/v1/logs"
+  private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  SSM_enable         = "false"
+  LayerARN           = "<you layer arn>"
   application_name   = "cloudtrail"
   subsystem_name     = "logs"
   s3_bucket_name     = "test-bucket-name"
@@ -23,7 +26,10 @@ module "cloudwatch_logs" {
   source = "coralogix/aws/coralogix//modules/cloudwatch-logs"
 
   coralogix_region   = "Europe"
-  private_key        = "2f55c873-c0cf-4523-82d4-c3b68ee6cb46"
+  CustomDomain       = "https://<your custom doamin>/api/v1/logs"
+  private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  SSM_enable         = "false"
+  LayerARN           = "<you layer arn>"
   application_name   = "cloudwatch"
   subsystem_name     = "logs"
   log_groups         = ["test-log-group"]
@@ -37,7 +43,9 @@ module "s3" {
   source = "coralogix/aws/coralogix//modules/s3"
 
   coralogix_region   = "Europe"
-  private_key        = "2f55c873-c0cf-4523-82d4-c3b68ee6cb46"
+  private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  SSM_enable         = "false"
+  LayerARN           = "<you layer arn>"
   application_name   = "s3"
   subsystem_name     = "logs"
   s3_bucket_name     = "test-bucket-name"

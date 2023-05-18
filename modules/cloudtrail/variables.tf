@@ -3,10 +3,9 @@ variable "coralogix_region" {
   type        = string
   default     = "Europe"
 }
-variable "Custom_url" {
+variable "CustomDomain" {
   description = "Custom coralogix url"
   type        = string
-  default     = ""
 
 }
 
