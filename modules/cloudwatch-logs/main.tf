@@ -169,3 +169,4 @@ resource "aws_secretsmanager_secret_version" "service_user" {
   secret_id     = aws_secretsmanager_secret.private_key_secret[count.index].id
   secret_string = var.private_key
 }
+

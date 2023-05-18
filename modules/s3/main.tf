@@ -177,3 +177,4 @@ resource "aws_sns_topic_subscription" "this" {
   protocol  = "email"
   endpoint  = var.notification_email
 }
+

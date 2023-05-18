@@ -10,34 +10,6 @@ Manage the application which retrieves `CloudWatch` logs and sends them to your 
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 2.23 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | Cloudwatch log group|
 
-
-## Usage
-
-To run this example you need to save this code in Terraform file, and change the values according to our settings.
-
-```hcl
-module "cloudwatch_logs" {
-  source = "coralogix/aws/coralogix//modules/cloudwatch-logs"
-
-  coralogix_region   = "Europe"
-  CustomDomain       = "https://<your custom doamin>/api/v1/logs"
-  private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
-  SSM_enable         = "false"
-  LayerARN           = "<you layer arn>"
-  application_name   = "cloudwatch"
-  subsystem_name     = "logs"
-  log_groups         = ["test-log-group"]
-}
-```
-now execute:
-```bash
-$ terraform init
-$ terraform plan
-$ terraform apply
-```
-
-Run `terraform destroy` when you don't need these resources.
-
 ## Providers
 
 | Name | Version |
@@ -56,7 +28,7 @@ Run `terraform destroy` when you don't need these resources.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | The Coralogix location region, possible options are [`Europe`, `Europe2`, `India`, `Singapore`, `US`] | `string` | `Europe` | no |
-| <a name="input_Custom_Domain"></a> [Custom_Url](#input\_Custom\_Domain) | Custom Domain for coralogix | `string` | n/a | no |
+| <a name="input_CustomDomain"></a> [CustomDomain](#input\_CustomDomain) | Custom Domain for coralogix | `string` | n/a | no |
 | <a name="input_Enable_SSM"></a> [Enable_SSM](#input\_Enable\_SSM) | store coralogix private_key as a secret so that it will not be save in the lambda. True/False | `string` | `False` | no |
 | <a name="input_LayerARN"></a> [LayerARN](#input\_LayerARN) | Coralogix SSM Layer ARN (if SsmEnabled set to false, can leave as empty). | `string` | n/a | no |
 | <a name="input_private_key"></a> [private\_key](#input\_private\_key) | The Coralogix private key which is used to validate your authenticity | `string` | n/a | yes |
@@ -80,3 +52,4 @@ Run `terraform destroy` when you don't need these resources.
 | <a name="output_lambda_function_name"></a> [lambda\_function\_name](#output\_lambda\_function\_name) | The name of the Lambda Function |
 | <a name="output_lambda_role_arn"></a> [lambda\_role\_arn](#output\_lambda\_role\_arn) | The ARN of the IAM role created for the Lambda Function |
 | <a name="output_lambda_role_name"></a> [lambda\_role\_name](#output\_lambda\_role\_name) | The name of the IAM role created for the Lambda Function |
+

@@ -10,33 +10,6 @@ Manage the application which retrieves `CloudTrail` logs from `S3` bucket and se
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 2.23 |
 
 
-## Usage
-
-To run this example you need to save this code in Terraform file, and change the values according to our settings.
-
-```hcl
-module "cloudtrail" {
-  source = "coralogix/aws/coralogix//modules/cloudtrail"
-
-  coralogix_region   = "Europe"
-  CustomDomain       = "https://<your custom doamin>/api/v1/logs"
-  private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
-  SSM_enable         = "false"
-  LayerARN           = "<you layer arn>"
-  application_name   = "cloudtrail"
-  subsystem_name     = "logs"
-  s3_bucket_name     = "test-bucket-name"
-}
-```
-now execute:
-```bash
-$ terraform init
-$ terraform plan
-$ terraform apply
-```
-
-Run `terraform destroy` when you don't need these resources.
-
 ## Providers
 
 | Name | Version |
@@ -77,3 +50,4 @@ Run `terraform destroy` when you don't need these resources.
 | <a name="output_lambda_function_name"></a> [lambda\_function\_name](#output\_lambda\_function\_name) | The name of the Lambda Function |
 | <a name="output_lambda_role_arn"></a> [lambda\_role\_arn](#output\_lambda\_role\_arn) | The ARN of the IAM role created for the Lambda Function |
 | <a name="output_lambda_role_name"></a> [lambda\_role\_name](#output\_lambda\_role\_name) | The name of the IAM role created for the Lambda Function |
+

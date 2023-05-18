@@ -20,3 +20,4 @@ module "s3" {
   notification_email = var.notification_email
   tags               = var.tags
 }
+

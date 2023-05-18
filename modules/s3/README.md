@@ -9,32 +9,6 @@ Manage the application which retrieves logs from `S3` bucket and sends them to y
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.1 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 2.23 |
 
-
-## Usage
-
-To run this example you need to save this code in Terraform file, and change the values according to our settings.
-
-```hcl
-module "s3" {
-  source = "coralogix/aws/coralogix//modules/s3"
-
-  coralogix_region   = "Europe"
-  CustomDomain       = "https://<your custom doamin>/api/v1/logs"
-  private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
-  SSM_enable         = "false"
-  LayerARN           = "<you layer arn>"
-  application_name   = "s3"
-  subsystem_name     = "logs"
-  s3_bucket_name     = "test-bucket-name"
-}
-```
-now execute:
-```bash
-$ terraform init
-$ terraform plan
-$ terraform apply
-```
-
 ## Providers
 
 | Name | Version |
@@ -81,3 +55,4 @@ $ terraform apply
 | <a name="output_lambda_function_name"></a> [lambda\_function\_name](#output\_lambda\_function\_name) | The name of the Lambda Function |
 | <a name="output_lambda_role_arn"></a> [lambda\_role\_arn](#output\_lambda\_role\_arn) | The ARN of the IAM role created for the Lambda Function |
 | <a name="output_lambda_role_name"></a> [lambda\_role\_name](#output\_lambda\_role\_name) | The name of the IAM role created for the Lambda Function |
+
