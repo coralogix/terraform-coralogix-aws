@@ -8,6 +8,7 @@ Manage the application which retrieves `CloudWatch` logs and sends them to your 
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.1 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 2.23 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | Cloudwatch log group|
 
 
 ## Usage
@@ -55,6 +56,9 @@ Run `terraform destroy` when you don't need these resources.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | The Coralogix location region, possible options are [`Europe`, `Europe2`, `India`, `Singapore`, `US`] | `string` | `Europe` | no |
+| <a name="input_Custom_Domain"></a> [Custom_Url](#input\_Custom\_Domain) | Custom Domain for coralogix | `string` | n/a | no |
+| <a name="input_Enable_SSM"></a> [Enable_SSM](#input\_Enable\_SSM) | store coralogix private_key as a secret so that it will not be save in the lambda. True/False | `string` | `False` | no |
+| <a name="input_LayerARN"></a> [LayerARN](#input\_LayerARN) | Coralogix SSM Layer ARN (if SsmEnabled set to false, can leave as empty). | `string` | n/a | no |
 | <a name="input_private_key"></a> [private\_key](#input\_private\_key) | The Coralogix private key which is used to validate your authenticity | `string` | n/a | yes |
 | <a name="input_application_name"></a> [application\_name](#input\_application\_name) | The name of your application | `string` | n/a | yes |
 | <a name="input_subsystem_name"></a> [subsystem\_name](#input\_subsystem\_name) | The subsystem name of your application | `string` | `""` | no |
