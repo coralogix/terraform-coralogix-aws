@@ -7,13 +7,8 @@ Manage the application which retrieves `CloudWatch` logs and sends them to your 
 To run this example you need to save this code in Terraform file, and change the values according to our settings.
 
 ```hcl
-terraform {
-  required_providers {
-      aws = {
-        source  = "hashicorp/aws"
-        version = ">= 4.15.1"
-      }
-  }
+provider "aws" {
+}
 module "cloudwatch_logs" {
   source = "coralogix/aws/coralogix//modules/cloudwatch-logs"
 

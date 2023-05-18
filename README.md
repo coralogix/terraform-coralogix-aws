@@ -5,6 +5,8 @@
 # s3:
 
 ```hcl
+provider "aws" {
+}
 module "s3" {
   source = "coralogix/aws/coralogix//modules/s3"
 
@@ -28,6 +30,8 @@ $ terraform apply
 To run this example you need to save this code in Terraform file, and change the values according to our settings.
 
 ```hcl
+provider "aws" {
+}
 module "cloudtrail" {
   source = "coralogix/aws/coralogix//modules/cloudtrail"
 
@@ -55,6 +59,8 @@ Run `terraform destroy` when you don't need these resources.
 To run this example you need to save this code in Terraform file, and change the values according to our settings.
 
 ```hcl
+provider "aws" {
+}
 module "cloudwatch_logs" {
   source = "coralogix/aws/coralogix//modules/cloudwatch-logs"
 
@@ -84,7 +90,7 @@ Run `terraform destroy` when you don't need these resources.
 - [cloudwatch-logs](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/cloudwatch-logs) - Send logs from `CloudWatch`.
 - [s3](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/s3) - Send logs from `S3` bucket.
 -[eventbridge](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/eventbridge) - Send logs from `eventbrdge`.
--[eventbridge](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/firehose) - Send logs from `firehose`.
+-[firehose](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/firehose) - Send logs from `firehose`.
 
 ## Authors
 

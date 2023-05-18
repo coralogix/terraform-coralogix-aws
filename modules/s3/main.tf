@@ -142,7 +142,6 @@ module "lambdaSSM" {
 }
 
 resource "aws_s3_bucket_notification" "this" {
- # depends_on      = [ module.lambdaSSM, module.lambda ]
   bucket = data.aws_s3_bucket.this.bucket
   lambda_function {
     lambda_function_arn = var.SSM_enable == "True" ? module.lambdaSSM.lambda_function_arn : module.lambda.lambda_function_arn
@@ -153,7 +152,7 @@ resource "aws_s3_bucket_notification" "this" {
 }
 
 resource "aws_sns_topic" "this" {
-  name_prefix  =  "${local.function_name}-Failure"
+  name_prefix  = "${local.function_name}-Failure"
   display_name = "${local.function_name}-Failure"
   tags         = merge(var.tags, local.tags)
 }

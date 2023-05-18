@@ -7,13 +7,8 @@ Manage the application which retrieves `CloudTrail` logs from `S3` bucket and se
 To run this example you need to save this code in Terraform file, and change the values according to our settings.
 
 ```hcl
-terraform {
-  required_providers {
-      aws = {
-        source  = "hashicorp/aws"
-        version = ">= 4.15.1"
-      }
-  }
+provider "aws" {
+}
 module "cloudtrail" {
   source = "coralogix/aws/coralogix//modules/cloudtrail"
 
@@ -26,7 +21,6 @@ module "cloudtrail" {
   subsystem_name     = "logs"
   s3_bucket_name     = "test-bucket-name"
     }
-}
 ```
 now execute:
 ```bash
