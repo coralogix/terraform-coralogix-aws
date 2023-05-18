@@ -4,7 +4,10 @@ module "s3" {
   source = "coralogix/aws/coralogix//modules/s3"
 
   coralogix_region   = var.coralogix_region
+  CustomDomain       = var.CustomDomain
   private_key        = var.private_key
+  SSM_enable         = var.SSM_enable
+  LayerARN           = var.LayerARN
   application_name   = var.application_name
   subsystem_name     = var.subsystem_name
   package_name       = "cloudtrail"
@@ -17,3 +20,4 @@ module "s3" {
   notification_email = var.notification_email
   tags               = var.tags
 }
+

@@ -1,15 +1,29 @@
 variable "coralogix_region" {
   description = "The Coralogix location region, possible options are [Europe, Europe2, India, Singapore, US]"
   type        = string
+  validation {
+    condition     = contains(["Europe", "Europe2", "India", "Singapore", "US", "Custom"], var.coralogix_region)
+    error_message = "The coralogix region must be one of these values: [Europe, Europe2, India, Singapore, US, Custom]."
+  }
   default     = "Europe"
 }
-
+variable "CustomDomain" {
+  description = "Your Custom URL for the Coralogix account. Ignore unless you have a custom URL. Just the FQDN, not the whole URL."
+  type        = string
+  }
 variable "private_key" {
   description = "The Coralogix private key which is used to validate your authenticity"
   type        = string
   sensitive   = true
 }
-
+variable "SSM_enable" {
+  description = "Use SSM for the private key True/False"
+  type        = string
+}
+variable "LayerARN" {
+  description = "Coralogix SSM Layer ARN"
+  type        = string
+}
 variable "application_name" {
   description = "The name of your application"
   type        = string
@@ -102,3 +116,4 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
