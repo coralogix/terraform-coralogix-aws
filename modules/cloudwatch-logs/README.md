@@ -28,8 +28,8 @@ Manage the application which retrieves `CloudWatch` logs and sends them to your 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | The Coralogix location region, possible options are [`Europe`, `Europe2`, `India`, `Singapore`, `US`] | `string` | `Europe` | no |
-| <a name="input_Custom_domain"></a> [Custom_domain](#input\_Custom_domain) | Custom Domain for coralogix | `string` | n/a | no |
-| <a name="input_enable_ssm"></a> [enable_ssm](#input\_Enable\_SSM) | store coralogix private_key as a secret so that it will not be save in the lambda. True/False | `string` | `False` | no |
+| <a name="input_custom_domain"></a> [Custom_domain](#input\_Custom\_domain) | Custom Domain for coralogix | `string` | n/a | no |
+| <a name="input_enable_ssm"></a> [enable_ssm](#input\_enable\_ssm) | store coralogix private_key as a secret so that it will not be save in the lambda. True/False | `string` | `False` | no |
 | <a name="input_layer_arn"></a> [layer_arn](#input\_layer_arn) | Coralogix SSM Layer ARN (if SsmEnabled set to false, can leave as empty). | `string` | n/a | no |
 | <a name="input_private_key"></a> [private\_key](#input\_private\_key) | The Coralogix private key which is used to validate your authenticity | `string` | n/a | yes |
 | <a name="input_application_name"></a> [application\_name](#input\_application\_name) | The name of your application | `string` | n/a | yes |

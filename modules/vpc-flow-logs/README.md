@@ -27,9 +27,9 @@ Manage the application which retrieves `vpc-flow-logs` logs from `S3` bucket and
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | The Coralogix location region, possible options are [`Europe`, `Europe2`, `India`, `Singapore`, `US`. `Custom`] | `string` | `Europe` | no |
-| <a name="input_CustomDomain"></a> [custom_domain](#input\_CustomDomain) | Custom Domain for coralogix, leave empty if you dont use custom domain. | `string` | n/a | no |
-| <a name="input_Enable_SSM"></a> [Enable\_SSM](#input\_Enable\_SSM) | store coralogix private_key as a secret so that it will not be save in the lambda. True/False | `string` | `False` | no |
-| <a name="input_LayerARN"></a> [layer_arn](#input\_LayerARN) | Coralogix SSM Layer ARN (if SsmEnabled set to false, can leave as empty). | `string` | n/a | no |
+| <a name="input_custom_domain"></a> [custom_domain](#input\_custom\_domain) | Custom Domain for coralogix, leave empty if you dont use custom domain. | `string` | n/a | no |
+| <a name="input_enable_ssm"></a> [enable_ssm](#input\_enable\_ssm) | store coralogix private_key as a secret so that it will not be save in the lambda. True/False | `string` | `False` | no |
+| <a name="input_layer_arn"></a> [layer_arn](#input\_layer\_arn) | Coralogix SSM Layer ARN (if SsmEnabled set to false, can leave as empty). | `string` | n/a | no |
 | <a name="input_private_key"></a> [private\_key](#input\_private\_key) | The Coralogix private key which is used to validate your authenticity | `string` | n/a | yes |
 | <a name="input_application_name"></a> [application\_name](#input\_application\_name) | The name of your application | `string` | n/a | yes |
 | <a name="input_subsystem_name"></a> [subsystem\_name](#input\_subsystem\_name) | The subsystem name of your application | `string` | n/a | yes |
