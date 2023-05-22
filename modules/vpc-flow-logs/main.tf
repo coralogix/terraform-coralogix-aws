@@ -1,13 +1,13 @@
 data "aws_caller_identity" "this" {}
 
-module "s3" {
+module "vpc-flow-logs" {
   source = "coralogix/aws/coralogix//modules/s3"
 
   coralogix_region   = var.coralogix_region
-  CustomDomain       = var.CustomDomain
+  custom_domain      = var.custom_domain
   private_key        = var.private_key
-  SSM_enable         = var.SSM_enable
-  LayerARN           = var.LayerARN
+  ssm_enable         = var.ssm_enable
+  layer_arn          = var.layer_arn
   application_name   = var.application_name
   subsystem_name     = var.subsystem_name
   package_name       = "vpc-flow-logs"

@@ -6,7 +6,7 @@ locals {
     India     = "api.app.coralogix.in"
     Singapore = "api.coralogixsg.com"
     US        = "api.coralogix.us"
-    Custom    = var.CustomDomain
+    Custom    = var.custom_domain
   }
   tags = {
     Provider = "Coralogix"
@@ -29,7 +29,7 @@ resource "random_string" "this" {
 module "lambda" {
   source                 = "terraform-aws-modules/lambda/aws"
   version                = "3.3.1"
-  create = var.SSM_enable != "True" ? true : false
+  create = var.ssm_enable != "True" ? true : false
 
   function_name          = local.function_name
   description            = "Send CloudWatch logs to Coralogix."
@@ -41,7 +41,7 @@ module "lambda" {
   create_package         = false
   destination_on_failure = aws_sns_topic.this.arn
   environment_variables = {
-    CORALOGIX_URL   = var.CustomDomain == "" ? lookup(local.coralogix_regions, var.coralogix_region, "Europe") : var.CustomDomain
+    CORALOGIX_URL   = var.custom_domain == "" ? lookup(local.coralogix_regions, var.coralogix_region, "Europe") : var.custom_domain
     private_key     = var.private_key
     app_name        = var.application_name
     sub_name        = var.subsystem_name
@@ -72,9 +72,9 @@ module "lambda" {
 module "lambdaSSM" {
   source                 = "terraform-aws-modules/lambda/aws"
   version                = "3.3.1"
-  create = var.SSM_enable == "True" ? true : false 
+  create = var.ssm_enable == "True" ? true : false 
 
-  layers                 = [var.LayerARN] 
+  layers                 = [var.layer_arn] 
   function_name          = local.function_name
   description            = "Send CloudWatch logs to Coralogix."
   handler                = "index.handler"
@@ -85,7 +85,7 @@ module "lambdaSSM" {
   create_package         = false
   destination_on_failure = aws_sns_topic.this.arn
   environment_variables = {
-    CORALOGIX_URL   = var.CustomDomain == "" ? lookup(local.coralogix_regions, var.coralogix_region, "Europe") : var.CustomDomain
+    CORALOGIX_URL   = var.custom_domain == "" ? lookup(local.coralogix_regions, var.coralogix_region, "Europe") : var.custom_domain
     AWS_LAMBDA_EXEC_WRAPPER: "/opt/wrapper.sh" 
     private_key     = "****" 
     app_name        = var.application_name
@@ -138,7 +138,7 @@ resource "aws_cloudwatch_log_subscription_filter" "this" {
   count           = length(var.log_groups)
   name            = "${module.lambda.lambda_function_name}-Subscription-${count.index}"
   log_group_name  = data.aws_cloudwatch_log_group.this[count.index].name
-  destination_arn = var.SSM_enable == "True" ?  module.lambdaSSM.lambda_function_arn : module.lambda.lambda_function_arn 
+  destination_arn = var.ssm_enable == "True" ?  module.lambdaSSM.lambda_function_arn : module.lambda.lambda_function_arn 
   filter_pattern  = ""
 }
 
@@ -157,14 +157,14 @@ resource "aws_sns_topic_subscription" "this" {
 }
 
 resource "aws_secretsmanager_secret" "private_key_secret" {
-  count = var.SSM_enable == "True" ? 1 : 0
+  count = var.ssm_enable == "True" ? 1 : 0
   depends_on = [ module.lambdaSSM ]
   name         = "lambda/coralogix/${data.aws_region.this.name}/${local.function_name}"
   description  = "Coralogix Send Your Data key Secret"
 }
 
 resource "aws_secretsmanager_secret_version" "service_user" {
-  count = var.SSM_enable == "True" ? 1 : 0
+  count = var.ssm_enable == "True" ? 1 : 0
   depends_on = [ aws_secretsmanager_secret.private_key_secret ]
   secret_id     = aws_secretsmanager_secret.private_key_secret[count.index].id
   secret_string = var.private_key

@@ -3,16 +3,16 @@ variable "coralogix_region" {
   type        = string
   default     = "Europe"
 }
-variable "CustomDomain" {
+variable "custom_domain" {
   description = "Custom coralogix url"
   type        = string
 }
 
-variable "SSM_enable" {
+variable "ssm_enable" {
   description = "store coralogix private_key as a secret. True/False"
   type        = string
 }
-variable "LayerARN" {
+variable "layer_arn" {
   description = "Coralogix SSM Layer ARN"
   type        = string
 }

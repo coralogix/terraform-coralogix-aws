@@ -8,7 +8,7 @@ variable "coralogix_region" {
   default     = "Europe"
 }
 
-variable "CustomDomain" {
+variable "custom_domain" {
   description = "Your Custom URL for the Coralogix account. Ignore unless you have a custom URL. Just the FQDN, not the whole URL."
   type        = string
   default     = ""
@@ -84,12 +84,12 @@ variable "tags" {
   default     = {}
 }
 
-variable "SSM_enable" {
+variable "ssm_enable" {
   description = "Use SSM for the private key True/False"
   type        = string
 }
 
-variable "LayerARN" {
+variable "layer_arn" {
   description = "Coralogix SSM Layer ARN"
   type        = string
 }

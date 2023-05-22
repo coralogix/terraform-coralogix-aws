@@ -1,6 +1,6 @@
-# Vpc-Flow-Logs
+#  vpc-flow-logs
 
-Manage the application which retrieves logs from `Vpc-Flow-Logs` and sends them to your *Coralogix* account.
+Manage the application which retrieves logs from `vpc-flow-logs` and sends them to your *Coralogix* account.
 
 ## Usage
 
@@ -14,10 +14,10 @@ module "vpc-flow-logs" {
   source = "coralogix/aws/coralogix//modules/vpc-flow-logs"
 
   coralogix_region   = "Europe"
-  CustomDomain       = "https://<your custom doamin>/api/v1/logs"
+  custom_domain      = "https://<your custom doamin>/api/v1/logs"
   private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
-  SSM_enable         = "false"
-  LayerARN           = "<you layer arn>"
+  ssm_enable         = "false"
+  layer_arn          = "<you layer arn>"
   application_name   = "vpc-flow-logs"
   subsystem_name     = "logs"
   s3_bucket_name     = "test-bucket-name"
