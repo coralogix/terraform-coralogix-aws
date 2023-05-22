@@ -83,6 +83,34 @@ $ terraform apply
 
 Run `terraform destroy` when you don't need these resources.
 
+# vpc-flow-logs:
+
+To run this example you need to save this code in Terraform file, and change the values according to our settings.
+
+```hcl
+provider "aws" {
+}
+module "vpc_flow_logs" {
+  source = "coralogix/aws/coralogix//modules/vpc-flow-logs"
+
+  coralogix_region   = "Europe"
+  CustomDomain       = "https://<your custom doamin>/api/v1/logs"
+  private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  SSM_enable         = "false"
+  LayerARN           = "<you layer arn>"
+  application_name   = "vpc-flow-logs"
+  subsystem_name     = "logs"
+  log_groups         = ["test-log-group"]
+}
+```
+now execute:
+```bash
+$ terraform init
+$ terraform plan
+$ terraform apply
+```
+
+Run `terraform destroy` when you don't need these resources.
 
 ## Modules
 
@@ -91,6 +119,7 @@ Run `terraform destroy` when you don't need these resources.
 - [s3](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/s3) - Send logs from `S3` bucket.
 - [eventbridge](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/eventbridge) - Send logs from `eventbrdge`.
 - [firehose](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/firehose) - Send logs from `firehose`.
+- [vpc-flow-logs](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/vpc-flow-logs) - Send logs from `vpc flow logs`.
 
 ## Authors
 
