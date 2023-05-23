@@ -3,7 +3,7 @@ locals {
   coralogix_regions = {
     Europe    = "ingress.coralogix.com"
     Europe2   = "ingress.eu2.coralogix.com"
-    India     = "ingress.app.coralogix.in"
+    India     = "ingress.coralogix.in"
     Singapore = "ingress.coralogixsg.com"
     US        = "ingress.coralogix.us"
     Custom    = var.custom_domain
