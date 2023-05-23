@@ -1,11 +1,11 @@
 locals {
   function_name = "Coralogix-${var.package_name}-${random_string.this.result}"
   coralogix_regions = {
-    Europe    = "api.coralogix.com"
-    Europe2   = "api.eu2.coralogix.com"
-    India     = "api.app.coralogix.in"
-    Singapore = "api.coralogixsg.com"
-    US        = "api.coralogix.us"
+    Europe    = "ingress.coralogix.com"
+    Europe2   = "ingress.eu2.coralogix.com"
+    India     = "ingress.app.coralogix.in"
+    Singapore = "ingress.coralogixsg.com"
+    US        = "ingress.coralogix.us"
     Custom    = var.custom_domain
   }
   coralogix_url_seffix = "/api/v1/logs"
