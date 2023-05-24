@@ -5,11 +5,11 @@ variable "coralogix_region" {
     condition     = contains(["Europe", "Europe2", "India", "Singapore", "US", "Custom"], var.coralogix_region)
     error_message = "The coralogix region must be one of these values: [Europe, Europe2, India, Singapore, US, Custom]."
   }
-  default     = "Europe"
+  default = "Europe"
 }
 
-variable "custom_domain" {
-  description = "Your Custom URL for the Coralogix account. Ignore unless you have a custom URL. Just the FQDN, not the whole URL."
+variable "custom_url" {
+  description = "Your Custom URL for the Coralogix account. Ignore unless you have a custom URL."
   type        = string
   default     = ""
 }

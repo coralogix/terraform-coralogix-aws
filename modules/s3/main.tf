@@ -6,7 +6,7 @@ locals {
     India     = "ingress.coralogix.in"
     Singapore = "ingress.coralogixsg.com"
     US        = "ingress.coralogix.us"
-    Custom    = var.custom_domain
+    Custom    = var.custom_url
   }
   coralogix_url_seffix = "/api/v1/logs"
   tags = {
@@ -27,7 +27,7 @@ resource "random_string" "this" {
 }
 
 module "lambda" {
-  create = var.ssm_enable != "True" ? true : false 
+  create                 = var.ssm_enable != "True" ? true : false
   source                 = "terraform-aws-modules/lambda/aws"
   version                = "3.2.1"
   function_name          = local.function_name
@@ -40,7 +40,7 @@ module "lambda" {
   create_package         = false
   destination_on_failure = aws_sns_topic.this.arn
   environment_variables = {
-    CORALOGIX_URL         = var.custom_domain == "" ? "https://${lookup(local.coralogix_regions, var.coralogix_region, "Europe")}${local.coralogix_url_seffix}" : var.custom_domain    
+    CORALOGIX_URL         = var.custom_url == "" ? "https://${lookup(local.coralogix_regions, var.coralogix_region, "Europe")}${local.coralogix_url_seffix}" : var.custom_url
     CORALOGIX_BUFFER_SIZE = tostring(var.buffer_size)
     private_key           = var.private_key
     app_name              = var.application_name
@@ -54,10 +54,10 @@ module "lambda" {
     bucket = "coralogix-serverless-repo-${data.aws_region.this.name}"
     key    = "${var.package_name}.zip"
   }
-  policy_path            = "/coralogix/"
-  role_path              = "/coralogix/"
-  role_name              = "${local.function_name}-Role"
-  role_description       = "Role for ${local.function_name} Lambda Function."
+  policy_path                             = "/coralogix/"
+  role_path                               = "/coralogix/"
+  role_name                               = "${local.function_name}-Role"
+  role_description                        = "Role for ${local.function_name} Lambda Function."
   create_current_version_allowed_triggers = false
   create_async_event_config               = true
   attach_async_event_policy               = true
@@ -81,7 +81,7 @@ module "lambda" {
 
 module "lambdaSSM" {
   source                 = "terraform-aws-modules/lambda/aws"
-  create = var.ssm_enable == "True" ? true : false
+  create                 = var.ssm_enable == "True" ? true : false
   version                = "3.2.1"
   layers                 = [var.layer_arn]
   function_name          = local.function_name
@@ -94,24 +94,24 @@ module "lambdaSSM" {
   create_package         = false
   destination_on_failure = aws_sns_topic.this.arn
   environment_variables = {
-    CORALOGIX_URL         = var.custom_domain == "" ? "https://${lookup(local.coralogix_regions, var.coralogix_region, "Europe")}${local.coralogix_url_seffix}" : var.custom_domain    
+    CORALOGIX_URL         = var.custom_url == "" ? "https://${lookup(local.coralogix_regions, var.coralogix_region, "Europe")}${local.coralogix_url_seffix}" : var.custom_url
     CORALOGIX_BUFFER_SIZE = tostring(var.buffer_size)
-    AWS_LAMBDA_EXEC_WRAPPER: "/opt/wrapper.sh"
-    app_name              = var.application_name
-    sub_name              = var.subsystem_name
-    newline_pattern       = var.newline_pattern
-    blocking_pattern      = var.blocking_pattern
-    sampling              = tostring(var.sampling_rate)
-    debug                 = tostring(var.debug)
+    AWS_LAMBDA_EXEC_WRAPPER : "/opt/wrapper.sh"
+    app_name         = var.application_name
+    sub_name         = var.subsystem_name
+    newline_pattern  = var.newline_pattern
+    blocking_pattern = var.blocking_pattern
+    sampling         = tostring(var.sampling_rate)
+    debug            = tostring(var.debug)
   }
   s3_existing_package = {
     bucket = "coralogix-serverless-repo-${data.aws_region.this.name}"
     key    = "${var.package_name}.zip"
   }
-  policy_path            = "/coralogix/"
-  role_path              = "/coralogix/"
-  role_name              = "${local.function_name}-Role"
-  role_description       = "Role for ${local.function_name} Lambda Function."
+  policy_path                             = "/coralogix/"
+  role_path                               = "/coralogix/"
+  role_name                               = "${local.function_name}-Role"
+  role_description                        = "Role for ${local.function_name} Lambda Function."
   create_current_version_allowed_triggers = false
   create_async_event_config               = true
   attach_async_event_policy               = true
@@ -129,7 +129,7 @@ module "lambdaSSM" {
         "secretsmanager:GetSecretValue",
         "secretsmanager:PutSecretValue",
         "secretsmanager:UpdateSecret"
-        ]
+      ]
       resources = ["*"]
     }
   }
@@ -159,22 +159,22 @@ resource "aws_sns_topic" "this" {
 }
 
 resource "aws_secretsmanager_secret" "private_key_secret" {
-  count = var.ssm_enable == "True" ? 1 : 0
-  depends_on = [ module.lambdaSSM ]
-  name         = "lambda/coralogix/${data.aws_region.this.name}/${local.function_name}"
-  description  = "Coralogix Send Your Data key Secret"
+  count       = var.ssm_enable == "True" ? 1 : 0
+  depends_on  = [module.lambdaSSM]
+  name        = "lambda/coralogix/${data.aws_region.this.name}/${local.function_name}"
+  description = "Coralogix Send Your Data key Secret"
 }
 resource "aws_secretsmanager_secret_version" "service_user" {
-  count = var.ssm_enable == "True" ? 1 : 0
-  depends_on = [ aws_secretsmanager_secret.private_key_secret ]
+  count         = var.ssm_enable == "True" ? 1 : 0
+  depends_on    = [aws_secretsmanager_secret.private_key_secret]
   secret_id     = aws_secretsmanager_secret.private_key_secret[count.index].id
   secret_string = var.private_key
 }
 resource "aws_sns_topic_subscription" "this" {
   depends_on = [aws_sns_topic.this]
-  count     = var.notification_email != null ? 1 : 0
-  topic_arn = aws_sns_topic.this.arn
-  protocol  = "email"
-  endpoint  = var.notification_email
+  count      = var.notification_email != null ? 1 : 0
+  topic_arn  = aws_sns_topic.this.arn
+  protocol   = "email"
+  endpoint   = var.notification_email
 }
 
