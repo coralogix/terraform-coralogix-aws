@@ -100,7 +100,7 @@ module "vpc_flow_logs" {
   layer_arn          = "<your layer arn>"
   application_name   = "vpc-flow-logs"
   subsystem_name     = "logs"
-  log_groups         = ["test-log-group"]
+  s3_bucket_name     = "test-bucket-name"
 }
 ```
 now execute:
