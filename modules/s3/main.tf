@@ -40,7 +40,7 @@ module "lambda" {
   create_package         = false
   destination_on_failure = aws_sns_topic.this.arn
   environment_variables = {
-    CORALOGIX_URL         = var.custom_url == "" ? "https://${lookup(local.coralogix_regions, var.coralogix_region, "Europe")}${local.coralogix_url_seffix}" : var.custom_url
+    coralogix_url         = var.custom_url == "" ? "https://${lookup(local.coralogix_regions, var.coralogix_region, "Europe")}${local.coralogix_url_seffix}" : var.custom_url
     CORALOGIX_BUFFER_SIZE = tostring(var.buffer_size)
     private_key           = var.private_key
     app_name              = var.application_name
@@ -94,9 +94,9 @@ module "lambdaSSM" {
   create_package         = false
   destination_on_failure = aws_sns_topic.this.arn
   environment_variables = {
-    CORALOGIX_URL         = var.custom_url == "" ? "https://${lookup(local.coralogix_regions, var.coralogix_region, "Europe")}${local.coralogix_url_seffix}" : var.custom_url
+    coralogix_url         = var.custom_url == "" ? "https://${lookup(local.coralogix_regions, var.coralogix_region, "Europe")}${local.coralogix_url_seffix}" : var.custom_url
     CORALOGIX_BUFFER_SIZE = tostring(var.buffer_size)
-    AWS_LAMBDA_EXEC_WRAPPER : "/opt/wrapper.sh"
+    AWS_LAMBDA_EXEC_WRAPPER = "/opt/wrapper.sh"
     app_name         = var.application_name
     sub_name         = var.subsystem_name
     newline_pattern  = var.newline_pattern

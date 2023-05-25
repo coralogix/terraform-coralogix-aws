@@ -7,13 +7,14 @@
 ```hcl
 provider "aws" {
 }
+
 module "s3" {
   source = "coralogix/aws/coralogix//modules/s3"
 
   coralogix_region   = "Europe"
   private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
   ssm_enable         = "false"
-  layer_arn          = "<you layer arn>"
+  layer_arn          = "<your layer arn>"
   application_name   = "s3"
   subsystem_name     = "logs"
   s3_bucket_name     = "test-bucket-name"
@@ -31,13 +32,14 @@ To run this example you need to save this code in Terraform file, and change the
 ```hcl
 provider "aws" {
 }
+
 module "cloudtrail" {
   source = "coralogix/aws/coralogix//modules/cloudtrail"
 
   coralogix_region   = "Europe"
   private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
   ssm_enable         = "false"
-  layer_arn          = "<you layer arn>"
+  layer_arn          = "<your layer arn>"
   application_name   = "cloudtrail"
   subsystem_name     = "logs"
   s3_bucket_name     = "test-bucket-name"
@@ -59,13 +61,14 @@ To run this example you need to save this code in Terraform file, and change the
 ```hcl
 provider "aws" {
 }
+
 module "cloudwatch_logs" {
   source = "coralogix/aws/coralogix//modules/cloudwatch-logs"
 
   coralogix_region   = "Europe"
   private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
   ssm_enable         = "false"
-  layer_arn          = "<you layer arn>"
+  layer_arn          = "<your layer arn>"
   application_name   = "cloudwatch"
   subsystem_name     = "logs"
   log_groups         = ["test-log-group"]
@@ -87,13 +90,14 @@ To run this example you need to save this code in Terraform file, and change the
 ```hcl
 provider "aws" {
 }
+
 module "vpc_flow_logs" {
   source = "coralogix/aws/coralogix//modules/vpc-flow-logs"
 
   coralogix_region   = "Europe"
   private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
   ssm_enable         = "false"
-  layer_arn          = "<you layer arn>"
+  layer_arn          = "<your layer arn>"
   application_name   = "vpc-flow-logs"
   subsystem_name     = "logs"
   log_groups         = ["test-log-group"]

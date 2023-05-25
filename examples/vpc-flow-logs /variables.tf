@@ -9,7 +9,7 @@ variable "coralogix_region" {
 }
 
 variable "custom_url" {
-  description = "Your Custom URL for the Coralogix account. Ignore unless you have a custom URL."
+  description = "Your Custom URL for the Coralogix account."
   type        = string
   default     = ""
 }
