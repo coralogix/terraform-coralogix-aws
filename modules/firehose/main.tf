@@ -297,7 +297,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream" {
 
         parameters {
           parameter_name  = "BufferIntervalInSeconds"
-          parameter_value = "60"
+          parameter_value = "61"
         }
       }
     }
