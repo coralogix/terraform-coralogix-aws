@@ -1,17 +1,23 @@
 variable "coralogix_region" {
-  description = "The Coralogix location region, possible options are [Europe, Europe2, India, Singapore, US, Custom]"
+  description = "The Coralogix location region, possible options are [Europe, Europe2, India, Singapore, US]"
   type        = string
-  validation {
-    condition     = contains(["Europe", "Europe2", "India", "Singapore", "US", "Custom"], var.coralogix_region)
-    error_message = "The coralogix region must be one of these values: [Europe, Europe2, India, Singapore, US, Custom]."
-  }
-  default = "Europe"
+  default     = "Europe"
 }
 
 variable "custom_url" {
   description = "Your Custom URL for the Coralogix account."
   type        = string
   default     = ""
+}
+
+variable "ssm_enable" {
+  description = "store coralogix private_key as a secret. True/False"
+  type        = string
+}
+
+variable "layer_arn" {
+  description = "Coralogix SSM Layer ARN"
+  type        = string
 }
 
 variable "private_key" {
@@ -28,30 +34,23 @@ variable "application_name" {
 variable "subsystem_name" {
   description = "The subsystem name of your application"
   type        = string
-  default     = ""
 }
 
-variable "newline_pattern" {
-  description = "The pattern for lines splitting"
+variable "s3_bucket_name" {
+  description = "The name of the S3 bucket to watch"
   type        = string
-  default     = "(?:\\r\\n|\\r|\\n)"
 }
 
-variable "buffer_charset" {
-  description = "The charset to use for buffer decoding, possible options are [utf8, ascii]"
+variable "s3_key_prefix" {
+  description = "The S3 path prefix to watch"
   type        = string
-  default     = "utf8"
+  default     = null
 }
 
-variable "sampling_rate" {
-  description = "Send messages with specific rate"
-  type        = number
-  default     = 1
-}
-
-variable "log_groups" {
-  description = "The names of the CloudWatch log groups to watch"
-  type        = list(string)
+variable "s3_key_suffix" {
+  description = "The S3 path suffix to watch"
+  type        = string
+  default     = ".log.gz"
 }
 
 variable "memory_size" {
@@ -60,10 +59,22 @@ variable "memory_size" {
   default     = 1024
 }
 
+variable "sampling_rate" {
+  description = "Send messages with specific rate"
+  type        = number
+  default     = 1
+}
+
 variable "timeout" {
   description = "Lambda function timeout limit"
   type        = number
   default     = 300
+}
+
+variable "debug" {
+  description = "Coralogix logger debug mode"
+  type        = bool
+  default     = false
 }
 
 variable "architecture" {
@@ -84,12 +95,3 @@ variable "tags" {
   default     = {}
 }
 
-variable "ssm_enable" {
-  description = "Use SSM for the private key True/False"
-  type        = string
-}
-
-variable "layer_arn" {
-  description = "Coralogix SSM Layer ARN"
-  type        = string
-}

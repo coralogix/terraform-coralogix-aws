@@ -1,12 +1,12 @@
 locals {
   function_name = "Coralogix-CloudWatch-${random_string.this.result}"
   coralogix_regions = {
-    Europe    = "api.coralogix.com"
-    Europe2   = "api.eu2.coralogix.com"
-    India     = "api.app.coralogix.in"
-    Singapore = "api.coralogixsg.com"
-    US        = "api.coralogix.us"
-    Custom    = var.CustomDomain
+    Europe    = "ingress.coralogix.com"
+    Europe2   = "ingress.eu2.coralogix.com"
+    India     = "ingress.coralogix.in"
+    Singapore = "ingress.coralogixsg.com"
+    US        = "ingress.coralogix.us"
+    Custom    = var.custom_url
   }
   tags = {
     Provider = "Coralogix"
@@ -17,8 +17,8 @@ locals {
 data "aws_region" "this" {}
 
 data "aws_cloudwatch_log_group" "this" {
-  count    = length(var.log_groups)
-  name     = element(var.log_groups, count.index)
+  count = length(var.log_groups)
+  name  = element(var.log_groups, count.index)
 }
 
 resource "random_string" "this" {
@@ -27,9 +27,9 @@ resource "random_string" "this" {
 }
 
 module "lambda" {
-  source                 = "terraform-aws-modules/lambda/aws"
-  version                = "3.3.1"
-  create = var.SSM_enable != "True" ? true : false
+  source  = "terraform-aws-modules/lambda/aws"
+  version = "3.3.1"
+  create  = var.ssm_enable != "True" ? true : false
 
   function_name          = local.function_name
   description            = "Send CloudWatch logs to Coralogix."
@@ -41,7 +41,7 @@ module "lambda" {
   create_package         = false
   destination_on_failure = aws_sns_topic.this.arn
   environment_variables = {
-    CORALOGIX_URL   = var.CustomDomain == "" ? lookup(local.coralogix_regions, var.coralogix_region, "Europe") : var.CustomDomain
+    coralogix_url   = var.custom_url == "" ? lookup(local.coralogix_regions, var.coralogix_region, "Europe") : var.custom_url
     private_key     = var.private_key
     app_name        = var.application_name
     sub_name        = var.subsystem_name
@@ -53,10 +53,10 @@ module "lambda" {
     bucket = "coralogix-serverless-repo-${data.aws_region.this.name}"
     key    = "cloudwatch-logs.zip"
   }
-  policy_path            = "/coralogix/"
-  role_path              = "/coralogix/"
-  role_name              = "${local.function_name}-Role"
-  role_description       = "Role for ${local.function_name} Lambda Function."
+  policy_path                             = "/coralogix/"
+  role_path                               = "/coralogix/"
+  role_name                               = "${local.function_name}-Role"
+  role_description                        = "Role for ${local.function_name} Lambda Function."
   create_current_version_allowed_triggers = false
   create_async_event_config               = true
   attach_async_event_policy               = true
@@ -70,11 +70,11 @@ module "lambda" {
 }
 
 module "lambdaSSM" {
-  source                 = "terraform-aws-modules/lambda/aws"
-  version                = "3.3.1"
-  create = var.SSM_enable == "True" ? true : false 
+  source  = "terraform-aws-modules/lambda/aws"
+  version = "3.3.1"
+  create  = var.ssm_enable == "True" ? true : false
 
-  layers                 = [var.LayerARN] 
+  layers                 = [var.layer_arn]
   function_name          = local.function_name
   description            = "Send CloudWatch logs to Coralogix."
   handler                = "index.handler"
@@ -85,9 +85,9 @@ module "lambdaSSM" {
   create_package         = false
   destination_on_failure = aws_sns_topic.this.arn
   environment_variables = {
-    CORALOGIX_URL   = var.CustomDomain == "" ? lookup(local.coralogix_regions, var.coralogix_region, "Europe") : var.CustomDomain
-    AWS_LAMBDA_EXEC_WRAPPER: "/opt/wrapper.sh" 
-    private_key     = "****" 
+    coralogix_url = var.custom_url == "" ? lookup(local.coralogix_regions, var.coralogix_region, "Europe") : var.custom_url
+    AWS_LAMBDA_EXEC_WRAPPER = "/opt/wrapper.sh"
+    private_key     = "****"
     app_name        = var.application_name
     sub_name        = var.subsystem_name
     newline_pattern = var.newline_pattern
@@ -98,16 +98,16 @@ module "lambdaSSM" {
     bucket = "coralogix-serverless-repo-${data.aws_region.this.name}"
     key    = "cloudwatch-logs.zip"
   }
-  policy_path            = "/coralogix/"
-  role_path              = "/coralogix/"
-  role_name              = "${local.function_name}-Role"
-  role_description       = "Role for ${local.function_name} Lambda Function."
+  policy_path                             = "/coralogix/"
+  role_path                               = "/coralogix/"
+  role_name                               = "${local.function_name}-Role"
+  role_description                        = "Role for ${local.function_name} Lambda Function."
   create_current_version_allowed_triggers = false
   create_async_event_config               = true
   attach_async_event_policy               = true
-  attach_policy_statements                = true 
-  policy_statements = { 
-    access_secret_policy = { 
+  attach_policy_statements                = true
+  policy_statements = {
+    access_secret_policy = {
       effect = "Allow"
       actions = [
         "secretsmanager:DescribeSecret",
@@ -133,12 +133,12 @@ resource "aws_cloudwatch_log_subscription_filter" "this" {
   # lambda module, which create aws_lambda_permission resources that are
   # prerequisite for these aws_cloudwatch_log_subscription_filter resources, to
   # finish applying before these start.
-  depends_on      = [ module.lambda ]
+  depends_on = [module.lambda]
 
   count           = length(var.log_groups)
   name            = "${module.lambda.lambda_function_name}-Subscription-${count.index}"
   log_group_name  = data.aws_cloudwatch_log_group.this[count.index].name
-  destination_arn = var.SSM_enable == "True" ?  module.lambdaSSM.lambda_function_arn : module.lambda.lambda_function_arn 
+  destination_arn = var.ssm_enable == "True" ? module.lambdaSSM.lambda_function_arn : module.lambda.lambda_function_arn
   filter_pattern  = ""
 }
 
@@ -149,23 +149,23 @@ resource "aws_sns_topic" "this" {
 }
 
 resource "aws_sns_topic_subscription" "this" {
-  depends_on = [aws_sns_topic.this,module.lambdaSSM,module.lambda] 
-  count     = var.notification_email != null ? 1 : 0
-  topic_arn = aws_sns_topic.this.arn
-  protocol  = "email"
-  endpoint  = var.notification_email
+  depends_on = [aws_sns_topic.this, module.lambdaSSM, module.lambda]
+  count      = var.notification_email != null ? 1 : 0
+  topic_arn  = aws_sns_topic.this.arn
+  protocol   = "email"
+  endpoint   = var.notification_email
 }
 
 resource "aws_secretsmanager_secret" "private_key_secret" {
-  count = var.SSM_enable == "True" ? 1 : 0
-  depends_on = [ module.lambdaSSM ]
-  name         = "lambda/coralogix/${data.aws_region.this.name}/${local.function_name}"
-  description  = "Coralogix Send Your Data key Secret"
+  count       = var.ssm_enable == "True" ? 1 : 0
+  depends_on  = [module.lambdaSSM]
+  name        = "lambda/coralogix/${data.aws_region.this.name}/${local.function_name}"
+  description = "Coralogix Send Your Data key Secret"
 }
 
 resource "aws_secretsmanager_secret_version" "service_user" {
-  count = var.SSM_enable == "True" ? 1 : 0
-  depends_on = [ aws_secretsmanager_secret.private_key_secret ]
+  count         = var.ssm_enable == "True" ? 1 : 0
+  depends_on    = [aws_secretsmanager_secret.private_key_secret]
   secret_id     = aws_secretsmanager_secret.private_key_secret[count.index].id
   secret_string = var.private_key
 }

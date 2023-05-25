@@ -1,6 +1,6 @@
-# s3
+#  vpc-flow-logs
 
-Manage the application which retrieves logs from `S3` bucket and sends them to your *Coralogix* account.
+Manage the application which retrieves logs from `vpc-flow-logs` and sends them to your *Coralogix* account.
 
 ## Usage
 
@@ -10,14 +10,14 @@ To run this example you need to save this code in Terraform file, and change the
 provider "aws" {
 }
 
-module "s3" {
-  source = "coralogix/aws/coralogix//modules/s3"
+module "vpc-flow-logs" {
+  source = "coralogix/aws/coralogix//modules/vpc-flow-logs"
 
   coralogix_region   = "Europe"
   private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
   ssm_enable         = "false"
   layer_arn          = "<your layer arn>"
-  application_name   = "s3"
+  application_name   = "vpc-flow-logs"
   subsystem_name     = "logs"
   s3_bucket_name     = "test-bucket-name"
 }
