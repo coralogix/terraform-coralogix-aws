@@ -1,4 +1,4 @@
-# s3
+# s3-sns
 
 Manage the application which retrieves `S3` logs through `SNS` and sends them to your *Coralogix* account.
 
