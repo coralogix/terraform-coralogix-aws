@@ -26,6 +26,33 @@ $ terraform init
 $ terraform plan
 $ terraform apply
 ```
+
+# s3-sns:
+
+```hcl
+provider "aws" {
+}
+
+module "s3-sns" {
+  source = "coralogix/aws/coralogix//modules/s3-sns"
+
+  coralogix_region   = "Europe"
+  private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  ssm_enable         = "false"
+  layer_arn          = "<your layer arn>"
+  application_name   = "s3-sns"
+  subsystem_name     = "logs"
+  sns_topic_name     = "test-sns-topic-name"
+  s3_bucket_name     = "test-bucket-name"
+}
+```
+now execute:
+```bash
+$ terraform init
+$ terraform plan
+$ terraform apply
+```
+
 # cloudtrail:
 To run this example you need to save this code in Terraform file, and change the values according to our settings.
 
@@ -42,6 +69,34 @@ module "cloudtrail" {
   layer_arn          = "<your layer arn>"
   application_name   = "cloudtrail"
   subsystem_name     = "logs"
+  s3_bucket_name     = "test-bucket-name"
+}
+```
+now execute:
+```bash
+$ terraform init
+$ terraform plan
+$ terraform apply
+```
+
+Run `terraform destroy` when you don't need these resources.
+
+# cloudtrail-sns:
+
+```hcl
+provider "aws" {
+}
+
+module "cloudtrail-sns" {
+  source = "coralogix/aws/coralogix//modules/cloudtrail-sns"
+
+  coralogix_region   = "Europe"
+  private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  ssm_enable         = "false"
+  layer_arn          = "<your layer arn>"
+  application_name   = "cloudtrail-sns"
+  subsystem_name     = "logs"
+  sns_topic_name     = "test-sns-topic-name"
   s3_bucket_name     = "test-bucket-name"
 }
 ```
