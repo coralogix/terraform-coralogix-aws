@@ -170,8 +170,10 @@ Run `terraform destroy` when you don't need these resources.
 ## Modules
 
 - [cloudtrail](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/cloudtrail) - Send `CloudTrail` logs from `S3` bucket.
+- [cloudtrail-sns](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/cloudtrail-sns) - Send `CloudTrail` logs from `S3` bucket through `SNS`.
 - [cloudwatch-logs](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/cloudwatch-logs) - Send logs from `CloudWatch`.
 - [s3](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/s3) - Send logs from `S3` bucket.
+- [s3-sns](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/s3-sns) - Send logs from `S3` bucket through `SNS`.
 - [eventbridge](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/eventbridge) - Send logs from `eventbrdge`.
 - [firehose](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/firehose) - Send logs from `firehose`.
 - [vpc-flow-logs](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/vpc-flow-logs) - Send `vpc flow logs` logs from `S3` bucket.
