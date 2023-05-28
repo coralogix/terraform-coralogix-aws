@@ -193,13 +193,18 @@ resource "aws_iam_role_policy" "lambda_iam_policy" {
       {
           "Action": [
               "tag:GetResources",
-              "ec2:DescribeTransitGateway*",
-              "ec2:DescribeTags",
-              "ec2:DescribeRegions",
-              "ec2:DescribeInstances",
-              "dms:DescribeReplicationTasks",
+              "cloudwatch:GetMetricData",
+              "cloudwatch:GetMetricStatistics",
+              "cloudwatch:ListMetrics",
+              "apigateway:GET",
+              "aps:ListWorkspaces",
+              "autoscaling:DescribeAutoScalingGroups",
               "dms:DescribeReplicationInstances",
-              "apigateway:GET"
+              "dms:DescribeReplicationTasks",
+              "ec2:DescribeTransitGatewayAttachments",
+              "ec2:DescribeSpotFleetRequests",
+              "storagegateway:ListGateways",
+              "storagegateway:ListTagsForResource"
           ],
           "Effect": "Allow",
           "Resource": "*",
