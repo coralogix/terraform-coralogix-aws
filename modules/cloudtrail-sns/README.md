@@ -1,4 +1,4 @@
-# cloudtrail
+# cloudtrail-sns
 
 Manage the application which retrieves `CloudTrail` logs from `S3` bucket through `SNS` and sends them to your *Coralogix* account.
 
