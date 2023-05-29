@@ -1,5 +1,5 @@
 locals {
-  function_name = "Coralogix-${var.integration_type}-${random_string.this.result}"
+  function_name = "Coralogix-S3-${random_string.this.result}"
   coralogix_regions = {
     Europe    = "ingress.coralogix.com"
     Europe2   = "ingress.eu2.coralogix.com"
@@ -8,27 +8,12 @@ locals {
     US        = "ingress.coralogix.us"
     Custom    = var.custom_url
   }
-
-  coralogix_url_seffix = "/api/v1/logs"
-
   tags = {
     Provider = "Coralogix"
     License  = "Apache-2.0"
   }
 
   integration_type = var.integration_type
-
-  s3_prefix_map = {
-    cloudtrail     = "CloudTrail"
-    vpc-flow-logs  = "vpcflowlogs"
-    cloudtrail-sns = "CloudTrail"
-  }
-
-  s3_suffix_map = {
-    cloudtrail    = ".json.gz"
-    vpc-flow-logs = ".log.gz"
-    s3-sns        = ".json.gz"
-  }
 }
 
 data "aws_region" "this" {}
@@ -39,8 +24,12 @@ data "aws_s3_bucket" "this" {
   bucket = var.s3_bucket_name
 }
 
+data "aws_sns_topic" "sns_topic" {
+  name = var.sns_topic_name
+}
+
 resource "random_string" "this" {
-  length  = 12
+  length  = 6
   special = false
 }
 
@@ -56,9 +45,9 @@ module "lambda" {
   memory_size            = var.memory_size
   timeout                = var.timeout
   create_package         = false
-  destination_on_failure = aws_sns_topic.this.arn
+  destination_on_failure = data.aws_sns_topic.sns_topic.arn
   environment_variables = {
-    coralogix_url         = var.custom_url == "" ? "https://${lookup(local.coralogix_regions, var.coralogix_region, "Europe")}${local.coralogix_url_seffix}" : var.custom_url
+    coralogix_url         = var.custom_url == "" ? "https://${lookup(local.coralogix_regions, var.coralogix_region, "Europe")}/api/v1/logs" : var.custom_url
     CORALOGIX_BUFFER_SIZE = tostring(var.buffer_size)
     private_key           = var.private_key
     app_name              = var.application_name
@@ -87,17 +76,10 @@ module "lambda" {
       resources = ["${data.aws_s3_bucket.this.arn}/*"]
     }
   }
-  allowed_triggers = {
-    AllowExecutionFromS3 = {
-      principal  = "s3.amazonaws.com"
-      source_arn = data.aws_s3_bucket.this.arn
-    }
-  }
-
   tags = merge(var.tags, local.tags)
 }
 
-module "lambdaSSM" {
+module "lambda_ssm" {
   source                 = "terraform-aws-modules/lambda/aws"
   create                 = var.ssm_enable == "True" ? true : false
   version                = "3.2.1"
@@ -110,17 +92,17 @@ module "lambdaSSM" {
   memory_size            = var.memory_size
   timeout                = var.timeout
   create_package         = false
-  destination_on_failure = aws_sns_topic.this.arn
+  destination_on_failure = data.aws_sns_topic.sns_topic.arn
   environment_variables = {
-    coralogix_url           = var.custom_url == "" ? "https://${lookup(local.coralogix_regions, var.coralogix_region, "Europe")}${local.coralogix_url_seffix}" : var.custom_url
-    CORALOGIX_BUFFER_SIZE   = tostring(var.buffer_size)
-    AWS_LAMBDA_EXEC_WRAPPER = "/opt/wrapper.sh"
-    app_name                = var.application_name
-    sub_name                = var.subsystem_name
-    newline_pattern         = var.newline_pattern
-    blocking_pattern        = var.blocking_pattern
-    sampling                = tostring(var.sampling_rate)
-    debug                   = tostring(var.debug)
+    coralogix_url         = var.custom_url == "" ? "https://${lookup(local.coralogix_regions, var.coralogix_region, "Europe")}/api/v1/logs" : var.custom_url
+    CORALOGIX_BUFFER_SIZE = tostring(var.buffer_size)
+    AWS_LAMBDA_EXEC_WRAPPER : "/opt/wrapper.sh"
+    app_name         = var.application_name
+    sub_name         = var.subsystem_name
+    newline_pattern  = var.newline_pattern
+    blocking_pattern = var.blocking_pattern
+    sampling         = tostring(var.sampling_rate)
+    debug            = tostring(var.debug)
   }
   s3_existing_package = {
     bucket = "coralogix-serverless-repo-${data.aws_region.this.name}"
@@ -151,49 +133,77 @@ module "lambdaSSM" {
       resources = ["*"]
     }
   }
-  allowed_triggers = {
-    AllowExecutionFromS3 = {
-      principal  = "s3.amazonaws.com"
-      source_arn = data.aws_s3_bucket.this.arn
-    }
-  }
   tags = merge(var.tags, local.tags)
+}
+
+resource "aws_lambda_permission" "sns_lambda_permission" {
+  statement_id  = "AllowExecutionFromSNS"
+  action        = "lambda:InvokeFunction"
+  function_name = local.function_name
+  principal     = "sns.amazonaws.com"
+  source_arn    = data.aws_sns_topic.sns_topic.arn
+  depends_on    = [data.aws_sns_topic.sns_topic]
 }
 
 resource "aws_s3_bucket_notification" "this" {
   bucket = data.aws_s3_bucket.this.bucket
-  lambda_function {
-    lambda_function_arn = var.ssm_enable == "True" ? module.lambdaSSM.lambda_function_arn : module.lambda.lambda_function_arn
-    events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = var.integration_type == "s3" || var.s3_key_prefix != null ? var.s3_key_prefix : "AWSLogs/${data.aws_caller_identity.this.account_id}/${lookup(local.s3_prefix_map, var.integration_type)}/"
-    filter_suffix       = var.integration_type == "s3" || var.s3_key_suffix != null ? var.s3_key_suffix : lookup(local.s3_suffix_map, var.integration_type)
+  topic {
+    topic_arn     = data.aws_sns_topic.sns_topic.arn
+    events        = ["s3:ObjectCreated:*"]
+    filter_prefix = var.integration_type == "s3-sns" || var.s3_key_prefix != null ? var.s3_key_prefix : "AWSLogs/${data.aws_caller_identity.this.account_id}/Cloudtrail/"
+    filter_suffix = var.integration_type == "s3-sns" || var.s3_key_suffix != null ? var.s3_key_suffix : ".json.gz"
   }
 }
 
-resource "aws_sns_topic" "this" {
-  name_prefix  = "${local.function_name}-Failure"
-  display_name = "${local.function_name}-Failure"
-  tags         = merge(var.tags, local.tags)
+resource "aws_sns_topic_subscription" "lambda_sns_subscription" {
+  depends_on = [module.lambda_ssm, module.lambda]
+  topic_arn  = data.aws_sns_topic.sns_topic.arn
+  protocol   = "lambda"
+  endpoint   = var.ssm_enable == "True" ? module.lambda_ssm.lambda_function_arn : module.lambda.lambda_function_arn
+}
+
+data "aws_iam_policy_document" "topic" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["s3.amazonaws.com"]
+    }
+
+    actions   = ["SNS:Publish"]
+    resources = ["arn:aws:sns:*:*:${data.aws_sns_topic.sns_topic.name}"]
+
+    condition {
+      test     = "ArnLike"
+      variable = "aws:SourceArn"
+      values   = [data.aws_s3_bucket.this.arn]
+    }
+  }
+}
+
+resource "aws_sns_topic_policy" "test" {
+  arn    = data.aws_sns_topic.sns_topic.arn
+  policy = data.aws_iam_policy_document.topic.json
 }
 
 resource "aws_secretsmanager_secret" "private_key_secret" {
   count       = var.ssm_enable == "True" ? 1 : 0
-  depends_on  = [module.lambdaSSM]
+  depends_on  = [module.lambda_ssm]
   name        = "lambda/coralogix/${data.aws_region.this.name}/${local.function_name}"
   description = "Coralogix Send Your Data key Secret"
 }
+
 resource "aws_secretsmanager_secret_version" "service_user" {
   count         = var.ssm_enable == "True" ? 1 : 0
   depends_on    = [aws_secretsmanager_secret.private_key_secret]
   secret_id     = aws_secretsmanager_secret.private_key_secret[count.index].id
   secret_string = var.private_key
 }
-resource "aws_sns_topic_subscription" "this" {
-  depends_on = [aws_sns_topic.this]
-  count      = var.notification_email != null ? 1 : 0
-  topic_arn  = aws_sns_topic.this.arn
-  protocol   = "email"
-  endpoint   = var.notification_email
+
+resource "aws_sns_topic_subscription" "email" {
+  count     = var.notification_email != null ? 1 : 0
+  topic_arn = data.aws_sns_topic.sns_topic.arn
+  protocol  = "email"
+  endpoint  = var.notification_email
 }
-
-

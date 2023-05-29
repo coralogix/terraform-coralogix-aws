@@ -1,11 +1,10 @@
 variable "coralogix_region" {
   description = "The Coralogix location region, possible options are [Europe, Europe2, India, Singapore, US]"
   type        = string
-  default     = "Europe"
 }
 
 variable "custom_url" {
-  description = "Your Custom URL for the Coralogix account"
+  description = "Custom coralogix url"
   type        = string
   default     = ""
 }
@@ -14,7 +13,6 @@ variable "ssm_enable" {
   description = "store coralogix private_key as a secret. True/False"
   type        = string
   default     = "false"
-
 }
 
 variable "layer_arn" {
@@ -35,6 +33,11 @@ variable "application_name" {
 
 variable "subsystem_name" {
   description = "The subsystem name of your application"
+  type        = string
+}
+
+variable "sns_topic_name" {
+  description = "The name of your SNS topic"
   type        = string
 }
 
@@ -85,3 +88,42 @@ variable "tags" {
   default     = {}
 }
 
+variable "blocking_pattern" {
+  description = "The pattern for lines blocking"
+  type        = string
+  default     = ""
+}
+
+variable "buffer_size" {
+  description = "Coralogix logger buffer size"
+  type        = number
+  default     = 134217728
+}
+
+variable "sampling_rate" {
+  description = "Send messages with specific rate"
+  type        = number
+  default     = 1
+}
+
+variable "debug" {
+  description = "Coralogix logger debug mode"
+  type        = bool
+  default     = false
+}
+
+variable "newline_pattern" {
+  description = "The pattern for lines splitting"
+  type        = string
+  default     = "(?:\\r\\n|\\r|\\n)"
+}
+
+variable "integration_type" {
+  description = "the aws service that send the data to the s3"
+  type        = string
+  validation {
+    condition     = contains(["s3-sns", "cloudtrail-sns"], var.integration_type)
+    error_message = "The integration type must be: [s3-sns, cloudtrail-sns]."
+  }
+  default = "s3-sns"
+}
