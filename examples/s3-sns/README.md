@@ -1,26 +1,20 @@
-# cloudtrail
-
-Manage the application which retrieves `CloudTrail` logs from `S3` bucket and sends them to your *Coralogix* account.
-
-## Usage
-
-To run this example you need to save this code in Terraform file, and change the values according to our settings.
+# s3-sns:
 
 ```hcl
 provider "aws" {
 }
 
-module "cloudtrail" {
-  source = "coralogix/aws/coralogix//modules/s3"
+module "s3-sns" {
+  source = "coralogix/aws/coralogix//modules/s3-sns"
 
   coralogix_region   = "Europe"
   private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
   ssm_enable         = "false"
   layer_arn          = "<your layer arn>"
-  application_name   = "cloudtrail"
+  application_name   = "s3-sns"
   subsystem_name     = "logs"
+  sns_topic_name     = "test-sns-topic-name"
   s3_bucket_name     = "test-bucket-name"
-  integration_type   = "cloudtrail"
 }
 ```
 now execute:
