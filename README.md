@@ -4,6 +4,9 @@
 
 # s3-sns:
 
+```hcl
+provider "aws" {
+}
 module "s3-sns" {
   source = "coralogix/aws/coralogix//modules/s3-sns"
 
