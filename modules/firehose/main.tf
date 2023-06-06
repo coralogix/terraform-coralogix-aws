@@ -57,7 +57,7 @@ resource "aws_cloudwatch_log_stream" "firehose_logstream_backup" {
 }
 
 resource "aws_s3_bucket" "firehose_bucket" {
-  tags   = merge(local.tags, {Name="${var.firehose_stream}-backup"})
+  tags   = merge(local.tags, { Name = "${var.firehose_stream}-backup" })
   bucket = "${var.firehose_stream}-backup"
 }
 
@@ -232,8 +232,8 @@ resource "aws_cloudwatch_log_group" "loggroup" {
 }
 
 resource "aws_lambda_function" "lambda_processor" {
-  s3_bucket = "cx-cw-metrics-tags-lambda-processor-${data.aws_region.current_region.name}"
-  s3_key = "function.zip"
+  s3_bucket     = "cx-cw-metrics-tags-lambda-processor-${data.aws_region.current_region.name}"
+  s3_key        = "function.zip"
   function_name = "${var.firehose_stream}-tags-processor"
   role          = aws_iam_role.lambda_iam.arn
   handler       = "function"
@@ -247,14 +247,6 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream" {
   name        = "coralogix-${var.firehose_stream}"
   destination = "http_endpoint"
 
-  s3_configuration {
-    role_arn           = aws_iam_role.firehose_to_coralogix.arn
-    bucket_arn         = aws_s3_bucket.firehose_bucket.arn
-    buffer_size        = 5
-    buffer_interval    = 300
-    compression_format = "GZIP"
-  }
-
   http_endpoint_configuration {
     url                = var.coralogix_firehose_custom_endpoint != null ? var.coralogix_firehose_custom_endpoint : local.endpoint_url[var.coralogix_region].url
     name               = "Coralogix"
@@ -264,6 +256,15 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream" {
     s3_backup_mode     = "FailedDataOnly"
     role_arn           = aws_iam_role.firehose_to_coralogix.arn
     retry_duration     = 30
+
+    s3_configuration {
+      role_arn           = aws_iam_role.firehose_to_coralogix.arn
+      bucket_arn         = aws_s3_bucket.firehose_bucket.arn
+      buffering_size     = 5
+      buffering_interval = 300
+      compression_format = "GZIP"
+    }
+    
     cloudwatch_logging_options {
       enabled         = "true"
       log_group_name  = aws_cloudwatch_log_group.firehose_loggroup.name
