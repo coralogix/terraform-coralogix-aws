@@ -1,5 +1,5 @@
 # Firehose Module
-Firehose module is designed to support CloudWatch metrics and logs.
+Firehose module is designed to support CloudWatch metrics.
 
 ## Metrics - Usage
 ### Firehose Delivery Stream
