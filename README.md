@@ -137,6 +137,8 @@ $ terraform plan
 $ terraform apply
 ```
 
+Run `terraform destroy` when you don't need these resources.
+
 ## Modules
 
 - [cloudtrail](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/cloudtrail) - Send `CloudTrail` logs from `S3` bucket.
