@@ -1,18 +1,8 @@
-locals {
-  function_name = "Coralogix-S3-${random_string.this.result}"
-  coralogix_regions = {
-    Europe    = "ingress.coralogix.com"
-    Europe2   = "ingress.eu2.coralogix.com"
-    India     = "ingress.coralogix.in"
-    Singapore = "ingress.coralogixsg.com"
-    US        = "ingress.coralogix.us"
-    Custom    = var.custom_url
-  }
-  tags = {
-    Provider = "Coralogix"
-    License  = "Apache-2.0"
-  }
+module "locals" {
+  source = "../locals_variables"
 
+  integration_type = var.integration_type
+  random_string    = random_string.this.result
 }
 
 data "aws_region" "this" {}
@@ -36,7 +26,7 @@ module "lambda" {
   create                 = var.ssm_enable != "True" ? true : false
   source                 = "terraform-aws-modules/lambda/aws"
   version                = "3.2.1"
-  function_name          = local.function_name
+  function_name          = module.locals.function_name
   description            = "Send logs from S3 bucket to Coralogix."
   handler                = "index.handler"
   runtime                = "nodejs16.x"
@@ -46,7 +36,7 @@ module "lambda" {
   create_package         = false
   destination_on_failure = data.aws_sns_topic.sns_topic.arn
   environment_variables = {
-    coralogix_url         = var.custom_url == "" ? "https://${lookup(local.coralogix_regions, var.coralogix_region, "Europe")}/api/v1/logs" : var.custom_url
+    coralogix_url         = var.custom_url == "" ? "https://${lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe")}/api/v1/logs" : var.custom_url
     CORALOGIX_BUFFER_SIZE = tostring(var.buffer_size)
     private_key           = var.private_key
     app_name              = var.application_name
@@ -62,8 +52,8 @@ module "lambda" {
   }
   policy_path                             = "/coralogix/"
   role_path                               = "/coralogix/"
-  role_name                               = "${local.function_name}-Role"
-  role_description                        = "Role for ${local.function_name} Lambda Function."
+  role_name                               = "${module.locals.function_name}-Role"
+  role_description                        = "Role for ${module.locals.function_name} Lambda Function."
   create_current_version_allowed_triggers = false
   create_async_event_config               = true
   attach_async_event_policy               = true
@@ -75,7 +65,7 @@ module "lambda" {
       resources = ["${data.aws_s3_bucket.this.arn}/*"]
     }
   }
-  tags = merge(var.tags, local.tags)
+  tags = merge(var.tags, module.locals.tags)
 }
 
 module "lambda_ssm" {
@@ -83,7 +73,7 @@ module "lambda_ssm" {
   create                 = var.ssm_enable == "True" ? true : false
   version                = "3.2.1"
   layers                 = [var.layer_arn]
-  function_name          = local.function_name
+  function_name          = module.locals.function_name
   description            = "Send logs from S3 bucket to Coralogix."
   handler                = "index.handler"
   runtime                = "nodejs16.x"
@@ -93,7 +83,7 @@ module "lambda_ssm" {
   create_package         = false
   destination_on_failure = data.aws_sns_topic.sns_topic.arn
   environment_variables = {
-    coralogix_url         = var.custom_url == "" ? "https://${lookup(local.coralogix_regions, var.coralogix_region, "Europe")}/api/v1/logs" : var.custom_url
+    coralogix_url         = var.custom_url == "" ? "https://${lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe")}/api/v1/logs" : var.custom_url
     CORALOGIX_BUFFER_SIZE = tostring(var.buffer_size)
     AWS_LAMBDA_EXEC_WRAPPER : "/opt/wrapper.sh"
     app_name         = var.application_name
@@ -109,8 +99,8 @@ module "lambda_ssm" {
   }
   policy_path                             = "/coralogix/"
   role_path                               = "/coralogix/"
-  role_name                               = "${local.function_name}-Role"
-  role_description                        = "Role for ${local.function_name} Lambda Function."
+  role_name                               = "${module.locals.function_name}-Role"
+  role_description                        = "Role for ${module.locals.function_name} Lambda Function."
   create_current_version_allowed_triggers = false
   create_async_event_config               = true
   attach_async_event_policy               = true
@@ -132,13 +122,13 @@ module "lambda_ssm" {
       resources = ["*"]
     }
   }
-  tags = merge(var.tags, local.tags)
+  tags = merge(var.tags, module.locals.tags)
 }
 
 resource "aws_lambda_permission" "sns_lambda_permission" {
   statement_id  = "AllowExecutionFromSNS"
   action        = "lambda:InvokeFunction"
-  function_name = local.function_name
+  function_name = module.locals.function_name
   principal     = "sns.amazonaws.com"
   source_arn    = data.aws_sns_topic.sns_topic.arn
   depends_on    = [data.aws_sns_topic.sns_topic]
@@ -189,7 +179,7 @@ resource "aws_sns_topic_policy" "test" {
 resource "aws_secretsmanager_secret" "private_key_secret" {
   count       = var.ssm_enable == "True" ? 1 : 0
   depends_on  = [module.lambda_ssm]
-  name        = "lambda/coralogix/${data.aws_region.this.name}/${local.function_name}"
+  name        = "lambda/coralogix/${data.aws_region.this.name}/${module.locals.function_name}"
   description = "Coralogix Send Your Data key Secret"
 }
 

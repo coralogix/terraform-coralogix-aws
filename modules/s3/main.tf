@@ -1,38 +1,16 @@
-locals {
-  function_name = "Coralogix-${var.integration_type}-${random_string.this.result}"
-  coralogix_regions = {
-    Europe    = "ingress.coralogix.com"
-    Europe2   = "ingress.eu2.coralogix.com"
-    India     = "ingress.coralogix.in"
-    Singapore = "ingress.coralogixsg.com"
-    US        = "ingress.coralogix.us"
-    Custom    = var.custom_url
-  }
-
-  coralogix_url_seffix = "/api/v1/logs"
-
-  tags = {
-    Provider = "Coralogix"
-    License  = "Apache-2.0"
-  }
-
-  s3_prefix_map = {
-    cloudtrail    = "CloudTrail"
-    vpc-flow-logs = "vpcflowlogs"
-  }
-
-  s3_suffix_map = {
-    cloudtrail    = ".json.gz"
-    vpc-flow-logs = ".log.gz"
-  }
-}
-
 data "aws_region" "this" {}
 
 data "aws_caller_identity" "this" {}
 
 data "aws_s3_bucket" "this" {
   bucket = var.s3_bucket_name
+}
+
+module "locals" {
+  source = "../locals_variables"
+
+  integration_type = var.integration_type
+  random_string    = random_string.this.result
 }
 
 resource "random_string" "this" {
@@ -44,7 +22,7 @@ module "lambda" {
   create                 = var.ssm_enable != "True" ? true : false
   source                 = "terraform-aws-modules/lambda/aws"
   version                = "3.2.1"
-  function_name          = local.function_name
+  function_name          = module.locals.function_name
   description            = "Send logs from S3 bucket to Coralogix."
   handler                = "index.handler"
   runtime                = "nodejs16.x"
@@ -54,7 +32,7 @@ module "lambda" {
   create_package         = false
   destination_on_failure = aws_sns_topic.this.arn
   environment_variables = {
-    coralogix_url         = var.custom_url == "" ? "https://${lookup(local.coralogix_regions, var.coralogix_region, "Europe")}${local.coralogix_url_seffix}" : var.custom_url
+    coralogix_url         = var.custom_url == "" ? "https://${lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe")}${module.locals.coralogix_url_seffix}" : var.custom_url
     CORALOGIX_BUFFER_SIZE = tostring(var.buffer_size)
     private_key           = var.private_key
     app_name              = var.application_name
@@ -70,8 +48,8 @@ module "lambda" {
   }
   policy_path                             = "/coralogix/"
   role_path                               = "/coralogix/"
-  role_name                               = "${local.function_name}-Role"
-  role_description                        = "Role for ${local.function_name} Lambda Function."
+  role_name                               = "${module.locals.function_name}-Role"
+  role_description                        = "Role for ${module.locals.function_name} Lambda Function."
   create_current_version_allowed_triggers = false
   create_async_event_config               = true
   attach_async_event_policy               = true
@@ -90,7 +68,7 @@ module "lambda" {
     }
   }
 
-  tags = merge(var.tags, local.tags)
+  tags = merge(var.tags, module.locals.tags)
 }
 
 module "lambdaSSM" {
@@ -98,7 +76,7 @@ module "lambdaSSM" {
   create                 = var.ssm_enable == "True" ? true : false
   version                = "3.2.1"
   layers                 = [var.layer_arn]
-  function_name          = local.function_name
+  function_name          = module.locals.function_name
   description            = "Send logs from S3 bucket to Coralogix."
   handler                = "index.handler"
   runtime                = "nodejs16.x"
@@ -108,7 +86,7 @@ module "lambdaSSM" {
   create_package         = false
   destination_on_failure = aws_sns_topic.this.arn
   environment_variables = {
-    coralogix_url           = var.custom_url == "" ? "https://${lookup(local.coralogix_regions, var.coralogix_region, "Europe")}${local.coralogix_url_seffix}" : var.custom_url
+    coralogix_url           = var.custom_url == "" ? "https://${lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe")}${module.locals.coralogix_url_seffix}" : var.custom_url
     CORALOGIX_BUFFER_SIZE   = tostring(var.buffer_size)
     AWS_LAMBDA_EXEC_WRAPPER = "/opt/wrapper.sh"
     app_name                = var.application_name
@@ -124,8 +102,8 @@ module "lambdaSSM" {
   }
   policy_path                             = "/coralogix/"
   role_path                               = "/coralogix/"
-  role_name                               = "${local.function_name}-Role"
-  role_description                        = "Role for ${local.function_name} Lambda Function."
+  role_name                               = "${module.locals.function_name}-Role"
+  role_description                        = "Role for ${module.locals.function_name} Lambda Function."
   create_current_version_allowed_triggers = false
   create_async_event_config               = true
   attach_async_event_policy               = true
@@ -153,7 +131,7 @@ module "lambdaSSM" {
       source_arn = data.aws_s3_bucket.this.arn
     }
   }
-  tags = merge(var.tags, local.tags)
+  tags = merge(var.tags, module.locals.tags)
 }
 
 resource "aws_s3_bucket_notification" "this" {
@@ -161,21 +139,21 @@ resource "aws_s3_bucket_notification" "this" {
   lambda_function {
     lambda_function_arn = var.ssm_enable == "True" ? module.lambdaSSM.lambda_function_arn : module.lambda.lambda_function_arn
     events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = var.integration_type == "s3" || var.s3_key_prefix != null ? var.s3_key_prefix : "AWSLogs/${data.aws_caller_identity.this.account_id}/${lookup(local.s3_prefix_map, var.integration_type)}/"
-    filter_suffix       = var.integration_type == "s3" || var.s3_key_suffix != null ? var.s3_key_suffix : lookup(local.s3_suffix_map, var.integration_type)
+    filter_prefix       = var.integration_type == "s3" || var.s3_key_prefix != null ? var.s3_key_prefix : "AWSLogs/${data.aws_caller_identity.this.account_id}/${lookup(module.locals.s3_prefix_map, var.integration_type)}/"
+    filter_suffix       = var.integration_type == "s3" || var.s3_key_suffix != null ? var.s3_key_suffix : lookup(module.locals.s3_suffix_map, var.integration_type)
   }
 }
 
 resource "aws_sns_topic" "this" {
-  name_prefix  = "${local.function_name}-Failure"
-  display_name = "${local.function_name}-Failure"
-  tags         = merge(var.tags, local.tags)
+  name_prefix  = "${module.locals.function_name}-Failure"
+  display_name = "${module.locals.function_name}-Failure"
+  tags         = merge(var.tags, module.locals.tags)
 }
 
 resource "aws_secretsmanager_secret" "private_key_secret" {
   count       = var.ssm_enable == "True" ? 1 : 0
   depends_on  = [module.lambdaSSM]
-  name        = "lambda/coralogix/${data.aws_region.this.name}/${local.function_name}"
+  name        = "lambda/coralogix/${data.aws_region.this.name}/${module.locals.function_name}"
   description = "Coralogix Send Your Data key Secret"
 }
 resource "aws_secretsmanager_secret_version" "service_user" {

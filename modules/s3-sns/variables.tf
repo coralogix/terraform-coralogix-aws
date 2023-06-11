@@ -7,9 +7,10 @@ variable "coralogix_region" {
   }
 }
 
-variable "custom_domain" {
+variable "custom_url" {
   description = "Custom coralogix url"
   type        = string
+  default     = ""
 }
 
 variable "ssm_enable" {
@@ -21,6 +22,7 @@ variable "ssm_enable" {
 variable "layer_arn" {
   description = "Coralogix SSM Layer ARN"
   type        = string
+  default     = ""
 }
 
 variable "private_key" {

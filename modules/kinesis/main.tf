@@ -1,18 +1,8 @@
-locals {
-  function_name = "Coralogix-CloudWatch-${random_string.this.result}"
-  coralogix_regions = {
-    Europe    = "ingress.coralogix.com"
-    Europe2   = "ingress.eu2.coralogix.com"
-    India     = "ingress.coralogix.in"
-    Singapore = "ingress.coralogixsg.com"
-    US        = "ingress.coralogix.us"
-    Custom    = var.custom_url
-  }
-  coralogix_url_seffix = "/api/v1/logs"
-  tags = {
-    Provider = "Coralogix"
-    License  = "Apache-2.0"
-  }
+module "locals" {
+  source = "../locals_variables"
+
+  integration_type = "kinesis"
+  random_string    = random_string.this.result
 }
 
 data "aws_region" "this" {}
@@ -26,13 +16,13 @@ resource "random_string" "this" {
   special = false
 }
 
-module "lambda" { 
-  source  = "terraform-aws-modules/lambda/aws"
-  version = "3.3.1"
+module "lambda" {
+  source                 = "terraform-aws-modules/lambda/aws"
+  version                = "3.3.1"
   create                 = var.ssm_enable != "True" ? true : false
   layers                 = [var.layer_arn]
-  function_name          = local.function_name
-  description            = "Send CloudWatch logs to Coralogix."
+  function_name          = module.locals.function_name
+  description            = "Send kinesis data stream logs to Coralogix."
   handler                = "index.handler"
   runtime                = "nodejs16.x"
   architectures          = [var.architecture]
@@ -41,11 +31,11 @@ module "lambda" {
   create_package         = false
   destination_on_failure = aws_sns_topic.this.arn
   environment_variables = {
-    coralogix_url         = var.custom_url == "" ? "https://${lookup(local.coralogix_regions, var.coralogix_region, "Europe")}${local.coralogix_url_seffix}" : var.custom_url
-    private_key           = var.private_key
-    app_name              = var.application_name
-    sub_name              = var.subsystem_name
-    newline_pattern       = var.newline_pattern
+    coralogix_url   = var.custom_url == "" ? "https://${lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe")}${module.locals.coralogix_url_seffix}" : var.custom_url
+    private_key     = var.private_key
+    app_name        = var.application_name
+    sub_name        = var.subsystem_name
+    newline_pattern = var.newline_pattern
   }
   s3_existing_package = {
     bucket = "coralogix-serverless-repo-${data.aws_region.this.name}"
@@ -53,8 +43,8 @@ module "lambda" {
   }
   policy_path                             = "/coralogix/"
   role_path                               = "/coralogix/"
-  role_name                               = "${local.function_name}-Role"
-  role_description                        = "Role for ${local.function_name} Lambda Function."
+  role_name                               = "${module.locals.function_name}-Role"
+  role_description                        = "Role for ${module.locals.function_name} Lambda Function."
   create_current_version_allowed_triggers = false
   create_async_event_config               = true
   attach_async_event_policy               = true
@@ -74,18 +64,18 @@ module "lambda" {
   number_of_policies = 1
   policies = [
     "arn:aws:iam::aws:policy/service-role/AWSLambdaKinesisExecutionRole",
-  ] 
-  tags = merge(var.tags, local.tags)
+  ]
+  tags = merge(var.tags, module.locals.tags)
 }
 
-module "lambda_ssm" { 
+module "lambda_ssm" {
   source  = "terraform-aws-modules/lambda/aws"
   version = "3.3.1"
   create  = var.ssm_enable == "True" ? true : false
 
   layers                 = [var.layer_arn]
-  function_name          = local.function_name
-  description            = "Send CloudWatch logs to Coralogix."
+  function_name          = module.locals.function_name
+  description            = "Send kinesis data stream logs to Coralogix."
   handler                = "index.handler"
   runtime                = "nodejs16.x"
   architectures          = [var.architecture]
@@ -94,7 +84,7 @@ module "lambda_ssm" {
   create_package         = false
   destination_on_failure = aws_sns_topic.this.arn
   environment_variables = {
-    coralogix_url           = var.custom_url == "" ? "https://${lookup(local.coralogix_regions, var.coralogix_region, "Europe")}${local.coralogix_url_seffix}" : var.custom_url
+    coralogix_url           = var.custom_url == "" ? "https://${lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe")}${module.locals.coralogix_url_seffix}" : var.custom_url
     AWS_LAMBDA_EXEC_WRAPPER = "/opt/wrapper.sh"
     private_key             = "****"
     app_name                = var.application_name
@@ -107,8 +97,8 @@ module "lambda_ssm" {
   }
   policy_path                             = "/coralogix/"
   role_path                               = "/coralogix/"
-  role_name                               = "${local.function_name}-Role"
-  role_description                        = "Role for ${local.function_name} Lambda Function."
+  role_name                               = "${module.locals.function_name}-Role"
+  role_description                        = "Role for ${module.locals.function_name} Lambda Function."
   create_current_version_allowed_triggers = false
   create_async_event_config               = true
   attach_async_event_policy               = true
@@ -141,14 +131,14 @@ module "lambda_ssm" {
   number_of_policies = 1
   policies = [
     "arn:aws:iam::aws:policy/service-role/AWSLambdaKinesisExecutionRole",
-  ] 
-  tags = merge(var.tags, local.tags)
+  ]
+  tags = merge(var.tags, module.locals.tags)
 }
 
 resource "aws_sns_topic" "this" {
   name_prefix  = "${module.lambda.lambda_function_name}-Failure"
   display_name = "${module.lambda.lambda_function_name}-Failure"
-  tags         = merge(var.tags, local.tags)
+  tags         = merge(var.tags, module.locals.tags)
 }
 
 resource "aws_sns_topic_subscription" "this" {
@@ -162,7 +152,7 @@ resource "aws_sns_topic_subscription" "this" {
 resource "aws_secretsmanager_secret" "private_key_secret" {
   count       = var.ssm_enable == "True" ? 1 : 0
   depends_on  = [module.lambda_ssm]
-  name        = "lambda/coralogix/${data.aws_region.this.name}/${local.function_name}"
+  name        = "lambda/coralogix/${data.aws_region.this.name}/${module.locals.function_name}"
   description = "Coralogix Send Your Data key Secret"
 }
 
