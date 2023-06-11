@@ -82,6 +82,33 @@ $ terraform apply
 Run `terraform destroy` when you don't need these resources.
 
 
+# kinesis:
+
+```hcl
+provider "aws" {
+}
+
+module "kinesis" {
+  source = "coralogix/aws/coralogix//modules/kinesis"
+
+  coralogix_region    = "Europe"
+  private_key         = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  ssm_enable          = "false"
+  layer_arn           = "<your layer arn>"
+  application_name    = "kinesis"
+  subsystem_name      = "logs"
+  kinesis_stream_name = "<your kinesis stream name>"
+}
+```
+now execute:
+```bash
+$ terraform init
+$ terraform plan
+$ terraform apply
+```
+
+Run `terraform destroy` when you don't need these resources.
+
 ## Modules
 
 - [cloudwatch-logs](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/cloudwatch-logs) - Send logs from `CloudWatch`.
@@ -89,6 +116,7 @@ Run `terraform destroy` when you don't need these resources.
 - [eventbridge](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/eventbridge) - Send logs from `eventbrdge`.
 - [firehose](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/firehose) -  How to Send metrics stream with `firehose`.
 - [vpc-flow-logs](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/vpc-flow-logs%20) - Send `vpc flow logs` logs from `S3` bucket.
+- [kinesis](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/kinesis) - Send logs from `kinesis data stream` with lambda.
 
 ## Authors
 
