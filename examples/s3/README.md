@@ -1,6 +1,6 @@
 # s3
 
-Manage the application which retrieves logs from `S3` bucket and sends them to your *Coralogix* account.
+Manage the application which retrieves logs from `S3` bucket and sends them to your *Coralogix* account. The application can also work with cloudtrail and vpc-flow-logs logs, that will be send to the s3.
 
 ## Usage
 
@@ -10,16 +10,16 @@ To run this example you need to save this code in Terraform file, and change the
 provider "aws" {
 }
 
-module "s3" {
+module "coralogix-shipper" {
   source = "coralogix/aws/coralogix//modules/s3"
 
   coralogix_region   = "Europe"
   private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
   ssm_enable         = "false"
-  layer_arn          = "<your layer arn>"
   application_name   = "s3"
   subsystem_name     = "logs"
   s3_bucket_name     = "test-bucket-name"
+  integration_type   = "s3"
 }
 ```
 now execute:

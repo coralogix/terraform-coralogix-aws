@@ -16,18 +16,14 @@ locals {
     License  = "Apache-2.0"
   }
 
-  integration_type = var.integration_type
-
   s3_prefix_map = {
-    cloudtrail     = "CloudTrail"
-    vpc-flow-logs  = "vpcflowlogs"
-    cloudtrail-sns = "CloudTrail"
+    cloudtrail    = "CloudTrail"
+    vpc-flow-logs = "vpcflowlogs"
   }
 
   s3_suffix_map = {
     cloudtrail    = ".json.gz"
     vpc-flow-logs = ".log.gz"
-    s3-sns        = ".json.gz"
   }
 }
 

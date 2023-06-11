@@ -1,12 +1,15 @@
 variable "coralogix_region" {
   description = "The Coralogix location region, possible options are [Europe, Europe2, India, Singapore, US]"
   type        = string
+  validation {
+    condition     = contains(["Europe", "Europe2", "India", "Singapore", "US", "Custom"], var.coralogix_region)
+    error_message = "The coralogix region must be one of these values: [Europe, Europe2, India, Singapore, US, Custom]."
+  }
 }
 
-variable "custom_url" {
+variable "custom_domain" {
   description = "Custom coralogix url"
   type        = string
-  default     = ""
 }
 
 variable "ssm_enable" {
@@ -125,5 +128,4 @@ variable "integration_type" {
     condition     = contains(["s3-sns", "cloudtrail-sns"], var.integration_type)
     error_message = "The integration type must be: [s3-sns, cloudtrail-sns]."
   }
-  default = "s3-sns"
 }

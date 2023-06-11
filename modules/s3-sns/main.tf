@@ -13,7 +13,6 @@ locals {
     License  = "Apache-2.0"
   }
 
-  integration_type = var.integration_type
 }
 
 data "aws_region" "this" {}

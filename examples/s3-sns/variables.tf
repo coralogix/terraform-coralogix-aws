@@ -4,9 +4,10 @@ variable "coralogix_region" {
   default     = "Europe"
 }
 
-variable "custom_domain" {
+variable "custom_url" {
   description = "Custom coralogix url"
   type        = string
+  default     = ""
 }
 
 variable "ssm_enable" {
@@ -18,6 +19,7 @@ variable "ssm_enable" {
 variable "layer_arn" {
   description = "Coralogix SSM Layer ARN"
   type        = string
+  default     = ""
 }
 
 variable "private_key" {
@@ -122,4 +124,13 @@ variable "newline_pattern" {
   description = "The pattern for lines splitting"
   type        = string
   default     = "(?:\\r\\n|\\r|\\n)"
+}
+
+variable "integration_type" {
+  description = "the aws service that send the data to the s3"
+  type        = string
+  validation {
+    condition     = contains(["s3-sns", "cloudtrail-sns"], var.integration_type)
+    error_message = "The integration type must be: [s3-sns, cloudtrail-sns]."
+  }
 }
