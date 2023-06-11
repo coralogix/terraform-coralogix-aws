@@ -115,7 +115,7 @@ Run `terraform destroy` when you don't need these resources.
 - [s3](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/s3) - Send logs from `S3` bucket.
 - [eventbridge](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/eventbridge) - Send logs from `eventbrdge`.
 - [firehose](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/firehose) -  How to Send metrics stream with `firehose`.
-- [vpc-flow-logs](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/vpc-flow-logs%20) - Send `vpc flow logs` logs from `S3` bucket.
+- [s3-sns](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/s3-sns) - Send logs from `S3` bucket, trigger by sns.
 - [kinesis](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/kinesis) - Send logs from `kinesis data stream` with lambda.
 
 ## Authors
