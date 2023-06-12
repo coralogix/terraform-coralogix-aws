@@ -132,3 +132,9 @@ variable "integration_type" {
     error_message = "The integration type must be: [cloudtrail, vpc-flow-logs, s3]."
   }
 }
+
+variable "sns_topic_name" {
+  description = "The name of your SNS topic"
+  type        = string
+  default     = ""
+}

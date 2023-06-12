@@ -1,3 +1,14 @@
+module "locals" {
+  source = "../locals_variables"
+
+  integration_type = var.integration_type
+  random_string    = random_string.this.result
+}
+
+locals {
+  sns_enable = var.integration_type == "s3-sns" || var.integration_type == "cloudtrail-sns" ? true : false
+}
+
 data "aws_region" "this" {}
 
 data "aws_caller_identity" "this" {}
@@ -6,15 +17,34 @@ data "aws_s3_bucket" "this" {
   bucket = var.s3_bucket_name
 }
 
-module "locals" {
-  source = "../locals_variables"
+data "aws_sns_topic" "sns_topic" {
+  count = local.sns_enable ? 1 : 0
+  name  = var.sns_topic_name
+}
 
-  integration_type = var.integration_type
-  random_string    = random_string.this.result
+data "aws_iam_policy_document" "topic" {
+  count = local.sns_enable ? 1 : 0
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["s3.amazonaws.com"]
+    }
+
+    actions   = ["SNS:Publish"]
+    resources = ["arn:aws:sns:*:*:${data.aws_sns_topic.sns_topic[count.index].name}"]
+
+    condition {
+      test     = "ArnLike"
+      variable = "aws:SourceArn"
+      values   = [data.aws_s3_bucket.this.arn]
+    }
+  }
 }
 
 resource "random_string" "this" {
-  length  = 12
+  length  = 6
   special = false
 }
 
@@ -61,12 +91,12 @@ module "lambda" {
       resources = ["${data.aws_s3_bucket.this.arn}/*"]
     }
   }
-  allowed_triggers = {
+  allowed_triggers = local.sns_enable != true ? {
     AllowExecutionFromS3 = {
       principal  = "s3.amazonaws.com"
       source_arn = data.aws_s3_bucket.this.arn
     }
-  }
+  } : {}
 
   tags = merge(var.tags, module.locals.tags)
 }
@@ -125,22 +155,34 @@ module "lambdaSSM" {
       resources = ["*"]
     }
   }
-  allowed_triggers = {
+  allowed_triggers = local.sns_enable != true ? {
     AllowExecutionFromS3 = {
       principal  = "s3.amazonaws.com"
       source_arn = data.aws_s3_bucket.this.arn
     }
-  }
+  } : {}
   tags = merge(var.tags, module.locals.tags)
 }
 
-resource "aws_s3_bucket_notification" "this" {
+resource "aws_s3_bucket_notification" "lambda_notification" {
+  count  = local.sns_enable == false ? 1 : 0
   bucket = data.aws_s3_bucket.this.bucket
   lambda_function {
     lambda_function_arn = var.ssm_enable == "True" ? module.lambdaSSM.lambda_function_arn : module.lambda.lambda_function_arn
     events              = ["s3:ObjectCreated:*"]
     filter_prefix       = var.integration_type == "s3" || var.s3_key_prefix != null ? var.s3_key_prefix : "AWSLogs/${data.aws_caller_identity.this.account_id}/${lookup(module.locals.s3_prefix_map, var.integration_type)}/"
     filter_suffix       = var.integration_type == "s3" || var.s3_key_suffix != null ? var.s3_key_suffix : lookup(module.locals.s3_suffix_map, var.integration_type)
+  }
+}
+
+resource "aws_s3_bucket_notification" "topic_notification" {
+  count  = local.sns_enable == true ? 1 : 0
+  bucket = data.aws_s3_bucket.this.bucket
+  topic {
+    topic_arn     = data.aws_sns_topic.sns_topic[count.index].arn
+    events        = ["s3:ObjectCreated:*"]
+    filter_prefix = var.integration_type == "s3-sns" || var.s3_key_prefix != null ? var.s3_key_prefix : "AWSLogs/${data.aws_caller_identity.this.account_id}/Cloudtrail/"
+    filter_suffix = var.integration_type == "s3-sns" || var.s3_key_suffix != null ? var.s3_key_suffix : ".json.gz"
   }
 }
 
@@ -170,4 +212,26 @@ resource "aws_sns_topic_subscription" "this" {
   endpoint   = var.notification_email
 }
 
+resource "aws_lambda_permission" "sns_lambda_permission" {
+  count         = local.sns_enable ? 1 : 0
+  statement_id  = "AllowExecutionFromSNS"
+  action        = "lambda:InvokeFunction"
+  function_name = module.locals.function_name
+  principal     = "sns.amazonaws.com"
+  source_arn    = data.aws_sns_topic.sns_topic[count.index].arn
+  depends_on    = [data.aws_sns_topic.sns_topic]
+}
 
+resource "aws_sns_topic_policy" "test" {
+  count  = local.sns_enable ? 1 : 0
+  arn    = data.aws_sns_topic.sns_topic[count.index].arn
+  policy = data.aws_iam_policy_document.topic[count.index].json
+}
+
+resource "aws_sns_topic_subscription" "lambda_sns_subscription" {
+  count      = local.sns_enable ? 1 : 0
+  depends_on = [module.lambdaSSM, module.lambda]
+  topic_arn  = data.aws_sns_topic.sns_topic[count.index].arn
+  protocol   = "lambda"
+  endpoint   = var.ssm_enable == "True" ? module.lambdaSSM.lambda_function_arn : module.lambda.lambda_function_arn
+}

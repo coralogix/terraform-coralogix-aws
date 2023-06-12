@@ -121,8 +121,13 @@ variable "integration_type" {
   description = "the aws service that send the data to the s3"
   type        = string
   validation {
-    condition     = contains(["cloudtrail", "vpc-flow-logs", "s3"], var.integration_type)
-    error_message = "The integration type must be: [cloudtrail, vpc-flow-logs, s3]."
+    condition     = contains(["cloudtrail", "vpc-flow-logs", "s3", "s3-sns", "cloudtrail-sns"], var.integration_type)
+    error_message = "The integration type must be: [cloudtrail, vpc-flow-logs, s3, s3-sns, cloudtrail-sns]."
   }
 }
 
+variable "sns_topic_name" {
+  description = "The name of your SNS topic"
+  type        = string
+  default     = ""
+}
