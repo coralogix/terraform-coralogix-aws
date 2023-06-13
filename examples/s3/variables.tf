@@ -28,6 +28,7 @@ variable "ssm_enable" {
 variable "layer_arn" {
   description = "Coralogix SSM Layer ARN"
   type        = string
+  default     = ""
 }
 
 variable "application_name" {
@@ -123,3 +124,17 @@ variable "tags" {
   default     = {}
 }
 
+variable "integration_type" {
+  description = "the aws service that send the data to the s3"
+  type        = string
+  validation {
+    condition     = contains(["cloudtrail", "vpc-flow-logs", "s3"], var.integration_type)
+    error_message = "The integration type must be: [cloudtrail, vpc-flow-logs, s3]."
+  }
+}
+
+variable "sns_topic_name" {
+  description = "The name of your SNS topic"
+  type        = string
+  default     = ""
+}

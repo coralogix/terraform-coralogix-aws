@@ -87,4 +87,5 @@ variable "ssm_enable" {
 variable "layer_arn" {
   description = "Coralogix SSM Layer ARN"
   type        = string
+  default     = ""
 }
