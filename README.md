@@ -2,38 +2,13 @@
 
 ## Examples
 
-# s3-sns:
-
-```hcl
-provider "aws" {
-}
-module "s3-sns" {
-  source = "coralogix/aws/coralogix//modules/s3-sns"
-
-  coralogix_region   = "Europe"
-  private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
-  ssm_enable         = "false"
-  layer_arn          = "<your layer arn>"
-  application_name   = "s3-sns"
-  subsystem_name     = "logs"
-  sns_topic_name     = "test-sns-topic-name"
-  s3_bucket_name     = "test-bucket-name"
-}
-```
-now execute:
-```bash
-$ terraform init
-$ terraform plan
-$ terraform apply
-```
-
 # s3:
 
 ```hcl
 provider "aws" {
 }
 
-module "s3" {
+module "coralogix-shipper-s3" {
   source = "coralogix/aws/coralogix//modules/s3"
 
   coralogix_region   = "Europe"
@@ -43,6 +18,7 @@ module "s3" {
   application_name   = "s3"
   subsystem_name     = "logs"
   s3_bucket_name     = "test-bucket-name"
+  integration_type   = "s3"
 }
 ```
 now execute:
@@ -115,7 +91,6 @@ Run `terraform destroy` when you don't need these resources.
 - [s3](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/s3) - Send logs from `S3` bucket.
 - [eventbridge](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/eventbridge) - Send logs from `eventbrdge`.
 - [firehose](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/firehose) -  How to Send metrics stream with `firehose`.
-- [s3-sns](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/s3-sns) - Send logs from `S3` bucket, trigger by sns.
 - [kinesis](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/kinesis) - Send logs from `kinesis data stream` with lambda.
 
 ## Authors
