@@ -18,6 +18,6 @@ module "eventbridge" {
   eventbridge_stream             = "eventbridge_stream_test"
   sources                        = ["aws.autoscaling"]
   role_name                      = "eventbridge_role_name"
-  private_key                    = "XXXX-XXXXXX-XXX-XXX"
+  private_key                    = "{{ secrets.TESTING_PRIVATE_KEY }}"
   coralogix_region               = "ireland"
 }

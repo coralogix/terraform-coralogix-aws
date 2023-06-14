@@ -16,7 +16,7 @@ module "s3" {
   source = "../../modules/s3"
 
   coralogix_region   = "Europe"
-  private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  private_key        = "{{ secrets.TESTING_PRIVATE_KEY }}"
   ssm_enable         = "false"
   layer_arn          = "<your layer arn>"
   application_name   = "s3"
