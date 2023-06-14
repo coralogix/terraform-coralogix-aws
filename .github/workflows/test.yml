@@ -1,0 +1,105 @@
+name: Terraform Testing
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches: [master]
+    paths:
+      - "modules/**"
+
+jobs:
+  check:
+    name: Check
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ env.package }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Get Changed Packages
+        id: get-changed-packages
+        run: |
+          export PACKAGES=$(git diff --name-only --diff-filter=d ${{ github.event.pull_request.base.sha || 'origin/master' }} ${{ github.sha }} modules/ | xargs -n1 dirname | sed -r 's/modules\/([^\/]+).*$/modules\/\1/g' | xargs -n1 basename | sort | uniq | jq -rcnR '[inputs]')
+          echo "package=$PACKAGES" >> $GITHUB_ENV
+          
+      - name: echo
+        run:  echo ${{ env.package }} 
+
+  validate:
+    name: Validate
+
+    runs-on: ubuntu-latest
+    needs: check
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.check.outputs.packages) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: check for missing test diractories
+        run: |
+          chmod +x tests/compare_diractories_test.sh
+          
+          output=$(tests/compare_diractories_test.sh)
+          # Check if the output is empty
+          if [ -z "$output" ] || [[ "$output" == "locals_variables" ]] ; then
+            echo "compare_diractories_test - OK."
+          else
+            echo "You need to add this modules to the tests directory: $output"
+            exit 1
+          fi
+          
+      - name: compare variables in test file and in the module
+        run: |
+          if [[ ${{ matrix.package }} != "locals_variables" ]]; then
+            chmod +x tests/test_variables_script.sh
+
+            output=$(tests/test_variables_script.sh modules/${{ matrix.package }}/variables.tf tests/${{ matrix.package }}/${{ matrix.package }}.tf)
+            # Check if the output is empty
+            if [ -z "$output" ]; then
+              echo "test_variables_script - OK."
+            else
+              echo "you need to add this variables to the test file for your integration: $output"
+              exit 1
+            fi
+          fi
+        
+      - name: Configure AWS credentials
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.TESTING_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.TESTING_SECRET_ACCESS_KEY }}
+        run: |
+          echo "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" >> $GITHUB_ENV
+          
+      - name: Terraform Init
+        if:  ${{ matrix.package }} != "locals_variables" 
+        run: |
+              if [ -d "tests/${{ matrix.package }}" ]; then
+                cd "tests/${{ matrix.package }}"
+                terraform init
+              fi
+          
+      - name: Terraform validate
+        if:  ${{ matrix.package }} != "locals_variables" 
+        run: |
+          if [ -d "tests/${{ matrix.package }}" ]; then
+            cd "tests/${{ matrix.package }}"
+            terraform validate
+          fi
+      
+      - name: Terraform Plan
+        if:  ${{ matrix.package }} != "locals_variables" 
+        run:  |
+          if [ -d "tests/${{ matrix.package }}" ]; then
+            cd "tests/${{ matrix.package }}"
+            terraform plan
+          fi
+
+        
