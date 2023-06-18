@@ -20,4 +20,5 @@ module "eventbridge" {
   role_name                      = "eventbridge_role_name"
   private_key                    = "{{ secrets.TESTING_PRIVATE_KEY }}"
   coralogix_region               = "ireland"
+  custom_url                     = ""
 }

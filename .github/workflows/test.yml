@@ -41,7 +41,6 @@ jobs:
       - name: Check for missing test directories
         run: |
           chmod +x tests/compare_directories_test.sh
-          
           output=$(tests/compare_directories_test.sh)
           # Check if the output is empty
           if [ -z "$output" ] || [[ "$output" == "locals_variables" ]] ; then
@@ -55,13 +54,12 @@ jobs:
         run: |
           if [[ ${{ matrix.package }} != "locals_variables" ]]; then
             chmod +x tests/test_variables_script.sh
-
             output=$(tests/test_variables_script.sh modules/${{ matrix.package }}/variables.tf tests/${{ matrix.package }}/${{ matrix.package }}.tf)
             # Check if the output is empty
             if [ -z "$output" ]; then
               echo "[INFO] Test file for module ${{ matrix.package }} is currect."
             else
-              echo "[ERROR] This variables are missing, in the module test file: $output"
+              echo "[ERROR] This variables are missing in the module test file: $output"
               exit 1
             fi
           fi
@@ -77,25 +75,19 @@ jobs:
       - name: Terraform init
         if:  ${{ matrix.package }} != "locals_variables" 
         run: |
-              if [ -d "tests/${{ matrix.package }}" ]; then
-                cd "tests/${{ matrix.package }}"
-                terraform init
-              fi
+          cd "tests/${{ matrix.package }}"
+          terraform init
           
       - name: Terraform validate
         if:  ${{ matrix.package }} != "locals_variables" 
         run: |
-          if [ -d "tests/${{ matrix.package }}" ]; then
-            cd "tests/${{ matrix.package }}"
-            terraform validate
-          fi
+          cd "tests/${{ matrix.package }}"
+          terraform validate
       
       - name: Terraform plan
         if:  ${{ matrix.package }} != "locals_variables" 
         run:  |
-          if [ -d "tests/${{ matrix.package }}" ]; then
-            cd "tests/${{ matrix.package }}"
-            terraform plan
-          fi
+          cd "tests/${{ matrix.package }}"
+          terraform plan
 
         
