@@ -15,7 +15,12 @@ variable "private_key" {
 }
 
 variable "coralogix_region" {
-  description = "Coralogix account region: us, singapore, ireland, india, stockholm [in lower-case letters]"
+  description = "Coralogix account region: us, singapore, ireland, india, stockholm, custom [in lower-case letters]"
+}
+
+variable "custom_url" {
+  description = "Custom coralogix url"
+  type        = string
 }
 
 variable "sources" {
