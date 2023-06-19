@@ -48,9 +48,9 @@ Provision a firehose delivery stream with [CloudWatch metric stream](https://doc
 For more granular inclusive filters of metric names belonging to an included namespace:
 
 Likewise when using this to include only specific namespaces and metric names, the variable 'include_all_namespaces' needs to disabled.
-The variable 'include_metric_stream_filter' can be used to send only conditional metric names belonging to a selected metric namespace. For any namespace where the metric names is empty or not specified, all metrics in that namespace is included.
+The variable 'include_metric_stream_filter' can be used to send only conditional metric names belonging to a selected metric namespace. For any selected namespace where the metric names list is empty or not specified, all metrics in that namespace is included.
 
-Note: 'include_metric_stream_namespaces' and 'include_metric_stream_filter' are independent. If error or filtered metrics do not show, check console CloudWatch -> Metrics -> Streams -> Selected Metrics table.
+Note: 'include_metric_stream_namespaces' and 'include_metric_stream_filter' are independent but related the same metric stream include filter and may conflict. If error or metrics do not show, check console CloudWatch -> Metrics -> Streams -> Selected Metrics table on result.
 
 Metric namespaces are also case-sensitive, please see the [AWS namespaces list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html). For case-sensitive metric names belonging to a namespace, please see the [AWS View available metrics guide](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/viewing_metrics_with_cloudwatch.html)
 
