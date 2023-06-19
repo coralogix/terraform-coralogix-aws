@@ -26,7 +26,7 @@ module "cloudwatch_firehose_coralogix" {
 }
 ```
 
-### Delivering selected CloudWatch metrics
+### Delivering selected CloudWatch metrics namespaces
 Provision a firehose delivery stream with [CloudWatch metric stream](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html).
 The metric stream includes only selected namespaces and sends the metrics to Coralogix:
 When including only specific namespaces, the variable 'include_all_namespaces' needs to disabled,
@@ -40,6 +40,45 @@ module "cloudwatch_firehose_coralogix" {
   include_all_namespaces           = var.include_all_namespaces
   include_metric_stream_namespaces = var.include_metric_stream_namespaces
   coralogix_region                 = var.coralogix_region
+}
+```
+
+### Filtering selected metrics names from CloudWatch namespaces
+Provision a firehose delivery stream with [CloudWatch metric stream](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html).
+For inclusive metric filters of metric names belonging to a selected namespace:
+When using this to include only specific namespaces and metric names, the variable 'include_all_namespaces' needs to disabled.
+The variable 'include_metric_stream_filter' can be used to send only conditional metric names belonging to a selected metric namespace. If the  metric names list of a namespace is empty or not specified, the whole metric namespace is included with all metric_names.
+
+```
+module "cloudwatch_firehose_coralogix" {
+  source                           = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
+  firehose_stream                  = var.coralogix_firehose_stream_name
+  privatekey                       = var.coralogix_privatekey
+  include_all_namespaces           = var.include_all_namespaces
+  include_metric_stream_filter     = var.include_metric_stream_filter
+  coralogix_region                 = var.coralogix_region
+}
+```
+
+Where the variable 'include_metric_stream_filter' can be set as follows:
+```
+variable "include_metric_stream_filter" {
+  description = "List of inclusive metric filters for namespace and metric_names. Specify this parameter, the stream sends only the conditional metric names from the metric namespaces that you specify here. If metric names is empty or not specified, the whole metric namespace is included"
+  type = list(object({
+    namespace    = string
+    metric_names = list(string)
+    })
+  )
+  default = [
+    {
+      namespace    = "AWS/EC2"
+      metric_names = ["CPUUtilization", "NetworkOut"]
+    },
+    {
+      namespace    = "AWS/S3"
+      metric_names = ["BucketSizeBytes"]
+    },
+  ]
 }
 ```
 

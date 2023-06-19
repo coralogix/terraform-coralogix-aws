@@ -27,6 +27,25 @@ variable "include_metric_stream_namespaces" {
   default     = ["AWS/EC2", "AWS/DynamoDB"]
 }
 
+variable "include_metric_stream_filter" {
+  description = "List of inclusive metric filters for namespace and metric_names. Specify this parameter, the stream sends only the conditional metric names from the metric namespaces that you specify here. If metric names is empty or not specified, the whole metric namespace is included"
+  type = list(object({
+    namespace    = string
+    metric_names = list(string)
+    })
+  )
+  default = [
+    {
+      namespace    = "AWS/EC2"
+      metric_names = ["CPUUtilization", "NetworkOut"]
+    },
+    {
+      namespace    = "AWS/S3"
+      metric_names = ["BucketSizeBytes"]
+    },
+  ]
+}
+
 variable "user_supplied_tags" {
   description = "Tags supplied by the user to populate to all generated resources"
   type        = map(string)
