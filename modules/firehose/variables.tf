@@ -24,6 +24,16 @@ variable "include_metric_stream_namespaces" {
   default     = []
 }
 
+variable "include_metric_stream_filter" {
+  description = "List of inclusive metric filters for namespace and metric_names. Specify this parameter, the stream sends only the conditional metric names from the metric namespaces that you specify here. If metric names is empty or not specified, the whole metric namespace is included"
+  type = list(object({
+    namespace    = string
+    metric_names = list(string)
+    })
+  )
+  default = []
+}
+
 variable "enable_cloudwatch_metricstream" {
   description = "Should be true if you want to create a new Cloud Watch metric stream and attach it to Firehose"
   type        = bool

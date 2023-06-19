@@ -264,7 +264,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream" {
       buffering_interval = 300
       compression_format = "GZIP"
     }
-    
+
     cloudwatch_logging_options {
       enabled         = "true"
       log_group_name  = aws_cloudwatch_log_group.firehose_loggroup.name
@@ -381,6 +381,13 @@ resource "aws_cloudwatch_metric_stream" "cloudwatch_metric_stream_included_ns" {
     for_each = var.include_metric_stream_namespaces
     content {
       namespace = "${include_filter.value}"
+    }
+  }
+  dynamic "include_filter" {
+    for_each = var.include_metric_stream_filter
+    content {
+      namespace    = include_filter.value["namespace"]
+      metric_names = include_filter.value["metric_names"]
     }
   }
 }
