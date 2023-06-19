@@ -46,8 +46,11 @@ module "cloudwatch_firehose_coralogix" {
 ### Filtering selected metrics names from CloudWatch namespaces
 Provision a firehose delivery stream with [CloudWatch metric stream](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html).
 For inclusive metric filters of metric names belonging to a selected namespace:
-When using this to include only specific namespaces and metric names, the variable 'include_all_namespaces' needs to disabled.
-The variable 'include_metric_stream_filter' can be used to send only conditional metric names belonging to a selected metric namespace. If the  metric names list of a namespace is empty or not specified, the whole metric namespace is included with all metric_names.
+
+Likewise when using this to include only specific namespaces and metric names, the variable 'include_all_namespaces' needs to disabled.
+The variable 'include_metric_stream_filter' can be used to send only conditional metric names belonging to a selected metric namespace. For any namespace where the metric names is empty or not specified, all metrics in that namespace is included.
+
+Metric namespaces are also case-sensitive, please see the [AWS namespaces list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html). For Metric names belonging to a namespace, please see the [AWS View available metrics guide](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/viewing_metrics_with_cloudwatch.html)
 
 ```
 module "cloudwatch_firehose_coralogix" {
