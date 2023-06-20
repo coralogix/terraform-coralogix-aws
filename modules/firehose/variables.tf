@@ -12,12 +12,6 @@ variable "coralogix_region" {
   description = "Coralogix account region: us, singapore, ireland, india, stockholm [in lower-case letters]"
 }
 
-variable "include_all_namespaces" {
-  description = "If set to true, the CloudWatch metric stream will include all available namespaces"
-  type        = bool
-  default     = true
-}
-
 variable "include_metric_stream_namespaces" {
   description = "List of specific namespaces to include in the CloudWatch metric stream, see https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html"
   type        = list(string)

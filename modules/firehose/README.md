@@ -29,15 +29,13 @@ module "cloudwatch_firehose_coralogix" {
 ### Delivering selected CloudWatch metrics by namespaces
 Provision a firehose delivery stream with [CloudWatch metric stream](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html).
 The metric stream includes only selected namespaces and sends the metrics to Coralogix:
-When including only specific namespaces, the variable 'include_all_namespaces' needs to disabled,
-and the variable 'include_metric_stream_namespaces' needs to include a list of the desired namespaces,
+When including specific namespaces, the variable 'include_metric_stream_namespaces' needs to include a list of the desired namespaces,
 which are case-sensitive. please see the [AWS namespaces list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html). 
 ```
 module "cloudwatch_firehose_coralogix" {
   source                           = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
   firehose_stream                  = var.coralogix_firehose_stream_name
   privatekey                       = var.coralogix_privatekey
-  include_all_namespaces           = var.include_all_namespaces
   include_metric_stream_namespaces = var.include_metric_stream_namespaces
   coralogix_region                 = var.coralogix_region
 }
@@ -47,7 +45,6 @@ module "cloudwatch_firehose_coralogix" {
 Provision a firehose delivery stream with [CloudWatch metric stream](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html).
 For more granular inclusive filters of metric names belonging to an included namespace:
 
-Likewise when using this to include only specific namespaces and metric names, the variable 'include_all_namespaces' needs to disabled.
 The variable 'include_metric_stream_filter' can be used to send only conditional metric names belonging to a selected metric namespace. For any selected namespace where the metric names list is empty or not specified, all metrics in that namespace is included.
 
 Note: 'include_metric_stream_namespaces' and 'include_metric_stream_filter' are independent but related the same metric stream include filter and may conflict. If error or metrics do not show, check console CloudWatch -> Metrics -> Streams -> Selected Metrics table on result.
@@ -59,7 +56,6 @@ module "cloudwatch_firehose_coralogix" {
   source                           = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
   firehose_stream                  = var.coralogix_firehose_stream_name
   privatekey                       = var.coralogix_privatekey
-  include_all_namespaces           = var.include_all_namespaces
   include_metric_stream_filter     = var.include_metric_stream_filter
   coralogix_region                 = var.coralogix_region
 }
@@ -172,7 +168,6 @@ then the CloudWatch metric stream must be configured with the same format, confi
 | <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | Coralogix account region: us, singapore, ireland, india, stockholm [in lower-case letters] | `any` | n/a | yes |
 | <a name="input_enable_cloudwatch_metricstream"></a> [enable\_cloudwatch\_metricstream](#input\_enable\_cloudwatch\_metricstream) | Should be true if you want to create a new Cloud Watch metric stream and attach it to Firehose | `bool` | `true` | no |
 | <a name="input_firehose_stream"></a> [firehose\_stream](#input\_firehose\_stream) | AWS Kinesis firehose delivery stream name | `string` | n/a | yes |
-| <a name="input_include_all_namespaces"></a> [include\_all\_namespaces](#input\_include\_all\_namespaces) | If set to true, the CloudWatch metric stream will include all available namespaces | `bool` | `true` | no |
 | <a name="input_include_metric_stream_namespaces"></a> [include\_metric\_stream\_namespaces](#input\_include\_metric\_stream\_namespaces) | List of specific namespaces to include in the CloudWatch metric stream, see https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html | `list(string)` | `[]` | no |
 | <a name="include_metric_stream_filter"></a> [include\_metric\_stream\_filter](#input\_include\_metric\_stream\_filter) | Guide to view specific metric names of namespaces, see https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/viewing_metrics_with_cloudwatch.html | `list(object({namespace=string, metric_names=list(string)})` | `[]` | no |
 | <a name="input_integration_type"></a> [integration\_type](#input\_integration\_type) | The integration type of the firehose delivery stream: 'CloudWatch\_Metrics\_JSON' or 'CloudWatch\_Metrics\_OpenTelemetry070' | `string` | `"CloudWatch_Metrics_OpenTelemetry070"` | no |

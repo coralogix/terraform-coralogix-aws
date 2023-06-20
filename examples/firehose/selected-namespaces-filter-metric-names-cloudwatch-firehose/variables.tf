@@ -15,12 +15,6 @@ variable "coralogix_privatekey" {
   sensitive   = true
 }
 
-variable "include_all_namespaces" {
-  type        = bool
-  description = "If set to true, the CloudWatch metric stream will include all available namespaces"
-  default     = false
-}
-
 variable "include_metric_stream_filter" {
   description = "List of inclusive metric filters for namespace and metric_names. Specify this parameter, the stream sends only the conditional metric names from the metric namespaces that you specify here. If metric names is empty or not specified, the whole metric namespace is included"
   type = list(object({
