@@ -15,12 +15,6 @@ variable "coralogix_privatekey" {
   sensitive   = true
 }
 
-variable "include_all_namespaces" {
-  type        = bool
-  description = "If set to true, the CloudWatch metric stream will include all available namespaces"
-  default     = false
-}
-
 variable "include_metric_stream_namespaces" {
   description = "List of specific namespaces to include in the CloudWatch metric stream, see https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html"
   type        = list(string)

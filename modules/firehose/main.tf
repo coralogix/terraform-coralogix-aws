@@ -359,24 +359,15 @@ resource "aws_iam_role_policy" "metric_streams_to_firehose_policy" {
 EOF
 }
 
-# Creating one metric stream for all namespaces
-resource "aws_cloudwatch_metric_stream" "cloudwatch_metric_stream_all_ns" {
-  tags          = local.tags
-  count         = var.include_all_namespaces && var.enable_cloudwatch_metricstream ? 1 : 0
-  name          = "cloudwatch_metrics"
-  role_arn      = aws_iam_role.metric_streams_to_firehose[0].arn
-  firehose_arn  = aws_kinesis_firehose_delivery_stream.coralogix_stream.arn
-  output_format = var.output_format
-}
-
 # Creating metric streams only for specific namespaces
-resource "aws_cloudwatch_metric_stream" "cloudwatch_metric_stream_included_ns" {
+resource "aws_cloudwatch_metric_stream" "cloudwatch_metric_stream" {
   tags          = local.tags
-  count         = !var.include_all_namespaces && var.enable_cloudwatch_metricstream ? 1 : 0
+  count         = var.enable_cloudwatch_metricstream ? 1 : 0
   name          = var.firehose_stream
   role_arn      = aws_iam_role.metric_streams_to_firehose[0].arn
   firehose_arn  = aws_kinesis_firehose_delivery_stream.coralogix_stream.arn
   output_format = var.output_format
+  
   dynamic "include_filter" {
     for_each = var.include_metric_stream_namespaces
     content {
