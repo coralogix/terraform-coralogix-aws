@@ -21,6 +21,7 @@ variable "coralogix_region" {
 variable "custom_url" {
   description = "Custom coralogix url"
   type        = string
+  default     = null
 }
 
 variable "sources" {
