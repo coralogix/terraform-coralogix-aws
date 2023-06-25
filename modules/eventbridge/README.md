@@ -12,6 +12,7 @@ module "eventbridge_coralogix" {
   custom_url                     = var.custom_url
   sources                        = var.eventbridge_sources
   application_name               = var.application_name
+  policy_name                    = var.policy_name
 }
 ```
 
