@@ -35,3 +35,8 @@ variable "application_name" {
   type        = string
   default     = null
 }
+variable "policy_name" {
+  description = "AWS IAM policy name"
+  type        = string
+  default     = "EventBridge_policy"
+}

@@ -40,7 +40,7 @@ data "aws_caller_identity" "current_identity" {}
 data "aws_region" "current_region" {}
 
 resource "aws_iam_policy" "eventbridge_policy" {
-  name = "EventBridge_policy"
+  name = var.policy_name
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
