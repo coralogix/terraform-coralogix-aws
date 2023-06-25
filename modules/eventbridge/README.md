@@ -77,6 +77,7 @@ The coralogix region variable accepts one of the following regions:
 | <a name="input_private_key"></a> [private\_key](#input\_private\_key) | Your Coralogix private key | `string` | n/a | yes |
 | <a name="input_role_name"></a> [role\_name](#input\_role\_name) | The name of the eventbridge role | `string` | n/a | yes |
 | <a name="input_sources"></a> [sources](#input\_sources) | The services for which we will send events | `list(any)` | <pre>[<br>  "aws.ec2",<br>  "aws.autoscaling",<br>  "aws.cloudwatch",<br>  "aws.events",<br>  "aws.health",<br>  "aws.rds"<br>]</pre> | no |
+| <a name="input_policy_name"></a> [policy_name](#input\_custom\_url) | Custom aws_iam_policy | `string` | `EventBridge_policy` | no |
 
 ## Outputs
 
