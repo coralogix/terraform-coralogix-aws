@@ -1,0 +1,93 @@
+name: Terraform testing
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches: [master]
+    paths:
+      - "modules/**"
+
+jobs:
+  check:
+    name: Check
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ env.packages }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Get changed packages
+        id: get-changed-packages
+        run: |
+          export PACKAGES=$(git diff --name-only --diff-filter=d ${{ github.event.pull_request.base.sha || 'origin/master' }} ${{ github.sha }} modules/ | xargs -n1 dirname | sed -r 's/modules\/([^\/]+).*$/modules\/\1/g' | xargs -n1 basename | sort | uniq | jq -rcnR '[inputs]')
+          echo "packages=$PACKAGES" >> $GITHUB_ENV
+
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    needs: check
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.check.outputs.packages) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Check for missing test directories
+        run: |
+          chmod +x tests/compare_directories_test.sh
+          output=$(tests/compare_directories_test.sh)
+          # Check if the output is empty
+          if [ -z "$output" ] || [[ "$output" == "locals_variables" ]] ; then
+            echo "[INFO] No tests are missing for Terraform module ${{ matrix.package }}."
+          else
+            echo "$output"
+            exit 1
+          fi
+          
+      - name: Compare variables in test file and in the module
+        run: |
+          if [[ ${{ matrix.package }} != "locals_variables" ]]; then
+            chmod +x tests/test_variables_script.sh
+            output=$(tests/test_variables_script.sh modules/${{ matrix.package }}/variables.tf tests/${{ matrix.package }}/${{ matrix.package }}.tf)
+            # Check if the output is empty
+            if [ -z "$output" ]; then
+              echo "[INFO] Test file for module ${{ matrix.package }} is currect."
+            else
+              echo "[ERROR] This variables are missing in the module test file: $output"
+              exit 1
+            fi
+          fi
+        
+      - name: Configure AWS credentials
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.TESTING_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.TESTING_SECRET_ACCESS_KEY }}
+        run: |
+          echo "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" >> $GITHUB_ENV
+          
+      - name: Terraform init
+        if:  ${{ matrix.package }} != "locals_variables" 
+        run: |
+          cd "tests/${{ matrix.package }}"
+          terraform init
+          
+      - name: Terraform validate
+        if:  ${{ matrix.package }} != "locals_variables" 
+        run: |
+          cd "tests/${{ matrix.package }}"
+          terraform validate
+      
+      - name: Terraform plan
+        if:  ${{ matrix.package }} != "locals_variables" 
+        run:  |
+          cd "tests/${{ matrix.package }}"
+          terraform plan
+
+        
