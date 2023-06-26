@@ -95,7 +95,7 @@ module "cloudwatch_firehose_coralogix" {
   source = "coralogix/aws/coralogix//modules/firehose"
 
   coralogix_region      = "irland"
-  private_key           = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX
+  private_key           = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
   application_name      = "firehose"
   subsystem_name        = "logs-and-metrics"
   firehose_stream       = "<your kinesis stream name>"
