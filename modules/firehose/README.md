@@ -1,5 +1,20 @@
-# Firehose Module
+# Firehose Module - Metrics And Logs
 Firehose module is designed to support CloudWatch metrics.
+
+## Logs - Usage
+### Firehose Delivery Stream
+Provision a firehose delivery stream for streaming logs to [Coralogix](https://coralogix.com/docs/aws-firehose/) - add this parameters to the configuration of the integration to enable to stream logs:
+```
+module "cloudwatch_firehose_coralogix" {
+  source                         = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
+  logs_enable                    = true
+  firehose_stream                = var.coralogix_firehose_stream_name
+  private_key                    = var.private_key
+  coralogix_region               = var.coralogix_region
+  integration_type_logs          = "Default"
+  source_type_logs               = "DirectPut"
+}
+```
 
 ## Metrics - Usage
 ### Firehose Delivery Stream
@@ -7,8 +22,9 @@ Provision a firehose delivery stream for streaming metrics to Coralogix:
 ```
 module "cloudwatch_firehose_coralogix" {
   source                         = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
+  metric_enable                  = true
   firehose_stream                = var.coralogix_firehose_stream_name
-  privatekey                     = var.coralogix_privatekey
+  private_key                    = var.private_key
   enable_cloudwatch_metricstream = false
   coralogix_region               = var.coralogix_region
 }
@@ -20,8 +36,9 @@ The metric stream includes all namespaces [AWS/EC2, AWS/EBS, etc..], and sends t
 ```
 module "cloudwatch_firehose_coralogix" {
   source           = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
+  metric_enable    = true
   firehose_stream  = var.coralogix_firehose_stream_name
-  privatekey       = var.coralogix_privatekey
+  private_key      = var.private_key
   coralogix_region = var.coralogix_region
 }
 ```
@@ -34,8 +51,9 @@ which are case-sensitive. please see the [AWS namespaces list](https://docs.aws.
 ```
 module "cloudwatch_firehose_coralogix" {
   source                           = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
+  metric_enable                    = true
   firehose_stream                  = var.coralogix_firehose_stream_name
-  privatekey                       = var.coralogix_privatekey
+  private_key                      = var.private_key
   include_metric_stream_namespaces = var.include_metric_stream_namespaces
   coralogix_region                 = var.coralogix_region
 }
@@ -54,8 +72,9 @@ Metric namespaces are also case-sensitive, please see the [AWS namespaces list](
 ```
 module "cloudwatch_firehose_coralogix" {
   source                           = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
+  metric_enable                    = true
   firehose_stream                  = var.coralogix_firehose_stream_name
-  privatekey                       = var.coralogix_privatekey
+  private_key                      = var.private_key
   include_metric_stream_filter     = var.include_metric_stream_filter
   coralogix_region                 = var.coralogix_region
 }
@@ -88,9 +107,10 @@ Provision multiple firehose delivery streams, which can include the provisioning
 ```
 module "cloudwatch_firehose_coralogix" {
   source           = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
+  metric_enable                  = true
   for_each         = toset(var.coralogix_streams)
   firehose_stream  = each.key
-  privatekey       = var.coralogix_privatekey
+  private_key      = var.private_key
   coralogix_region = var.coralogix_region
 }
 ```
@@ -125,9 +145,8 @@ It is possible to pass a custom firehose ingress endpoint with by using the `cor
 # Metrics Output Format
 Coralogix suppots both `JSON` format and `OpenTelemtry` format. 
 The default format configured here is `OpenTelemtry`. 
-if using `Json` in the firehose output format, which is configured via the `integration_type` variable,
+if using `Json` in the firehose output format, which is configured via the `integration_type_metrics` variable,
 then the CloudWatch metric stream must be configured with the same format, configured via the `output_format` variable.
-
 
 
 <!-- BEGIN_TF_DOCS -->
@@ -143,25 +162,8 @@ then the CloudWatch metric stream must be configured with the same format, confi
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 4.17.1 |
 
-## Resources
 
-| Name | Type |
-|------|------|
-| [aws_cloudwatch_log_group.firehose_loggroup](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
-| [aws_cloudwatch_log_stream.firehose_logstream_backup](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_stream) | resource |
-| [aws_cloudwatch_log_stream.firehose_logstream_dest](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_stream) | resource |
-| [aws_cloudwatch_metric_stream.cloudwatch_metric_stream_all_ns](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_stream) | resource |
-| [aws_cloudwatch_metric_stream.cloudwatch_metric_stream_included_ns](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_stream) | resource |
-| [aws_iam_role.firehose_to_coralogix](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
-| [aws_iam_role.metric_streams_to_firehose](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
-| [aws_iam_role_policy.firehose_to_http_metric_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
-| [aws_iam_role_policy.metric_streams_to_firehose_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
-| [aws_kinesis_firehose_delivery_stream.coralogix_stream](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kinesis_firehose_delivery_stream) | resource |
-| [aws_s3_bucket.firehose_bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
-| [aws_caller_identity.current_identity](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
-| [aws_region.current_region](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
-
-## Inputs
+## Inputs 
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
@@ -170,14 +172,23 @@ then the CloudWatch metric stream must be configured with the same format, confi
 | <a name="input_firehose_stream"></a> [firehose\_stream](#input\_firehose\_stream) | AWS Kinesis firehose delivery stream name | `string` | n/a | yes |
 | <a name="input_include_metric_stream_namespaces"></a> [include\_metric\_stream\_namespaces](#input\_include\_metric\_stream\_namespaces) | List of specific namespaces to include in the CloudWatch metric stream, see https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html | `list(string)` | `[]` | no |
 | <a name="include_metric_stream_filter"></a> [include\_metric\_stream\_filter](#input\_include\_metric\_stream\_filter) | Guide to view specific metric names of namespaces, see https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/viewing_metrics_with_cloudwatch.html | `list(object({namespace=string, metric_names=list(string)})` | `[]` | no |
-| <a name="input_integration_type"></a> [integration\_type](#input\_integration\_type) | The integration type of the firehose delivery stream: 'CloudWatch\_Metrics\_JSON' or 'CloudWatch\_Metrics\_OpenTelemetry070' | `string` | `"CloudWatch_Metrics_OpenTelemetry070"` | no |
+| <a name="input_integration_type_metrics"></a> [integration\_type](#input\_integration\_type) | The integration type of the firehose delivery stream: 'CloudWatch\_Metrics\_JSON' or 'CloudWatch\_Metrics\_OpenTelemetry070' | `string` | `"CloudWatch_Metrics_OpenTelemetry070"` | no |
 | <a name="input_output_format"></a> [output\_format](#input\_output\_format) | The output format of the cloudwatch metric stream: 'json' or 'opentelemetry0.7' | `string` | `"opentelemetry0.7"` | no |
-| <a name="input_privatekey"></a> [privatekey](#input\_privatekey) | Coralogix account logs private key | `any` | n/a | yes |
+| <a name="input_private_key"></a> [private_key](#input\_private_key) | Coralogix account logs private key | `any` | n/a | yes |
+| <a name="input_metric_enable"></a> [metric_enable](#input\_metric_enable) | Enble sending metrics to Coralogix | `bool` | `true` | no |
+| <a name="input_application_name"></a> [application_name](#input\_application_name) | The name of your application in Coralogix | `string` | n/a | no |
+| <a name="input_subsystem_name"></a> [subsystem_name](#input\_subsystem_name) | The subsystem name of your application in Coralogix | `string` | n/a | no |
+| <a name="input_user_supplied_tags"></a> [user_supplied_tags](#input\_user_supplied_tags) | Tags supplied by the user to populate to all generated resources | `map(string)` | n/a | no |
+| <a name="input_cloudwatch_retention_days"></a> [cloudwatch_retention_days](#input\_cloudwatch_retention_days) | Days of retention in Cloudwatch retention days | `number` | n/a | no |
+| <a name="input_coralogix_firehose_custom_endpoint"></a> [coralogix_firehose_custom_endpoint](#input\_coralogix_firehose_custom_endpoint) | Custom endpoint for Coralogix firehose integration endpoint  (https://firehose-ingress.private.coralogix.net:8443/firehose) | `string` | `null` | no |
+| <a name="input_logs_enable"></a> [logs_enable](#input\_logs_enable) | Enble sending logs to Coralogix | `bool` | `false` | no |
+| <a name="input_source_type_logs"></a> [source_type_logs](#input\_source_type_logs) | The source_type of kinesis firehose: KinesisStreamAsSource or DirectPut | `string` | `DirectPut` | no |
+| <a name="input_kinesis_stream_arn"></a> [kinesis_stream_arn](#input\_kinesis_stream_arn) | The kinesis stream name for the logs - used in kinesis stream as a source | `string` | `""` | no |
+| <a name="input_kinesis_stream_arn"></a> [kinesis_stream_arn](#input\_integration_type_logs) | The integration type of the firehose delivery stream: 'CloudWatch_JSON', 'WAF', 'CloudWatch_CloudTrail', 'EksFargate', 'Default', 'RawText' | `string` | `Default` | no |
+| <a name="input_dynamic_metadata_logs"></a> [dynamic_metadata_logs](#input\_dynamic_metadata_logs) | Dynamic values search for specific fields in the logs to populate the fields | `bool` | `false` | no |
+
 
 ## Outputs
 
 No outputs.
 <!-- END_TF_DOCS -->
-
-## Authors
-Module is maintained by [Amit Mazor](https://github.com/orgs/coralogix/people/amit-mazor)
