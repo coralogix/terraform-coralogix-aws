@@ -85,12 +85,44 @@ $ terraform apply
 
 Run `terraform destroy` when you don't need these resources.
 
+# firehose:
+
+```hcl
+provider "aws" {
+}
+
+module "cloudwatch_firehose_coralogix" {
+  source = "coralogix/aws/coralogix//modules/firehose"
+
+  coralogix_region      = "irland"
+  private_key           = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX
+  application_name      = "firehose"
+  subsystem_name        = "logs-and-metrics"
+  firehose_stream       = "<your kinesis stream name>"
+
+	#logs:
+	logs_enable = true
+  integration_type_logs = "CloudWatch_JSON"
+  source_type_logs      = "DirectPut"
+	
+	#metric:
+  metric_enable = true
+  enable_cloudwatch_metricstream = true
+}
+```
+now execute:
+```bash
+$ terraform init
+$ terraform plan
+$ terraform apply
+```
+
 ## Modules
 
 - [cloudwatch-logs](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/cloudwatch-logs) - Send logs from `CloudWatch`.
 - [s3](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/s3) - Send logs from `S3` bucket.
 - [eventbridge](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/eventbridge) - Send logs from `eventbrdge`.
-- [firehose](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/firehose) -  How to Send metrics stream with `firehose`.
+- - [firehose](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/firehose) -  Send metrics stream and logs with `firehose`.
 - [kinesis](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/kinesis) - Send logs from `kinesis data stream` with lambda.
 
 ## Authors
