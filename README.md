@@ -100,13 +100,12 @@ module "cloudwatch_firehose_coralogix" {
   subsystem_name        = "logs-and-metrics"
   firehose_stream       = "<your kinesis stream name>"
 
-	#logs:
-	logs_enable = true
+  #logs:
+  logs_enable           = true
   integration_type_logs = "CloudWatch_JSON"
-  source_type_logs      = "DirectPut"
-	
-	#metric:
-  metric_enable = true
+
+  #metric:
+  metric_enable                  = true
   enable_cloudwatch_metricstream = true
 }
 ```
@@ -122,7 +121,7 @@ $ terraform apply
 - [cloudwatch-logs](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/cloudwatch-logs) - Send logs from `CloudWatch`.
 - [s3](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/s3) - Send logs from `S3` bucket.
 - [eventbridge](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/eventbridge) - Send logs from `eventbrdge`.
-- - [firehose](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/firehose) -  Send metrics stream and logs with `firehose`.
+- [firehose](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/firehose) -  Send metrics stream and logs with `firehose`.
 - [kinesis](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/kinesis) - Send logs from `kinesis data stream` with lambda.
 
 ## Authors
