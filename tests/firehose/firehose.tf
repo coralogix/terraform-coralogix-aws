@@ -16,6 +16,6 @@ module "firehose" {
   source = "../../modules/firehose"
 
   coralogix_region   = "ireland"
-  privatekey         = "{{ secrets.TESTING_PRIVATE_KEY }}"
+  private_key        = "{{ secrets.TESTING_PRIVATE_KEY }}"
   firehose_stream    = "test-stream"
 }
