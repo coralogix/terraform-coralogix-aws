@@ -192,6 +192,3 @@ then the CloudWatch metric stream must be configured with the same format, confi
 
 No outputs.
 <!-- END_TF_DOCS -->
-
-## Authors
-Module is maintained by [Aviv Schreiber](https://github.com/orgs/coralogix/people/Avivsc-corl)
