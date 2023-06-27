@@ -8,6 +8,7 @@ Provision a firehose delivery stream for streaming logs to [Coralogix](https://c
 module "cloudwatch_firehose_coralogix" {
   source                         = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
   logs_enable                    = true
+  metric_enable                  = false
   firehose_stream                = var.coralogix_firehose_stream_name
   private_key                    = var.private_key
   coralogix_region               = var.coralogix_region
