@@ -1,11 +1,11 @@
 # Firehose Delivery Stream
 Configuration in this directory creates a firehose delivery stream only for logs.
-`metric_enable = true` by default, You can disable by changing it to `false`. 
 This firehose delivery stream can be used with CloudWatch, CloudTrail, [etc..](https://coralogix.com/docs/aws-firehose/)
 
 ## Usage
 
 In this example you need to configure the following variables:
+* `metric_enable = false` --> Optional. By default the metric_enable is true
 * application_name --> Optional
 * subsystem_name --> Optional
 * logs_enable --> Enables sending logs
