@@ -61,7 +61,6 @@ resource "aws_cloudwatch_log_stream" "firehose_logstream_backup" {
 resource "aws_s3_bucket" "firehose_bucket" {
   tags   = merge(local.tags, { Name = "${var.firehose_stream}-backup" })
   bucket = "${var.firehose_stream}-backup"
-  force_destroy = true
 }
 
 resource "aws_s3_bucket_public_access_block" "firehose_bucket_bucket_access" {
