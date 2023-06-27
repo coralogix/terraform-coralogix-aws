@@ -22,6 +22,6 @@ module "cloudwatch_firehose_coralogix" {
   source           = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
   for_each         = toset(var.coralogix_streams)
   firehose_stream  = each.key
-  privatekey       = var.coralogix_privatekey
+  private_key       = var.private_key
   coralogix_region = var.coralogix_region
 }
