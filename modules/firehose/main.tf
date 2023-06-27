@@ -137,7 +137,7 @@ resource "aws_iam_role" "firehose_to_coralogix" {
 
 resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs_kinesis_stream_as_source" {
   tags        = local.tags
-  name        = "coralogix_firehose_stream"
+  name        = "coralogix-${var.firehose_stream}-logs"
   destination = "http_endpoint"
   count = var.source_type_logs == "KinesisStreamAsSource" && var.logs_enable == true ? 1 : 0
   
@@ -199,7 +199,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs_kinesis_s
 
 resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs_direct_put_as_source" {
   tags        = local.tags
-  name        = "coralogix_firehose_stream" 
+  name        = "coralogix-${var.firehose_stream}-logs"
   destination = "http_endpoint"
   count = var.source_type_logs == "DirectPut" && var.logs_enable == true ? 1 : 0
 
