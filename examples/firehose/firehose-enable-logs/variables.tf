@@ -16,9 +16,15 @@ variable "private_key" {
 }
 
 variable "logs_enable" {
-  description = "Enble sending logs to Coralogix"
+  description = "Enable sending logs to Coralogix"
   type        = bool
   default     = false
+}
+
+variable "metric_enable" {
+  description = "Enable sending metrics to Coralogix"
+  type        = bool
+  default     = true
 }
 
 variable "source_type_logs" {
