@@ -25,7 +25,7 @@ coralogix-filter-metric-names:
 In this example you need to configure the following variables:
 * firehose_stream --> The name of the Firehose delivery stream
 * coralogix_region --> The region of Coralogix account
-* privatekey --> Coralogix account logs privatekey
-Since the privatekey is private and we cant put it hardcoded, it can be exported instead of insert it as an input each time:
-export TF_VAR_coralogix_privatekey="your-coralogix-private-key"
+* private_key --> Coralogix account logs private_key
+Since the private_key is private and we cant put it hardcoded, it can be exported instead of insert it as an input each time:
+export TF_VAR_private_key="your-coralogix-private-key"
 * include_metric_stream_filter --> List of inclusive metric filters for namespace and metric_names. For the full list of the available namespaces, please see [namespaces list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html). To view available metric names of selected namespace, please see [view available metric names](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/viewing_metrics_with_cloudwatch.html)

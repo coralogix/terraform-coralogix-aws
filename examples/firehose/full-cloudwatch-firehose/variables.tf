@@ -1,4 +1,4 @@
-variable "coralogix_firehose_stream_name" {
+variable "firehose_stream" {
   description = "Coralogix firehose delivery stream name"
   type        = string
   default     = "coralogix-firehose"
@@ -9,7 +9,7 @@ variable "coralogix_region" {
   description = "The region of the Coralogix account"
 }
 
-variable "coralogix_privatekey" {
+variable "private_key" {
   type        = string
   description = "Coralogix account logs private key"
   sensitive   = true
