@@ -179,12 +179,12 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs_kinesis_s
 
       common_attributes {
         name  = "applicationName"
-        value = local.application_name #var.application_name #local.application_name
+        value = local.application_name
       }
 
       common_attributes {
         name  = "subsystemName"
-        value = local.application_name #var.subsystem_name #local.application_name
+        value = var.subsystem_name 
       }
 
       common_attributes {
