@@ -89,9 +89,9 @@ variable "logs_enable" {
 }
 
 variable "metric_enable" {
-  description = "The source_type of kinesis firehose: KinesisStreamAsSource or DirectPut"
+  description = "Enble sending metrics to Coralogix"
   type        = bool
-  default     = false
+  default     = true
 }
 
 #for logs:
