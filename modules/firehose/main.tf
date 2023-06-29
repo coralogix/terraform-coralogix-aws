@@ -25,7 +25,6 @@ locals {
       url = "https://firehose-ingress.eu2.coralogix.com/firehose"
     }
   }
-  index_metric = var.metric_enable == true ? 1 : 0
   tags = merge(var.user_supplied_tags, {
     terraform-module         = "kinesis-firehose-to-coralogix"
     terraform-module-version = "v0.1.0"
