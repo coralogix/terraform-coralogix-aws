@@ -94,7 +94,7 @@ provider "aws" {
 module "cloudwatch_firehose_coralogix" {
   source = "coralogix/aws/coralogix//modules/firehose"
 
-  coralogix_region      = "irland"
+  coralogix_region      = "ireland"
   private_key           = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
   application_name      = "firehose"
   subsystem_name        = "logs-and-metrics"
