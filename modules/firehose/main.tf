@@ -113,7 +113,7 @@ resource "aws_iam_role" "firehose_to_coralogix" {
             "kinesis:GetRecords",
             "kinesis:ListShards"
           ],
-          "Resource" = "${var.kinesis_stream_arn}"
+          "Resource" = "arn:aws:kinesis:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_identity.account_id}:stream/${var.firehose_stream}"
         },
         {
           "Effect" = "Allow",
