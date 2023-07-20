@@ -37,7 +37,7 @@ variable "include_metric_stream_filter" {
 variable "user_supplied_tags" {
   description = "Tags supplied by the user to populate to all generated resources"
   type        = map(string)
-  default     = { custom-tag-sample="value1" }
+  default     = { custom-tag-sample = "value1" }
 }
 
 variable "cloudwatch_retention_days" {

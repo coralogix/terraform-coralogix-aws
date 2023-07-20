@@ -29,7 +29,7 @@ locals {
     terraform-module         = "kinesis-firehose-to-coralogix"
     terraform-module-version = "v0.1.0"
     managed-by               = "coralogix-terraform"
-    custom_endpoint           = var.coralogix_firehose_custom_endpoint != null ? var.coralogix_firehose_custom_endpoint : ""
+    custom_endpoint          = var.coralogix_firehose_custom_endpoint != null ? var.coralogix_firehose_custom_endpoint : ""
   })
   application_name = var.application_name == null ? "coralogix-${var.firehose_stream}" : var.application_name
 }
@@ -72,12 +72,12 @@ resource "aws_s3_bucket_public_access_block" "firehose_bucket_bucket_access" {
 }
 
 resource "aws_iam_role" "firehose_to_coralogix" {
-  tags               = local.tags
+  tags = local.tags
   assume_role_policy = jsonencode({
-    "Version"   = "2012-10-17",
+    "Version" = "2012-10-17",
     "Statement" = [
       {
-        "Action"    = "sts:AssumeRole",
+        "Action" = "sts:AssumeRole",
         "Principal" = {
           "Service" = "firehose.amazonaws.com"
         },
@@ -86,9 +86,9 @@ resource "aws_iam_role" "firehose_to_coralogix" {
     ]
   })
   inline_policy {
-    name   = "coralogix-firehose-execution"
+    name = "coralogix-firehose-execution"
     policy = jsonencode({
-      "Version"   = "2012-10-17",
+      "Version" = "2012-10-17",
       "Statement" = [
         {
           "Effect" = "Allow",
@@ -137,21 +137,21 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs_kinesis_s
   tags        = local.tags
   name        = "coralogix-${var.firehose_stream}-logs"
   destination = "http_endpoint"
-  count = var.source_type_logs == "KinesisStreamAsSource" && var.logs_enable == true ? 1 : 0
-  
+  count       = var.source_type_logs == "KinesisStreamAsSource" && var.logs_enable == true ? 1 : 0
+
   kinesis_source_configuration {
-      kinesis_stream_arn = var.kinesis_stream_arn
-      role_arn = aws_iam_role.firehose_to_coralogix.arn
+    kinesis_stream_arn = var.kinesis_stream_arn
+    role_arn           = aws_iam_role.firehose_to_coralogix.arn
 
   }
-  
+
   http_endpoint_configuration {
     url                = var.coralogix_firehose_custom_endpoint != null ? var.coralogix_firehose_custom_endpoint : local.endpoint_url[var.coralogix_region].url
     name               = "Coralogix"
     access_key         = var.private_key
     buffering_size     = 6
     buffering_interval = 60
-    s3_backup_mode     = "FailedDataOnly" 
+    s3_backup_mode     = "FailedDataOnly"
     role_arn           = aws_iam_role.firehose_to_coralogix.arn
     retry_duration     = 300
     #
@@ -162,7 +162,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs_kinesis_s
       buffering_interval = 300
       compression_format = "GZIP"
     }
-    
+
     cloudwatch_logging_options {
       enabled         = "true"
       log_group_name  = aws_cloudwatch_log_group.firehose_loggroup.name
@@ -184,7 +184,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs_kinesis_s
 
       common_attributes {
         name  = "subsystemName"
-        value = var.subsystem_name 
+        value = var.subsystem_name
       }
 
       common_attributes {
@@ -199,7 +199,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs_direct_pu
   tags        = local.tags
   name        = "coralogix-${var.firehose_stream}-logs"
   destination = "http_endpoint"
-  count = var.source_type_logs == "DirectPut" && var.logs_enable == true ? 1 : 0
+  count       = var.source_type_logs == "DirectPut" && var.logs_enable == true ? 1 : 0
 
   http_endpoint_configuration {
     url                = var.coralogix_firehose_custom_endpoint != null ? var.coralogix_firehose_custom_endpoint : local.endpoint_url[var.coralogix_region].url
@@ -210,7 +210,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs_direct_pu
     s3_backup_mode     = "FailedDataOnly"
     role_arn           = aws_iam_role.firehose_to_coralogix.arn
     retry_duration     = 300
-    #
+
     s3_configuration {
       role_arn           = aws_iam_role.firehose_to_coralogix.arn
       bucket_arn         = aws_s3_bucket.firehose_bucket.arn
@@ -218,8 +218,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs_direct_pu
       buffering_interval = 300
       compression_format = "GZIP"
     }
-    
-    #v
+
     cloudwatch_logging_options {
       enabled         = "true"
       log_group_name  = aws_cloudwatch_log_group.firehose_loggroup.name
@@ -236,12 +235,12 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs_direct_pu
 
       common_attributes {
         name  = "applicationName"
-        value = local.application_name 
+        value = local.application_name
       }
 
       common_attributes {
         name  = "subsystemName"
-        value = var.subsystem_name 
+        value = var.subsystem_name
       }
 
       common_attributes {
@@ -254,21 +253,21 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs_direct_pu
 
 
 resource "aws_iam_role_policy_attachment" "example_policy_attachment" {
-  count = var.logs_enable == true ? 1 : 0
+  count      = var.logs_enable == true ? 1 : 0
   role       = aws_iam_role.firehose_to_coralogix.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonKinesisFirehoseFullAccess" 
+  policy_arn = "arn:aws:iam::aws:policy/AmazonKinesisFirehoseFullAccess"
 }
 
 resource "aws_iam_role_policy_attachment" "additional_policy_attachment_1" {
-  count = var.logs_enable == true ? 1 : 0
+  count      = var.logs_enable == true ? 1 : 0
   role       = aws_iam_role.firehose_to_coralogix.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonKinesisReadOnlyAccess" 
+  policy_arn = "arn:aws:iam::aws:policy/AmazonKinesisReadOnlyAccess"
 }
 
 resource "aws_iam_role_policy_attachment" "additional_policy_attachment_2" {
-  count = var.logs_enable == true ? 1 : 0
+  count      = var.logs_enable == true ? 1 : 0
   role       = aws_iam_role.firehose_to_coralogix.name
-  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"  
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
 }
 
 ################################################################################
@@ -276,7 +275,7 @@ resource "aws_iam_role_policy_attachment" "additional_policy_attachment_2" {
 ################################################################################
 
 resource "aws_iam_role_policy" "firehose_to_http_metric_policy" {
-  count = var.metric_enable == true ? 1 : 0
+  count  = var.metric_enable == true ? 1 : 0
   name   = "firehose_to_http_metric_policy"
   role   = aws_iam_role.firehose_to_coralogix.id
   policy = <<EOF
@@ -364,14 +363,14 @@ data "aws_iam_policy_document" "lambda_assume_role" {
 }
 
 resource "aws_iam_role" "lambda_iam" {
-  count = var.metric_enable == true ? 1 : 0
+  count              = var.metric_enable == true ? 1 : 0
   name               = "${var.firehose_stream}-metrics-transform-lambda-iam"
   tags               = local.tags
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role[count.index].json
 }
 
 resource "aws_iam_role_policy" "lambda_iam_policy" {
-  count = var.metric_enable == true ? 1 : 0
+  count  = var.metric_enable == true ? 1 : 0
   name   = "${var.firehose_stream}-metrics-transform-lambda-iam"
   role   = aws_iam_role.lambda_iam[count.index].id
   policy = <<EOF
@@ -414,14 +413,14 @@ EOF
 }
 
 resource "aws_cloudwatch_log_group" "loggroup" {
-  count = var.metric_enable == true ? 1 : 0
+  count             = var.metric_enable == true ? 1 : 0
   name              = "/aws/lambda/${aws_lambda_function.lambda_processor[count.index].function_name}"
   retention_in_days = var.cloudwatch_retention_days
   tags              = local.tags
 }
 
 resource "aws_lambda_function" "lambda_processor" {
-  count = var.metric_enable ? 1 : 0
+  count         = var.metric_enable ? 1 : 0
   s3_bucket     = "cx-cw-metrics-tags-lambda-processor-${data.aws_region.current_region.name}"
   s3_key        = "function.zip"
   function_name = "${var.firehose_stream}-metrics-tags-processor"
@@ -455,7 +454,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_metrics" {
       buffering_interval = 300
       compression_format = "GZIP"
     }
-    
+
     cloudwatch_logging_options {
       enabled         = "true"
       log_group_name  = aws_cloudwatch_log_group.firehose_loggroup.name
@@ -560,7 +559,7 @@ resource "aws_cloudwatch_metric_stream" "cloudwatch_metric_stream" {
   dynamic "include_filter" {
     for_each = var.include_metric_stream_namespaces
     content {
-      namespace = "${include_filter.value}"
+      namespace = include_filter.value
     }
   }
   dynamic "include_filter" {
