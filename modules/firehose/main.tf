@@ -182,9 +182,12 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs_kinesis_s
         value = local.application_name
       }
 
-      common_attributes {
-        name  = "subsystemName"
-        value = var.subsystem_name 
+      dynamic common_attributes {
+        for_each = var.subsystem_name == "" ? [] : [1]
+        content {
+          name  = "subsystemName"
+          value = var.subsystem_name 
+        }
       }
 
       common_attributes {
@@ -239,9 +242,12 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs_direct_pu
         value = local.application_name 
       }
 
-      common_attributes {
-        name  = "subsystemName"
-        value = var.subsystem_name 
+      dynamic common_attributes {
+        for_each = var.subsystem_name == "" ? [] : [1]
+        content {
+          name  = "subsystemName"
+          value = var.subsystem_name 
+        }
       }
 
       common_attributes {
