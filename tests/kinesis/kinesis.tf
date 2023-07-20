@@ -15,10 +15,10 @@ provider "aws" {
 module "kinesis" {
   source = "../../modules/kinesis"
 
-  coralogix_region        = "Europe"
-  private_key             = "{{ secrets.TESTING_PRIVATE_KEY }}"
-  ssm_enable              = "false"
-  application_name        = "kinesis"
-  subsystem_name          = "logs"
-  kinesis_stream_name     = "github-action-test-data-stream"
+  coralogix_region    = "Europe"
+  private_key         = "{{ secrets.TESTING_PRIVATE_KEY }}"
+  ssm_enable          = "false"
+  application_name    = "kinesis"
+  subsystem_name      = "logs"
+  kinesis_stream_name = "github-action-test-data-stream"
 }  
