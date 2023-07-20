@@ -61,7 +61,7 @@ variable "application_name" {
 variable "subsystem_name" {
   description = "The subsystem name of your application in Coralogix"
   type        = string
-  default     = ""
+  default     = null
 }
 
 variable "user_supplied_tags" {
@@ -109,7 +109,7 @@ variable "kinesis_stream_arn" {
 variable "integration_type_logs" {
   description = "The integration type of the firehose delivery stream: 'CloudWatch_JSON', 'WAF', 'CloudWatch_CloudTrail', 'EksFargate', 'Default', 'RawText'"
   type        = string
-  default     = ""
+  default     = null
 }
 
 variable "dynamic_metadata_logs" {
