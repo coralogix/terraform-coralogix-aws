@@ -94,7 +94,6 @@ variable "metric_enable" {
   default     = true
 }
 
-#for logs:
 variable "source_type_logs" {
   description = "The source_type of kinesis firehose: KinesisStreamAsSource or DirectPut"
   type        = string
