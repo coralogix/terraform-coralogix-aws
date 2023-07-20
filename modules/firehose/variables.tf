@@ -49,7 +49,7 @@ variable "output_format" {
 variable "integration_type_metrics" {
   description = "The integration type of the firehose delivery stream: 'CloudWatch_Metrics_JSON' or 'CloudWatch_Metrics_OpenTelemetry070'"
   type        = string
-  default     = "CloudWatch_Metrics_OpenTelemetry070"
+  default     = ""
 }
 
 variable "application_name" {
@@ -94,7 +94,6 @@ variable "metric_enable" {
   default     = true
 }
 
-#for logs:
 variable "source_type_logs" {
   description = "The source_type of kinesis firehose: KinesisStreamAsSource or DirectPut"
   type        = string
