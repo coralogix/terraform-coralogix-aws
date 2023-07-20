@@ -110,7 +110,7 @@ variable "kinesis_stream_arn" {
 variable "integration_type_logs" {
   description = "The integration type of the firehose delivery stream: 'CloudWatch_JSON', 'WAF', 'CloudWatch_CloudTrail', 'EksFargate', 'Default', 'RawText'"
   type        = string
-  default     = "Default"
+  default     = ""
 }
 
 variable "dynamic_metadata_logs" {

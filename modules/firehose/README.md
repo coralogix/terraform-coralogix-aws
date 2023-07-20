@@ -185,7 +185,7 @@ then the CloudWatch metric stream must be configured with the same format, confi
 | <a name="input_logs_enable"></a> [logs_enable](#input\_logs_enable) | Enble sending logs to Coralogix | `bool` | `false` | no |
 | <a name="input_source_type_logs"></a> [source_type_logs](#input\_source_type_logs) | The source_type of kinesis firehose: KinesisStreamAsSource or DirectPut | `string` | `DirectPut` | no |
 | <a name="input_kinesis_stream_arn"></a> [kinesis_stream_arn](#input\_kinesis_stream_arn) | The kinesis stream name for the logs - used in kinesis stream as a source | `string` | `""` | no |
-| <a name="input_kinesis_stream_arn"></a> [kinesis_stream_arn](#input\_integration_type_logs) | The integration type of the firehose delivery stream: 'CloudWatch_JSON', 'WAF', 'CloudWatch_CloudTrail', 'EksFargate', 'Default', 'RawText' | `string` | `Default` | no |
+| <a name="input_integration_type_logs"></a> [integration_type_logs](#input\_integration_type_logs) | The integration type of the firehose delivery stream: 'CloudWatch_JSON', 'WAF', 'CloudWatch_CloudTrail', 'EksFargate', 'Default', 'RawText' | `string` | `Default` | no |
 | <a name="input_dynamic_metadata_logs"></a> [dynamic_metadata_logs](#input\_dynamic_metadata_logs) | Dynamic values search for specific fields in the logs to populate the fields | `bool` | `false` | no |
 
 

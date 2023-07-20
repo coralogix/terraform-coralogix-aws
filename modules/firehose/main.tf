@@ -31,7 +31,6 @@ locals {
     managed-by               = "coralogix-terraform"
     custom_endpoint           = var.coralogix_firehose_custom_endpoint != null ? var.coralogix_firehose_custom_endpoint : ""
   })
-  application_name = var.application_name == null ? "coralogix-${var.firehose_stream}" : var.application_name
 }
 
 data "aws_caller_identity" "current_identity" {}
@@ -172,21 +171,27 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs_kinesis_s
     request_configuration {
       content_encoding = "GZIP"
 
-      common_attributes {
-        name  = "integrationType"
-        value = var.integration_type_logs
+      dynamic "common_attributes" {
+        for_each = var.integration_type_logs == "" ? [] : [1]
+        content {
+          name  = "integrationType"
+          value = var.integration_type_logs
+        }
       }
 
-      common_attributes {
-        name  = "applicationName"
-        value = local.application_name
+      dynamic "common_attributes" {
+        for_each = var.application_name == "" ? [] : [1]
+        content {
+          name  = "applicationName"
+          value = var.application_name
+        }
       }
 
-      dynamic common_attributes {
+      dynamic "common_attributes" {
         for_each = var.subsystem_name == "" ? [] : [1]
         content {
           name  = "subsystemName"
-          value = var.subsystem_name 
+          value = var.subsystem_name
         }
       }
 
@@ -232,21 +237,27 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs_direct_pu
     request_configuration {
       content_encoding = "GZIP"
 
-      common_attributes {
-        name  = "integrationType"
-        value = var.integration_type_logs
+      dynamic "common_attributes" {
+        for_each = var.integration_type_logs == "" ? [] : [1]
+        content {
+          name  = "integrationType"
+          value = var.integration_type_logs
+        }
       }
 
-      common_attributes {
-        name  = "applicationName"
-        value = local.application_name 
+      dynamic "common_attributes" {
+        for_each = var.application_name == "" ? [] : [1]
+        content {
+          name  = "applicationName"
+          value = var.application_name
+        }
       }
 
-      dynamic common_attributes {
+      dynamic "common_attributes" {
         for_each = var.subsystem_name == "" ? [] : [1]
         content {
           name  = "subsystemName"
-          value = var.subsystem_name 
+          value = var.subsystem_name
         }
       }
 
@@ -471,14 +482,20 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_metrics" {
     request_configuration {
       content_encoding = "GZIP"
 
-      common_attributes {
-        name  = "integrationType"
-        value = var.integration_type_metrics
+      dynamic "common_attributes" {
+        for_each = var.integration_type_logs == "" ? [] : [1]
+        content {
+          name  = "integrationType"
+          value = var.integration_type_logs
+        }
       }
 
-      common_attributes {
-        name  = "applicationName"
-        value = local.application_name
+      dynamic "common_attributes" {
+        for_each = var.application_name == "" ? [] : [1]
+        content {
+          name  = "applicationName"
+          value = var.application_name
+        }
       }
     }
 
