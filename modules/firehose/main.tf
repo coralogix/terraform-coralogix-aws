@@ -195,9 +195,12 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs_kinesis_s
         }
       }
 
-      common_attributes {
-        name  = "dynamicMetadata"
-        value = var.dynamic_metadata_logs
+      dynamic "common_attributes" {
+        for_each = var.dynamic_metadata_logs == null ? [] : [1]
+        content {
+          name  = "dynamicMetadata"
+          value = var.dynamic_metadata_logs
+        }
       }
     }
   }
@@ -260,9 +263,12 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs_direct_pu
         }
       }
 
-      common_attributes {
-        name  = "dynamicMetadata"
-        value = var.dynamic_metadata_logs
+      dynamic "common_attributes" {
+        for_each = var.dynamic_metadata_logs == null ? [] : [1]
+        content {
+          name  = "dynamicMetadata"
+          value = var.dynamic_metadata_logs
+        }
       }
     }
   }

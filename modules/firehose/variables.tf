@@ -115,5 +115,5 @@ variable "integration_type_logs" {
 variable "dynamic_metadata_logs" {
   description = "Dynamic values search for specific fields in the logs to populate the fields"
   type        = bool
-  default     = false
+  default     = null
 }
