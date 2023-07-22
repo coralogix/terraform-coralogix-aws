@@ -49,7 +49,7 @@ variable "output_format" {
 variable "integration_type_metrics" {
   description = "The integration type of the firehose delivery stream: 'CloudWatch_Metrics_JSON' or 'CloudWatch_Metrics_OpenTelemetry070'"
   type        = string
-  default     = "CloudWatch_Metrics_OpenTelemetry070"
+  default     = ""
 }
 
 variable "application_name" {
@@ -61,7 +61,7 @@ variable "application_name" {
 variable "subsystem_name" {
   description = "The subsystem name of your application in Coralogix"
   type        = string
-  default     = ""
+  default     = null
 }
 
 variable "user_supplied_tags" {
@@ -109,11 +109,11 @@ variable "kinesis_stream_arn" {
 variable "integration_type_logs" {
   description = "The integration type of the firehose delivery stream: 'CloudWatch_JSON', 'WAF', 'CloudWatch_CloudTrail', 'EksFargate', 'Default', 'RawText'"
   type        = string
-  default     = "Default"
+  default     = null
 }
 
 variable "dynamic_metadata_logs" {
   description = "Dynamic values search for specific fields in the logs to populate the fields"
   type        = bool
-  default     = false
+  default     = null
 }
