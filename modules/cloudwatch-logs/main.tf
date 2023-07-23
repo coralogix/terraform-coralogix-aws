@@ -32,7 +32,7 @@ module "lambda" {
   create_package         = false
   destination_on_failure = aws_sns_topic.this.arn
   environment_variables = {
-    coralogix_url   = var.custom_url == "" ? lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe") : var.custom_url
+    CORALOGIX_URL   = var.custom_url == "" ? lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe") : var.custom_url
     private_key     = var.private_key
     app_name        = var.application_name
     sub_name        = var.subsystem_name
@@ -76,7 +76,7 @@ module "lambdaSSM" {
   create_package         = false
   destination_on_failure = aws_sns_topic.this.arn
   environment_variables = {
-    coralogix_url           = var.custom_url == "" ? lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe") : var.custom_url
+    CORALOGIX_URL           = var.custom_url == "" ? lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe") : var.custom_url
     AWS_LAMBDA_EXEC_WRAPPER = "/opt/wrapper.sh"
     private_key             = "****"
     app_name                = var.application_name
