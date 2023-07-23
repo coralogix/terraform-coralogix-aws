@@ -49,7 +49,7 @@ variable "output_format" {
 variable "integration_type_metrics" {
   description = "The integration type of the firehose delivery stream: 'CloudWatch_Metrics_JSON' or 'CloudWatch_Metrics_OpenTelemetry070'"
   type        = string
-  default     = ""
+  default     = null
 }
 
 variable "application_name" {
