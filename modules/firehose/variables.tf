@@ -34,6 +34,16 @@ variable "include_metric_stream_filter" {
   default = []
 }
 
+variable "metric_statistics_configurations" {
+  description = "For each entry, specify one or more metrics (metric_name and namespace) and the list of additional statistics to stream for those metrics. Each configuration of metric name and namespace can have a list of additional_statistics included into the AWS CloudWatch Metric Stream."
+  type = list(object({
+    additional_statistics = list(string)
+    metric_name           = string
+    namespace             = string
+  }))
+  default = []
+}
+
 variable "enable_cloudwatch_metricstream" {
   description = "Should be true if you want to create a new Cloud Watch metric stream and attach it to Firehose"
   type        = bool
