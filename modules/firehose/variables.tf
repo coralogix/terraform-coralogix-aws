@@ -41,7 +41,44 @@ variable "metric_statistics_configurations" {
     metric_name           = string
     namespace             = string
   }))
-  default = []
+  default = [
+    {
+      additional_statistics = ["p99", "p95"],
+      metric_name           = "VolumeTotalReadTime",
+      namespace             = "AWS/EBS"
+    },
+    {
+      additional_statistics = ["p99", "p95"],
+      metric_name           = "VolumeTotalWriteTime",
+      namespace             = "AWS/EBS"
+    },
+    {
+      additional_statistics = ["p99", "p95"],
+      metric_name           = "Latency",
+      namespace             = "AWS/ELB"
+    },
+    {
+      additional_statistics = ["p99", "p95"],
+      metric_name           = "Duration",
+      namespace             = "AWS/ELB"
+    },
+    {
+      additional_statistics = ["p99", "p95"],
+      metric_name           = "PostRuntimeExtensionsDuration",
+      namespace             = "AWS/Lambda"
+    },
+    {
+      additional_statistics = ["p99", "p95"],
+      metric_name           = "FirstByteLatency",
+      namespace             = "AWS/S3"
+    },
+    {
+      additional_statistics = ["p99", "p95"],
+      metric_name           = "TotalRequestLatency",
+      namespace             = "AWS/S3"
+    }
+    # Add more configurations as needed
+  ]
 }
 
 variable "enable_cloudwatch_metricstream" {
