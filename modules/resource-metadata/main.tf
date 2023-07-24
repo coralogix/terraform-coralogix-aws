@@ -24,14 +24,14 @@ module "eventbridge" {
   rules = {
     crons = {
       description         = "Trigger for a Lambda"
-      schedule_expression = "rate(5 minutes)"
+      schedule_expression = var.schedule
     }
   }
 
   targets = {
     crons = [
       {
-        name  = "lambda-loves-cron"
+        name  = "cron-for-lambda"
         arn   = var.ssm_enable != "True" ? module.lambda.lambda_function_arn : module.lambdaSSM.lambda_function_arn
         input = jsonencode({ "job" : "cron-by-rate" })
       }
