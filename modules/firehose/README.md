@@ -66,7 +66,7 @@ For more granular inclusive filters of metric names belonging to an included nam
 
 The variable 'include_metric_stream_filter' can be used to send only conditional metric names belonging to a selected metric namespace. For any selected namespace where the metric names list is empty or not specified, all metrics in that namespace is included.
 
-Note: 'include_metric_stream_namespaces' and 'include_metric_stream_filter' are independent but related the same metric stream include filter and may conflict. If error or metrics do not show, check console CloudWatch -> Metrics -> Streams -> Selected Metrics table on result.
+**Note**: 'include_metric_stream_namespaces' and 'include_metric_stream_filter' are independent but related the same metric stream include filter and may conflict. If error or metrics do not show, check console CloudWatch -> Metrics -> Streams -> Selected Metrics table on result.
 
 Metric namespaces are also case-sensitive, please see the [AWS namespaces list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html). For case-sensitive metric names belonging to a namespace, please see the [AWS View available metrics guide](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/viewing_metrics_with_cloudwatch.html)
 
@@ -108,7 +108,7 @@ Provide a list of additional statistics for the specified metrics. For each entr
 
 Depending on the `output_format` variable configured. The `json` format would support streaming of statistics provided by CloudWatch and the `opentelemetry0.7` (default) supports streaming percentile statistics (p99 etc.). 
 
-Set `additional_metric_statistics_enable` to `true` to enable the additional statistics configuration, defaults to `false`.
+Set `additional_metric_statistics_enable` to `true` to enable.
 
 ```
 module "cloudwatch_firehose_coralogix" {
@@ -123,7 +123,7 @@ module "cloudwatch_firehose_coralogix" {
 }
 ```
 
-Where the variable 'additional_metric_statistics' can be set as follows:
+Where the variable `additional_metric_statistics` can be set as follows:
 ```
 variable "additional_metric_statistics" {
   description = "Each configuration of metric name and namespace can have a list of additional_statistics included into the AWS CloudWatch Metric Stream."
