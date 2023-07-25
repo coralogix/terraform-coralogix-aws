@@ -594,8 +594,20 @@ resource "aws_cloudwatch_metric_stream" "cloudwatch_metric_stream" {
   dynamic "include_filter" {
     for_each = var.include_metric_stream_filter
     content {
-      namespace    = include_filter.value["namespace"]
-      metric_names = include_filter.value["metric_names"]
+      namespace    = include_filter.value.namespace
+      metric_names = include_filter.value.metric_names
+    }
+  }
+
+  dynamic "statistics_configuration" {
+    for_each = var.additional_metric_statistics_enable == true ? var.additional_metric_statistics : []
+    content {
+      additional_statistics = statistics_configuration.value.additional_statistics
+
+      include_metric {
+        metric_name = statistics_configuration.value.metric_name
+        namespace   = statistics_configuration.value.namespace
+      }
     }
   }
 }

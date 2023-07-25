@@ -64,9 +64,9 @@ module "cloudwatch_firehose_coralogix" {
 Provision a firehose delivery stream with [CloudWatch metric stream](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html).
 For more granular inclusive filters of metric names belonging to an included namespace:
 
-The variable 'include_metric_stream_filter' can be used to send only conditional metric names belonging to a selected metric namespace. For any selected namespace where the metric names list is empty or not specified, all metrics in that namespace is included.
+The variable `include_metric_stream_filter` can be used to send only conditional metric names belonging to a selected metric namespace. For any selected namespace where the metric names list is empty or not specified, all metrics in that namespace is included.
 
-Note: 'include_metric_stream_namespaces' and 'include_metric_stream_filter' are independent but related the same metric stream include filter and may conflict. If error or metrics do not show, check console CloudWatch -> Metrics -> Streams -> Selected Metrics table on result.
+**Note**: `include_metric_stream_namespaces` and `include_metric_stream_filter` are independent but related the same metric stream include filter and may conflict. If error or metrics do not show, check console _CloudWatch_ -> _Metrics_ -> _Streams_ -> _Selected Metrics_ table on result.
 
 Metric namespaces are also case-sensitive, please see the [AWS namespaces list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html). For case-sensitive metric names belonging to a namespace, please see the [AWS View available metrics guide](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/viewing_metrics_with_cloudwatch.html)
 
@@ -76,21 +76,9 @@ module "cloudwatch_firehose_coralogix" {
   metric_enable                    = true
   firehose_stream                  = var.coralogix_firehose_stream_name
   private_key                      = var.private_key
-  include_metric_stream_filter     = var.include_metric_stream_filter
-  coralogix_region                 = var.coralogix_region
-}
-```
-
-Where the variable 'include_metric_stream_filter' can be set as follows:
-```
-variable "include_metric_stream_filter" {
-  description = "List of inclusive metric filters for namespace and metric_names. Specify this parameter, the stream sends only the conditional metric names from the metric namespaces that you specify here. If metric names is empty or not specified, the whole metric namespace is included"
-  type = list(object({
-    namespace    = string
-    metric_names = list(string)
-    })
-  )
-  default = [
+  
+  # If metric names is empty or not specified, the whole metric namespace is included
+  include_metric_stream_filter     = [
     {
       namespace    = "AWS/EC2"
       metric_names = ["CPUUtilization", "NetworkOut"]
@@ -100,6 +88,44 @@ variable "include_metric_stream_filter" {
       metric_names = ["BucketSizeBytes"]
     },
   ]
+  coralogix_region                 = var.coralogix_region
+}
+```
+
+### Additional Statistics
+Provide a list of additional statistics for the specified metrics. For each entry, specify one or more metrics (metric_name and namespace) and a list of corresponding statistics to include in the CloudWatch metric stream.
+
+Depending on the `output_format` variable configured. The `json` format would support streaming of statistics provided by CloudWatch and the `opentelemetry0.7` (default) supports streaming percentile statistics (p99 etc.). 
+
+Set `additional_metric_statistics_enable` to `true` to enable.
+
+```
+module "cloudwatch_firehose_coralogix" {
+  source                           = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
+  metric_enable                       = true
+  firehose_stream                     = var.coralogix_firehose_stream_name
+  private_key                         = var.private_key
+  include_metric_stream_filter        = var.include_metric_stream_filter
+
+  additional_metric_statistics_enable = true
+  additional_metric_statistics        = [
+    {
+      additional_statistics = ["p50", "p75", "p95", "p99"],
+      metric_name           = "VolumeTotalReadTime",
+      namespace             = "AWS/EBS"
+    },
+    {
+      additional_statistics = ["p50", "p75", "p95", "p99"],
+      metric_name           = "FirstByteLatency",
+      namespace             = "AWS/S3"
+    },
+    {
+      additional_statistics = ["p95", "p99"],
+      metric_name           = "TotalRequestLatency",
+      namespace             = "AWS/S3"
+    }
+  ]
+  coralogix_region                    = var.coralogix_region
 }
 ```
 
