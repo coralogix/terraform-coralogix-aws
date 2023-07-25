@@ -12,24 +12,24 @@ variable "metrics_bucket_name" {
 
 variable "log_kms_enalbed" {
   type        = bool
-  description = "whether to use KMS or not"
+  description = "whether to use KMS for the logs bucket or not"
   default     = false
 }
 
 variable "log_kms_arn" {
   type        = string
-  description = "Kms arn"
+  description = "The arn for the logs bucket KMS"
   default     = ""
 }
 
 variable "metrics_kms_enalbed" {
   type        = bool
-  description = "whether to use KMS or not"
+  description = "whether to use KMS for the metrics bucket or not"
   default     = false
 }
 
 variable "metrics_kms_arn" {
   type        = string
-  description = "Kms arn"
+  description = "The arn for the metrics bucket KMS"
   default     = ""
 }

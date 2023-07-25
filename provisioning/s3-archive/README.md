@@ -1,6 +1,6 @@
 The module s3-archive will create s3 buckets to archive your coralogix logs and metrics
 
-The template can run only on the following regions eu-west-1,eu-north-1,ap-southeast-1,ap-south-1,us-east-2
+The module can run only on the following regions eu-west-1,eu-north-1,ap-southeast-1,ap-south-1,us-east-2
 
 ## Requirements
 
@@ -15,16 +15,16 @@ The template can run only on the following regions eu-west-1,eu-north-1,ap-south
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.15.1 |
 
-| Variable name | Description | Type | Default | Required |
+| Variable name | Description | Type | Default |
 |------|-------------|------|---------|:--------:|
-| log_bucket_name | The name of the S3 bucket to create for the logs archive (Leave empty if not needed) | `string` | n/a | no |
-| metrics_bucket_name | The name of the S3 bucket to create for the Metrics archive (Leave empty if not needed) | `string` | n/a | no |
-| log_kms_enalbed | Use kms encription or not | `boolean` | false | no |
-| metrics_kms_enalbed | Use kms encription or not | `boolean` | false | no |
-| log_kms_arn | In case that kms_enalbed is true, the arn of your kms | `string` | n/a | no |
-| metrics_kms_arn | In case that kms_enalbed is true, the arn of your kms | `string` | n/a | no |
+| log_bucket_name | The name of the S3 bucket to create for the logs archive (Leave empty if not needed) | `string` | n/a |
+| metrics_bucket_name | The name of the S3 bucket to create for the Metrics archive (Leave empty if not needed) | `string` | n/a |
+| log_kms_enalbed | Use kms encription or not | `boolean` | false |
+| metrics_kms_enalbed | Use kms encription or not | `boolean` | false |
+| log_kms_arn | In case that kms_enalbed is true, the arn of your kms | `string` | n/a |
+| metrics_kms_arn | In case that kms_enalbed is true, the arn of your kms | `string` | n/a |
 
-### Run the module
+### To run the module
 ```hcl
 provider "aws" {
 }
