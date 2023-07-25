@@ -84,7 +84,7 @@ module "cloudwatch_firehose_coralogix" {
 Where the variable 'include_metric_stream_filter' can be set as follows:
 ```
 variable "include_metric_stream_filter" {
-  description = "List of inclusive metric filters for namespace and metric_names. Specify this parameter, the stream sends only the conditional metric names from the metric namespaces that you specify here. If metric names is empty or not specified, the whole metric namespace is included"
+  description = "List of inclusive metric filters for namespace and metric_names."
   type = list(object({
     namespace    = string
     metric_names = list(string)
@@ -99,6 +99,55 @@ variable "include_metric_stream_filter" {
       namespace    = "AWS/S3"
       metric_names = ["BucketSizeBytes"]
     },
+  ]
+}
+```
+
+### Additional Statistics
+Provide a list of additional statistics for the specified metrics. For each entry, specify one or more metrics (metric_name and namespace) and a list of corresponding statistics to include in the CloudWatch metric stream.
+
+Depending on the `output_format` variable configured. The `json` format would support streaming of statistics provided by CloudWatch and the `opentelemetry0.7` (default) supports streaming percentile statistics (p99 etc.). 
+
+Set `additional_metric_statistics_enable` to `true` to enable the additional statistics configuration, defaults to `false`.
+
+```
+module "cloudwatch_firehose_coralogix" {
+  source                           = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
+  metric_enable                       = true
+  firehose_stream                     = var.coralogix_firehose_stream_name
+  private_key                         = var.private_key
+  include_metric_stream_filter        = var.include_metric_stream_filter
+  additional_metric_statistics        = var.additional_metric_statistics
+  additional_metric_statistics_enable = true
+  coralogix_region                    = var.coralogix_region
+}
+```
+
+Where the variable 'additional_metric_statistics' can be set as follows:
+```
+variable "additional_metric_statistics" {
+  description = "Each configuration of metric name and namespace can have a list of additional_statistics included into the AWS CloudWatch Metric Stream."
+  type = list(object({
+    additional_statistics = list(string)
+    metric_name           = string
+    namespace             = string
+  }))
+  default = [
+    {
+      additional_statistics = ["p50", "p75", "p95", "p99"],
+      metric_name           = "VolumeTotalReadTime",
+      namespace             = "AWS/EBS"
+    },
+    {
+      additional_statistics = ["p50", "p75", "p95", "p99"],
+      metric_name           = "FirstByteLatency",
+      namespace             = "AWS/S3"
+    },
+    {
+      additional_statistics = ["p95", "p99"],
+      metric_name           = "TotalRequestLatency",
+      namespace             = "AWS/S3"
+    }
   ]
 }
 ```

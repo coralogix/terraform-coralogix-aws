@@ -600,7 +600,7 @@ resource "aws_cloudwatch_metric_stream" "cloudwatch_metric_stream" {
   }
 
   dynamic "statistics_configuration" {
-    for_each = var.metric_statistics_configurations
+    for_each = var.additional_metric_statistics_enable == true ? var.additional_metric_statistics : []
     content {
       additional_statistics = statistics_configuration.value.additional_statistics
 
