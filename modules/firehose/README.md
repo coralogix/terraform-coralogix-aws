@@ -76,21 +76,9 @@ module "cloudwatch_firehose_coralogix" {
   metric_enable                    = true
   firehose_stream                  = var.coralogix_firehose_stream_name
   private_key                      = var.private_key
-  include_metric_stream_filter     = var.include_metric_stream_filter
-  coralogix_region                 = var.coralogix_region
-}
-```
-
-Where the variable 'include_metric_stream_filter' can be set as follows:
-```
-variable "include_metric_stream_filter" {
-  description = "List of inclusive metric filters for namespace and metric_names."
-  type = list(object({
-    namespace    = string
-    metric_names = list(string)
-    })
-  )
-  default = [
+  
+  # If metric names is empty or not specified, the whole metric namespace is included
+  include_metric_stream_filter     = [
     {
       namespace    = "AWS/EC2"
       metric_names = ["CPUUtilization", "NetworkOut"]
@@ -100,6 +88,7 @@ variable "include_metric_stream_filter" {
       metric_names = ["BucketSizeBytes"]
     },
   ]
+  coralogix_region                 = var.coralogix_region
 }
 ```
 
@@ -117,22 +106,9 @@ module "cloudwatch_firehose_coralogix" {
   firehose_stream                     = var.coralogix_firehose_stream_name
   private_key                         = var.private_key
   include_metric_stream_filter        = var.include_metric_stream_filter
-  additional_metric_statistics        = var.additional_metric_statistics
-  additional_metric_statistics_enable = true
-  coralogix_region                    = var.coralogix_region
-}
-```
 
-Where the variable `additional_metric_statistics` can be set as follows:
-```
-variable "additional_metric_statistics" {
-  description = "Each configuration of metric name and namespace can have a list of additional_statistics included into the AWS CloudWatch Metric Stream."
-  type = list(object({
-    additional_statistics = list(string)
-    metric_name           = string
-    namespace             = string
-  }))
-  default = [
+  additional_metric_statistics_enable = true
+  additional_metric_statistics        = [
     {
       additional_statistics = ["p50", "p75", "p95", "p99"],
       metric_name           = "VolumeTotalReadTime",
@@ -149,6 +125,7 @@ variable "additional_metric_statistics" {
       namespace             = "AWS/S3"
     }
   ]
+  coralogix_region                    = var.coralogix_region
 }
 ```
 
