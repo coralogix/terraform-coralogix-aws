@@ -25,9 +25,9 @@ jobs:
           fetch-depth: 0
 
       - name: Release
-        uses: cycjimmy/semantic-release-action@v3
+        uses: cycjimmy/semantic-release-action@v3.4.2
         with:
-          semantic_version: 19.0.2
+          semantic_version: 19.0.5
           extra_plugins: |
             conventional-changelog-conventionalcommits@4.6.3
         env:
