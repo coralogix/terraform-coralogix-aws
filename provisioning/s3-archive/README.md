@@ -16,7 +16,7 @@ The module can run only on the following regions eu-west-1,eu-north-1,ap-southea
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.15.1 |
 
 | Variable name | Description | Type | Default |
-|------|-------------|------|---------|:--------:|
+|------|-------------|------|:--------:|
 | log_bucket_name | The name of the S3 bucket to create for the logs archive (Leave empty if not needed) | `string` | n/a |
 | metrics_bucket_name | The name of the S3 bucket to create for the Metrics archive (Leave empty if not needed) | `string` | n/a |
 | log_kms_enalbed | Use kms encription or not | `boolean` | false |
