@@ -9,9 +9,9 @@ variable "bypass_valid_region" {
   default     = false
 }
 
-variable "log_bucket_name" {
+variable "logs_bucket_name" {
   type        = string
-  description = "The name of the S3 bucket to create for the Logs archive (Leave empty if not needed)"
+  description = "The name of the S3 bucket to create for the logs archive (Leave empty if not needed)"
   default     = ""
 }
 
@@ -21,7 +21,7 @@ variable "metrics_bucket_name" {
   default     = ""
 }
 
-variable "log_kms_arn" {
+variable "logs_kms_arn" {
   type        = string
   description = "The arn for the logs bucket KMS"
   default     = ""

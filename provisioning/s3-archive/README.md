@@ -15,13 +15,13 @@ The module can run only on the following regions eu-west-1,eu-north-1,ap-southea
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.15.1 |
 
-| Variable name | Description | Type | Default |
-|------|-------------|------|:--------:|
-| coralogix_region | The AWS Region where your [coralogix account](https://coralogix.com/docs/coralogix-domain/) is set, Note: Must be the same as the region you create the S3 bucket | `string` | n/a |
-| log_bucket_name | The name of the S3 bucket to create for the logs archive (Leave empty if not needed), must follow [AWS naming rules](https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html) | `string` | n/a |
-| metrics_bucket_name | The name of the S3 bucket to create for the Metrics archive (Leave empty if not needed), must follow [AWS naming rules](https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html) | `string` | n/a |
-| log_kms_arn |  In case that you want to use KMS for the logs bucket - the arn of your kms. Make sure that the kms is in the same region as your bucket | `string` | n/a |
-| metrics_kms_arn | In case that you want to use KMS for the metrics bucket - the arn of your kms. Make sure that the kms is in the same region as your bucket | `string` | n/a |
+| Variable name | Description | Type | Default | Required | 
+|------|-------------|------|------|:--------:|
+| coralogix_region | The AWS Region where your [coralogix account](https://coralogix.com/docs/coralogix-domain/) is set, Note: Must be the same as the region you create the S3 bucket | `string` | n/a | :heavy_check_mark: |
+| logs_bucket_name | The name of the S3 bucket to create for the logs archive (Leave empty if not needed), Note: bucket name must follow [AWS naming rules](https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html) | `string` | n/a | |
+| metrics_bucket_name | The name of the S3 bucket to create for the metrics archive (Leave empty if not needed), Note: bucket name must follow [AWS naming rules](https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html) | `string` | n/a | |
+| logs_kms_arn |  The arn of your kms for the logs bucket , Note: make sure that the kms is in the same region as your bucket | `string` | n/a | |
+| metrics_kms_arn | The arn of your kms for the metrics bucket , Note: make sure that the kms is in the same region as your bucket | `string` | n/a | |
 
 ### To run the module
 ```hcl
@@ -32,7 +32,7 @@ module "s3-archive" {
   source = "coralogix/aws/coralogix//provisioning/s3-archive"
 
   coralogix_region    = "<your coralogix region>"
-  log_bucket_name     = "<your bucket name>"
+  logs_bucket_name     = "<your bucket name>"
   metrics_bucket_name = "<your bucket name>"
 }
 ```
