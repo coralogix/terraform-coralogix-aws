@@ -116,6 +116,28 @@ $ terraform plan
 $ terraform apply
 ```
 
+# resource-metadata:
+
+```hcl
+provider "aws" {
+}
+
+module "coralogix-resource-metadata" {
+  source = "coralogix/aws/coralogix//modules/resource-metadata"
+
+  coralogix_region   = "Europe"
+  private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  ssm_enable         = "false"
+  layer_arn          = "<your layer arn>"
+}
+```
+now execute:
+```bash
+$ terraform init
+$ terraform plan
+$ terraform apply
+```
+
 ## Modules
 
 - [cloudwatch-logs](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/cloudwatch-logs) - Send logs from `CloudWatch`.
@@ -123,6 +145,7 @@ $ terraform apply
 - [eventbridge](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/eventbridge) - Send logs from `eventbrdge`.
 - [firehose](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/firehose) -  Send metrics stream and logs with `firehose`.
 - [kinesis](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/kinesis) - Send logs from `kinesis data stream` with lambda.
+- [resource-metadata](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/resource-metadata) - Send metadata from your AWS account to coralogix.
 
 ## Authors
 
