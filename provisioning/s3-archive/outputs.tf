@@ -7,9 +7,9 @@ output "wrong_region" {
 }
 
 output "log_kms_problem" {
-  value = var.log_kms_arn == "" || contains(split(":", var.log_kms_arn), var.coralogix_region) ?  "" : "The KMS that you spacifide for logs is not in the same region as your coralogix_region"
+  value = var.log_kms_arn == "" || contains(split(":", var.log_kms_arn), var.coralogix_region) ?  "" : "The KMS that you specified for logs is not in the same region as your coralogix_region"
 }
 
 output "metrics_kms_problem" {
-  value = var.metrics_kms_arn == "" || contains(split(":", var.metrics_kms_arn), var.coralogix_region) ?  "" : "The KMS that you spacifide for metrics is not in the same region as your coralogix_region"
+  value = var.metrics_kms_arn == "" || contains(split(":", var.metrics_kms_arn), var.coralogix_region) ?  "" : "The KMS that you specified for metrics is not in the same region as your coralogix_region"
 }
