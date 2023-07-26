@@ -3,9 +3,9 @@ variable "coralogix_region" {
   description = "The region that you want to create the buckets in"
 }
 
-variable "by_pass_valid_rergion" {
+variable "bypass_valid_region" {
   type        = bool
-  description = "Use to by pass the coralogix_region"
+  description = "Use to bypass the coralogix_region validation"
   default     = false
 }
 
