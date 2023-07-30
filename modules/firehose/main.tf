@@ -12,6 +12,9 @@ locals {
     "us" = {
       url = "https://firehose-ingress.coralogix.us/firehose"
     }
+    "us2" = {
+      url = "https://firehose-ingress.cx498.coralogix.com/firehose"
+    }
     "singapore" = {
       url = "https://firehose-ingress.coralogixsg.com/firehose"
     }

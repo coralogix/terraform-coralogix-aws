@@ -27,7 +27,7 @@ Manage the application which retrieves `CloudWatch` logs and sends them to your 
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | The Coralogix location region, possible options are [`Europe`, `Europe2`, `India`, `Singapore`, `US`] | `string` | `Europe` | no |
+| <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | The Coralogix location region, possible options are [`Europe`, `Europe2`, `India`, `Singapore`, `US`, `US2`] | `string` | `Europe` | no |
 | <a name="input_custom_url"></a> [custom_url](#input\_custom\_domain) | Custom url for coralogix | `string` | n/a | no |
 | <a name="input_enable_ssm"></a> [enable_ssm](#input\_enable\_ssm) | store coralogix private_key as a secret so that it will not be save in the lambda. True/False | `string` | `False` | no |
 | <a name="input_layer_arn"></a> [layer_arn](#input\_layer\_arn) | Coralogix SSM Layer ARN (if SsmEnabled set to false, can leave as empty). | `string` | n/a | no |
@@ -43,6 +43,16 @@ Manage the application which retrieves `CloudWatch` logs and sends them to your 
 | <a name="input_architecture"></a> [architecture](#input\_architecture) | Lambda function architecture | `string` | `x86_64` | no |
 | <a name="input_notification_email"></a> [notification_email](#input\_notification\_email) | Failure notification email address | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to add to all resources | `map(string)` | `{}` | no |
+
+## Coralgoix regions
+| Coralogix region | AWS Region | Coralogix Domain |
+|------|------------|------------|
+| `Europe` |  `eu-west-1` | coralogix.com |
+| `Europe2` |  `eu-north-1` | eu2.coralogix.com |
+| `India` | `ap-south-1`  | coralogix.in |
+| `Singapore` | `ap-southeast-1` | coralogixsg.com |
+| `US` | `us-east-2` | coralogix.us |
+| `US2` | `us-west-2` | cx498.coralogix.com |
 
 ## Outputs
 

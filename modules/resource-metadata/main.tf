@@ -6,6 +6,7 @@ locals {
     India     = "ingress.app.coralogix.in:443"
     Singapore = "ingress.coralogixsg.com:443"
     US        = "ingress.coralogix.us:443"
+    US2       = "ingress.cx498.coralogix.com:443"
     Custom    = var.custom_url
   }
   tags = {

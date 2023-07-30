@@ -24,6 +24,9 @@ locals {
     "stockholm" = {
       url = "https://aws-events.eu2.coralogix.com/aws/event"
     }
+    "us2" = {
+      url = "https://aws-events.cx498.coralogix.com/aws/event"
+    }
     "custom" = {
       url = "${var.custom_url}"
     }
