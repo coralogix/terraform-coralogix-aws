@@ -35,6 +35,7 @@ The coralogix region variable accepts one of the following regions:
 | Region    | Logs Endpoint
 |-----------|-----------------------------------------------------------------|
 | us        | `https://aws-events.coralogix.us/aws/event`                |
+| us2       | `https://aws-events.cx498.coralogix.com/aws/event`         |
 | singapore | `https://aws-events.coralogixsg.com/aws/event`             |
 | ireland   | `https://aws-events.coralogix.com/aws/event`               |
 | india     | `https://aws-events.coralogix.in/aws/event`            |
@@ -72,13 +73,23 @@ The coralogix region variable accepts one of the following regions:
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_application_name"></a> [application\_name](#input\_application\_name) | Coralogix application name | `string` | `null` | no |
-| <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | Coralogix account region: us, singapore, ireland, india, stockholm [in lower-case letters] | `any` | n/a | yes |
+| <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | Coralogix account region: us, us2, singapore, ireland, india, stockholm [in lower-case letters] | `any` | n/a | yes |
 | <a name="input_custom_url"></a> [custom_url](#input\_custom\_url) | Custom coralogix url | `string` | `null` | no |
 | <a name="input_eventbridge_stream"></a> [eventbridge\_stream](#input\_eventbridge\_stream) | AWS eventbridge delivery stream name | `string` | n/a | yes |
 | <a name="input_private_key"></a> [private\_key](#input\_private\_key) | Your Coralogix private key | `string` | n/a | yes |
 | <a name="input_role_name"></a> [role\_name](#input\_role\_name) | The name of the eventbridge role | `string` | n/a | yes |
 | <a name="input_sources"></a> [sources](#input\_sources) | The services for which we will send events | `list(any)` | <pre>[<br>  "aws.ec2",<br>  "aws.autoscaling",<br>  "aws.cloudwatch",<br>  "aws.events",<br>  "aws.health",<br>  "aws.rds"<br>]</pre> | no |
 | <a name="input_policy_name"></a> [policy_name](#input\_custom\_url) | Custom aws_iam_policy | `string` | `EventBridge_policy` | no |
+
+## Coralgoix regions
+| Coralogix region | AWS Region | Coralogix Domain |
+|------|------------|------------|
+| `Ireland` |  `eu-west-1` | coralogix.com |
+| `Stockholm` | `eu-north-1` | eu2.coralogix.com |
+| `India` | `ap-south-1`  | coralogix.in |
+| `Singapore` | `ap-southeast-1` | coralogixsg.com |
+| `US` | `us-east-2` | coralogix.us |
+| `US2` | `us-west-2` | cx498.coralogix.com |
 
 ## Outputs
 

@@ -161,6 +161,7 @@ The coralogix region variable accepts one of the following regions:
 | Region    | Metrics Endpoint
 |-----------|-----------------------------------------------------------------|
 | us        | `https://firehose-ingress.coralogix.us/firehose`                |
+| us2       | `https://firehose-ingress.cx498.coralogix.com/firehose`         |
 | singapore | `https://firehose-ingress.coralogixsg.com/firehose`             |
 | ireland   | `https://firehose-ingress.coralogix.com/firehose`               |
 | india     | `https://firehose-ingress.app.coralogix.in/firehose`            |
@@ -194,7 +195,7 @@ then the CloudWatch metric stream must be configured with the same format, confi
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | Coralogix account region: us, singapore, ireland, india, stockholm [in lower-case letters] | `any` | n/a | yes |
+| <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | Coralogix account region: us, us2, singapore, ireland, india, stockholm [in lower-case letters] | `any` | n/a | yes |
 | <a name="input_enable_cloudwatch_metricstream"></a> [enable\_cloudwatch\_metricstream](#input\_enable\_cloudwatch\_metricstream) | Should be true if you want to create a new Cloud Watch metric stream and attach it to Firehose | `bool` | `true` | no |
 | <a name="input_firehose_stream"></a> [firehose\_stream](#input\_firehose\_stream) | AWS Kinesis firehose delivery stream name | `string` | n/a | yes |
 | <a name="input_include_metric_stream_namespaces"></a> [include\_metric\_stream\_namespaces](#input\_include\_metric\_stream\_namespaces) | List of specific namespaces to include in the CloudWatch metric stream, see https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html | `list(string)` | `[]` | no |
@@ -214,6 +215,15 @@ then the CloudWatch metric stream must be configured with the same format, confi
 | <a name="input_integration_type_logs"></a> [integration_type_logs](#input\_integration_type_logs) | The integration type of the firehose delivery stream: 'CloudWatch_JSON', 'WAF', 'CloudWatch_CloudTrail', 'EksFargate', 'Default', 'RawText' | `string` | `Default` | no |
 | <a name="input_dynamic_metadata_logs"></a> [dynamic_metadata_logs](#input\_dynamic_metadata_logs) | Dynamic values search for specific fields in the logs to populate the fields | `bool` | `false` | no |
 
+## Coralgoix regions
+| Coralogix region | AWS Region | Coralogix Domain |
+|------|------------|------------|
+| `Ireland` | `eu-west-1` | coralogix.com |
+| `Stockholm` | `eu-north-1` | eu2.coralogix.com |
+| `India` | `ap-south-1` | coralogix.in |
+| `Singapore` | `ap-southeast-1` | coralogixsg.com |
+| `US` | `us-east-2` | coralogix.us |
+| `US2` | `us-west-2` | cx498.coralogix.com |
 
 ## Outputs
 

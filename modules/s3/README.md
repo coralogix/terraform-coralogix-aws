@@ -26,7 +26,7 @@ Manage the application which retrieves logs from `S3` bucket and sends them to y
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | The Coralogix location region, possible options are [`Europe`, `Europe2`, `India`, `Singapore`, `US`. `Custom`] | `string` | n/a | yes |
+| <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | The Coralogix location region, possible options are [`Europe`, `Europe2`, `India`, `Singapore`, `US`, `US2`, `Custom`] | `string` | n/a | yes |
 | <a name="input_custom_url"></a> [custom_url](#input\_custom\_domain) | Custom url for coralogix for example: https://<your_custom_domain>/api/v1/logs| `string` | n/a | no |
 | <a name="input_integration_type"></a> [integration_type](#input\_data\_type) | which service will send the data to the s3, possible options are [`cloudtrail`, `vpc-flow-log`, `s3`, `s3-sns`, `cloudtrail-sns`] | `string` | n/a | yes |
 | <a name="input_sns_topic_name"></a> [sns_topic_name](#input\_sns\_topic\_name) | The SNS topic that will contain the SNS subscription, need only if you use the sns interations | `string` |  | no |
@@ -48,6 +48,16 @@ Manage the application which retrieves logs from `S3` bucket and sends them to y
 | <a name="input_architecture"></a> [architecture](#input\_architecture) | Lambda function architecture | `string` | `x86_64` | no |
 | <a name="input_notification_email"></a> [notification_email](#input\_notification\_email) | Failure notification email address | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to add to all resources | `map(string)` | `{}` | no |
+
+## Coralgoix regions
+| Coralogix region | AWS Region | Coralogix Domain |
+|------|------------|------------|
+| `Europe` |  `eu-west-1` | coralogix.com |
+| `Europe2` |  `eu-north-1` | eu2.coralogix.com |
+| `India` | `ap-south-1`  | coralogix.in |
+| `Singapore` | `ap-southeast-1` | coralogixsg.com |
+| `US` | `us-east-2` | coralogix.us |
+| `US2` | `us-west-2` | cx498.coralogix.com |
 
 ## Outputs
 

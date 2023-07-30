@@ -10,11 +10,11 @@ variable "private_key" {
 }
 
 variable "coralogix_region" {
-  description = "Coralogix account region: us, singapore, ireland, india, stockholm [in lower-case letters]"
+  description = "Coralogix account region: us, us2, singapore, ireland, india, stockholm [in lower-case letters]"
   type        = string
   validation {
-    condition     = contains(["ireland", "stockholm", "india", "singapore", "us"], var.coralogix_region)
-    error_message = "The coralogix region must be one of these values: [ireland, stockholm, india, singapore, us]."
+    condition     = contains(["ireland", "stockholm", "india", "singapore", "us", "us2"], var.coralogix_region)
+    error_message = "The coralogix region must be one of these values: [ireland, stockholm, india, singapore, us, us2]."
   }
 }
 
