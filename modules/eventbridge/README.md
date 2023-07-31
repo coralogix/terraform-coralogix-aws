@@ -72,7 +72,7 @@ The coralogix region variable accepts one of the following regions:
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_application_name"></a> [application\_name](#input\_application\_name) | Coralogix application name | `string` | `null` | no |
+| <a name="input_application_name"></a> [application\_name](#input\_application\_name) | Coralogix application name | `string` | n/a | yes |
 | <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | Coralogix account region: us, us2, singapore, ireland, india, stockholm [in lower-case letters] | `any` | n/a | yes |
 | <a name="input_custom_url"></a> [custom_url](#input\_custom\_url) | Custom coralogix url | `string` | `null` | no |
 | <a name="input_eventbridge_stream"></a> [eventbridge\_stream](#input\_eventbridge\_stream) | AWS eventbridge delivery stream name | `string` | n/a | yes |

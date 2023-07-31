@@ -23,6 +23,7 @@ variable "private_key" {
 variable "ssm_enable" {
   description = "Use SSM for the private key True/False"
   type        = string
+  default     = "False"
 }
 
 variable "layer_arn" {
@@ -128,8 +129,8 @@ variable "integration_type" {
   description = "the aws service that send the data to the s3"
   type        = string
   validation {
-    condition     = contains(["cloudtrail", "vpc-flow-logs", "s3"], var.integration_type)
-    error_message = "The integration type must be: [cloudtrail, vpc-flow-logs, s3]."
+    condition     = contains(["cloudtrail", "vpc-flow-logs", "s3", "s3-sns", "cloudtrail-sns"], var.integration_type)
+    error_message = "The integration type must be: [cloudtrail, vpc-flow-logs, s3, s3-sns, cloudtrail-sns]."
   }
 }
 

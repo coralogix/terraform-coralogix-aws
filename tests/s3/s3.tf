@@ -17,8 +17,6 @@ module "s3" {
 
   coralogix_region = "Europe"
   private_key      = "{{ secrets.TESTING_PRIVATE_KEY }}"
-  ssm_enable       = "false"
-  layer_arn        = "<your layer arn>"
   application_name = "s3"
   subsystem_name   = "logs"
   s3_bucket_name   = "github-action-bucket-testing"
