@@ -82,6 +82,7 @@ variable "tags" {
 variable "ssm_enable" {
   description = "Use SSM for the private key True/False"
   type        = string
+  default     = "False"
 }
 
 variable "layer_arn" {
