@@ -16,7 +16,6 @@ module "cloudwatch" {
 
   coralogix_region = "Europe"
   private_key      = "{{ secrets.TESTING_PRIVATE_KEY }}"
-  ssm_enable       = "false"
   application_name = "cloudwatch-logs"
   subsystem_name   = "logs"
   log_groups       = ["github-action-testing-log-stream"]

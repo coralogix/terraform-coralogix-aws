@@ -204,8 +204,8 @@ then the CloudWatch metric stream must be configured with the same format, confi
 | <a name="input_output_format"></a> [output\_format](#input\_output\_format) | The output format of the cloudwatch metric stream: 'json' or 'opentelemetry0.7' | `string` | `"opentelemetry0.7"` | no |
 | <a name="input_private_key"></a> [private_key](#input\_private_key) | Coralogix account logs private key | `any` | n/a | yes |
 | <a name="input_metric_enable"></a> [metric_enable](#input\_metric_enable) | Enble sending metrics to Coralogix | `bool` | `true` | no |
-| <a name="input_application_name"></a> [application_name](#input\_application_name) | The name of your application in Coralogix | `string` | n/a | no |
-| <a name="input_subsystem_name"></a> [subsystem_name](#input\_subsystem_name) | The subsystem name of your application in Coralogix | `string` | n/a | no |
+| <a name="input_application_name"></a> [application_name](#input\_application_name) | The name of your application in Coralogix | `string` | n/a | yes |
+| <a name="input_subsystem_name"></a> [subsystem_name](#input\_subsystem_name) | The subsystem name of your application in Coralogix | `string` | n/a | yes |
 | <a name="input_user_supplied_tags"></a> [user_supplied_tags](#input\_user_supplied_tags) | Tags supplied by the user to populate to all generated resources | `map(string)` | n/a | no |
 | <a name="input_cloudwatch_retention_days"></a> [cloudwatch_retention_days](#input\_cloudwatch_retention_days) | Days of retention in Cloudwatch retention days | `number` | n/a | no |
 | <a name="input_coralogix_firehose_custom_endpoint"></a> [coralogix_firehose_custom_endpoint](#input\_coralogix_firehose_custom_endpoint) | Custom endpoint for Coralogix firehose integration endpoint  (https://firehose-ingress.private.coralogix.net:8443/firehose) | `string` | `null` | no |

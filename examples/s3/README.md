@@ -17,7 +17,6 @@ module "coralogix-shipper-s3" {
 
   coralogix_region   = "Europe"
   private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
-  ssm_enable         = "false"
   application_name   = "s3"
   subsystem_name     = "logs"
   s3_bucket_name     = "test-bucket-name"
@@ -32,7 +31,6 @@ module "coralogix-shipper-cloudtrail" {
 
   coralogix_region   = "Europe"
   private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
-  ssm_enable         = "false"
   application_name   = "cloudtrail"
   subsystem_name     = "logs"
   s3_bucket_name     = "test-bucket-name"
@@ -47,7 +45,6 @@ module "coralogix-shipper-vpc-flow-logs" {
 
   coralogix_region   = "Europe"
   private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
-  ssm_enable         = "false"
   application_name   = "vpc-flow-logs"
   subsystem_name     = "logs"
   s3_bucket_name     = "test-bucket-name"
@@ -62,7 +59,6 @@ module "coralogix-shipper-sns" {
 
   coralogix_region   = "Europe"
   private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
-  ssm_enable         = "false"
   application_name   = "s3-sns"
   subsystem_name     = "logs"
   sns_topic_name     = "test-sns-topic-name"
@@ -78,7 +74,6 @@ module "coralogix-shipper-cloudtrail-sns" {
 
   coralogix_region   = "Europe"
   private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
-  ssm_enable         = "false"
   application_name   = "cloudtrail-sns"
   subsystem_name     = "logs"
   sns_topic_name     = "test-sns-topic-name"

@@ -13,8 +13,6 @@ module "coralogix-shipper-s3" {
 
   coralogix_region   = "Europe"
   private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
-  ssm_enable         = "false"
-  layer_arn          = "<your layer arn>"
   application_name   = "s3"
   subsystem_name     = "logs"
   s3_bucket_name     = "test-bucket-name"
@@ -41,8 +39,6 @@ module "cloudwatch_logs" {
 
   coralogix_region   = "Europe"
   private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
-  ssm_enable         = "false"
-  layer_arn          = "<your layer arn>"
   application_name   = "cloudwatch"
   subsystem_name     = "logs"
   log_groups         = ["test-log-group"]
@@ -69,8 +65,6 @@ module "kinesis" {
 
   coralogix_region    = "Europe"
   private_key         = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
-  ssm_enable          = "false"
-  layer_arn           = "<your layer arn>"
   application_name    = "kinesis"
   subsystem_name      = "logs"
   kinesis_stream_name = "<your kinesis stream name>"
@@ -127,8 +121,6 @@ module "coralogix-resource-metadata" {
 
   coralogix_region   = "Europe"
   private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
-  ssm_enable         = "false"
-  layer_arn          = "<your layer arn>"
 }
 ```
 now execute:
