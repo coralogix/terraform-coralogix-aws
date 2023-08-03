@@ -31,6 +31,9 @@ module "lambda" {
   timeout                = var.timeout
   create_package         = false
   destination_on_failure = aws_sns_topic.this.arn
+  vpc_subnet_ids         = var.subnet_ids
+  vpc_security_group_ids = var.security_group_ids
+  attach_network_policy  = true
   environment_variables = {
     CORALOGIX_URL   = var.custom_url == "" ? lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe") : var.custom_url
     private_key     = var.private_key
@@ -75,6 +78,9 @@ module "lambdaSSM" {
   timeout                = var.timeout
   create_package         = false
   destination_on_failure = aws_sns_topic.this.arn
+  vpc_subnet_ids         = var.subnet_ids
+  vpc_security_group_ids = var.security_group_ids
+  attach_network_policy  = true
   environment_variables = {
     CORALOGIX_URL           = var.custom_url == "" ? lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe") : var.custom_url
     AWS_LAMBDA_EXEC_WRAPPER = "/opt/wrapper.sh"

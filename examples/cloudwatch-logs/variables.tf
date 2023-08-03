@@ -95,3 +95,15 @@ variable "layer_arn" {
   type        = string
   default     = ""
 }
+
+variable "subnet_ids" {
+  description = "The subnet id with the private link"
+  type        = list(string)
+  default     = [""]
+}
+
+variable "security_group_ids" {
+  description = "The security group id for assigned to the subnet_ids"
+  type        = list(string)
+  default     = [""]
+}

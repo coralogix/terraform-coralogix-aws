@@ -38,6 +38,8 @@ Manage the application which retrieves `CloudWatch` logs and sends them to your 
 | <a name="input_buffer_charset"></a> [buffer\_charset](#input\_buffer\_charset) | The charset to use for buffer decoding, possible options are [`utf8`, `ascii`] | `string` | `utf8` | no |
 | <a name="input_sampling_rate"></a> [sampling\_rate](#input\_sampling\_rate) | Send messages with specific rate | `number` | `1` | no |
 | <a name="input_log_groups"></a> [log\_groups](#input\_log\_groups) | The names of the CloudWatch log groups to watch | `list(string)` | n/a | yes |
+| <a name="input_subnet_ids"></a> [vpc\_subnet\_ids](#input\_subnet\_ids) | The ID of the subnet with the private_link that the lambda will be created in | `list(string)` | n/a | no |
+| <a name="input_security_group_ids"></a> [security\_group\_ids](#input\_security\_group\_ids) | The ID of the security group of the subnet | `list(string)` | n/a | no |
 | <a name="input_memory_size"></a> [memory\_size](#input\_memory\_size) | Lambda function memory limit | `number` | `1024` | no |
 | <a name="input_timeout"></a> [timeout](#input\_timeout) | Lambda function timeout limit | `number` | `300` | no |
 | <a name="input_architecture"></a> [architecture](#input\_architecture) | Lambda function architecture | `string` | `x86_64` | no |
