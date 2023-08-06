@@ -132,3 +132,9 @@ variable "sns_topic_name" {
   type        = string
   default     = ""
 }
+
+# variable "custom_s3_sbucket" {
+#   description = "The name of the s3 bucket to same the lambda zip code in"
+#   type        = string
+#   default     = ""
+# }
