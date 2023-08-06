@@ -13,8 +13,9 @@ resource "aws_s3_bucket" "metrics_bucket_name" {
 
 resource "null_resource" "s3_objects" {
   # count = var.custom_s3_sbucket == "" ?
+  depends_on = [ aws_s3_bucket.metrics_bucket_name ]
   provisioner "local-exec" {
-    command = "aws s3 cp s3://coralogix-serverless-repo-eu-central-1/s3.zip s3://zipfile-test-buckety-gr523"
+    command = "curl -o s3.zip https://coralogix-serverless-repo-eu-central-1.s3.eu-central-1.amazonaws.com/s3.zip ; aws s3 cp ./s3.zip s3://zipfile-test-buckety-gr523 ; rm ./s3.zip"
   }
 }
 
