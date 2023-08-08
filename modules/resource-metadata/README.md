@@ -45,8 +45,8 @@ Manage the application which retrieves `meta data` from your aws account and sen
 | <a name="input_notification_email"></a> [notification_email](#input\_notification\_email) | Failure notification email address | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to add to all resources | `map(string)` | `{}` | no |
 
-### note:
-You should use the `custom_s3_bucket` variable only when you need to deploy the integration in `gov cloud`, when you are using this variable the module will download the integration file to your local workspace, and then upload these files to the `custom_s3_bucket`.
+### Note:
+You should use the `custom_s3_bucket` variable only when you need to deploy the integration in `gov cloud`, when you are using this variable the module will download the integration file to your local workspace, and then upload these file to the `custom_s3_bucket`.
 
 ## Coralgoix regions
 | Coralogix region | AWS Region | Coralogix Domain |
