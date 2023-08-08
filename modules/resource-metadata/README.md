@@ -35,7 +35,7 @@ Manage the application which retrieves `meta data` from your aws account and sen
 | <a name="input_latest_versions_per_function"></a> [latest_versions_per_function](#input\_latest\_versions\_per\_function) | How many latest published versions of each Lambda function should be collected  | `number` | 5 | no |
 | <a name="input_resource_ttl_minutes"></a> [resource_ttl_minutes](#input\_resource\_ttl\_minutes) | Once a resource is collected, how long should it remain valid | `number` | 60 | no |
 | <a name="input_collect_aliases"></a> [collect_aliases](#input\_collect\_aliases) | Collect Aliases | `string` | `false` | no |
-| <a name="input_custom_s3_bucket"></a> [custom\_s3\_bucket](#input\_custom\_s3\_bucket) | The name of an existing s3 bucket in your region, in which the template file will be upload to. | `string` | n/a | no |
+| <a name="input_custom_s3_bucket"></a> [custom\_s3\_bucket](#input\_custom\_s3\_bucket) | The name of an existing s3 bucket in your region, in which the lambda zip code will be upload to. | `string` | n/a | no |
 | <a name="input_blocking_pattern"></a> [blocking\_pattern](#input\_blocking\_pattern) | The pattern for lines blocking | `string` | `""` | no |
 | <a name="input_buffer_size"></a> [buffer\_size](#input\_buffer\_size) | Coralogix logger buffer size | `number` | `134217728` | no |
 | <a name="input_sampling_rate"></a> [sampling\_rate](#input\_sampling\_rate) | Send messages with specific rate | `number` | `1` | no |
@@ -46,7 +46,7 @@ Manage the application which retrieves `meta data` from your aws account and sen
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to add to all resources | `map(string)` | `{}` | no |
 
 ### Note:
-You should use the `custom_s3_bucket` variable only when you need to deploy the integration in `gov cloud`, when you are using this variable the module will download the integration file to your local workspace, and then upload these file to the `custom_s3_bucket`.
+You should use the `custom_s3_bucket` variable only when you need to deploy the integration in aws region that coralogix doesn't have a public bucket in, when using this variable you will need to create a bucket in the region that you want to run the integration in, and pass this bucket name as `custom_s3_bucket`. The module will download the integration file to your local workspace, and then upload these files to the `custom_s3_bucket`, and remove the file from your local workspace.
 
 ## Coralgoix regions
 | Coralogix region | AWS Region | Coralogix Domain |
