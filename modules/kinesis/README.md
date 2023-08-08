@@ -38,11 +38,15 @@ Manage the application which retrieves logs from `S3` bucket and sends them to y
 | <a name="input_buffer_size"></a> [buffer\_size](#input\_buffer\_size) | Coralogix logger buffer size | `number` | `134217728` | no |
 | <a name="input_sampling_rate"></a> [sampling\_rate](#input\_sampling\_rate) | Send messages with specific rate | `number` | `1` | no |
 | <a name="input_kinesis_stream_name"></a> [kinesis\_stream\_name](#input\_kinesis\_stream\_name) | The name of the kinesis data stream | `string` | n/a | yes |
+| <a name="input_custom_s3_bucket"></a> [custom\_s3\_bucket](#input\_custom\_s3\_bucket) | The name of an existing s3 bucket in your region, in which the template file will be upload to. | `string` | n/a | no |
 | <a name="input_memory_size"></a> [memory\_size](#input\_memory\_size) | Lambda function memory limit | `number` | `1024` | no |
 | <a name="input_timeout"></a> [timeout](#input\_timeout) | Lambda function timeout limit | `number` | `300` | no |
 | <a name="input_architecture"></a> [architecture](#input\_architecture) | Lambda function architecture | `string` | `x86_64` | no |
 | <a name="input_notification_email"></a> [notification_email](#input\_notification\_email) | Failure notification email address | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to add to all resources | `map(string)` | `{}` | no |
+
+### note:
+You should use the `custom_s3_bucket` variable only when you need to deploy the integration in `gov cloud`, when you are using this variable the module will download the integration file to your local workspace, and then upload these files to the `custom_s3_bucket`.
 
 ## Coralgoix regions
 | Coralogix region | AWS Region | Coralogix Domain |

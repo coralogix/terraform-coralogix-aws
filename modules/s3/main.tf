@@ -5,20 +5,6 @@ module "locals" {
   random_string    = random_string.this.result
 }
 
-
-
-resource "aws_s3_bucket" "metrics_bucket_name" {
-  bucket = "zipfile-test-buckety-gr523"
-}
-
-resource "null_resource" "s3_objects" {
-  # count = var.custom_s3_sbucket == "" ?
-  depends_on = [ aws_s3_bucket.metrics_bucket_name ]
-  provisioner "local-exec" {
-    command = "curl -o s3.zip https://coralogix-serverless-repo-eu-central-1.s3.eu-central-1.amazonaws.com/s3.zip ; aws s3 cp ./s3.zip s3://zipfile-test-buckety-gr523 ; rm ./s3.zip"
-  }
-}
-
 locals {
   sns_enable = var.integration_type == "s3-sns" || var.integration_type == "cloudtrail-sns" ? true : false
 }
@@ -62,9 +48,16 @@ resource "random_string" "this" {
   special = false
 }
 
+resource "null_resource" "s3_bucket_copy" {
+  count = var.custom_s3_bucket == "" ? 0 : 1
+  provisioner "local-exec" {
+    command = "curl -o ${var.integration_type}.zip https://coralogix-serverless-repo-eu-central-1.s3.eu-central-1.amazonaws.com/${var.integration_type}.zip ; aws s3 cp ./${var.integration_type}.zip s3://${var.custom_s3_bucket} ; rm ./${var.integration_type}.zip"
+  }
+}
+
 module "lambda" {
   create                 = var.ssm_enable != "True" ? true : false
-  depends_on             = [ null_resource.s3_objects ]
+  depends_on             = [ null_resource.s3_bucket_copy ]
   source                 = "terraform-aws-modules/lambda/aws"
   version                = "3.2.1"
   function_name          = module.locals.function_name
@@ -88,8 +81,7 @@ module "lambda" {
     debug                 = tostring(var.debug)
   }
   s3_existing_package = {
-    # bucket = var.custom_s3_sbucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_sbucket
-    bucket = "zipfile-test-buckety-gr523"
+    bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
     key    = "${var.integration_type}.zip"
   }
   policy_path                             = "/coralogix/"
@@ -120,6 +112,7 @@ module "lambda" {
 module "lambdaSSM" {
   source                 = "terraform-aws-modules/lambda/aws"
   create                 = var.ssm_enable == "True" ? true : false
+  depends_on             = [ null_resource.s3_bucket_copy ]
   version                = "3.2.1"
   layers                 = [var.layer_arn]
   function_name          = module.locals.function_name
@@ -143,7 +136,7 @@ module "lambdaSSM" {
     debug                   = tostring(var.debug)
   }
   s3_existing_package = {
-    bucket = "zipfile-test-buckety-gr523"
+    bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
     key    = "${var.integration_type}.zip"
   }
   policy_path                             = "/coralogix/"

@@ -90,3 +90,9 @@ variable "layer_arn" {
   type        = string
   default     = ""
 }
+
+variable "custom_s3_bucket" {
+  description = "The name of the s3 bucket to save the lambda zip code in"
+  type        = string
+  default     = ""
+}
