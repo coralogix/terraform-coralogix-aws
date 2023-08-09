@@ -28,7 +28,7 @@ Manage the application which retrieves logs from `S3` bucket and sends them to y
 |------|-------------|------|---------|:--------:|
 | <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | The Coralogix location region, possible options are [`Europe`, `Europe2`, `India`, `Singapore`, `US`, `US2`] | `string` | `Europe` | yes |
 | <a name="input_custom_url"></a> [custom_url](#input\_custom\_url) | Custom url for coralogix | `string` | n/a | no |
-| <a name="input_enable_ssm"></a> [enable_ssm](#input\_enable_\_ssm) | store coralogix private_key as a secret so that it will not be save in the lambda. True/False | `string` | `False` | no |
+| <a name="input_ssm_enable"></a> [ssm_enable](#input\_ssm\_enable\) | store coralogix private_key as a secret so that it will not be save in the lambda True/False. Require that the coralogix ssm layer will be deployed in advance | `string` | `False` | no |
 | <a name="input_layer_arn"></a> [layer_arn](#input\_layer\_arn) | Coralogix SSM Layer ARN (if SsmEnabled set to false, can leave as empty). | `string` | n/a | no |
 | <a name="input_private_key"></a> [private\_key](#input\_private\_key) | The Coralogix private key which is used to validate your authenticity | `string` | n/a | yes |
 | <a name="input_application_name"></a> [application\_name](#input\_application\_name) | The name of your application | `string` | n/a | yes |
@@ -61,3 +61,4 @@ You should use the `custom_s3_bucket` variable only when you need to deploy the 
 ## Outputs
 
 No outputs.
+

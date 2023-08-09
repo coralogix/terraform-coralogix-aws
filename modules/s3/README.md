@@ -30,7 +30,7 @@ Manage the application which retrieves logs from `S3` bucket and sends them to y
 | <a name="input_custom_url"></a> [custom_url](#input\_custom\_domain) | Custom url for coralogix for example: https://<your_custom_domain>/api/v1/logs| `string` | n/a | no |
 | <a name="input_integration_type"></a> [integration_type](#input\_data\_type) | which service will send the data to the s3, possible options are [`cloudtrail`, `vpc-flow-log`, `s3`, `s3-sns`, `cloudtrail-sns`] | `string` | n/a | yes |
 | <a name="input_sns_topic_name"></a> [sns_topic_name](#input\_sns\_topic\_name) | The SNS topic that will contain the SNS subscription, need only if you use the sns interations | `string` |  | no |
-| <a name="input_enable_ssm"></a> [enable_ssm](#input\_enable_\_ssm) | store coralogix private_key as a secret so that it will not be save in the lambda. True/False | `string` | `False` | no |
+| <a name="input_ssm_enable"></a> [ssm_enable](#input\_ssm\_enable\) | store coralogix private_key as a secret so that it will not be save in the lambda True/False. Require that the coralogix ssm layer will be deployed in advance | `string` | `False` | no |
 | <a name="input_layer_arn"></a> [layer_arn](#input\_layer\_arn) | Coralogix SSM Layer ARN (if SsmEnabled set to false, can leave as empty). | `string` | n/a | no |
 | <a name="input_private_key"></a> [private\_key](#input\_private\_key) | The Coralogix private key which is used to validate your authenticity | `string` | n/a | yes |
 | <a name="input_application_name"></a> [application\_name](#input\_application\_name) | The name of your application | `string` | n/a | yes |
@@ -71,4 +71,5 @@ You should use the `custom_s3_bucket` variable only when you need to deploy the 
 | <a name="output_lambda_function_name"></a> [lambda\_function\_name](#output\_lambda\_function\_name) | The name of the Lambda Function |
 | <a name="output_lambda_role_arn"></a> [lambda\_role\_arn](#output\_lambda\_role\_arn) | The ARN of the IAM role created for the Lambda Function |
 | <a name="output_lambda_role_name"></a> [lambda\_role\_name](#output\_lambda\_role\_name) | The name of the IAM role created for the Lambda Function |
+
 
