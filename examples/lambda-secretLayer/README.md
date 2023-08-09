@@ -1,6 +1,8 @@
 # secret-lambdaLayer:
 
 This application will create an SSM layer to use in our integrations.
+You will need to deploy one layer per AWS Region you want to use.
+Currently the layer support only NodeJS runtimes.
 
 ## Usage
 
