@@ -26,7 +26,8 @@ $ terraform plan
 $ terraform apply
 ```
 
-You can connect this module to your integration as shown below, so you won't need to manually past the arn:
+You can connect this module to your integration as shown below, so you won't need to manually pass the arn.
+Please be aware you should not deploy more than one layer per region.
 
 ```hcl
 provider "aws" {
