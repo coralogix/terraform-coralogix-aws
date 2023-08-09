@@ -1,6 +1,6 @@
 # secret-lambdaLayer:
 
-This application will create an SMM layer to use in our integrations.
+This application will create an SSM layer to use in our integrations.
 
 ## Usage
 

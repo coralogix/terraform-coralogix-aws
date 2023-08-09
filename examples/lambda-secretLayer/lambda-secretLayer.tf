@@ -1,11 +1,11 @@
 provider "aws" {
 }
 
-module "ssm-secret-layer" {
-  source = "coralogix/aws/coralogix//modules/secret-lambdaLayer"
+module "lambda-secretLayer" {
+  source = "coralogix/aws/coralogix//modules/lambda-secretLayer"
 
 }
 
 output "layer_arn" {
-  value = module.ssm-secret-layer.lambda_layer_version_arn
+  value = module.lambda-secretLayer.lambda_layer_version_arn
 }
