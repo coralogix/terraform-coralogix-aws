@@ -474,7 +474,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_metrics" {
     url                = var.coralogix_firehose_custom_endpoint != null ? var.coralogix_firehose_custom_endpoint : local.endpoint_url[var.coralogix_region].url
     name               = "Coralogix"
     access_key         = var.private_key
-    buffering_size     = 0.2
+    buffering_size     = 1
     buffering_interval = 60
     s3_backup_mode     = "FailedDataOnly"
     role_arn           = aws_iam_role.firehose_to_coralogix.arn
@@ -527,7 +527,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_metrics" {
 
         parameters {
           parameter_name  = "BufferSizeInMBs"
-          parameter_value = "1"
+          parameter_value = "0.2"
         }
 
         parameters {
