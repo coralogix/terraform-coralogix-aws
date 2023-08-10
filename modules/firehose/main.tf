@@ -454,6 +454,7 @@ resource "aws_lambda_function" "lambda_processor" {
   handler       = "function"
   runtime       = "go1.x"
   timeout       = "60"
+  memory_size   = 512
   tags          = local.tags
 }
 
