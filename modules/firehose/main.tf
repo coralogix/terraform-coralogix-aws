@@ -456,6 +456,12 @@ resource "aws_lambda_function" "lambda_processor" {
   timeout       = "60"
   memory_size   = 512
   tags          = local.tags
+
+  environment {
+    variables = {
+      FILE_CACHE_PATH = "/tmp"
+    }
+  }
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_metrics" {
@@ -468,7 +474,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_metrics" {
     url                = var.coralogix_firehose_custom_endpoint != null ? var.coralogix_firehose_custom_endpoint : local.endpoint_url[var.coralogix_region].url
     name               = "Coralogix"
     access_key         = var.private_key
-    buffering_size     = 6
+    buffering_size     = 0.2
     buffering_interval = 60
     s3_backup_mode     = "FailedDataOnly"
     role_arn           = aws_iam_role.firehose_to_coralogix.arn
