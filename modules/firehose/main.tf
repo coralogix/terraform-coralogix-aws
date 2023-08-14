@@ -34,6 +34,11 @@ locals {
     managed-by               = "coralogix-terraform"
     custom_endpoint          = var.coralogix_firehose_custom_endpoint != null ? var.coralogix_firehose_custom_endpoint : ""
   })
+
+  # default namings if not provided
+  cloudwatch_metric_stream_name = var.cloudwatch_metric_stream_custom_name != null ? var.cloudwatch_metric_stream_name : var.firehose_stream
+  s3_backup_bucket_name         = var.s3_backup_bucket_custom_name != null ? var.s3_backup_bucket_name : "${var.firehose_stream}-backup"
+  lambda_function_name          = var.lambda_function_custom_name != null ? var.lambda_function_name : "${var.firehose_stream}-metrics-tags-processor"
 }
 
 data "aws_caller_identity" "current_identity" {}
@@ -61,7 +66,7 @@ resource "aws_cloudwatch_log_stream" "firehose_logstream_backup" {
 
 resource "aws_s3_bucket" "firehose_bucket" {
   tags   = merge(local.tags, { Name = "${var.firehose_stream}-backup" })
-  bucket = "${var.firehose_stream}-backup"
+  bucket = local.s3_backup_bucket_name
 }
 
 resource "aws_s3_bucket_public_access_block" "firehose_bucket_bucket_access" {
@@ -135,85 +140,19 @@ resource "aws_iam_role" "firehose_to_coralogix" {
 # Firehose Logs Stream
 ################################################################################
 
-resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs_kinesis_stream_as_source" {
+resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs" {
   tags        = local.tags
   name        = "coralogix-${var.firehose_stream}-logs"
   destination = "http_endpoint"
-  count       = var.source_type_logs == "KinesisStreamAsSource" && var.logs_enable == true ? 1 : 0
+  count       = var.logs_enable == true ? 1 : 0
 
-  kinesis_source_configuration {
-    kinesis_stream_arn = var.kinesis_stream_arn
-    role_arn           = aws_iam_role.firehose_to_coralogix.arn
-
-  }
-
-  http_endpoint_configuration {
-    url                = var.coralogix_firehose_custom_endpoint != null ? var.coralogix_firehose_custom_endpoint : local.endpoint_url[var.coralogix_region].url
-    name               = "Coralogix"
-    access_key         = var.private_key
-    buffering_size     = 6
-    buffering_interval = 60
-    s3_backup_mode     = "FailedDataOnly"
-    role_arn           = aws_iam_role.firehose_to_coralogix.arn
-    retry_duration     = 300
-    #
-    s3_configuration {
+  dynamic "kinesis_source_configuration" {
+    for_each = var.source_type_logs == "KinesisStreamAsSource" && var.kinesis_stream_arn != null ? [1] : []
+    content {
+      kinesis_stream_arn = var.kinesis_stream_arn
       role_arn           = aws_iam_role.firehose_to_coralogix.arn
-      bucket_arn         = aws_s3_bucket.firehose_bucket.arn
-      buffering_size     = 5
-      buffering_interval = 300
-      compression_format = "GZIP"
-    }
-
-    cloudwatch_logging_options {
-      enabled         = "true"
-      log_group_name  = aws_cloudwatch_log_group.firehose_loggroup.name
-      log_stream_name = aws_cloudwatch_log_stream.firehose_logstream_dest.name
-    }
-
-    request_configuration {
-      content_encoding = "GZIP"
-
-      dynamic "common_attributes" {
-        for_each = var.integration_type_logs == null ? [] : [1]
-        content {
-          name  = "integrationType"
-          value = var.integration_type_logs
-        }
-      }
-
-      dynamic "common_attributes" {
-        for_each = var.application_name == null ? [] : [1]
-        content {
-          name  = "applicationName"
-          value = var.application_name
-        }
-      }
-
-      dynamic "common_attributes" {
-        for_each = var.subsystem_name == null ? [] : [1]
-        content {
-          name  = "subsystemName"
-          value = var.subsystem_name
-        }
-      }
-
-      dynamic "common_attributes" {
-        for_each = var.dynamic_metadata_logs == null ? [] : [1]
-        content {
-          name  = "dynamicMetadata"
-          value = var.dynamic_metadata_logs
-        }
-      }
     }
   }
-}
-
-resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs_direct_put_as_source" {
-  tags        = local.tags
-  name        = "coralogix-${var.firehose_stream}-logs"
-  destination = "http_endpoint"
-  count       = var.source_type_logs == "DirectPut" && var.logs_enable == true ? 1 : 0
 
   http_endpoint_configuration {
     url                = var.coralogix_firehose_custom_endpoint != null ? var.coralogix_firehose_custom_endpoint : local.endpoint_url[var.coralogix_region].url
@@ -276,7 +215,6 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs_direct_pu
     }
   }
 }
-
 
 resource "aws_iam_role_policy_attachment" "example_policy_attachment" {
   count      = var.logs_enable == true ? 1 : 0
@@ -388,7 +326,7 @@ data "aws_iam_policy_document" "lambda_assume_role" {
   }
 }
 
-resource "aws_iam_role" "lambda_iam" {
+resource "aws_iam_role" "lambda_iam_role" {
   count              = var.metric_enable == true ? 1 : 0
   name               = "${var.firehose_stream}-metrics-transform-lambda-iam"
   tags               = local.tags
@@ -398,7 +336,7 @@ resource "aws_iam_role" "lambda_iam" {
 resource "aws_iam_role_policy" "lambda_iam_policy" {
   count  = var.metric_enable == true ? 1 : 0
   name   = "${var.firehose_stream}-metrics-transform-lambda-iam"
-  role   = aws_iam_role.lambda_iam[count.index].id
+  role   = aws_iam_role.lambda_iam_role[count.index].id
   policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -449,7 +387,7 @@ resource "aws_lambda_function" "lambda_processor" {
   count         = var.metric_enable ? 1 : 0
   s3_bucket     = "cx-cw-metrics-tags-lambda-processor-${data.aws_region.current_region.name}"
   s3_key        = "function.zip"
-  function_name = "${var.firehose_stream}-metrics-tags-processor"
+  function_name = local.lambda_function_name
   role          = aws_iam_role.lambda_iam[count.index].arn
   handler       = "function"
   runtime       = "go1.x"
@@ -590,7 +528,7 @@ EOF
 resource "aws_cloudwatch_metric_stream" "cloudwatch_metric_stream" {
   tags          = local.tags
   count         = var.enable_cloudwatch_metricstream && var.metric_enable ? 1 : 0
-  name          = var.firehose_stream
+  name          = local.cloudwatch_metric_stream_name
   role_arn      = aws_iam_role.metric_streams_to_firehose[count.index].arn
   firehose_arn  = aws_kinesis_firehose_delivery_stream.coralogix_stream_metrics[count.index].arn
   output_format = var.output_format

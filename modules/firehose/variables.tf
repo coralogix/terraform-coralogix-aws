@@ -155,7 +155,7 @@ variable "source_type_logs" {
 variable "kinesis_stream_arn" {
   description = "The kinesis stream name for the logs - used in kinesis stream as a source"
   type        = string
-  default     = ""
+  default     = null
 }
 
 variable "integration_type_logs" {
@@ -165,7 +165,32 @@ variable "integration_type_logs" {
 }
 
 variable "dynamic_metadata_logs" {
-  description = "Dynamic values search for specific fields in the logs to populate the fields"
+  description = "When set to true, it fetches set the applicationName / subsystemName dynamically"
   type        = bool
   default     = null
+}
+
+variable "cloudwatch_metric_stream_custom_name" {
+  description = "Set the name of the CloudWatch metric stream, otherwise variable 'firehose_stream' will be used"
+  type        = string
+  default     = null
+}
+
+variable "s3_backup_bucket_custom_name" {
+  description = "Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup' will be used"
+  type        = string
+  default     = null
+}
+
+variable "lambda_function_custom_name" {
+  description = "Set the name of the lambda processor function, otherwise variable '{firehose_stream}-metrics-tags-processor' will be used"
+  type        = string
+  default     = null
+}
+
+variable "lambda_iam_custom_name" {
+  description = "Set the name of the lambda processor policy, otherwise variable '{firehose_stream}-metrics-transform-lambda-iam' will be used"
+  type        = string
+  default     = null
+
 }
