@@ -36,9 +36,11 @@ locals {
   })
 
   # default namings if not provided
-  cloudwatch_metric_stream_name = var.cloudwatch_metric_stream_custom_name != null ? var.cloudwatch_metric_stream_name : var.firehose_stream
-  s3_backup_bucket_name         = var.s3_backup_bucket_custom_name != null ? var.s3_backup_bucket_name : "${var.firehose_stream}-backup"
-  lambda_function_name          = var.lambda_function_custom_name != null ? var.lambda_function_name : "${var.firehose_stream}-metrics-tags-processor"
+  firehose_iam_name             = var.firehose_iam_custom_name != null ? var.firehose_iam_custom_name : "${var.firehose_stream}-firehose-iam"
+  cloudwatch_metric_stream_name = var.cloudwatch_metric_stream_custom_name != null ? var.cloudwatch_metric_stream_custom_name : var.firehose_stream
+  s3_backup_bucket_name         = var.s3_backup_bucket_custom_name != null ? var.s3_backup_bucket_custom_name : "${var.firehose_stream}-backup"
+  lambda_function_name          = var.lambda_function_custom_name != null ? var.lambda_function_custom_name : "${var.firehose_stream}-metrics-lambda-function"
+  lambda_iam_name               = var.lambda_iam_custom_name != null ? var.lambda_iam_custom_name : "${var.firehose_stream}-metrics-lambda-iam"
 }
 
 data "aws_caller_identity" "current_identity" {}
@@ -65,7 +67,7 @@ resource "aws_cloudwatch_log_stream" "firehose_logstream_backup" {
 }
 
 resource "aws_s3_bucket" "firehose_bucket" {
-  tags   = merge(local.tags, { Name = "${var.firehose_stream}-backup" })
+  tags   = merge(local.tags, { Name = local.s3_backup_bucket_name })
   bucket = local.s3_backup_bucket_name
 }
 
@@ -80,6 +82,7 @@ resource "aws_s3_bucket_public_access_block" "firehose_bucket_bucket_access" {
 
 resource "aws_iam_role" "firehose_to_coralogix" {
   tags = local.tags
+  name = local.firehose_iam_name
   assume_role_policy = jsonencode({
     "Version" = "2012-10-17",
     "Statement" = [
@@ -93,7 +96,7 @@ resource "aws_iam_role" "firehose_to_coralogix" {
     ]
   })
   inline_policy {
-    name = "coralogix-firehose-execution"
+    name = local.firehose_iam_name
     policy = jsonencode({
       "Version" = "2012-10-17",
       "Statement" = [
@@ -328,14 +331,14 @@ data "aws_iam_policy_document" "lambda_assume_role" {
 
 resource "aws_iam_role" "lambda_iam_role" {
   count              = var.metric_enable == true ? 1 : 0
-  name               = "${var.firehose_stream}-metrics-transform-lambda-iam"
+  name               = local.lambda_iam_name
   tags               = local.tags
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role[count.index].json
 }
 
 resource "aws_iam_role_policy" "lambda_iam_policy" {
   count  = var.metric_enable == true ? 1 : 0
-  name   = "${var.firehose_stream}-metrics-transform-lambda-iam"
+  name   = local.lambda_iam_name
   role   = aws_iam_role.lambda_iam_role[count.index].id
   policy = <<EOF
 {
@@ -388,7 +391,7 @@ resource "aws_lambda_function" "lambda_processor" {
   s3_bucket     = "cx-cw-metrics-tags-lambda-processor-${data.aws_region.current_region.name}"
   s3_key        = "function.zip"
   function_name = local.lambda_function_name
-  role          = aws_iam_role.lambda_iam[count.index].arn
+  role          = aws_iam_role.lambda_iam_role[count.index].arn
   handler       = "function"
   runtime       = "go1.x"
   timeout       = "60"

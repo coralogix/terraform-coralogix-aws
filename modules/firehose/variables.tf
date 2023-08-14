@@ -170,6 +170,12 @@ variable "dynamic_metadata_logs" {
   default     = null
 }
 
+variable "firehose_iam_custom_name" {
+  description = "Set the name of the Kinesis Firehose policy, otherwise variable '{firehose_stream}-firehose-iam' will be used"
+  type        = string
+  default     = null
+}
+
 variable "cloudwatch_metric_stream_custom_name" {
   description = "Set the name of the CloudWatch metric stream, otherwise variable 'firehose_stream' will be used"
   type        = string
