@@ -112,8 +112,14 @@ variable "include_metric_stream_filter" {
   default = []
 }
 
+variable "additional_metric_statistics_enable" {
+  description = "To enable the inclusion of additional statistics to the streaming metrics"
+  type        = bool
+  default     = false
+}
+
 variable "additional_metric_statistics" {
-  description = "For each entry, specify one or more metrics (metric_name and namespace) and the list of additional statistics to stream for those metrics. Each configuration of metric name and namespace can have a list of additional_statistics included into the AWS CloudWatch Metric Stream."
+  description = "For each entry, specify one or more metrics (metric_name and namespace) and the list of additional statistics to stream for those metrics. Each configuration of metric name and namespace can have a list of additional_statistics included into the AWS CloudWatch Metric Stream"
   type = list(object({
     additional_statistics = list(string)
     metric_name           = string
@@ -156,12 +162,6 @@ variable "additional_metric_statistics" {
       namespace             = "AWS/S3"
     }
   ]
-}
-
-variable "additional_metric_statistics_enable" {
-  description = "To enable the inclusion of additional statistics to the streaming metrics."
-  type        = bool
-  default     = false
 }
 
 variable "user_supplied_tags" {
