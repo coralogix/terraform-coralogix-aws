@@ -55,7 +55,7 @@ variable "source_type_logs" {
 }
 
 variable "kinesis_stream_arn" {
-  description = "The kinesis stream name for the logs - used in kinesis stream as a source"
+  description = "If 'KinesisStreamAsSource' set as source_type_logs. Set the kinesis stream's ARN as the source of the firehose log stream"
   type        = string
   default     = null
 }
@@ -67,13 +67,13 @@ variable "integration_type_logs" {
 }
 
 variable "dynamic_metadata_logs" {
-  description = "When set to true, it fetches set the applicationName / subsystemName dynamically"
+  description = "When set to true, field fetched dynamically for fields like applicationName / subsystemName"
   type        = bool
   default     = null
 }
 
 variable "metric_enable" {
-  description = "Enable sending metrics to Coralogix"
+  description = "Enable sending of metrics to Coralogix"
   type        = bool
   default     = true
 }
