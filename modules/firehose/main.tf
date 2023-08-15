@@ -121,7 +121,7 @@ resource "aws_iam_role" "firehose_to_coralogix" {
             "kinesis:GetRecords",
             "kinesis:ListShards"
           ],
-          "Resource" = "arn:aws:kinesis:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_identity.account_id}:stream/${var.firehose_stream}"
+          "Resource" = "arn:aws:kinesis:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_identity.account_id}:stream/*"
         },
         {
           "Effect" = "Allow",
@@ -289,7 +289,7 @@ resource "aws_iam_role_policy" "firehose_to_coralogix_metric_policy" {
                "kinesis:GetRecords",
                "kinesis:ListShards"
            ],
-           "Resource": "arn:aws:kinesis:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_identity.account_id}:stream/${var.firehose_stream}-metric"
+           "Resource": "arn:aws:kinesis:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_identity.account_id}:stream/*"
         },
         {
            "Effect": "Allow",
@@ -406,7 +406,7 @@ resource "aws_lambda_function" "lambda_processor" {
 resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_metrics" {
   count       = var.metric_enable == true ? 1 : 0
   tags        = local.tags
-  name        = "coralogix-${var.firehose_stream}-metrics"
+  name        = "${var.firehose_stream}-delivery-metrics"
   destination = "http_endpoint"
 
   http_endpoint_configuration {
