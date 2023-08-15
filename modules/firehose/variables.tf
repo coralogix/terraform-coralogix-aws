@@ -171,32 +171,25 @@ variable "dynamic_metadata_logs" {
 }
 
 variable "firehose_iam_custom_name" {
-  description = "Set the name of the Kinesis Firehose policy, otherwise variable '{firehose_stream}-firehose-iam' will be used"
+  description = "Set the name of the Kinesis Firehose policy, otherwise variable '{firehose_stream}-iam' will be used"
   type        = string
   default     = null
 }
 
-variable "cloudwatch_metric_stream_custom_name" {
+variable "metric_stream_custom_name" {
   description = "Set the name of the CloudWatch metric stream, otherwise variable 'firehose_stream' will be used"
   type        = string
   default     = null
 }
 
-variable "s3_backup_bucket_custom_name" {
+variable "s3_backup_custom_name" {
   description = "Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup' will be used"
   type        = string
   default     = null
 }
 
-variable "lambda_function_custom_name" {
+variable "lambda_processor_custom_name" {
   description = "Set the name of the lambda processor function, otherwise variable '{firehose_stream}-metrics-tags-processor' will be used"
   type        = string
   default     = null
-}
-
-variable "lambda_iam_custom_name" {
-  description = "Set the name of the lambda processor policy, otherwise variable '{firehose_stream}-metrics-transform-lambda-iam' will be used"
-  type        = string
-  default     = null
-
 }
