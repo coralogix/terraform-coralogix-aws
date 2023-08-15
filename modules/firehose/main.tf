@@ -36,7 +36,7 @@ locals {
   })
 
   # default namings
-  cloud_watch_metric_stream_name = var.metric_stream_custom_name != null ? var.metric_stream_custom_name : "${var.firehose_stream}-metric-stream"
+  cloud_watch_metric_stream_name = var.cloudwatch_metric_stream_custom_name != null ? var.cloudwatch_metric_stream_custom_name : "${var.firehose_stream}-metric-stream"
   s3_backup_bucket_name          = var.s3_backup_custom_name != null ? var.s3_backup_custom_name : "${var.firehose_stream}-backup"
   lambda_processor_name          = var.lambda_processor_custom_name != null ? var.lambda_processor_custom_name : "${var.firehose_stream}-metrics-lambda"
 }
