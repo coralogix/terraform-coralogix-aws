@@ -55,12 +55,12 @@ variable "additional_metric_statistics" {
   }))
   default = [
     {
-      additional_statistics = ["p75", "p99"],
+      additional_statistics = ["p50", "p75", "p95", "p99"],
       metric_name           = "VolumeTotalReadTime",
       namespace             = "AWS/EBS"
     },
     {
-      additional_statistics = ["p75", "p99"],
+      additional_statistics = ["p50", "p75", "p95", "p99"],
       metric_name           = "VolumeTotalWriteTime",
       namespace             = "AWS/EBS"
     },
@@ -71,9 +71,24 @@ variable "additional_metric_statistics" {
     },
     {
       additional_statistics = ["p50", "p75", "p95", "p99"],
+      metric_name           = "Duration",
+      namespace             = "AWS/ELB"
+    },
+    {
+      additional_statistics = ["p50", "p75", "p95", "p99"],
+      metric_name           = "PostRuntimeExtensionsDuration",
+      namespace             = "AWS/Lambda"
+    },
+    {
+      additional_statistics = ["p50", "p75", "p95", "p99"],
       metric_name           = "FirstByteLatency",
       namespace             = "AWS/S3"
     },
+    {
+      additional_statistics = ["p50", "p75", "p95", "p99"],
+      metric_name           = "TotalRequestLatency",
+      namespace             = "AWS/S3"
+    }
   ]
 }
 
