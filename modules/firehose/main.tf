@@ -80,7 +80,7 @@ resource "aws_s3_bucket_public_access_block" "firehose_bucket_bucket_access" {
 
 resource "aws_iam_role" "firehose_to_coralogix" {
   tags = local.tags
-  name = "${var.firehose_stream}-iam"
+  name = "${var.firehose_stream}-role"
   assume_role_policy = jsonencode({
     "Version" = "2012-10-17",
     "Statement" = [
@@ -94,7 +94,7 @@ resource "aws_iam_role" "firehose_to_coralogix" {
     ]
   })
   inline_policy {
-    name = "${var.firehose_stream}-iam"
+    name = "${var.firehose_stream}-policy"
     policy = jsonencode({
       "Version" = "2012-10-17",
       "Statement" = [
@@ -329,14 +329,14 @@ data "aws_iam_policy_document" "lambda_assume_role" {
 
 resource "aws_iam_role" "lambda_iam_role" {
   count              = var.metric_enable == true ? 1 : 0
-  name               = "${local.lambda_processor_name}-iam"
+  name               = "${local.lambda_processor_name}-role"
   tags               = local.tags
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role[count.index].json
 }
 
 resource "aws_iam_role_policy" "lambda_iam_policy" {
   count  = var.metric_enable == true ? 1 : 0
-  name   = "${local.lambda_processor_name}-iam"
+  name   = "${local.lambda_processor_name}-policy"
   role   = aws_iam_role.lambda_iam_role[count.index].id
   policy = <<EOF
 {
@@ -485,7 +485,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_metrics" {
 resource "aws_iam_role" "metric_streams_to_firehose_role" {
   tags               = local.tags
   count              = var.enable_cloudwatch_metricstream && var.metric_enable ? 1 : 0
-  name               = "${local.cloud_watch_metric_stream_name}-iam"
+  name               = "${local.cloud_watch_metric_stream_name}-role"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -505,7 +505,7 @@ EOF
 
 resource "aws_iam_role_policy" "metric_streams_to_firehose_policy" {
   count  = var.enable_cloudwatch_metricstream && var.metric_enable ? 1 : 0
-  name   = "${local.cloud_watch_metric_stream_name}-iam"
+  name   = "${local.cloud_watch_metric_stream_name}-policy"
   role   = aws_iam_role.metric_streams_to_firehose_role[0].id
   policy = <<EOF
 {
