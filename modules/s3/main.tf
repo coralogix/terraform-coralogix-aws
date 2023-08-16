@@ -48,16 +48,15 @@ resource "random_string" "this" {
   special = false
 }
 
-resource "null_resource" "s3_bucket" {
+resource "null_resource" "s3_bucket_copy" {
   count = var.custom_s3_bucket == "" ? 0 : 1
   provisioner "local-exec" {
-    command = "curl -o cloudwatch-logs.zip https://coralogix-serverless-repo-eu-central-1.s3.eu-central-1.amazonaws.com/cloudwatch-logs.zip ; aws s3 cp ./cloudwatch-logs.zip s3://${var.custom_s3_bucket} ; rm ./cloudwatch-logs.zip"
-  }
+    command = "curl -o ${var.package_name}.zip https://coralogix-serverless-repo-eu-central-1.s3.eu-central-1.amazonaws.com/${var.package_name}.zip ; aws s3 cp ./${var.package_name}.zip s3://${var.custom_s3_bucket} ; rm ./${var.package_name}.zip"  }
 }
 
 module "lambda" {
   create                 = var.layer_arn == "" ? true : false
-  depends_on             = [ null_resource.s3_bucket ]
+  depends_on             = [ null_resource.s3_bucket_copy ]
   source                 = "terraform-aws-modules/lambda/aws"
   version                = "3.2.1"
   function_name          = module.locals.function_name
@@ -112,7 +111,7 @@ module "lambda" {
 module "lambdaSSM" {
   source                 = "terraform-aws-modules/lambda/aws"
   create                 = var.layer_arn != "" ? true : false
-  depends_on             = [ null_resource.s3_bucket ]
+  depends_on             = [ null_resource.s3_bucket_copy ]
   version                = "3.2.1"
   layers                 = [var.layer_arn]
   function_name          = module.locals.function_name

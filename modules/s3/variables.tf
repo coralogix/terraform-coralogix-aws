@@ -19,12 +19,6 @@ variable "private_key" {
   sensitive   = true
 }
 
-# variable "ssm_enable" {
-#   description = "Use SSM for the private key True/False"
-#   type        = string
-#   default     = "False"
-# }
-
 variable "layer_arn" {
   description = " In case you are using SSM This is the ARN of the Coralogix Security Layer."
   type        = string
