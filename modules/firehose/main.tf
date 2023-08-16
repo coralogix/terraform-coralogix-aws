@@ -36,9 +36,9 @@ locals {
   })
 
   # default namings
-  cloud_watch_metric_stream_name = var.cloudwatch_metric_stream_custom_name != null ? var.cloudwatch_metric_stream_custom_name : "${var.firehose_stream}-metric-stream"
+  cloud_watch_metric_stream_name = var.cloudwatch_metric_stream_custom_name != null ? var.cloudwatch_metric_stream_custom_name : var.firehose_stream
   s3_backup_bucket_name          = var.s3_backup_custom_name != null ? var.s3_backup_custom_name : "${var.firehose_stream}-backup"
-  lambda_processor_name          = var.lambda_processor_custom_name != null ? var.lambda_processor_custom_name : "${var.firehose_stream}-metrics-lambda"
+  lambda_processor_name          = var.lambda_processor_custom_name != null ? var.lambda_processor_custom_name : "${var.firehose_stream}-metrics-transform"
 }
 
 data "aws_caller_identity" "current_identity" {}
@@ -143,7 +143,7 @@ resource "aws_iam_role" "firehose_to_coralogix" {
 
 resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs" {
   tags        = local.tags
-  name        = "${var.firehose_stream}-delivery-logs"
+  name        = "${var.firehose_stream}-logs"
   destination = "http_endpoint"
   count       = var.logs_enable == true ? 1 : 0
 
@@ -388,7 +388,7 @@ resource "aws_lambda_function" "lambda_processor" {
   count         = var.metric_enable ? 1 : 0
   s3_bucket     = "cx-cw-metrics-tags-lambda-processor-${data.aws_region.current_region.name}"
   s3_key        = "function.zip"
-  function_name = local.lambda_processor_name
+  function_name = "${local.lambda_processor_name}-processor"
   role          = aws_iam_role.lambda_iam_role[count.index].arn
   handler       = "function"
   runtime       = "go1.x"
@@ -406,7 +406,7 @@ resource "aws_lambda_function" "lambda_processor" {
 resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_metrics" {
   count       = var.metric_enable == true ? 1 : 0
   tags        = local.tags
-  name        = "${var.firehose_stream}-delivery-metrics"
+  name        = "${var.firehose_stream}-metrics"
   destination = "http_endpoint"
 
   http_endpoint_configuration {
