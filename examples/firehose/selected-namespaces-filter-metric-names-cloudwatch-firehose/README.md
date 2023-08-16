@@ -1,5 +1,5 @@
-# Firehose Delivery Stream with CloudWatch metrics stream with filtered metric names of selected namespaces 
-Configuration in this directory creates a firehose delivery stream, and a CloudWatch metrics stream. 
+# Firehose Delivery Stream with filtered metric names of selected namespaces
+Configuration in this directory creates a firehose delivery stream, and a CloudWatch metrics stream.
 The CloudWatch metrics stream in this example includes both specific namespaces and metric names that are inserted in the list object. If the filter's list of metric_names is left empty, all metric_names are included in the namespace.
 
 All of the namespaces are created under one metric stream, see [use metric streams](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html)
