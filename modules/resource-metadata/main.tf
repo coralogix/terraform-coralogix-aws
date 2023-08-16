@@ -46,8 +46,16 @@ resource "random_string" "this" {
   special = false
 }
 
+resource "null_resource" "s3_bucket" {
+  count = var.custom_s3_bucket == "" ? 0 : 1
+  provisioner "local-exec" {
+    command = "curl -o cloudwatch-logs.zip https://coralogix-serverless-repo-eu-central-1.s3.eu-central-1.amazonaws.com/cloudwatch-logs.zip ; aws s3 cp ./cloudwatch-logs.zip s3://${var.custom_s3_bucket} ; rm ./cloudwatch-logs.zip"
+  }
+}
+
 module "lambda" {
   create                 = var.layer_arn == "" ? true : false
+  depends_on             = [ null_resource.s3_bucket ]
   source                 = "terraform-aws-modules/lambda/aws"
   version                = "3.2.1"
   function_name          = local.function_name
@@ -69,7 +77,7 @@ module "lambda" {
     AWS_MAX_ATTEMPTS             = 10
   }
   s3_existing_package = {
-    bucket = "coralogix-serverless-repo-${data.aws_region.this.name}"
+    bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
     key    = "${var.package_name}.zip"
   }
   policy_path                             = "/coralogix/"
@@ -108,6 +116,7 @@ module "lambda" {
 
 module "lambdaSSM" {
   create                 = var.layer_arn != "" ? true : false
+  depends_on             = [ null_resource.s3_bucket ]
   source                 = "terraform-aws-modules/lambda/aws"
   version                = "3.2.1"
   function_name          = local.function_name
@@ -131,7 +140,7 @@ module "lambdaSSM" {
     AWS_MAX_ATTEMPTS             = 10
   }
   s3_existing_package = {
-    bucket = "coralogix-serverless-repo-${data.aws_region.this.name}"
+    bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
     key    = "${var.package_name}.zip"
   }
   policy_path                             = "/coralogix/"

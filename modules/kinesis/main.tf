@@ -16,10 +16,18 @@ resource "random_string" "this" {
   special = false
 }
 
+resource "null_resource" "s3_bucket" {
+  count = var.custom_s3_bucket == "" ? 0 : 1
+  provisioner "local-exec" {
+    command = "curl -o cloudwatch-logs.zip https://coralogix-serverless-repo-eu-central-1.s3.eu-central-1.amazonaws.com/cloudwatch-logs.zip ; aws s3 cp ./cloudwatch-logs.zip s3://${var.custom_s3_bucket} ; rm ./cloudwatch-logs.zip"
+  }
+}
+
 module "lambda" {
   source                 = "terraform-aws-modules/lambda/aws"
   version                = "3.3.1"
   create                 = var.layer_arn == "" ? true : false
+  depends_on             = [ null_resource.s3_bucket ]
   layers                 = [var.layer_arn]
   function_name          = module.locals.function_name
   description            = "Send kinesis data stream logs to Coralogix."
@@ -38,7 +46,7 @@ module "lambda" {
     newline_pattern = var.newline_pattern
   }
   s3_existing_package = {
-    bucket = "coralogix-serverless-repo-${data.aws_region.this.name}"
+    bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
     key    = "${var.package_name}.zip"
   }
   policy_path                             = "/coralogix/"
@@ -72,7 +80,7 @@ module "lambda_ssm" {
   source  = "terraform-aws-modules/lambda/aws"
   version = "3.3.1"
   create  = var.layer_arn != "" ? true : false
-
+  depends_on             = [ null_resource.s3_bucket ]
   layers                 = [var.layer_arn]
   function_name          = module.locals.function_name
   description            = "Send kinesis data stream logs to Coralogix."
@@ -93,7 +101,7 @@ module "lambda_ssm" {
     newline_pattern         = var.newline_pattern
   }
   s3_existing_package = {
-    bucket = "coralogix-serverless-repo-${data.aws_region.this.name}"
+    bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
     key    = "${var.package_name}.zip"
   }
   policy_path                             = "/coralogix/"

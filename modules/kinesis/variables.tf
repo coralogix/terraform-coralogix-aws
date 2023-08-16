@@ -85,6 +85,12 @@ variable "layer_arn" {
   default     = ""
 }
 
+variable "custom_s3_bucket" {
+  description = "The name of the s3 bucket to save the lambda zip code in"
+  type        = string
+  default     = ""
+}
+
 variable "create_secret" {
   description = "Set to False In case you want to use SSM with your secret that contains coralogix private key"
   type        = string
