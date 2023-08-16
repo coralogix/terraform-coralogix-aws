@@ -1,10 +1,14 @@
 # Firehose Module - Metrics And Logs
+
 Firehose module is designed to support CloudWatch metrics.
 
 ## Logs - Usage
+
 ### Firehose Delivery Stream
+
 Provision a firehose delivery stream for streaming logs to [Coralogix](https://coralogix.com/docs/aws-firehose/) - add this parameters to the configuration of the integration to enable to stream logs:
-```
+
+```terraform
 module "cloudwatch_firehose_coralogix" {
   source                         = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
   logs_enable                    = true
@@ -18,23 +22,12 @@ module "cloudwatch_firehose_coralogix" {
 ```
 
 ## Metrics - Usage
-### Firehose Delivery Stream
-Provision a firehose delivery stream for streaming metrics to Coralogix:
-```
-module "cloudwatch_firehose_coralogix" {
-  source                         = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
-  metric_enable                  = true
-  firehose_stream                = var.coralogix_firehose_stream_name
-  private_key                    = var.private_key
-  enable_cloudwatch_metricstream = false
-  coralogix_region               = var.coralogix_region
-}
-```
 
 ### Delivering all CloudWatch metrics
 Provision a firehose delivery stream with [CloudWatch metric stream](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html).
 The metric stream includes all namespaces [AWS/EC2, AWS/EBS, etc..], and sends the metrics to Coralogix:
-```
+
+```terraform
 module "cloudwatch_firehose_coralogix" {
   source           = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
   metric_enable    = true
@@ -49,7 +42,8 @@ Provision a firehose delivery stream with [CloudWatch metric stream](https://doc
 The metric stream includes only selected namespaces and sends the metrics to Coralogix:
 When including specific namespaces, the variable 'include_metric_stream_namespaces' needs to include a list of the desired namespaces,
 which are case-sensitive. please see the [AWS namespaces list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html). 
-```
+
+```terraform
 module "cloudwatch_firehose_coralogix" {
   source                           = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
   metric_enable                    = true
@@ -60,7 +54,7 @@ module "cloudwatch_firehose_coralogix" {
 }
 ```
 
-### Filtering selected metric_names from namespaces
+### Filtering selected metric names from namespaces
 Provision a firehose delivery stream with [CloudWatch metric stream](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html).
 For more granular inclusive filters of metric names belonging to an included namespace:
 
@@ -70,7 +64,7 @@ The variable `include_metric_stream_filter` can be used to send only conditional
 
 Metric namespaces are also case-sensitive, please see the [AWS namespaces list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html). For case-sensitive metric names belonging to a namespace, please see the [AWS View available metrics guide](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/viewing_metrics_with_cloudwatch.html)
 
-```
+```terraform
 module "cloudwatch_firehose_coralogix" {
   source                           = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
   metric_enable                    = true
@@ -101,7 +95,7 @@ If `additional_metric_statistics` is not configured but is enabled `true`, the m
 
 In the below example, `additional_metric_statistics` is enabled and the default configured metrics, namespaces and additional statistics percentiles are used. Note: as `output_format` of `opentelemetry0.7` is configured, only percentile values are supported.
 
-```
+```terraform
 output_format = "opentelemetry0.7"
 
 additional_metric_statistics_enable = true
