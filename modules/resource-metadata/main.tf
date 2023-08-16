@@ -33,7 +33,7 @@ module "eventbridge" {
     crons = [
       {
         name  = "cron-for-lambda"
-        arn   = var.ssm_enable != "True" ? module.lambda.lambda_function_arn : module.lambdaSSM.lambda_function_arn
+        arn   = var.layer_arn == "" ? module.lambda.lambda_function_arn : module.lambdaSSM.lambda_function_arn
         input = jsonencode({ "job" : "cron-by-rate" })
       }
     ]
@@ -46,16 +46,8 @@ resource "random_string" "this" {
   special = false
 }
 
-resource "null_resource" "s3_bucket" {
-  count = var.custom_s3_bucket == "" ? 0 : 1
-  provisioner "local-exec" {
-    command = "curl -o ${var.package_name}.zip https://coralogix-serverless-repo-eu-central-1.s3.eu-central-1.amazonaws.com/${var.package_name}.zip ; aws s3 cp ./${var.package_name}.zip s3://${var.custom_s3_bucket} ; rm ./${var.package_name}.zip"
-  }
-}
-
 module "lambda" {
-  create                 = var.ssm_enable != "True" ? true : false
-  depends_on             = [ null_resource.s3_bucket ]
+  create                 = var.layer_arn == "" ? true : false
   source                 = "terraform-aws-modules/lambda/aws"
   version                = "3.2.1"
   function_name          = local.function_name
@@ -77,7 +69,7 @@ module "lambda" {
     AWS_MAX_ATTEMPTS             = 10
   }
   s3_existing_package = {
-    bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
+    bucket = "coralogix-serverless-repo-${data.aws_region.this.name}"
     key    = "${var.package_name}.zip"
   }
   policy_path                             = "/coralogix/"
@@ -115,8 +107,7 @@ module "lambda" {
 }
 
 module "lambdaSSM" {
-  create                 = var.ssm_enable == "True" ? true : false
-  depends_on             = [ null_resource.s3_bucket ]
+  create                 = var.layer_arn != "" ? true : false
   source                 = "terraform-aws-modules/lambda/aws"
   version                = "3.2.1"
   function_name          = local.function_name
@@ -132,6 +123,7 @@ module "lambdaSSM" {
   environment_variables = {
     CORALOGIX_METADATA_URL       = lookup(local.coralogix_regions, var.coralogix_region, "Europe")
     AWS_LAMBDA_EXEC_WRAPPER      =  "/opt/wrapper.sh"
+    SECRET_NAME                  = var.create_secret == "False" ? var.private_key : ""
     LATEST_VERSIONS_PER_FUNCTION = var.latest_versions_per_function
     RESOURCE_TTL_MINUTES         = var.resource_ttl_minutes
     COLLECT_ALIASES              = var.collect_aliases
@@ -139,7 +131,7 @@ module "lambdaSSM" {
     AWS_MAX_ATTEMPTS             = 10
   }
   s3_existing_package = {
-    bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
+    bucket = "coralogix-serverless-repo-${data.aws_region.this.name}"
     key    = "${var.package_name}.zip"
   }
   policy_path                             = "/coralogix/"
@@ -193,13 +185,13 @@ resource "aws_sns_topic" "this" {
 }
 
 resource "aws_secretsmanager_secret" "private_key_secret" {
-  count       = var.ssm_enable == "True" ? 1 : 0
+  count         = var.layer_arn != "" && var.create_secret == "True"  ? 1 : 0
   depends_on  = [module.lambdaSSM]
   name        = "lambda/coralogix/${data.aws_region.this.name}/${local.function_name}"
   description = "Coralogix Send Your Data key Secret"
 }
 resource "aws_secretsmanager_secret_version" "service_user" {
-  count         = var.ssm_enable == "True" ? 1 : 0
+  count         = var.layer_arn != "" && var.create_secret == "True"  ? 1 : 0
   depends_on    = [aws_secretsmanager_secret.private_key_secret]
   secret_id     = aws_secretsmanager_secret.private_key_secret[count.index].id
   secret_string = var.private_key

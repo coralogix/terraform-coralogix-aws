@@ -19,14 +19,8 @@ variable "private_key" {
   sensitive   = true
 }
 
-variable "ssm_enable" {
-  description = "Use SSM for the private key True/False"
-  type        = string
-  default     = "False"
-}
-
 variable "layer_arn" {
-  description = "Coralogix SSM Layer ARN"
+  description = "In case you are using SSM This is the ARN of the Coralogix Security Layer."
   type        = string
   default     = ""
 }
@@ -91,8 +85,8 @@ variable "tags" {
   default     = {}
 }
 
-variable "custom_s3_bucket" {
-  description = "The name of the s3 bucket to save the lambda zip code in"
+variable "create_secret" {
+  description = "Set to false In case you want to use SSM with your secret that contains coralogix private key"
   type        = string
-  default     = ""
+  default     = "True"
 }

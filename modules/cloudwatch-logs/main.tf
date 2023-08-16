@@ -17,18 +17,11 @@ resource "random_string" "this" {
   special = false
 }
 
-resource "null_resource" "s3_bucket" {
-  count = var.custom_s3_bucket == "" ? 0 : 1
-  provisioner "local-exec" {
-    command = "curl -o cloudwatch-logs.zip https://coralogix-serverless-repo-eu-central-1.s3.eu-central-1.amazonaws.com/cloudwatch-logs.zip ; aws s3 cp ./cloudwatch-logs.zip s3://${var.custom_s3_bucket} ; rm ./cloudwatch-logs.zip"
-  }
-}
-
 module "lambda" {
   source  = "terraform-aws-modules/lambda/aws"
   version = "3.3.1"
-  create  = var.ssm_enable != "True" ? true : false
-  depends_on             = [ null_resource.s3_bucket ]
+  create  = var.layer_arn == "" ? true : false
+
   function_name          = module.locals.function_name
   description            = "Send CloudWatch logs to Coralogix."
   handler                = "index.handler"
@@ -51,7 +44,7 @@ module "lambda" {
     sampling        = tostring(var.sampling_rate)
   }
   s3_existing_package = {
-    bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
+    bucket = "coralogix-serverless-repo-${data.aws_region.this.name}"
     key    = "cloudwatch-logs.zip"
   }
   policy_path                             = "/coralogix/"
@@ -73,8 +66,8 @@ module "lambda" {
 module "lambdaSSM" {
   source  = "terraform-aws-modules/lambda/aws"
   version = "3.3.1"
-  create  = var.ssm_enable == "True" ? true : false
-  depends_on             = [ null_resource.s3_bucket ]
+  create  = var.layer_arn != "" ? true : false
+
   layers                 = [var.layer_arn]
   function_name          = module.locals.function_name
   description            = "Send CloudWatch logs to Coralogix."
@@ -91,6 +84,7 @@ module "lambdaSSM" {
   environment_variables = {
     CORALOGIX_URL           = var.custom_url == "" ? lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe") : var.custom_url
     AWS_LAMBDA_EXEC_WRAPPER = "/opt/wrapper.sh"
+    SECRET_NAME             = var.create_secret == "False" ? var.private_key : ""
     private_key             = "****"
     app_name                = var.application_name
     sub_name                = var.subsystem_name
@@ -99,7 +93,7 @@ module "lambdaSSM" {
     sampling                = tostring(var.sampling_rate)
   }
   s3_existing_package = {
-    bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
+    bucket = "coralogix-serverless-repo-${data.aws_region.this.name}"
     key    = "cloudwatch-logs.zip"
   }
   policy_path                             = "/coralogix/"
@@ -142,7 +136,7 @@ resource "aws_cloudwatch_log_subscription_filter" "this" {
   count           = length(var.log_groups)
   name            = "${module.lambda.lambda_function_name}-Subscription-${count.index}"
   log_group_name  = data.aws_cloudwatch_log_group.this[count.index].name
-  destination_arn = var.ssm_enable == "True" ? module.lambdaSSM.lambda_function_arn : module.lambda.lambda_function_arn
+  destination_arn = var.layer_arn != "" ? module.lambdaSSM.lambda_function_arn : module.lambda.lambda_function_arn
   filter_pattern  = ""
 }
 
@@ -161,16 +155,15 @@ resource "aws_sns_topic_subscription" "this" {
 }
 
 resource "aws_secretsmanager_secret" "private_key_secret" {
-  count       = var.ssm_enable == "True" ? 1 : 0
+  count         = var.layer_arn != "" && var.create_secret == "True"  ? 1 : 0
   depends_on  = [module.lambdaSSM]
   name        = "lambda/coralogix/${data.aws_region.this.name}/${module.locals.function_name}"
   description = "Coralogix Send Your Data key Secret"
 }
 
 resource "aws_secretsmanager_secret_version" "service_user" {
-  count         = var.ssm_enable == "True" ? 1 : 0
+  count         = var.layer_arn != "" && var.create_secret == "True"  ? 1 : 0
   depends_on    = [aws_secretsmanager_secret.private_key_secret]
   secret_id     = aws_secretsmanager_secret.private_key_secret[count.index].id
   secret_string = var.private_key
 }
-

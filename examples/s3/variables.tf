@@ -15,19 +15,13 @@ variable "custom_url" {
 }
 
 variable "private_key" {
-  description = "The Coralogix private key which is used to validate your authenticity"
+  description = "Your Coralogix secret key or incase you use your own created secret put here the name of your secret that contains the coralogix Private Key"
   type        = string
   sensitive   = true
 }
 
-variable "ssm_enable" {
-  description = "Use SSM for the private key True/False"
-  type        = string
-  default     = "False"
-}
-
 variable "layer_arn" {
-  description = "Coralogix SSM Layer ARN"
+  description = "In case you are using SSM This is the ARN of the Coralogix Security Layer."
   type        = string
   default     = ""
 }
@@ -140,8 +134,8 @@ variable "sns_topic_name" {
   default     = ""
 }
 
-variable "custom_s3_bucket" {
-  description = "The name of the s3 bucket to save the lambda zip code in"
+variable "create_secret" {
+  description = "Set to false In case you want to use SSM with your secret that contains coralogix private key"
   type        = string
-  default     = ""
+  default     = "True"
 }
