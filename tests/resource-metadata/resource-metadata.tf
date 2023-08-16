@@ -17,5 +17,4 @@ module "resource-metadata" {
 
   coralogix_region = "Europe"
   private_key      = "{{ secrets.TESTING_PRIVATE_KEY }}"
-  layer_arn        = "<your layer arn>"
 }
