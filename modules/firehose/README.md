@@ -93,54 +93,63 @@ module "cloudwatch_firehose_coralogix" {
 ```
 
 ### Additional Statistics
-Provides a list of additional statistics for the specified metrics. For each entry, specify one or more metrics (metric_name and namespace) and a list of corresponding statistics to include in the CloudWatch metric stream.
+Also, `additional_metric_statistics` provide a means to configure additional statistics to a given metric. This is done by specifying the metric_name and namespace and corresponding list of additional statistics. Read [metric streams](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html) for more infomation. Set `additional_metric_statistics_enable` to true to enable this featurem, 
 
-Depending on the `output_format` variable configured. The `json` format would support streaming of statistics provided by CloudWatch and the `opentelemetry0.7` (default) supports streaming percentile statistics (p99 etc.). 
+Depending on the `output_format` variable configured (default opentelemetry0.7). The `json` format would support streaming of statistics provided by CloudWatch and the `opentelemetry0.7` (default) supports streaming percentile statistics (p99.). 
 
-Set `additional_metric_statistics_enable` to `true` to enable.
+If `additional_metric_statistics` is not configured but is enabled `true`, the module's default configuration of recommended metric and statistics is used which is configured to the `p50`, `p75`, `p95` and `p99` percentiles.
+
+In the below example, `additional_metric_statistics` is enabled and the default configured metrics, namespaces and additional statistics percentiles are used. Note: as `output_format` of `opentelemetry0.7` is configured, only percentile values are supported.
 
 ```
-module "cloudwatch_firehose_coralogix" {
-  source                           = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
-  metric_enable                       = true
-  firehose_stream                     = var.coralogix_firehose_stream_name
-  private_key                         = var.private_key
-  include_metric_stream_filter        = var.include_metric_stream_filter
+output_format = "opentelemetry0.7"
 
-  additional_metric_statistics_enable = true
-  additional_metric_statistics        = [
-    {
-      additional_statistics = ["p50", "p75", "p95", "p99"],
-      metric_name           = "VolumeTotalReadTime",
-      namespace             = "AWS/EBS"
-    },
-    {
-      additional_statistics = ["p50", "p75", "p95", "p99"],
-      metric_name           = "FirstByteLatency",
-      namespace             = "AWS/S3"
-    },
-    {
-      additional_statistics = ["p95", "p99"],
-      metric_name           = "TotalRequestLatency",
-      namespace             = "AWS/S3"
-    }
-  ]
-  coralogix_region                    = var.coralogix_region
-}
+additional_metric_statistics_enable = true
+additional_metric_statistics = [
+  {
+    additional_statistics = ["p50", "p75", "p95", "p99"],
+    metric_name           = "VolumeTotalReadTime",
+    namespace             = "AWS/EBS"
+  },
+  {
+    additional_statistics = ["p50", "p75", "p95", "p99"],
+    metric_name           = "VolumeTotalWriteTime",
+    namespace             = "AWS/EBS"
+  },
+  {
+    additional_statistics = ["p50", "p75", "p95", "p99"],
+    metric_name           = "Latency",
+    namespace             = "AWS/ELB"
+  },
+  {
+    additional_statistics = ["p50", "p75", "p95", "p99"],
+    metric_name           = "Duration",
+    namespace             = "AWS/ELB"
+  },
+  {
+    additional_statistics = ["p50", "p75", "p95", "p99"],
+    metric_name           = "PostRuntimeExtensionsDuration",
+    namespace             = "AWS/Lambda"
+  },
+  {
+    additional_statistics = ["p50", "p75", "p95", "p99"],
+    metric_name           = "FirstByteLatency",
+    namespace             = "AWS/S3"
+  },
+  {
+    additional_statistics = ["p50", "p75", "p95", "p99"],
+    metric_name           = "TotalRequestLatency",
+    namespace             = "AWS/S3"
+  }
+]
 ```
 
-### Multiple Firehose Delivery Stream
-Provision multiple firehose delivery streams, which can include the provisioning of CloudWatch metric stream if desired:
-```
-module "cloudwatch_firehose_coralogix" {
-  source           = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
-  metric_enable    = true
-  for_each         = toset(var.coralogix_streams)
-  firehose_stream  = each.key
-  private_key      = var.private_key
-  coralogix_region = var.coralogix_region
-}
-```
+Read more about the following:
+
+- [Statistics that can be streamed](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-metric-streams-statistics.html)
+- [Metric streams output formats](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-metric-streams-formats.html) 
+- [Statistical definitions](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Statistics-definitions.html)
+
 
 ### Examples
 Examples can be found under the [examples directory](https://github.com/coralogix/terraform-coralogix-aws/blob/master/examples/firehose/selected-metrics-cloudwatch-firehose)

@@ -1,8 +1,8 @@
 # Firehose Delivery Streams
 
-## With the different metrics configurations
+To enable metrics, set `enable_metrics` and `enable_cloudwatch_metricstream` to true. This will create a firehose delivery stream and a CloudWatch metrics stream. Also set `integration_type_metrics` to either 'CloudWatch_Metrics_JSON' or 'CloudWatch_Metrics_OpenTelemetry070' for coralogix to be notified on the format type of metrics streamed.
 
-Configuration in this directory creates a firehose delivery stream, and a CloudWatch metrics stream.
+## With the different metrics configurations
 
 The CloudWatch metrics stream in this example includes both specific namespaces and metric names that are inserted in the list object. This is done either through the `include_metric_stream_namespaces` param to list selected namespaces (and all metric_names associated) or a more granular `include_metric_stream_filter` for selected namespaces and metric_names. Note: If a filter's list for metric_names is empty`[]`, all related metric_names to the namespace are exported.
 
@@ -85,12 +85,12 @@ Read more about the following:
 ## Usage
 
 In this example you need to configure the following variables:
-* firehose_stream --> The name of the Firehose delivery stream
-* coralogix_region --> The region of Coralogix account
-* private_key --> Coralogix account logs private_key
+* `firehose_stream` --> The name of the Firehose delivery stream
+* `coralogix_region` --> The region of Coralogix account
+* `private_key` --> Coralogix account logs private_key
 Since the private_key is private and we cant put it hardcoded, it can be exported instead of insert it as an input each time:
 export TF_VAR_private_key="your-coralogix-private-key"
-* include_metric_stream_namespaces --> The list of the the desired namespaces, for example: ["EC2", "DynamoDB"]. For the full list of the available namespaces and how they need to be mentioned, please see [namespaces list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html)'
-* include_metric_stream_filter --> List of inclusive metric filters for namespace and metric_names. For the full list of the available namespaces, please see [namespaces list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html). To view available metric names of selected namespace, please see [view available metric names](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/viewing_metrics_with_cloudwatch.html)
-* additional_metric_statistics_enable --> Enable additional metric statistics for CloudWatch metric streams
-* additional_metric_statistics --> List of additional metric statistics for namespace, metric_name and additional_statistics. For the full list of the available namespaces, please see [namespaces list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html). To view available metric names of selected namespace, please see [view available metric names](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/viewing_metrics_with_cloudwatch.html). For the full list of the available additional statistics, please see [statistics that can be streamed](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-metric-streams-statistics.html)
+* `include_metric_stream_namespaces` --> The list of the the desired namespaces, for example: ["EC2", "DynamoDB"]. For the full list of the available namespaces and how they need to be mentioned, please see [namespaces list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html)'
+* `include_metric_stream_filter` --> List of inclusive metric filters for namespace and metric_names. For the full list of the available namespaces, please see [namespaces list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html). To view available metric names of selected namespace, please see [view available metric names](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/viewing_metrics_with_cloudwatch.html)
+* `additional_metric_statistics_enable` --> Enable additional metric statistics for CloudWatch metric streams
+* `additional_metric_statistics` --> List of additional metric statistics for namespace, metric_name and additional_statistics. For the full list of the available namespaces, please see [namespaces list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html). To view available metric names of selected namespace, please see [view available metric names](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/viewing_metrics_with_cloudwatch.html). For the full list of the available additional statistics, please see [statistics that can be streamed](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-metric-streams-statistics.html)

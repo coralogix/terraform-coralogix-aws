@@ -15,6 +15,24 @@ variable "private_key" {
   sensitive   = true
 }
 
+variable "metric_enable" {
+  description = "Enable sending of metrics to Coralogix"
+  type        = bool
+  default     = true
+}
+
+variable "integration_type_metrics" {
+  description = "The integration type of the firehose delivery stream: 'CloudWatch_Metrics_JSON' or 'CloudWatch_Metrics_OpenTelemetry070'"
+  type        = string
+  default     = "CloudWatch_Metrics_OpenTelemetry070"
+}
+
+variable "enable_cloudwatch_metricstream" {
+  description = "Should be true if you want to create a new Cloud Watch metric stream and attach it to Firehose"
+  type        = bool
+  default     = true
+}
+
 variable "include_metric_stream_namespaces" {
   description = "List of specific namespaces to include in the CloudWatch metric stream, see https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html"
   type        = list(string)
