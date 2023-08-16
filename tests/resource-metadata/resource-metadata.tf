@@ -17,6 +17,5 @@ module "resource-metadata" {
 
   coralogix_region = "Europe"
   private_key      = "{{ secrets.TESTING_PRIVATE_KEY }}"
-  ssm_enable       = "false"
   layer_arn        = "<your layer arn>"
 }

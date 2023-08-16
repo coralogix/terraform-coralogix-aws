@@ -199,6 +199,7 @@ resource "aws_secretsmanager_secret" "private_key_secret" {
   name        = "lambda/coralogix/${data.aws_region.this.name}/${local.function_name}"
   description = "Coralogix Send Your Data key Secret"
 }
+
 resource "aws_secretsmanager_secret_version" "service_user" {
   count         = var.layer_arn != "" && var.create_secret == "True"  ? 1 : 0
   depends_on    = [aws_secretsmanager_secret.private_key_secret]
