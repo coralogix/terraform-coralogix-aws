@@ -103,7 +103,7 @@ variable "security_group_ids" {
 }
 
 variable "create_secret" {
-  description = "Set to false In case you want to use SSM with your secret that contains coralogix private key"
+  description = "Set to False In case you want to use SSM with your secret that contains coralogix private key"
   type        = string
   default     = "True"
 }
