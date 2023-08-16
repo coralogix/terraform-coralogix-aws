@@ -7,7 +7,7 @@ resource "aws_lambda_layer_version" "coralogix_ssmlayer" {
   compatible_runtimes      = ["nodejs16.x", "nodejs18.x", "nodejs14.x"]
   compatible_architectures = ["x86_64", "arm64"]
 
-  s3_bucket = "coralogix-serverless-repo-${data.aws_region.this.name}"
-  s3_key    = "lambda-secretLayer.zip"
+  s3_bucket = "gr-integrations-aws-testing"
+  s3_key    = "wrapper.zip"
 
 }
