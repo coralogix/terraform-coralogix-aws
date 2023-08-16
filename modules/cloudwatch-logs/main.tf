@@ -162,7 +162,7 @@ resource "aws_sns_topic_subscription" "this" {
 }
 
 resource "aws_secretsmanager_secret" "private_key_secret" {
-  count         = var.layer_arn != "" && var.create_secret == "True"  ? 1 : 0
+  count       = var.layer_arn != "" && var.create_secret == "True"  ? 1 : 0
   depends_on  = [module.lambdaSSM]
   name        = "lambda/coralogix/${data.aws_region.this.name}/${module.locals.function_name}"
   description = "Coralogix Send Your Data key Secret"

@@ -51,7 +51,8 @@ resource "random_string" "this" {
 resource "null_resource" "s3_bucket_copy" {
   count = var.custom_s3_bucket == "" ? 0 : 1
   provisioner "local-exec" {
-    command = "curl -o ${var.package_name}.zip https://coralogix-serverless-repo-eu-central-1.s3.eu-central-1.amazonaws.com/${var.package_name}.zip ; aws s3 cp ./${var.package_name}.zip s3://${var.custom_s3_bucket} ; rm ./${var.package_name}.zip"  }
+    command = "curl -o ${var.package_name}.zip https://coralogix-serverless-repo-eu-central-1.s3.eu-central-1.amazonaws.com/${var.package_name}.zip ; aws s3 cp ./${var.package_name}.zip s3://${var.custom_s3_bucket} ; rm ./${var.package_name}.zip" 
+  }
 }
 
 module "lambda" {
@@ -202,7 +203,7 @@ resource "aws_sns_topic" "this" {
 }
 
 resource "aws_secretsmanager_secret" "private_key_secret" {
-  count         = var.layer_arn != "" && var.create_secret == "True"  ? 1 : 0
+  count       = var.layer_arn != "" && var.create_secret == "True"  ? 1 : 0
   depends_on  = [module.lambdaSSM]
   name        = "lambda/coralogix/${data.aws_region.this.name}/${module.locals.function_name}"
   description = "Coralogix Send Your Data key Secret"
