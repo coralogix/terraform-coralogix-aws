@@ -60,7 +60,7 @@ module "cloudwatch_firehose_coralogix" {
 }
 ```
 
-### Filtering selected metric names from included CloudWatch namespaces
+### Filtering selected metric_names from namespaces
 Provision a firehose delivery stream with [CloudWatch metric stream](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html).
 For more granular inclusive filters of metric names belonging to an included namespace:
 
@@ -93,7 +93,7 @@ module "cloudwatch_firehose_coralogix" {
 ```
 
 ### Additional Statistics
-Provide a list of additional statistics for the specified metrics. For each entry, specify one or more metrics (metric_name and namespace) and a list of corresponding statistics to include in the CloudWatch metric stream.
+Provides a list of additional statistics for the specified metrics. For each entry, specify one or more metrics (metric_name and namespace) and a list of corresponding statistics to include in the CloudWatch metric stream.
 
 Depending on the `output_format` variable configured. The `json` format would support streaming of statistics provided by CloudWatch and the `opentelemetry0.7` (default) supports streaming percentile statistics (p99 etc.). 
 
@@ -134,7 +134,7 @@ Provision multiple firehose delivery streams, which can include the provisioning
 ```
 module "cloudwatch_firehose_coralogix" {
   source           = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
-  metric_enable                  = true
+  metric_enable    = true
   for_each         = toset(var.coralogix_streams)
   firehose_stream  = each.key
   private_key      = var.private_key
@@ -215,11 +215,6 @@ then the CloudWatch metric stream must be configured with the same format, confi
 | <a name="input_additional_metric_statistics_enable"></a> [input\_additional\_metric\_statistics\_enable](#input\_additional\_metric\_statistics\_enable) | To enable the inclusion of additional statistics to the streaming metrics | `bool` | `true` | no |
 | <a name="input_additional_metric_statistics"></a> [input\_additional\_metric\_statistics](#input\_additional\_metric\_statistics) | For each entry, specify one or more metrics (metric_name and namespace) and the list of additional statistics to stream for those metrics. Each configuration of metric name and namespace can have a list of additional_statistics included into the AWS CloudWatch Metric Stream. | `list(object({additional_statistics=list(string), metric_name=string, namespace=string}))` | See variables.tf | no |
 | <a name="input_user_supplied_tags"></a> [user_supplied_tags](#input\_user_supplied_tags) | Tags supplied by the user to populate to all generated resources | `map(string)` | n/a | no |
-
-## Custom Names
-
-| Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
 | <a name="input_cloudwatch_metric_stream_custom_name"></a> [cloudwatch_metric_stream_custom_name](#input\_cloudwatch_metric_stream_custom_name) | Set the name of the CloudWatch metric stream, otherwise variable 'firehose_stream' will be used | `string` | `null` | no |
 | <a name="input_s3_backup_custom_name"></a> [s3_backup_custom_name](#input\_s3_backup_custom_name) | Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup' will be used | `string` | `null` | no |
 | <a name="input_lambda_processor_custom_name"></a> [lambda_processor_custom_name](#input\_lambda_processor_custom_name) | Set the name of the lambda processor function, otherwise variable '{firehose_stream}-metrics-tags-processor' will be used | `string` | `null` | no |

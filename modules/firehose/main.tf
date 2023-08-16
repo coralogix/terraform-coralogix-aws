@@ -388,7 +388,7 @@ resource "aws_lambda_function" "lambda_processor" {
   count         = var.metric_enable ? 1 : 0
   s3_bucket     = "cx-cw-metrics-tags-lambda-processor-${data.aws_region.current_region.name}"
   s3_key        = "function.zip"
-  function_name = "${local.lambda_processor_name}-processor"
+  function_name = local.lambda_processor_name
   role          = aws_iam_role.lambda_iam_role[count.index].arn
   handler       = "function"
   runtime       = "go1.x"

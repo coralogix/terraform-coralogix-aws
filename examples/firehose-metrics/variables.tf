@@ -15,6 +15,31 @@ variable "private_key" {
   sensitive   = true
 }
 
+variable "include_metric_stream_namespaces" {
+  description = "List of specific namespaces to include in the CloudWatch metric stream, see https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html"
+  type        = list(string)
+  default     = ["AWS/EC2", "AWS/DynamoDB"]
+}
+
+variable "include_metric_stream_filter" {
+  description = "List of inclusive metric filters for namespace and metric_names. Specify this parameter, the stream sends only the conditional metric names from the metric namespaces that you specify here. If metric names is empty or not specified, the whole metric namespace is included"
+  type = list(object({
+    namespace    = string
+    metric_names = list(string)
+    })
+  )
+  default = [
+    {
+      namespace    = "AWS/EC2"
+      metric_names = ["CPUUtilization", "NetworkOut"]
+    },
+    {
+      namespace    = "AWS/S3"
+      metric_names = ["BucketSizeBytes"]
+    },
+  ]
+}
+
 variable "additional_metric_statistics_enable" {
   description = "To enable the inclusion of additional statistics to the streaming metrics"
   type        = bool
@@ -50,4 +75,22 @@ variable "additional_metric_statistics" {
       namespace             = "AWS/S3"
     },
   ]
+}
+
+variable "output_format" {
+  description = "The output format of the cloudwatch metric stream: 'json' or 'opentelemetry0.7'"
+  type        = string
+  default     = "opentelemetry0.7"
+}
+
+variable "user_supplied_tags" {
+  description = "Tags supplied by the user to populate to all generated resources"
+  type        = map(string)
+  default     = { custom-tag-sample = "value1" }
+}
+
+variable "cloudwatch_retention_days" {
+  description = "Days of retention in Cloudwatch retention days"
+  type        = number
+  default     = 1
 }

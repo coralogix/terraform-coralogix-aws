@@ -62,3 +62,15 @@ variable "subsystem_name" {
   type        = string
   default     = ""
 }
+
+variable "user_supplied_tags" {
+  description = "Tags supplied by the user to populate to all generated resources"
+  type        = map(string)
+  default     = { custom-tag-sample = "value1" }
+}
+
+variable "cloudwatch_retention_days" {
+  description = "Days of retention in Cloudwatch retention days"
+  type        = number
+  default     = 1
+}
