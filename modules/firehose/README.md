@@ -95,7 +95,7 @@ If `additional_metric_statistics` is not configured but is enabled `true`, the m
 
 In the below example, `additional_metric_statistics` is enabled and the default configured metrics, namespaces and additional statistics percentiles are used. Note: as `output_format` of `opentelemetry0.7` is configured, only percentile values are supported.
 
-```terraform
+```tf
 output_format = "opentelemetry0.7"
 
 additional_metric_statistics_enable = true
