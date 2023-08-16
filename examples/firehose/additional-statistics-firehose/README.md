@@ -1,11 +1,11 @@
 # Firehose Delivery Stream with addtional metric statistics for Cloudwatch metric streams
 Configuration in this directory creates a firehose delivery stream, and a CloudWatch metrics stream.
 
-The CloudWatch metrics stream in this example includes additional metric statistics both of specific namespaces, metric names, and a list of percentage values. `var.additional_metric_statistics_enable` is also required to be set to `true`
-
-If `var.additional_metric_statistics_enable` is enabled `true` but `var.additional_metric_statistics` is not overwritten, then the default recommended statistics is taken.
+The CloudWatch metrics stream in this example includes additional metric statistics both of specific namespaces, metric names, and a list of percentage values. `additional_metric_statistics_enable` is also required to be set to `true`. If `additional_metric_statistics_enable` is enabled `true` but `additional_metric_statistics` is not overwritten, then the default recommended statistics is taken.
 
 Avalible types of the additional statistics are listed under [statistics that can be streamed](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-metric-streams-statistics.html) on AWS.
+
+## Example
 
 In the below example, four different AWS metrics are added percentile statistics to get data about the 50th to 99th percentile of telemetry. Helping to understand the median to highest utilization rates:
 ```
