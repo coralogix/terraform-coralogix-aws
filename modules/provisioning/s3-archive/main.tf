@@ -2,13 +2,13 @@ locals {
   is_logs_bucket_name_empty    = var.logs_bucket_name != ""
   is_metrics_bucket_name_empty = var.metrics_bucket_name != ""
   is_same_bucket_name          = var.logs_bucket_name == var.metrics_bucket_name
-  is_valid_region              = contains(["eu-west-1", "eu-north-1", "ap-southeast-1", "ap-south-1", "us-east-2", "us-west-2"], var.coralogix_region) &&  data.aws_region.current.name == var.coralogix_region
+  is_valid_region              = contains(["eu-west-1", "eu-north-1", "ap-southeast-1", "ap-south-1", "us-east-2", "us-west-2"], var.coralogix_region) && data.aws_region.current.name == var.coralogix_region
 
-  logs_validations         = local.is_logs_bucket_name_empty && !local.is_same_bucket_name && (local.is_valid_region || var.bypass_valid_region)
-  metrics_validations      = local.is_metrics_bucket_name_empty && !local.is_same_bucket_name && (local.is_valid_region || var.bypass_valid_region)
-  kms_logs_validation      = local.logs_validations && var.logs_kms_arn != "" && contains(split(":", var.logs_kms_arn), var.coralogix_region)
-  kms_metrics_validation   = local.metrics_validations && var.metrics_kms_arn != "" && contains(split(":", var.metrics_kms_arn), var.coralogix_region)
-  coralogix_arn            = var.custom_coralogix_arn != "" ? "arn:aws:iam::${var.custom_coralogix_arn}:root" : var.coralogix_region == "us-west-2" ? "arn:aws:iam::739076534691:root" : "arn:aws:iam::625240141681:root"
+  logs_validations       = local.is_logs_bucket_name_empty && !local.is_same_bucket_name && (local.is_valid_region || var.bypass_valid_region)
+  metrics_validations    = local.is_metrics_bucket_name_empty && !local.is_same_bucket_name && (local.is_valid_region || var.bypass_valid_region)
+  kms_logs_validation    = local.logs_validations && var.logs_kms_arn != "" && contains(split(":", var.logs_kms_arn), var.coralogix_region)
+  kms_metrics_validation = local.metrics_validations && var.metrics_kms_arn != "" && contains(split(":", var.metrics_kms_arn), var.coralogix_region)
+  coralogix_arn          = var.custom_coralogix_arn != "" ? "arn:aws:iam::${var.custom_coralogix_arn}:root" : var.bypass_valid_region == true ? "arn:aws:iam::625240141681:root" : var.coralogix_arn_mapping[var.coralogix_region]
 }
 
 data "aws_region" "current" {}
@@ -80,12 +80,12 @@ resource "aws_s3_bucket_policy" "metrics_bucket_policy" {
           AWS = local.coralogix_arn
         }
         Action = [
-            "s3:GetObject",
-            "s3:ListBucket",
-            "s3:PutObject",
-            "s3:DeleteObject",
-            "s3:PutObjectTagging",
-            "s3:GetObjectTagging"
+          "s3:GetObject",
+          "s3:ListBucket",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:PutObjectTagging",
+          "s3:GetObjectTagging"
         ]
         Resource = [
           aws_s3_bucket.metrics_bucket_name[count.index].arn,

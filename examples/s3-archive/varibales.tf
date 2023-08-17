@@ -15,6 +15,18 @@ variable "custom_coralogix_arn" {
   default     = ""
 }
 
+variable "coralogix_arn_mapping" {
+  type = map(string)
+  default = {
+    "eu-west-1"          = "625240141681"
+    "eu-north-1"         = "625240141681"
+    "ap-southeast-1"     = "625240141681"
+    "ap-south-1"         = "625240141681"
+    "us-east-2"          = "625240141681"
+    "us-west-2"          = "739076534691"
+  }
+}
+
 variable "logs_bucket_name" {
   type        = string
   description = "The name of the S3 bucket to create for the logs archive (Leave empty if not needed)"
