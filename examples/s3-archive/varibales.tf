@@ -24,6 +24,7 @@ variable "coralogix_arn_mapping" {
     "ap-south-1"         = "625240141681"
     "us-east-2"          = "625240141681"
     "us-west-2"          = "739076534691"
+    "default"            = "625240141681"
   }
 }
 
