@@ -33,7 +33,7 @@ module "eventbridge" {
     crons = [
       {
         name  = "cron-for-lambda"
-        arn   = var.ssm_enable != "True" ? module.lambda.lambda_function_arn : module.lambdaSSM.lambda_function_arn
+        arn   = var.layer_arn == "" ? module.lambda.lambda_function_arn : module.lambdaSSM.lambda_function_arn
         input = jsonencode({ "job" : "cron-by-rate" })
       }
     ]
@@ -54,7 +54,7 @@ resource "null_resource" "s3_bucket" {
 }
 
 module "lambda" {
-  create                 = var.ssm_enable != "True" ? true : false
+  create                 = var.layer_arn == "" ? true : false
   depends_on             = [ null_resource.s3_bucket ]
   source                 = "terraform-aws-modules/lambda/aws"
   version                = "3.2.1"
@@ -115,7 +115,7 @@ module "lambda" {
 }
 
 module "lambdaSSM" {
-  create                 = var.ssm_enable == "True" ? true : false
+  create                 = var.layer_arn != "" ? true : false
   depends_on             = [ null_resource.s3_bucket ]
   source                 = "terraform-aws-modules/lambda/aws"
   version                = "3.2.1"
@@ -132,6 +132,7 @@ module "lambdaSSM" {
   environment_variables = {
     CORALOGIX_METADATA_URL       = lookup(local.coralogix_regions, var.coralogix_region, "Europe")
     AWS_LAMBDA_EXEC_WRAPPER      =  "/opt/wrapper.sh"
+    SECRET_NAME                  = var.create_secret == "False" ? var.private_key : ""
     LATEST_VERSIONS_PER_FUNCTION = var.latest_versions_per_function
     RESOURCE_TTL_MINUTES         = var.resource_ttl_minutes
     COLLECT_ALIASES              = var.collect_aliases
@@ -193,13 +194,14 @@ resource "aws_sns_topic" "this" {
 }
 
 resource "aws_secretsmanager_secret" "private_key_secret" {
-  count       = var.ssm_enable == "True" ? 1 : 0
+  count       = var.layer_arn != "" && var.create_secret == "True"  ? 1 : 0
   depends_on  = [module.lambdaSSM]
   name        = "lambda/coralogix/${data.aws_region.this.name}/${local.function_name}"
   description = "Coralogix Send Your Data key Secret"
 }
+
 resource "aws_secretsmanager_secret_version" "service_user" {
-  count         = var.ssm_enable == "True" ? 1 : 0
+  count         = var.layer_arn != "" && var.create_secret == "True"  ? 1 : 0
   depends_on    = [aws_secretsmanager_secret.private_key_secret]
   secret_id     = aws_secretsmanager_secret.private_key_secret[count.index].id
   secret_string = var.private_key

@@ -25,9 +25,9 @@ resource "null_resource" "s3_bucket" {
 
 module "lambda" {
   source                 = "terraform-aws-modules/lambda/aws"
-  depends_on             = [ null_resource.s3_bucket ]
   version                = "3.3.1"
-  create                 = var.ssm_enable != "True" ? true : false
+  create                 = var.layer_arn == "" ? true : false
+  depends_on             = [ null_resource.s3_bucket ]
   layers                 = [var.layer_arn]
   function_name          = module.locals.function_name
   description            = "Send kinesis data stream logs to Coralogix."
@@ -79,7 +79,7 @@ module "lambda" {
 module "lambda_ssm" {
   source  = "terraform-aws-modules/lambda/aws"
   version = "3.3.1"
-  create  = var.ssm_enable == "True" ? true : false
+  create  = var.layer_arn != "" ? true : false
   depends_on             = [ null_resource.s3_bucket ]
   layers                 = [var.layer_arn]
   function_name          = module.locals.function_name
@@ -94,6 +94,7 @@ module "lambda_ssm" {
   environment_variables = {
     CORALOGIX_URL           = var.custom_url == "" ? "${lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe")}" : var.custom_url
     AWS_LAMBDA_EXEC_WRAPPER = "/opt/wrapper.sh"
+    SECRET_NAME             = var.create_secret == "False" ? var.private_key : ""
     private_key             = "****"
     app_name                = var.application_name
     sub_name                = var.subsystem_name
@@ -158,14 +159,14 @@ resource "aws_sns_topic_subscription" "this" {
 }
 
 resource "aws_secretsmanager_secret" "private_key_secret" {
-  count       = var.ssm_enable == "True" ? 1 : 0
+  count       = var.layer_arn != "" && var.create_secret == "True"  ? 1 : 0
   depends_on  = [module.lambda_ssm]
   name        = "lambda/coralogix/${data.aws_region.this.name}/${module.locals.function_name}"
   description = "Coralogix Send Your Data key Secret"
 }
 
 resource "aws_secretsmanager_secret_version" "service_user" {
-  count         = var.ssm_enable == "True" ? 1 : 0
+  count         = var.layer_arn != "" && var.create_secret == "True"  ? 1 : 0
   depends_on    = [aws_secretsmanager_secret.private_key_secret]
   secret_id     = aws_secretsmanager_secret.private_key_secret[count.index].id
   secret_string = var.private_key
