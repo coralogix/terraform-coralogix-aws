@@ -9,6 +9,12 @@ variable "bypass_valid_region" {
   default     = false
 }
 
+variable "custom_coralogix_arn" {
+  type        = string
+  description = "In case that you want to use a custom coralogix arn enter the aws account id that you want to use"
+  default     = ""
+}
+
 variable "logs_bucket_name" {
   type        = string
   description = "The name of the S3 bucket to create for the logs archive (Leave empty if not needed)"

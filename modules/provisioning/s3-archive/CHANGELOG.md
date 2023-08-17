@@ -2,5 +2,5 @@
 
 ## S3-archive
 
-### version / full date
-* [Update/Bug fix] massage describe the changes
+### 0.0.1 / 17.8.2023
+* [Update] Add support to US2, and add an option to use custom coalogix arn.
