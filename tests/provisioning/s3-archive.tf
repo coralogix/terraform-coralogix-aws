@@ -15,5 +15,5 @@ provider "aws" {
 module "s3-archive" {
   source = "../../modules/provisioning/s3-archive"
 
-  coralogix_region = "eu-west-1"
+  aws_region = "eu-west-1"
 }
