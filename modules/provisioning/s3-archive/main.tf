@@ -2,13 +2,13 @@ locals {
   is_logs_bucket_name_empty    = var.logs_bucket_name != ""
   is_metrics_bucket_name_empty = var.metrics_bucket_name != ""
   is_same_bucket_name          = var.logs_bucket_name == var.metrics_bucket_name
-  is_valid_region              = contains(["eu-west-1", "eu-north-1", "ap-southeast-1", "ap-south-1", "us-east-2", "us-west-2"], var.coralogix_region) && data.aws_region.current.name == var.coralogix_region
+  is_valid_region              = data.aws_region.current.name == var.aws_region
 
-  logs_validations       = local.is_logs_bucket_name_empty && !local.is_same_bucket_name && (local.is_valid_region || var.bypass_valid_region)
-  metrics_validations    = local.is_metrics_bucket_name_empty && !local.is_same_bucket_name && (local.is_valid_region || var.bypass_valid_region)
-  kms_logs_validation    = local.logs_validations && var.logs_kms_arn != "" && contains(split(":", var.logs_kms_arn), var.coralogix_region)
-  kms_metrics_validation = local.metrics_validations && var.metrics_kms_arn != "" && contains(split(":", var.metrics_kms_arn), var.coralogix_region)
-  coralogix_arn          = var.custom_coralogix_arn != "" ? "arn:aws:iam::${var.custom_coralogix_arn}:root" : var.bypass_valid_region == true ? "arn:aws:iam::${var.coralogix_arn_mapping["default"]}:root" : "arn:aws:iam::${var.coralogix_arn_mapping[var.coralogix_region]}:root"
+  logs_validations       = local.is_logs_bucket_name_empty && !local.is_same_bucket_name && (local.is_valid_region || var.bypass_valid_region != "")
+  metrics_validations    = local.is_metrics_bucket_name_empty && !local.is_same_bucket_name && (local.is_valid_region || var.bypass_valid_region != "")
+  kms_logs_validation    = local.logs_validations && var.logs_kms_arn != "" && contains(split(":", var.logs_kms_arn), var.aws_region)
+  kms_metrics_validation = local.metrics_validations && var.metrics_kms_arn != "" && contains(split(":", var.metrics_kms_arn), var.aws_region)
+  coralogix_arn          = var.custom_coralogix_arn != "" ? "arn:aws:iam::${var.custom_coralogix_arn}:root" : var.bypass_valid_region != "" ? "arn:aws:iam::${var.coralogix_arn_mapping[""]}:root" : "arn:aws:iam::${var.coralogix_arn_mapping[var.aws_region]}:root"
 }
 
 data "aws_region" "current" {}

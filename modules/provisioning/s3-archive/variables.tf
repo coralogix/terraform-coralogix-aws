@@ -1,12 +1,17 @@
-variable "coralogix_region" {
+variable "aws_region" {
   type        = string
-  description = "The region that you want to create the buckets in"
+  description = "The AWS region that you want to create the S3 bucket, Must be the same as the AWS region where your coralogix account is set"
+  default     = ""
+  validation {
+    condition     = contains(["eu-west-1", "eu-north-1", "ap-southeast-1", "ap-south-1", "us-east-2", "us-west-2", ""], var.aws_region)
+    error_message = "The aws region must be one of these values: [eu-west-1, eu-north-1, ap-southeast-1, ap-south-1, us-east-2, us-west-2]."
+  }
 }
 
 variable "bypass_valid_region" {
-  type        = bool
-  description = "Use to bypass the coralogix_region validation"
-  default     = false
+  type        = string
+  description = "Use to bypass the aws_region validation, enter the AWS region that you want to create the S3 bucket in. When using this variable leave aws_region empty"
+  default     = ""
 }
 
 variable "custom_coralogix_arn" {
@@ -24,7 +29,7 @@ variable "coralogix_arn_mapping" {
     "ap-south-1"         = "625240141681"
     "us-east-2"          = "625240141681"
     "us-west-2"          = "739076534691"
-    "default"            = "625240141681"
+    ""                   = "625240141681"
   }
 }
 
