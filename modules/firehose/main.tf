@@ -79,13 +79,13 @@ resource "aws_s3_bucket_public_access_block" "firehose_bucket_bucket_access" {
 }
 
 resource "aws_iam_role" "firehose_to_coralogix" {
-  tags = local.tags
-  name = "${var.firehose_stream}-firehose"
+  tags               = local.tags
+  name               = "${var.firehose_stream}-firehose"
   assume_role_policy = jsonencode({
-    "Version" = "2012-10-17",
+    "Version"   = "2012-10-17",
     "Statement" = [
       {
-        "Action" = "sts:AssumeRole",
+        "Action"    = "sts:AssumeRole",
         "Principal" = {
           "Service" = "firehose.amazonaws.com"
         },
@@ -94,9 +94,9 @@ resource "aws_iam_role" "firehose_to_coralogix" {
     ]
   })
   inline_policy {
-    name = "${var.firehose_stream}-firehose"
+    name   = "${var.firehose_stream}-firehose"
     policy = jsonencode({
-      "Version" = "2012-10-17",
+      "Version"   = "2012-10-17",
       "Statement" = [
         {
           "Effect" = "Allow",
@@ -137,6 +137,7 @@ resource "aws_iam_role" "firehose_to_coralogix" {
   }
 }
 
+
 ################################################################################
 # Firehose Logs Stream
 ################################################################################
@@ -148,7 +149,9 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs" {
   count       = var.logs_enable == true ? 1 : 0
 
   dynamic "kinesis_source_configuration" {
-    for_each = var.source_type_logs == "KinesisStreamAsSource" && var.kinesis_stream_arn != null ? [1] : []
+    for_each = var.source_type_logs == "KinesisStreamAsSource" && var.kinesis_stream_arn != null ? [
+      1
+    ] : []
     content {
       kinesis_stream_arn = var.kinesis_stream_arn
       role_arn           = aws_iam_role.firehose_to_coralogix.arn
@@ -239,6 +242,93 @@ resource "aws_iam_role_policy_attachment" "additional_policy_attachment_2" {
 # Firehose Metrics Stream
 ################################################################################
 
+data "aws_iam_policy_document" "firehose_to_coralogix_metric_policy" {
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "s3:AbortMultipartUpload",
+      "s3:GetBucketLocation",
+      "s3:GetObject",
+      "s3:ListBucket",
+      "s3:ListBucketMultipartUploads",
+      "s3:PutObject"
+    ]
+    resources = [
+      aws_s3_bucket.firehose_bucket.arn,
+      "${aws_s3_bucket.firehose_bucket.arn}/*"
+    ]
+  }
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "kms:Decrypt",
+      "kms:GenerateDataKey"
+    ]
+    resources = [
+      "arn:aws:kms:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_identity.account_id}:key/key-id"
+    ]
+    condition {
+      test     = "StringEquals"
+      values   = ["s3.${data.aws_region.current_region.name}.amazonaws.com"]
+      variable = "kms:ViaService"
+    }
+    condition {
+      test     = "StringLike"
+      values   = ["${aws_s3_bucket.firehose_bucket.arn}/prefix*"]
+      variable = "kms:EncryptionContext:aws:s3:arn"
+    }
+
+  }
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "kinesis:DescribeStream",
+      "kinesis:GetShardIterator",
+      "kinesis:GetRecords",
+      "kinesis:ListShards"
+    ]
+    resources = [
+      "arn:aws:kinesis:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_identity.account_id}:stream/*"
+    ]
+  }
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "logs:PutLogEvents"
+    ]
+    resources = [
+      aws_cloudwatch_log_group.firehose_loggroup.arn
+    ]
+  }
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "lambda:InvokeFunction",
+      "lambda:GetFunctionConfiguration"
+    ]
+    resources = [
+      "${aws_lambda_function.lambda_processor[count.index].arn}:*"
+    ]
+  }
+}
+
+resource "aws_iam_policy" "firehose_to_coralogix_metric_policy" {
+  count  = var.metric_enable == true ? 1 : 0
+  name   = "Coralogix-firehose_metric_policy"
+  policy = data.aws_iam_policy_document.firehose_to_coralogix_metric_policy.json
+}
+
+resource "aws_iam_role_policy_attachment" "firehose_to_coralogix_metric_policy" {
+  count = var.metric_enable == true ? 1 : 0
+  policy_arn = aws_iam_policy.firehose_to_coralogix_metric_policy[count.index].arn
+  role       = aws_iam_role.firehose_to_coralogix.name
+}
+
 resource "aws_iam_role_policy" "firehose_to_coralogix_metric_policy" {
   count  = var.metric_enable == true ? 1 : 0
   name   = "${var.firehose_stream}-metrics-addon"
@@ -248,58 +338,6 @@ resource "aws_iam_role_policy" "firehose_to_coralogix_metric_policy" {
     "Version": "2012-10-17",
     "Statement":
     [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "s3:AbortMultipartUpload",
-                "s3:GetBucketLocation",
-                "s3:GetObject",
-                "s3:ListBucket",
-                "s3:ListBucketMultipartUploads",
-                "s3:PutObject"
-            ],
-            "Resource": [
-                "${aws_s3_bucket.firehose_bucket.arn}",
-                "${aws_s3_bucket.firehose_bucket.arn}/*"
-            ]
-        },
-        {
-           "Effect": "Allow",
-           "Action": [
-               "kms:Decrypt",
-               "kms:GenerateDataKey"
-           ],
-           "Resource": [
-               "arn:aws:kms:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_identity.account_id}:key/key-id"
-           ],
-           "Condition": {
-               "StringEquals": {
-                   "kms:ViaService": "s3.${data.aws_region.current_region.name}.amazonaws.com"
-               },
-               "StringLike": {
-                   "kms:EncryptionContext:aws:s3:arn": "${aws_s3_bucket.firehose_bucket.arn}/prefix*"
-               }
-           }
-        },
-        {
-           "Effect": "Allow",
-           "Action": [
-               "kinesis:DescribeStream",
-               "kinesis:GetShardIterator",
-               "kinesis:GetRecords",
-               "kinesis:ListShards"
-           ],
-           "Resource": "arn:aws:kinesis:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_identity.account_id}:stream/*"
-        },
-        {
-           "Effect": "Allow",
-           "Action": [
-               "logs:PutLogEvents"
-           ],
-           "Resource": [
-               "${aws_cloudwatch_log_group.firehose_loggroup.arn}"
-           ]
-        },
         {
           "Effect": "Allow",
           "Action": [
