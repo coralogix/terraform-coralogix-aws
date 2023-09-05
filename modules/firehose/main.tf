@@ -242,7 +242,7 @@ resource "aws_iam_role_policy_attachment" "additional_policy_attachment_2" {
 
 resource "aws_iam_policy" "firehose_to_coralogix_metric_policy" {
   count  = var.metric_enable == true ? 1 : 0
-  name   = "Coralogix-firehose_metric_policy"
+  name   = "${var.firehose_stream}-metrics-policy"
   tags   = local.tags
   policy = <<EOF
 {
