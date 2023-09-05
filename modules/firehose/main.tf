@@ -32,7 +32,7 @@ locals {
     terraform-module         = "kinesis-firehose-to-coralogix"
     terraform-module-version = "v0.1.0"
     managed-by               = "coralogix-terraform"
-    custom_endpoint          = var.coralogix_firehose_custom_endpoint != null ? var.coralogix_firehose_custom_endpoint : ""
+    custom_endpoint          = var.coralogix_firehose_custom_endpoint != null ? var.coralogix_firehose_custom_endpoint : "_default_"
   })
 
   # default namings
@@ -137,6 +137,7 @@ resource "aws_iam_role" "firehose_to_coralogix" {
   }
 }
 
+
 ################################################################################
 # Firehose Logs Stream
 ################################################################################
@@ -239,10 +240,10 @@ resource "aws_iam_role_policy_attachment" "additional_policy_attachment_2" {
 # Firehose Metrics Stream
 ################################################################################
 
-resource "aws_iam_role_policy" "firehose_to_coralogix_metric_policy" {
+resource "aws_iam_policy" "firehose_to_coralogix_metric_policy" {
   count  = var.metric_enable == true ? 1 : 0
-  name   = "${var.firehose_stream}-metrics-addon"
-  role   = aws_iam_role.firehose_to_coralogix.id
+  name   = "${var.firehose_stream}-metrics-policy"
+  tags   = local.tags
   policy = <<EOF
 {
     "Version": "2012-10-17",
@@ -311,6 +312,12 @@ resource "aws_iam_role_policy" "firehose_to_coralogix_metric_policy" {
     ]
 }
 EOF
+}
+
+resource "aws_iam_role_policy_attachment" "firehose_to_coralogix_metric_policy" {
+  count      = var.metric_enable == true ? 1 : 0
+  policy_arn = aws_iam_policy.firehose_to_coralogix_metric_policy[count.index].arn
+  role       = aws_iam_role.firehose_to_coralogix.name
 }
 
 data "aws_iam_policy_document" "lambda_assume_role" {
