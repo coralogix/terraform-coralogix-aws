@@ -137,7 +137,8 @@ $ terraform apply
 - [cloudwatch-logs](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/cloudwatch-logs) - Send logs from `CloudWatch`.
 - [s3](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/s3) - Send logs from `S3` bucket.
 - [eventbridge](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/eventbridge) - Send logs from `eventbrdge`.
-- [firehose](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/firehose) -  Send metrics stream and logs with `firehose`.
+- [firehose-logs](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/firehose-logs) -  Send logs streams with `firehose`.
+- [firehose-metrics](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/firehose-metrics) -  Send metric streams with `firehose`.
 - [kinesis](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/kinesis) - Send logs from `kinesis data stream` with lambda.
 - [resource-metadata](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/resource-metadata) - Send metadata from your AWS account to coralogix.
 
