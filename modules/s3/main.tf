@@ -3,6 +3,7 @@ module "locals" {
 
   integration_type = var.integration_type
   random_string    = random_string.this.result
+
 }
 
 locals {
