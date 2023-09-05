@@ -79,13 +79,13 @@ resource "aws_s3_bucket_public_access_block" "firehose_bucket_bucket_access" {
 }
 
 resource "aws_iam_role" "firehose_to_coralogix" {
-  tags               = local.tags
-  name               = "${var.firehose_stream}-firehose"
+  tags = local.tags
+  name = "${var.firehose_stream}-firehose"
   assume_role_policy = jsonencode({
-    "Version"   = "2012-10-17",
+    "Version" = "2012-10-17",
     "Statement" = [
       {
-        "Action"    = "sts:AssumeRole",
+        "Action" = "sts:AssumeRole",
         "Principal" = {
           "Service" = "firehose.amazonaws.com"
         },
@@ -94,9 +94,9 @@ resource "aws_iam_role" "firehose_to_coralogix" {
     ]
   })
   inline_policy {
-    name   = "${var.firehose_stream}-firehose"
+    name = "${var.firehose_stream}-firehose"
     policy = jsonencode({
-      "Version"   = "2012-10-17",
+      "Version" = "2012-10-17",
       "Statement" = [
         {
           "Effect" = "Allow",
@@ -149,9 +149,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs" {
   count       = var.logs_enable == true ? 1 : 0
 
   dynamic "kinesis_source_configuration" {
-    for_each = var.source_type_logs == "KinesisStreamAsSource" && var.kinesis_stream_arn != null ? [
-      1
-    ] : []
+    for_each = var.source_type_logs == "KinesisStreamAsSource" && var.kinesis_stream_arn != null ? [1] : []
     content {
       kinesis_stream_arn = var.kinesis_stream_arn
       role_arn           = aws_iam_role.firehose_to_coralogix.arn
