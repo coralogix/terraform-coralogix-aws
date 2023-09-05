@@ -2,7 +2,9 @@ variable "coralogix_region" {
   description = "The Coralogix location region, possible options are [Europe, Europe2, India, Singapore, US]"
   type        = string
   validation {
-    condition     = contains(["Europe", "Europe2", "India", "Singapore", "US", "US2", "Custom"], var.coralogix_region)
+    condition = contains([
+      "Europe", "Europe2", "India", "Singapore", "US", "US2", "Custom"
+    ], var.coralogix_region)
     error_message = "The coralogix region must be one of these values: [Europe, Europe2, India, Singapore, US, US2, Custom]."
   }
 }
@@ -25,28 +27,6 @@ variable "layer_arn" {
   default     = ""
 }
 
-variable "application_name" {
-  description = "The name of your application"
-  type        = string
-}
-
-variable "subsystem_name" {
-  description = "The subsystem name of your application"
-  type        = string
-}
-
-variable "newline_pattern" {
-  description = "The pattern for lines splitting"
-  type        = string
-  default     = "(?:\\r\\n|\\r|\\n)"
-}
-
-variable "blocking_pattern" {
-  description = "The pattern for lines blocking"
-  type        = string
-  default     = ""
-}
-
 variable "buffer_size" {
   description = "Coralogix logger buffer size"
   type        = number
@@ -63,23 +43,6 @@ variable "debug" {
   description = "Coralogix logger debug mode"
   type        = bool
   default     = false
-}
-
-variable "s3_bucket_name" {
-  description = "The name of the S3 bucket to watch"
-  type        = string
-}
-
-variable "s3_key_prefix" {
-  description = "The S3 path prefix to watch"
-  type        = string
-  default     = null
-}
-
-variable "s3_key_suffix" {
-  description = "The S3 path suffix to watch"
-  type        = string
-  default     = null
 }
 
 variable "memory_size" {
@@ -112,19 +75,10 @@ variable "tags" {
   default     = {}
 }
 
-variable "integration_type" {
-  description = "the aws service that send the data to the s3"
-  type        = string
-  validation {
-    condition     = contains(["cloudtrail", "vpc-flow-logs", "s3", "s3-sns", "cloudtrail-sns"], var.integration_type)
-    error_message = "The integration type must be: [cloudtrail, vpc-flow-logs, s3, s3-sns, cloudtrail-sns]."
-  }
-}
-
 variable "sns_topic_name" {
   description = "The name of your SNS topic"
   type        = string
-  default     = ""
+  default     = null
 }
 
 variable "custom_s3_bucket" {
@@ -137,4 +91,29 @@ variable "create_secret" {
   description = "Set to False In case you want to use SSM with your secret that contains coralogix private key"
   type        = string
   default     = "True"
+}
+
+variable "s3_bucket_name" {
+  type = string
+}
+
+variable "log_info" {
+  type = map(object({
+    s3_key_prefix    = optional(string)
+    s3_key_suffix    = optional(string)
+    application_name = string
+    subsystem_name   = string
+    integration_type = string
+    newline_pattern  = optional(string)
+    blocking_pattern = optional(string)
+  }))
+  validation {
+    condition = alltrue([
+      for bucket_info in var.log_info :contains([
+        "cloudtrail", "vpc-flow-logs", "s3", "s3-sns", "cloudtrail-sns"
+      ], bucket_info.integration_type)
+    ] )
+    error_message = "All integration types must be: [cloudtrail, vpc-flow-logs, s3, s3-sns, cloudtrail-sns]."
+  }
+
 }
