@@ -21,7 +21,7 @@ module "eventbridge" {
   source = "terraform-aws-modules/eventbridge/aws"
 
   create_bus = false
-
+  create_role = false
   rules = {
     crons = {
       description         = "Trigger for a Lambda"
