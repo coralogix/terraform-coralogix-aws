@@ -35,7 +35,7 @@ data "aws_iam_policy_document" "topic" {
       identifiers = ["s3.amazonaws.com"]
     }
 
-    actions   = ["SNS:Publish"]
+    actions = ["SNS:Publish"]
     resources = [
       "arn:aws:sns:*:*:${data.aws_sns_topic.sns_topic[count.index].name}"
     ]
@@ -76,7 +76,7 @@ module "lambda" {
   timeout                = var.timeout
   create_package         = false
   destination_on_failure = aws_sns_topic.this[each.key].arn
-  environment_variables  = {
+  environment_variables = {
     CORALOGIX_URL         = var.custom_url == "" ? "https://${lookup(module.locals[each.key].coralogix_regions, var.coralogix_region, "Europe")}${module.locals[each.key].coralogix_url_seffix}" : var.custom_url
     CORALOGIX_BUFFER_SIZE = tostring(var.buffer_size)
     private_key           = var.private_key
@@ -99,7 +99,7 @@ module "lambda" {
   create_async_event_config               = true
   attach_async_event_policy               = true
   attach_policy_statements                = true
-  policy_statements                       = {
+  policy_statements = {
     S3 = {
       effect    = "Allow"
       actions   = ["s3:GetObject"]
@@ -132,7 +132,7 @@ module "lambdaSSM" {
   timeout                = var.timeout
   create_package         = false
   destination_on_failure = aws_sns_topic.this[each.key].arn
-  environment_variables  = {
+  environment_variables = {
     CORALOGIX_URL           = var.custom_url == "" ? "https://${lookup(module.locals[each.key].coralogix_regions, var.coralogix_region, "Europe")}${module.locals[each.key].coralogix_url_seffix}" : var.custom_url
     CORALOGIX_BUFFER_SIZE   = tostring(var.buffer_size)
     AWS_LAMBDA_EXEC_WRAPPER = "/opt/wrapper.sh"
@@ -156,14 +156,14 @@ module "lambdaSSM" {
   create_async_event_config               = true
   attach_async_event_policy               = true
   attach_policy_statements                = true
-  policy_statements                       = {
+  policy_statements = {
     S3 = {
       effect    = "Allow"
       actions   = ["s3:GetObject"]
       resources = ["${data.aws_s3_bucket.this.arn}/*"]
     }
     secret_access_policy = {
-      effect  = "Allow"
+      effect = "Allow"
       actions = [
         "secretsmanager:DescribeSecret",
         "secretsmanager:GetSecretValue",
@@ -188,7 +188,7 @@ resource "aws_s3_bucket_notification" "lambda_notification" {
   count  = var.sns_topic_name == null ? 1 : 0
   bucket = data.aws_s3_bucket.this.bucket
   dynamic "lambda_function" {
-    for_each  = var.log_info
+    for_each = var.log_info
     iterator = log_info
     content {
       lambda_function_arn = var.layer_arn != "" ? module.lambdaSSM[log_info.key].lambda_function_arn : module.lambda[log_info.key].lambda_function_arn
@@ -204,7 +204,7 @@ resource "aws_s3_bucket_notification" "topic_notification" {
   count  = var.sns_topic_name != null ? 1 : 0
   bucket = data.aws_s3_bucket.this.bucket
   dynamic "topic" {
-    for_each  = var.log_info
+    for_each = var.log_info
     iterator = log_info
 
     content {
@@ -217,34 +217,34 @@ resource "aws_s3_bucket_notification" "topic_notification" {
 }
 
 resource "aws_sns_topic" "this" {
-  for_each               = var.log_info
+  for_each     = var.log_info
   name_prefix  = "${module.locals[each.key].function_name}-Failure"
   display_name = "${module.locals[each.key].function_name}-Failure"
   tags         = merge(var.tags, module.locals[each.key].tags)
 }
 
 resource "aws_secretsmanager_secret" "private_key_secret" {
-  count       = var.layer_arn != "" && var.create_secret == "True"  ? 1 : 0
+  count       = var.layer_arn != "" && var.create_secret == "True" ? 1 : 0
   depends_on  = [module.lambdaSSM]
   name        = "lambda/coralogix/${data.aws_region.this.name}/${var.s3_bucket_name}/api_key"
   description = "Coralogix Send Your Data key Secret"
 }
 resource "aws_secretsmanager_secret_version" "service_user" {
-  count         = var.layer_arn != "" && var.create_secret == "True"  ? 1 : 0
+  count         = var.layer_arn != "" && var.create_secret == "True" ? 1 : 0
   depends_on    = [aws_secretsmanager_secret.private_key_secret]
   secret_id     = aws_secretsmanager_secret.private_key_secret[count.index].id
   secret_string = var.private_key
 }
 resource "aws_sns_topic_subscription" "this" {
   depends_on = [aws_sns_topic.this]
-  for_each      = var.notification_email != null ? var.log_info : {}
+  for_each   = var.notification_email != null ? var.log_info : {}
   topic_arn  = aws_sns_topic.this[each.key].arn
   protocol   = "email"
   endpoint   = var.notification_email
 }
 
 resource "aws_lambda_permission" "sns_lambda_permission" {
-  for_each         = var.sns_topic_name != null ? var.log_info : {}
+  for_each      = var.sns_topic_name != null ? var.log_info : {}
   statement_id  = "AllowExecutionFromSNS"
   action        = "lambda:InvokeFunction"
   function_name = module.locals[each.key].function_name
@@ -260,7 +260,7 @@ resource "aws_sns_topic_policy" "test" {
 }
 
 resource "aws_sns_topic_subscription" "lambda_sns_subscription" {
-  for_each      = var.sns_topic_name != null ? var.log_info : {}
+  for_each   = var.sns_topic_name != null ? var.log_info : {}
   depends_on = [module.lambdaSSM, module.lambda]
   topic_arn  = data.aws_sns_topic.sns_topic[0].arn
   protocol   = "lambda"

@@ -109,10 +109,10 @@ variable "log_info" {
   }))
   validation {
     condition = alltrue([
-      for bucket_info in var.log_info :contains([
+      for bucket_info in var.log_info : contains([
         "cloudtrail", "vpc-flow-logs", "s3", "s3-sns", "cloudtrail-sns"
       ], bucket_info.integration_type)
-    ] )
+    ])
     error_message = "All integration types must be: [cloudtrail, vpc-flow-logs, s3, s3-sns, cloudtrail-sns]."
   }
 
