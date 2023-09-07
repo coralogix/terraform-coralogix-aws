@@ -2,6 +2,9 @@
 
 ## cloudwatch-logs
 
+### 0.0.4 / 7.9.2023
+* [Update] Changed the default value of the subnet and security group variables to `[]`, allowing subsequent terraform runs as noop.
+
 ### 0.0.3 / 16.8.2023
 * [Update] Add an option to use an existing secret instead of creating a new one with SSM, and remove ssm_enabled variable.
 
