@@ -171,7 +171,7 @@ variable "tags" {
     terraform-module         = "kinesis-firehose-to-coralogix"
     terraform-module-version = "v0.1.0"
     managed-by               = "coralogix-terraform"
-    custom_endpoint          = "_default_"
+    custom_endpoint          = var.coralogix_firehose_custom_endpoint != null ? var.coralogix_firehose_custom_endpoint : "_default_"
   }
 }
 
