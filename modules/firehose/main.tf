@@ -459,6 +459,14 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_metrics" {
       }
     }
 
+    dynamic "common_attributes" {
+      for_each = var.subsystem_name == null ? [] : [1]
+      content {
+        name  = "subsystemName"
+        value = var.subsystem_name
+      }
+    }
+
     processing_configuration {
       enabled = "true"
 
