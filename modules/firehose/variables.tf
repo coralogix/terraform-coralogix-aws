@@ -164,6 +164,17 @@ variable "additional_metric_statistics" {
   ]
 }
 
+variable "tags" {
+  description = "Default tags supplied by the module to populate to all generated resources. Can be overriden if needed."
+  type        = map(string)
+  default     =  {
+    terraform-module         = "kinesis-firehose-to-coralogix"
+    terraform-module-version = "v0.1.0"
+    managed-by               = "coralogix-terraform"
+    custom_endpoint          = "_default_"
+  }
+}
+
 variable "user_supplied_tags" {
   description = "Tags supplied by the user to populate to all generated resources"
   type        = map(string)
