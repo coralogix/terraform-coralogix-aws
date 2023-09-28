@@ -170,6 +170,12 @@ variable "user_supplied_tags" {
   default     = {}
 }
 
+variable "override_default_tags" {
+  description = "Override the default tags in the module by supplying a map of key-value pairs"
+  type        = map(string)
+  default     = {}
+}
+
 variable "cloudwatch_metric_stream_custom_name" {
   description = "Set the name of the CloudWatch metric stream, otherwise variable 'firehose_stream' will be used"
   type        = string
