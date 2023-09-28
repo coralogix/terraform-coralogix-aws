@@ -29,7 +29,7 @@ locals {
     }
   }
 
-  tags = var.override_default_tags == {} ? merge(var.user_supplied_tags, {
+  tags = length(var.override_default_tags) == 0 ? merge(var.user_supplied_tags, {
     terraform-module         = "kinesis-firehose-to-coralogix"
     terraform-module-version = "v0.1.0"
     managed-by               = "coralogix-terraform"
