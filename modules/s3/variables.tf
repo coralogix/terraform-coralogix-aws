@@ -20,7 +20,7 @@ variable "private_key" {
 }
 
 variable "layer_arn" {
-  description = " In case you are using SM This is the ARN of the Coralogix Security Layer."
+  description = "In case you are using Secret Manager This is the ARN of the Coralogix Security lambda Layer."
   type        = string
   default     = ""
 }
@@ -132,9 +132,9 @@ variable "custom_s3_bucket" {
   type        = string
   default     = ""
 }
-
+ 
 variable "create_secret" {
-  description = "Set to False In case you want to use SM with your secret that contains coralogix private key"
+  description = "Set to False In case you want to use secrets manager with a predefine secret that was already created and contains Coralogix Send Your Data API key"
   type        = string
   default     = "True"
 }

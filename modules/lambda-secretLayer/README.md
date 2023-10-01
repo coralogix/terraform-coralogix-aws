@@ -1,6 +1,6 @@
-## Coralogx Layer for SM private_key
+## Coralogx Layer for Secret Manager Data API key
 
-This Lambda Layer allows to store Coralogix Private Key in SM. 
+This Lambda Layer allows to store Coralogix Data API key in Secret Manager. 
 
 You will need to deploy one layer per AWS Region you want to use. For now.
 

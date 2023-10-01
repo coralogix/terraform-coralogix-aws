@@ -10,7 +10,7 @@ Manage the application which retrieves logs from `S3` bucket and sends them to y
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 2.23 |
 
 ### Note: 
-* in case you use SM(Secret Manager) you should first deploy the [SM lambda layer](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/597078901540/Coralogix-Lambda-SSMLayer)
+* in case you use Secret Manager you should first deploy the [SM lambda layer](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/597078901540/Coralogix-Lambda-SSMLayer), you should only deploy one layer per region.
 
 ## Providers
 
@@ -33,9 +33,9 @@ Manage the application which retrieves logs from `S3` bucket and sends them to y
 | <a name="input_custom_url"></a> [custom_url](#input\_custom\_domain) | Custom url for coralogix for example: https://<your_custom_domain>/api/v1/logs| `string` | n/a | no |
 | <a name="input_integration_type"></a> [integration_type](#input\_data\_type) | which service will send the data to the s3, possible options are [`cloudtrail`, `vpc-flow-log`, `s3`, `s3-sns`, `cloudtrail-sns`] | `string` | n/a | yes |
 | <a name="input_sns_topic_name"></a> [sns_topic_name](#input\_sns\_topic\_name) | The SNS topic that will contain the SNS subscription, need only if you use the sns interations | `string` |  | no |
-| <a name="input_layer_arn"></a> [layer_arn](#input\_layer\_arn) | In case you want to use SM This is the ARN of the Coralogix [Security Layer](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/597078901540/Coralogix-Lambda-SSMLayer). | `string` | n/a | no |
-| <a name="input_create_secret"></a> [create_secret](#input\_create\_secret) | Set to False In case you want to use SM option with your secret that contains coralogix Private Key| `string` | True | no |
-| <a name="input_private_key"></a> [private\_key](#input\_private\_key) | Your Coralogix secret key or incase you use your own created secret put here the name of your secret that contains the coralogix Private Key| `string` | n/a | yes |
+| <a name="input_layer_arn"></a> [layer_arn](#input\_layer\_arn) | In case you want to use Secret Manager This is the ARN of the Coralogix [lambda layer](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/597078901540/Coralogix-Lambda-SSMLayer). | `string` | n/a | no |
+| <a name="input_create_secret"></a> [create_secret](#input\_create\_secret) | Set to False In case you want to use Secret Manager option with your secret that contains coralogix Data API key| `string` | True | no |
+| <a name="input_private_key"></a> [private\_key](#input\_private\_key) | Your Coralogix secret key or incase you use your own created secret put here the name of your secret that contains the coralogix Data API key| `string` | n/a | yes |
 | <a name="input_application_name"></a> [application\_name](#input\_application\_name) | The name of your application | `string` | n/a | yes |
 | <a name="input_subsystem_name"></a> [subsystem\_name](#input\_subsystem\_name) | The subsystem name of your application | `string` | n/a | yes |
 | <a name="input_custom_s3_bucket"></a> [custom\_s3\_bucket](#input\_custom\_s3\_bucket) | The name of an existing s3 bucket in your region, in which the lambda zip code will be upload to. | `string` | n/a | no |

@@ -10,7 +10,7 @@ Manage the application which retrieves `meta data` from your aws account and sen
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 2.23 |
 
 ### Note: 
-* in case you use SM(Secret Manager) you should first deploy the [SM lambda layer](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/597078901540/Coralogix-Lambda-SSMLayer)
+* in case you use Secret Manager you should first deploy the [SM lambda layer](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/597078901540/Coralogix-Lambda-SSMLayer), you should only deploy one layer per region.
 
 ## Providers
 
@@ -31,9 +31,9 @@ Manage the application which retrieves `meta data` from your aws account and sen
 |------|-------------|------|---------|:--------:|
 | <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | The Coralogix location region, possible options are [`Europe`, `Europe2`, `India`, `Singapore`, `US`, `US2`, `Custom`] | `string` | n/a | yes |
 | <a name="input_custom_url"></a> [custom_url](#input\_custom\_domain) | Custom url for coralogix for example: https://<your_custom_domain>/api/v1/logs| `string` | n/a | no |
-| <a name="input_layer_arn"></a> [layer_arn](#input\_layer\_arn) | In case you want to use SM This is the ARN of the Coralogix [Security Layer](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/597078901540/Coralogix-Lambda-SSMLayer). | `string` | n/a | no |
-| <a name="input_create_secret"></a> [create_secret](#input\_create\_secret) | Set to False In case you want to use SM with your secret that contains coralogix Private Key| `string` | True | no |
-| <a name="input_private_key"></a> [private\_key](#input\_private\_key) | Your Coralogix secret key or incase you use your own created secret put here the name of your secret that contains the coralogix Private Key| `string` | n/a | yes |
+| <a name="input_layer_arn"></a> [layer_arn](#input\_layer\_arn) | In case you want to use Secret Manager This is the ARN of the Coralogix [lambda layer](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/597078901540/Coralogix-Lambda-SSMLayer). | `string` | n/a | no |
+| <a name="input_create_secret"></a> [create_secret](#input\_create\_secret) | Set to False In case you want to use Secret Manager with your secret that contains coralogix Data API key| `string` | True | no |
+| <a name="input_private_key"></a> [private\_key](#input\_private\_key) | Your Coralogix secret key or incase you use your own created secret put here the name of your secret that contains the coralogix Data API key| `string` | n/a | yes |
 | <a name="input_schedule"></a> [schedule](#input\_schedule) | The rate to collacet metadata  | `string` | `rate(10 minutes)` | no |
 | <a name="input_latest_versions_per_function"></a> [latest_versions_per_function](#input\_latest\_versions\_per\_function) | How many latest published versions of each Lambda function should be collected  | `number` | 5 | no |
 | <a name="input_resource_ttl_minutes"></a> [resource_ttl_minutes](#input\_resource\_ttl\_minutes) | Once a resource is collected, how long should it remain valid | `number` | 60 | no |

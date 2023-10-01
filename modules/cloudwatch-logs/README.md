@@ -11,7 +11,7 @@ Manage the application which retrieves `CloudWatch` logs and sends them to your 
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | Cloudwatch log group|
 
 ### Note: 
-* in case you use SM(Secret Manager) you should first deploy the [SM lambda layer](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/597078901540/Coralogix-Lambda-SSMLayer)
+* in case you use Secret Manager you should first deploy the [SM lambda layer](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/597078901540/Coralogix-Lambda-SSMLayer), you should only deploy one layer per region.
 
 ## Providers
 
@@ -32,9 +32,9 @@ Manage the application which retrieves `CloudWatch` logs and sends them to your 
 |------|-------------|------|---------|:--------:|
 | <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | The Coralogix location region, possible options are [`Europe`, `Europe2`, `India`, `Singapore`, `US`, `US2`] | `string` | `Europe` | yes |
 | <a name="input_custom_url"></a> [custom_url](#input\_custom\_domain) | Custom url for coralogix | `string` | n/a | no |
-| <a name="input_layer_arn"></a> [layer_arn](#input\_layer\_arn) | In case you want to use SM This is the ARN of the Coralogix [Security Layer](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/597078901540/Coralogix-Lambda-SSMLayer). | `string` | n/a | no |
-| <a name="input_create_secret"></a> [create_secret](#input\_create\_secret) | Set to False In case you want to use SM with your secret that contains coralogix Private Key| `string` | True | no |
-| <a name="input_private_key"></a> [private\_key](#input\_private\_key) | Your Coralogix secret key or incase you use your own created secret put here the name of your secret that contains the coralogix Private Key| `string` | n/a | yes |
+| <a name="input_layer_arn"></a> [layer_arn](#input\_layer\_arn) | In case you want to use Secret Manager This is the ARN of the Coralogix [lambda layer ](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/597078901540/Coralogix-Lambda-SSMLayer). | `string` | n/a | no |
+| <a name="input_create_secret"></a> [create_secret](#input\_create\_secret) | Set to False In case you want to use Secret Manager with your secret that contains coralogix Data API key| `string` | True | no |
+| <a name="input_private_key"></a> [private\_key](#input\_private\_key) | Your Coralogix secret key or incase you use your own created secret put here the name of your secret that contains the coralogix Data API key| `string` | n/a | yes |
 | <a name="input_application_name"></a> [application\_name](#input\_application\_name) | The name of your application | `string` | n/a | yes |
 | <a name="input_subsystem_name"></a> [subsystem\_name](#input\_subsystem\_name) | The subsystem name of your application | `string` | n/a | yes |
 | <a name="input_newline_pattern"></a> [newline\_pattern](#input\_newline\_pattern) | The pattern for lines splitting | `string` | `(?:\r\n\|\r\|\n)` | no |
