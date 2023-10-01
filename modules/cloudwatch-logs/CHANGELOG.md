@@ -2,6 +2,9 @@
 
 ## cloudwatch-logs
 
+### 0.0.4 / 1.10.2023
+* [Change] Change SSM option in the integration to SM - Secret Manager.
+
 ### 0.0.3 / 16.8.2023
 * [Update] Add an option to use an existing secret instead of creating a new one with SSM, and remove ssm_enabled variable.
 

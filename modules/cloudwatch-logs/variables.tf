@@ -85,7 +85,7 @@ variable "tags" {
 }
 
 variable "layer_arn" {
-  description = "In case you are using SSM This is the ARN of the Coralogix Security Layer."
+  description = "In case you are using SM This is the ARN of the Coralogix Security Layer."
   type        = string
   default     = ""
 }
@@ -109,7 +109,7 @@ variable "custom_s3_bucket" {
 }
 
 variable "create_secret" {
-  description = "Set to False In case you want to use SSM with your secret that contains coralogix private key"
+  description = "Set to False In case you want to use SM with your secret that contains coralogix private key"
   type        = string
   default     = "True"
 }

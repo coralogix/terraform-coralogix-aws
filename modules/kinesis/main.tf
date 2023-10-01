@@ -76,7 +76,7 @@ module "lambda" {
   tags = merge(var.tags, module.locals.tags)
 }
 
-module "lambda_ssm" {
+module "lambda_sm" {
   source  = "terraform-aws-modules/lambda/aws"
   version = "3.3.1"
   create  = var.layer_arn != "" ? true : false
@@ -151,7 +151,7 @@ resource "aws_sns_topic" "this" {
 }
 
 resource "aws_sns_topic_subscription" "this" {
-  depends_on = [aws_sns_topic.this, module.lambda_ssm, module.lambda]
+  depends_on = [aws_sns_topic.this, module.lambda_sm, module.lambda]
   count      = var.notification_email != null ? 1 : 0
   topic_arn  = aws_sns_topic.this.arn
   protocol   = "email"
@@ -160,7 +160,7 @@ resource "aws_sns_topic_subscription" "this" {
 
 resource "aws_secretsmanager_secret" "private_key_secret" {
   count       = var.layer_arn != "" && var.create_secret == "True"  ? 1 : 0
-  depends_on  = [module.lambda_ssm]
+  depends_on  = [module.lambda_sm]
   name        = "lambda/coralogix/${data.aws_region.this.name}/${module.locals.function_name}"
   description = "Coralogix Send Your Data key Secret"
 }

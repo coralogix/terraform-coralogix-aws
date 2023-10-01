@@ -70,7 +70,7 @@ module "lambda" {
   tags = merge(var.tags, module.locals.tags)
 }
 
-module "lambdaSSM" {
+module "lambdaSM" {
   source  = "terraform-aws-modules/lambda/aws"
   version = "3.3.1"
   create  = var.layer_arn != "" ? true : false
@@ -143,7 +143,7 @@ resource "aws_cloudwatch_log_subscription_filter" "this" {
   count           = length(var.log_groups)
   name            = "${module.lambda.lambda_function_name}-Subscription-${count.index}"
   log_group_name  = data.aws_cloudwatch_log_group.this[count.index].name
-  destination_arn = var.layer_arn != "" ? module.lambdaSSM.lambda_function_arn : module.lambda.lambda_function_arn
+  destination_arn = var.layer_arn != "" ? module.lambdaSM.lambda_function_arn : module.lambda.lambda_function_arn
   filter_pattern  = ""
 }
 
@@ -154,7 +154,7 @@ resource "aws_sns_topic" "this" {
 }
 
 resource "aws_sns_topic_subscription" "this" {
-  depends_on = [aws_sns_topic.this, module.lambdaSSM, module.lambda]
+  depends_on = [aws_sns_topic.this, module.lambdaSM, module.lambda]
   count      = var.notification_email != null ? 1 : 0
   topic_arn  = aws_sns_topic.this.arn
   protocol   = "email"
@@ -163,7 +163,7 @@ resource "aws_sns_topic_subscription" "this" {
 
 resource "aws_secretsmanager_secret" "private_key_secret" {
   count       = var.layer_arn != "" && var.create_secret == "True"  ? 1 : 0
-  depends_on  = [module.lambdaSSM]
+  depends_on  = [module.lambdaSM]
   name        = "lambda/coralogix/${data.aws_region.this.name}/${module.locals.function_name}"
   description = "Coralogix Send Your Data key Secret"
 }

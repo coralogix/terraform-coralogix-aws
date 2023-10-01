@@ -9,6 +9,9 @@ Manage the application which retrieves logs from `S3` bucket and sends them to y
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.1 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 2.23 |
 
+### Note: 
+* in case you use SM(Secret Manager) you should first deploy the [SM lambda layer](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/597078901540/Coralogix-Lambda-SSMLayer)
+
 ## Providers
 
 | Name | Version |
@@ -28,8 +31,8 @@ Manage the application which retrieves logs from `S3` bucket and sends them to y
 |------|-------------|------|---------|:--------:|
 | <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | The Coralogix location region, possible options are [`Europe`, `Europe2`, `India`, `Singapore`, `US`, `US2`] | `string` | `Europe` | yes |
 | <a name="input_custom_url"></a> [custom_url](#input\_custom\_url) | Custom url for coralogix | `string` | n/a | no |
-| <a name="input_layer_arn"></a> [layer_arn](#input\_layer\_arn) | In case you are using SSM This is the ARN of the Coralogix Security Layer. | `string` | n/a | no |
-| <a name="input_create_secret"></a> [create_secret](#input\_create\_secret) | Set to False In case you want to use SSM with your secret that contains coralogix Private Key| `string` | True | no |
+| <a name="input_layer_arn"></a> [layer_arn](#input\_layer\_arn) | In case you want to use SM This is the ARN of the Coralogix [Security Layer](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/597078901540/Coralogix-Lambda-SSMLayer). | `string` | n/a | no |
+| <a name="input_create_secret"></a> [create_secret](#input\_create\_secret) | Set to False In case you want to use SM with your secret that contains coralogix Private Key| `string` | True | no |
 | <a name="input_private_key"></a> [private\_key](#input\_private\_key) | Your Coralogix secret key or incase you use your own created secret put here the name of your secret that contains the coralogix Private Key| `string` | n/a | yes |
 | <a name="input_application_name"></a> [application\_name](#input\_application\_name) | The name of your application | `string` | n/a | yes |
 | <a name="input_subsystem_name"></a> [subsystem\_name](#input\_subsystem\_name) | The subsystem name of your application | `string` | n/a | yes |

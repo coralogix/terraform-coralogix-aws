@@ -33,7 +33,7 @@ module "eventbridge" {
     crons = [
       {
         name  = "cron-for-lambda"
-        arn   = var.layer_arn == "" ? module.lambda.lambda_function_arn : module.lambdaSSM.lambda_function_arn
+        arn   = var.layer_arn == "" ? module.lambda.lambda_function_arn : module.lambdaSM.lambda_function_arn
         input = jsonencode({ "job" : "cron-by-rate" })
       }
     ]
@@ -114,7 +114,7 @@ module "lambda" {
   tags = merge(var.tags, local.tags)
 }
 
-module "lambdaSSM" {
+module "lambdaSM" {
   create                 = var.layer_arn != "" ? true : false
   depends_on             = [ null_resource.s3_bucket ]
   source                 = "terraform-aws-modules/lambda/aws"
@@ -195,7 +195,7 @@ resource "aws_sns_topic" "this" {
 
 resource "aws_secretsmanager_secret" "private_key_secret" {
   count       = var.layer_arn != "" && var.create_secret == "True"  ? 1 : 0
-  depends_on  = [module.lambdaSSM]
+  depends_on  = [module.lambdaSM]
   name        = "lambda/coralogix/${data.aws_region.this.name}/${local.function_name}"
   description = "Coralogix Send Your Data key Secret"
 }
