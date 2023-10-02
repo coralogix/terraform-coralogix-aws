@@ -2,6 +2,9 @@
 
 ## resource-metadata
 
+### 0.0.4 / 1.10.2023
+* [Change] Change SSM option in the integration to SM - Secret Manager.
+
 ### 0.0.3 / 6.9.2023
 * [Bug fix] Remove the IAM role named Default - there is no need for this role and it can cause a conflict.
 

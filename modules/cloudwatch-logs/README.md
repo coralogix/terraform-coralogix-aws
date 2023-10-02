@@ -10,6 +10,9 @@ Manage the application which retrieves `CloudWatch` logs and sends them to your 
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 2.23 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | Cloudwatch log group|
 
+### Note: 
+* in case you use Secret Manager you should first deploy the [SM lambda layer](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/597078901540/Coralogix-Lambda-SSMLayer), you should only deploy one layer per region.
+
 ## Providers
 
 | Name | Version |
@@ -29,9 +32,9 @@ Manage the application which retrieves `CloudWatch` logs and sends them to your 
 |------|-------------|------|---------|:--------:|
 | <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | The Coralogix location region, possible options are [`Europe`, `Europe2`, `India`, `Singapore`, `US`, `US2`] | `string` | `Europe` | yes |
 | <a name="input_custom_url"></a> [custom_url](#input\_custom\_domain) | Custom url for coralogix | `string` | n/a | no |
-| <a name="input_layer_arn"></a> [layer_arn](#input\_layer\_arn) | In case you are using SSM This is the ARN of the Coralogix Security Layer. | `string` | n/a | no |
-| <a name="input_create_secret"></a> [create_secret](#input\_create\_secret) | Set to False In case you want to use SSM with your secret that contains coralogix Private Key| `string` | True | no |
-| <a name="input_private_key"></a> [private\_key](#input\_private\_key) | Your Coralogix secret key or incase you use your own created secret put here the name of your secret that contains the coralogix Private Key| `string` | n/a | yes |
+| <a name="input_layer_arn"></a> [layer_arn](#input\_layer\_arn) | In case you want to use Secret Manager This is the ARN of the Coralogix [lambda layer ](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/597078901540/Coralogix-Lambda-SSMLayer). | `string` | n/a | no |
+| <a name="input_create_secret"></a> [create_secret](#input\_create\_secret) | Set to False In case you want to use secrets manager with a predefine secret that was already created and contains Coralogix Send Your Data API key| `string` | True | no |
+| <a name="input_private_key"></a> [private\_key](#input\_private\_key) | Your [Coralogix Send Your Data – API Key](https://coralogix.com/docs/send-your-data-api-key/) or incase you use pre created secret (created in AWS secret manager) put here the name of the secret that contains the Coralogix send your data key| `string` | n/a | yes |
 | <a name="input_application_name"></a> [application\_name](#input\_application\_name) | The name of your application | `string` | n/a | yes |
 | <a name="input_subsystem_name"></a> [subsystem\_name](#input\_subsystem\_name) | The subsystem name of your application | `string` | n/a | yes |
 | <a name="input_newline_pattern"></a> [newline\_pattern](#input\_newline\_pattern) | The pattern for lines splitting | `string` | `(?:\r\n\|\r\|\n)` | no |
@@ -48,7 +51,9 @@ Manage the application which retrieves `CloudWatch` logs and sends them to your 
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to add to all resources | `map(string)` | `{}` | no |
 
 ### Note:
-You should use the `custom_s3_bucket` variable only when you need to deploy the integration in aws region that coralogix doesn't have a public bucket in (i.e for GovCloud), when using this variable you will need to create a bucket in the region that you want to run the integration in, and pass this bucket name as `custom_s3_bucket`. The module will download the integration file to your local workspace, and then upload these files to the `custom_s3_bucket`, and remove the file from your local workspace.
+* You should use the `custom_s3_bucket` variable only when you need to deploy the integration in aws region that coralogix doesn't have a public bucket in (i.e for GovCloud), when using this variable you will need to create a bucket in the region that you want to run the integration in, and pass this bucket name as `custom_s3_bucket`. The module will download the integration file to your local workspace, and then upload these files to the `custom_s3_bucket`, and remove the file from your local workspace.
+
+* You can use log field as `Application/Subsystem` names. Use the following syntax: `$.my_log.field`. In case you leave subsystemName as Empty it will be populated from log group name.
 
 ## Coralgoix regions
 | Coralogix region | AWS Region | Coralogix Domain |

@@ -109,7 +109,7 @@ module "lambda" {
   tags = merge(var.tags, module.locals.tags)
 }
 
-module "lambdaSSM" {
+module "lambdaSM" {
   source                 = "terraform-aws-modules/lambda/aws"
   create                 = var.layer_arn != "" ? true : false
   depends_on             = [ null_resource.s3_bucket_copy ]
@@ -178,7 +178,7 @@ resource "aws_s3_bucket_notification" "lambda_notification" {
   count  = local.sns_enable == false ? 1 : 0
   bucket = data.aws_s3_bucket.this.bucket
   lambda_function {
-    lambda_function_arn = var.layer_arn != "" ? module.lambdaSSM.lambda_function_arn : module.lambda.lambda_function_arn
+    lambda_function_arn = var.layer_arn != "" ? module.lambdaSM.lambda_function_arn : module.lambda.lambda_function_arn
     events              = ["s3:ObjectCreated:*"]
     filter_prefix       = var.integration_type == "s3" || var.s3_key_prefix != null ? var.s3_key_prefix : "AWSLogs/${data.aws_caller_identity.this.account_id}/${lookup(module.locals.s3_prefix_map, var.integration_type)}/"
     filter_suffix       = var.integration_type == "s3" || var.s3_key_suffix != null ? var.s3_key_suffix : lookup(module.locals.s3_suffix_map, var.integration_type)
@@ -204,7 +204,7 @@ resource "aws_sns_topic" "this" {
 
 resource "aws_secretsmanager_secret" "private_key_secret" {
   count       = var.layer_arn != "" && var.create_secret == "True"  ? 1 : 0
-  depends_on  = [module.lambdaSSM]
+  depends_on  = [module.lambdaSM]
   name        = "lambda/coralogix/${data.aws_region.this.name}/${module.locals.function_name}"
   description = "Coralogix Send Your Data key Secret"
 }
@@ -240,8 +240,8 @@ resource "aws_sns_topic_policy" "test" {
 
 resource "aws_sns_topic_subscription" "lambda_sns_subscription" {
   count      = local.sns_enable ? 1 : 0
-  depends_on = [module.lambdaSSM, module.lambda]
+  depends_on = [module.lambdaSM, module.lambda]
   topic_arn  = data.aws_sns_topic.sns_topic[count.index].arn
   protocol   = "lambda"
-  endpoint   = var.layer_arn != "" ? module.lambdaSSM.lambda_function_arn : module.lambda.lambda_function_arn
+  endpoint   = var.layer_arn != "" ? module.lambdaSM.lambda_function_arn : module.lambda.lambda_function_arn
 }
