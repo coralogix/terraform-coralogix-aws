@@ -90,7 +90,7 @@ jobs:
             terraform validate
           fi
           
-      - if: ${{ github.repository_owner == 'guyrenny'}}
+      - if: ${{ github.repository_owner == 'coralogix'}}
         name: Terraform plan
         run:  |
           if [[ ${{ matrix.package }} != "locals_variables" ]];then
