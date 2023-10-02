@@ -9,12 +9,19 @@ on:
 
 jobs:
   check:
-    if: github.repository == "jimbob88/Osiris"
     name: Check
     runs-on: ubuntu-latest
     outputs:
       packages: ${{ env.packages }}
     steps:
+      - name: Check if repository is forked
+        run: |
+          if [[ "${{ github.repository }}" != "${{ github.event.repository }}" ]]; then
+            echo "This is a forked repository, skipping the workflow."
+            exit 0
+          else
+            echo "This is the main repository, continue with the workflow."
+          fi
       - name: Checkout
         uses: actions/checkout@v3
         with:
