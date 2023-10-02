@@ -64,7 +64,8 @@ jobs:
             fi
           fi
         
-      - name: Configure AWS credentials
+      - if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+        name: Configure AWS credentials
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.TESTING_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.TESTING_SECRET_ACCESS_KEY }}
@@ -72,21 +73,24 @@ jobs:
           echo "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" >> $GITHUB_ENV
           
-      - name: Terraform init
+      - if: ${{ github.event.pull_request.head.repo.full_name == github.repository }} 
+        name: Terraform init
         run: |
           if [[ ${{ matrix.package }} != "locals_variables" ]];then
             cd "tests/${{ matrix.package }}"
             terraform init
           fi
           
-      - name: Terraform validate
+      - if: ${{ github.event.pull_request.head.repo.full_name == github.repository }} 
+        name: Terraform validate
         run: |
           if [[ ${{ matrix.package }} != "locals_variables" ]];then
             cd "tests/${{ matrix.package }}"
             terraform validate
           fi
       
-      - name: Terraform plan
+      - if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+        name: Terraform plan
         run:  |
           if [[ ${{ matrix.package }} != "locals_variables" ]];then
             cd "tests/${{ matrix.package }}"
