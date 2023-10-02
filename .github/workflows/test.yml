@@ -9,7 +9,7 @@ on:
 
 jobs:
   check:
-    if: github.repository == ‘jimbob88/Osiris’
+    if: github.repository == "jimbob88/Osiris"
     name: Check
     runs-on: ubuntu-latest
     outputs:
