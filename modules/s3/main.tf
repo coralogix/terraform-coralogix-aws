@@ -5,6 +5,8 @@ module "locals" {
   random_string    = random_string.this.result
 }
 
+
+
 locals {
   sns_enable = var.integration_type == "s3-sns" || var.integration_type == "cloudtrail-sns" ? true : false
 }
