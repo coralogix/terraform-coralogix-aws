@@ -74,7 +74,7 @@ jobs:
           echo "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" >> $GITHUB_ENV
 
-      - if: ${{ github.repository_owner == 'coralogix'}}
+      - if: ${{ github.repository == github.event.repository }}
         name: Terraform init
         run: |
           if [[ ${{ matrix.package }} != "locals_variables" ]];then
@@ -82,7 +82,7 @@ jobs:
             terraform init
           fi
 
-      - if: ${{ github.repository_owner == 'coralogix'}}   
+      - if: ${{ github.repository == github.event.repository }} 
         name: Terraform validate
         run: |
           if [[ ${{ matrix.package }} != "locals_variables" ]];then
@@ -90,7 +90,7 @@ jobs:
             terraform validate
           fi
           
-      - if: ${{ github.repository_owner == 'coralogix'}}
+      - if: ${{ github.repository == github.event.repository }}
         name: Terraform plan
         run:  |
           if [[ ${{ matrix.package }} != "locals_variables" ]];then
