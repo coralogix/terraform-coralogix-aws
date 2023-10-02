@@ -38,8 +38,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         
-      - name: Check for missing test directories
-        if: ${{ github.repository != github.event.repository }}
+         
+      - if: ${{ github.repository == github.event.repository }}
+        name: Check for missing test directories
         run: |
           chmod +x tests/compare_directories_test.sh
           output=$(tests/compare_directories_test.sh)
