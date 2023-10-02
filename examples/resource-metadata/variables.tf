@@ -14,13 +14,13 @@ variable "custom_url" {
 }
 
 variable "private_key" {
-  description = "Your Coralogix secret key or incase you use your own created secret put here the name of your secret that contains the coralogix Data API key"
+  description = "Your Coralogix data api key or incase you use your own created secret put here the name of your secret that contains the coralogix Data API key"
   type        = string
   sensitive   = true
 }
 
 variable "layer_arn" {
-  description = "In case you are using Secret Manager This is the ARN of the Coralogix Security Layer."
+  description = "In case you are using Secret Manager This is the ARN of the Coralogix Security lambda Layer."
   type        = string
   default     = ""
 }
@@ -92,7 +92,7 @@ variable "custom_s3_bucket" {
 }
 
 variable "create_secret" {
-  description = "Set to False In case you want to use Secret Manager with your secret that contains coralogix Data API key"
+  description = "Set to False In case you want to use secrets manager with a predefine secret that was already created and contains Coralogix Send Your Data API key"
   type        = string
   default     = "True"
 }

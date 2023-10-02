@@ -15,7 +15,7 @@ variable "custom_url" {
 }
 
 variable "private_key" {
-  description = "The Coralogix Data API key which is used to validate your authenticity"
+  description = "Your Coralogix data api key or incase you use your own created secret put here the name of your secret that contains the coralogix Data API key"
   type        = string
   sensitive   = true
 }
