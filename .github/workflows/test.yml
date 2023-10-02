@@ -39,7 +39,6 @@ jobs:
         uses: actions/checkout@v3
         
          
-      - if: ${{ github.repository == github.event.repository }}
         name: Check for missing test directories
         run: |
           chmod +x tests/compare_directories_test.sh
@@ -51,8 +50,8 @@ jobs:
             echo "$output"
             exit 1
           fi
-          
-      - name: Compare variables in test file and in the module
+
+        name: Compare variables in test file and in the module
         run: |
           if [[ ${{ matrix.package }} != "locals_variables" ]]; then
             chmod +x tests/test_variables_script.sh
@@ -65,30 +64,34 @@ jobs:
               exit 1
             fi
           fi
-        
-      - name: Configure AWS credentials
+
+      - if: ${{ github.repository == github.event.repository }}
+        name: Configure AWS credentials
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.TESTING_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.TESTING_SECRET_ACCESS_KEY }}
         run: |
           echo "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" >> $GITHUB_ENV
-          
-      - name: Terraform init
+
+      - if: ${{ github.repository == github.event.repository }}  
+        name: Terraform init
         run: |
           if [[ ${{ matrix.package }} != "locals_variables" ]];then
             cd "tests/${{ matrix.package }}"
             terraform init
           fi
-          
-      - name: Terraform validate
+
+      - if: ${{ github.repository == github.event.repository }}   
+        name: Terraform validate
         run: |
           if [[ ${{ matrix.package }} != "locals_variables" ]];then
             cd "tests/${{ matrix.package }}"
             terraform validate
           fi
-      
-      - name: Terraform plan
+          
+      - if: ${{ github.repository == github.event.repository }}
+        name: Terraform plan
         run:  |
           if [[ ${{ matrix.package }} != "locals_variables" ]];then
             cd "tests/${{ matrix.package }}"
