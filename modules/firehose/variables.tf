@@ -171,7 +171,7 @@ variable "user_supplied_tags" {
 }
 
 variable "override_default_tags" {
-  description = "Override the default tags in the module by supplying a map of key-value pairs"
+  description = "Override and remove the default tags by setting to true"
   type        = bool
   default     = false
 }
