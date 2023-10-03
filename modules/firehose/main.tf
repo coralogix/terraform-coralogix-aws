@@ -29,12 +29,12 @@ locals {
     }
   }
 
-  tags = length(var.override_default_tags) == 0 ? merge(var.user_supplied_tags, {
+  tags = var.override_default_tags == false ? merge(var.user_supplied_tags, {
     terraform-module         = "kinesis-firehose-to-coralogix"
     terraform-module-version = "v0.1.0"
     managed-by               = "coralogix-terraform"
     custom_endpoint          = var.coralogix_firehose_custom_endpoint != null ? var.coralogix_firehose_custom_endpoint : "_default_"
-  }) : merge(var.user_supplied_tags, var.override_default_tags)
+  }) : var.user_supplied_tags
 
   # default namings
   cloud_watch_metric_stream_name = var.cloudwatch_metric_stream_custom_name != null ? var.cloudwatch_metric_stream_custom_name : var.firehose_stream
