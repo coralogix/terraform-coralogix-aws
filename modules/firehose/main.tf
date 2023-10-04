@@ -28,12 +28,13 @@ locals {
       url = "https://firehose-ingress.eu2.coralogix.com/firehose"
     }
   }
-  tags = merge(var.user_supplied_tags, {
+
+  tags = var.override_default_tags == false ? merge(var.user_supplied_tags, {
     terraform-module         = "kinesis-firehose-to-coralogix"
     terraform-module-version = "v0.1.0"
     managed-by               = "coralogix-terraform"
     custom_endpoint          = var.coralogix_firehose_custom_endpoint != null ? var.coralogix_firehose_custom_endpoint : "_default_"
-  })
+  }) : var.user_supplied_tags
 
   # default namings
   cloud_watch_metric_stream_name = var.cloudwatch_metric_stream_custom_name != null ? var.cloudwatch_metric_stream_custom_name : var.firehose_stream
@@ -455,6 +456,14 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_metrics" {
         content {
           name  = "applicationName"
           value = var.application_name
+        }
+      }
+
+      dynamic "common_attributes" {
+        for_each = var.subsystem_name == null ? [] : [1]
+        content {
+          name  = "subsystemName"
+          value = var.subsystem_name
         }
       }
     }
