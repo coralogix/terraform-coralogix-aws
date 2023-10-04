@@ -2,6 +2,9 @@
 
 ## S3
 
+### 0.0.4 / 4.10.2023
+* [bug_fix] Add secret_manager_enabled variable to allow the use of lambda-SecretLayer in the same run with this module 
+
 ### 0.0.3 / 1.10.2023
 * [Change] Change SSM option in the integration to Secret Manager.
 
