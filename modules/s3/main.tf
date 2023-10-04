@@ -56,7 +56,7 @@ resource "null_resource" "s3_bucket_copy" {
 }
 
 module "lambda" {
-  create                 = var.layer_arn == "" ? true : false
+  create                 = var.secret_manager_enabled == false ? true : false
   depends_on             = [ null_resource.s3_bucket_copy ]
   source                 = "terraform-aws-modules/lambda/aws"
   version                = "3.2.1"
@@ -111,7 +111,7 @@ module "lambda" {
 
 module "lambdaSM" {
   source                 = "terraform-aws-modules/lambda/aws"
-  create                 = var.layer_arn != "" ? true : false
+  create                 = var.secret_manager_enabled ? true : false
   depends_on             = [ null_resource.s3_bucket_copy ]
   version                = "3.2.1"
   layers                 = [var.layer_arn]
@@ -178,7 +178,7 @@ resource "aws_s3_bucket_notification" "lambda_notification" {
   count  = local.sns_enable == false ? 1 : 0
   bucket = data.aws_s3_bucket.this.bucket
   lambda_function {
-    lambda_function_arn = var.layer_arn != "" ? module.lambdaSM.lambda_function_arn : module.lambda.lambda_function_arn
+    lambda_function_arn = var.secret_manager_enabled ? module.lambdaSM.lambda_function_arn : module.lambda.lambda_function_arn
     events              = ["s3:ObjectCreated:*"]
     filter_prefix       = var.integration_type == "s3" || var.s3_key_prefix != null ? var.s3_key_prefix : "AWSLogs/${data.aws_caller_identity.this.account_id}/${lookup(module.locals.s3_prefix_map, var.integration_type)}/"
     filter_suffix       = var.integration_type == "s3" || var.s3_key_suffix != null ? var.s3_key_suffix : lookup(module.locals.s3_suffix_map, var.integration_type)
@@ -203,13 +203,13 @@ resource "aws_sns_topic" "this" {
 }
 
 resource "aws_secretsmanager_secret" "private_key_secret" {
-  count       = var.layer_arn != "" && var.create_secret == "True"  ? 1 : 0
+  count       = var.secret_manager_enabled && var.create_secret == "True"  ? 1 : 0
   depends_on  = [module.lambdaSM]
   name        = "lambda/coralogix/${data.aws_region.this.name}/${module.locals.function_name}"
   description = "Coralogix Send Your Data key Secret"
 }
 resource "aws_secretsmanager_secret_version" "service_user" {
-  count         = var.layer_arn != "" && var.create_secret == "True"  ? 1 : 0
+  count         = var.secret_manager_enabled && var.create_secret == "True"  ? 1 : 0
   depends_on    = [aws_secretsmanager_secret.private_key_secret]
   secret_id     = aws_secretsmanager_secret.private_key_secret[count.index].id
   secret_string = var.private_key
@@ -243,5 +243,5 @@ resource "aws_sns_topic_subscription" "lambda_sns_subscription" {
   depends_on = [module.lambdaSM, module.lambda]
   topic_arn  = data.aws_sns_topic.sns_topic[count.index].arn
   protocol   = "lambda"
-  endpoint   = var.layer_arn != "" ? module.lambdaSM.lambda_function_arn : module.lambda.lambda_function_arn
+  endpoint   = var.secret_manager_enabled ? module.lambdaSM.lambda_function_arn : module.lambda.lambda_function_arn
 }

@@ -26,7 +26,7 @@ resource "null_resource" "s3_bucket" {
 module "lambda" {
   source                 = "terraform-aws-modules/lambda/aws"
   version                = "3.3.1"
-  create                 = var.layer_arn == "" ? true : false
+  create                 = var.secret_manager_enabled == false ? true : false
   depends_on             = [ null_resource.s3_bucket ]
   layers                 = [var.layer_arn]
   function_name          = module.locals.function_name
@@ -79,7 +79,7 @@ module "lambda" {
 module "lambda_sm" {
   source  = "terraform-aws-modules/lambda/aws"
   version = "3.3.1"
-  create  = var.layer_arn != "" ? true : false
+  create  = var.secret_manager_enabled ? true : false
   depends_on             = [ null_resource.s3_bucket ]
   layers                 = [var.layer_arn]
   function_name          = module.locals.function_name
@@ -159,14 +159,14 @@ resource "aws_sns_topic_subscription" "this" {
 }
 
 resource "aws_secretsmanager_secret" "private_key_secret" {
-  count       = var.layer_arn != "" && var.create_secret == "True"  ? 1 : 0
+  count       = var.secret_manager_enabled && var.create_secret == "True"  ? 1 : 0
   depends_on  = [module.lambda_sm]
   name        = "lambda/coralogix/${data.aws_region.this.name}/${module.locals.function_name}"
   description = "Coralogix Send Your Data key Secret"
 }
 
 resource "aws_secretsmanager_secret_version" "service_user" {
-  count         = var.layer_arn != "" && var.create_secret == "True"  ? 1 : 0
+  count         = var.secret_manager_enabled && var.create_secret == "True"  ? 1 : 0
   depends_on    = [aws_secretsmanager_secret.private_key_secret]
   secret_id     = aws_secretsmanager_secret.private_key_secret[count.index].id
   secret_string = var.private_key

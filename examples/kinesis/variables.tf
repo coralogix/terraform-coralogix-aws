@@ -79,6 +79,12 @@ variable "tags" {
   default     = {}
 }
 
+variable "secret_manager_enabled" {
+  description = "Set to true in case that you want to keep your Coralogix Send Your Data API Key as a secret in aws Secret Manager "
+  type        = bool
+  default     = false
+}
+
 variable "layer_arn" {
   description = "In case you are using Secret Manager This is the ARN of the Coralogix Security Layer."
   type        = string
