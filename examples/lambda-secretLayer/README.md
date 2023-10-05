@@ -46,6 +46,7 @@ module "coralogix-shipper-s3" {
 
   coralogix_region   = "Europe"
   private_key        = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  secret_manager_enabled  = true
   layer_arn          = module.lambda-secretLayer.lambda_layer_version_arn
   application_name   = "s3"
   subsystem_name     = "logs"
@@ -71,6 +72,7 @@ module "coralogix-shipper-s3" {
 
   coralogix_region   = "Europe"
   private_key        = "the name of the secret that contains the Coralogix send your data key"
+  secret_manager_enabled  = true
   layer_arn          = module.lambda-secretLayer.lambda_layer_version_arn
   application_name   = "s3"
   subsystem_name     = "logs"
