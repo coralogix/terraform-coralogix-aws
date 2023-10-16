@@ -194,7 +194,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs" {
       dynamic "common_attributes" {
         for_each = var.application_name == null ? [] : [1]
         content {
-          name  = "applicationName"
+          name  = "applicationNameDefault"
           value = var.application_name
         }
       }
@@ -202,7 +202,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs" {
       dynamic "common_attributes" {
         for_each = var.subsystem_name == null ? [] : [1]
         content {
-          name  = "subsystemName"
+          name  = "subsystemNameDefault"
           value = var.subsystem_name
         }
       }
