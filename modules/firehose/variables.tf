@@ -188,6 +188,12 @@ variable "s3_backup_custom_name" {
   default     = null
 }
 
+variable "lambda_processor_enable" {
+  description = "Enable lambda processor function, defaults to true"
+  type        = bool
+  default     = true
+}
+
 variable "lambda_processor_custom_name" {
   description = "Set the name of the lambda processor function, otherwise variable '{firehose_stream}-metrics-tags-processor' will be used"
   type        = string

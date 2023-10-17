@@ -138,6 +138,20 @@ additional_metric_statistics = [
 ]
 ```
 
+### Removal of CloudWatch Metric Streams Lambda transformation
+By default, a [Coralogix Lambda Transformation Function](https://github.com/coralogix/cloudwatch-metric-streams-lambda-transformation) has been added to the [Kinesis Firehose Data Transformation](https://docs.aws.amazon.com/firehose/latest/dev/data-transformation.html) as a `processing_configuration`. This is done, to enrich the metrics from CloudWatch Metric Streams with AWS resource tags. The optional lambda function is deployed as part of the module, and can be removed by setting the variable `lambda_processor_enable` to `false`.
+
+```terraform
+module "cloudwatch_firehose_coralogix" {
+  source                           = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
+  metric_enable                    = true
+  lambda_processor_enable          = false
+  firehose_stream                  = var.coralogix_firehose_stream_name
+  private_key                      = var.private_key
+  coralogix_region                 = var.coralogix_region
+}
+```
+
 Read more about the following:
 
 - [Statistics that can be streamed](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-metric-streams-statistics.html)
@@ -222,6 +236,7 @@ then the CloudWatch metric stream must be configured with the same format, confi
 | <a name="input_cloudwatch_metric_stream_custom_name"></a> [cloudwatch_metric_stream_custom_name](#input\_cloudwatch_metric_stream_custom_name) | Set the name of the CloudWatch metric stream, otherwise variable 'firehose_stream' will be used | `string` | `null` | no |
 | <a name="input_s3_backup_custom_name"></a> [s3_backup_custom_name](#input\_s3_backup_custom_name) | Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup' will be used | `string` | `null` | no |
 | <a name="input_lambda_processor_custom_name"></a> [lambda_processor_custom_name](#input\_lambda_processor_custom_name) | Set the name of the lambda processor function, otherwise variable '{firehose_stream}-metrics-tags-processor' will be used | `string` | `null` | no |
+| <a name="input_lambda_processor_enable"></a> [lambda_processor_enable](#input\_lambda_processor_enable) | Enable the lambda processor function. Set to false to remove the lambda and all associated resources. | `bool` | `true` | no |
 
 ## Coralgoix regions
 | Coralogix region | AWS Region | Coralogix Domain |

@@ -300,7 +300,8 @@ resource "aws_iam_policy" "firehose_to_coralogix_metric_policy" {
            "Resource": [
                "${aws_cloudwatch_log_group.firehose_loggroup.arn}"
            ]
-        },
+        }
+        %{if var.lambda_processor_enable},
         {
           "Effect": "Allow",
           "Action": [
@@ -309,6 +310,8 @@ resource "aws_iam_policy" "firehose_to_coralogix_metric_policy" {
           ],
           "Resource": "${aws_lambda_function.lambda_processor[count.index].arn}:*"
         }
+        %{else}
+        %{endif}
     ]
 }
 EOF
@@ -385,14 +388,14 @@ EOF
 }
 
 resource "aws_cloudwatch_log_group" "loggroup" {
-  count             = var.metric_enable == true ? 1 : 0
+  count             = var.metric_enable && var.lambda_processor_enable == true ? 1 : 0
   name              = "/aws/lambda/${aws_lambda_function.lambda_processor[count.index].function_name}"
   retention_in_days = var.cloudwatch_retention_days
   tags              = local.tags
 }
 
 resource "aws_lambda_function" "lambda_processor" {
-  count         = var.metric_enable ? 1 : 0
+  count         = var.metric_enable && var.lambda_processor_enable ? 1 : 0
   s3_bucket     = "cx-cw-metrics-tags-lambda-processor-${data.aws_region.current_region.name}"
   s3_key        = "function.zip"
   function_name = local.lambda_processor_name
@@ -468,27 +471,31 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_metrics" {
       }
     }
 
-    processing_configuration {
-      enabled = "true"
+    dynamic "processing_configuration" {
+      for_each = var.lambda_processor_enable == true ? [1] : []
+      content {
+        enabled = "true"
 
-      processors {
-        type = "Lambda"
+        processors {
+          type = "Lambda"
 
-        parameters {
-          parameter_name  = "LambdaArn"
-          parameter_value = "${aws_lambda_function.lambda_processor[count.index].arn}:$LATEST"
-        }
+          parameters {
+            parameter_name  = "LambdaArn"
+            parameter_value = "${aws_lambda_function.lambda_processor[count.index].arn}:$LATEST"
+          }
 
-        parameters {
-          parameter_name  = "BufferSizeInMBs"
-          parameter_value = "0.2"
-        }
+          parameters {
+            parameter_name  = "BufferSizeInMBs"
+            parameter_value = "0.2"
+          }
 
-        parameters {
-          parameter_name  = "BufferIntervalInSeconds"
-          parameter_value = "61"
+          parameters {
+            parameter_name  = "BufferIntervalInSeconds"
+            parameter_value = "61"
+          }
         }
       }
+
     }
   }
 }
