@@ -404,6 +404,7 @@ resource "aws_lambda_function" "lambda_processor" {
   runtime       = "provided.al2"
   timeout       = "60"
   memory_size   = 512
+  architectures = ["arm64"]
   tags          = local.tags
 
   environment {
