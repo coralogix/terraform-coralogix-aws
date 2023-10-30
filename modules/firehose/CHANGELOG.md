@@ -2,6 +2,9 @@
 
 ## firehose
 
+### 0.0.1 / 25 Oct 2023
+* [Update] Migrate transformation Lambda runtime
+
 ### 0.0.1 / 17.8.23
 * [Update] fix duplicate IAM issue
 

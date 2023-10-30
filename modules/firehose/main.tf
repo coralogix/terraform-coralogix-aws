@@ -397,13 +397,14 @@ resource "aws_cloudwatch_log_group" "loggroup" {
 resource "aws_lambda_function" "lambda_processor" {
   count         = var.metric_enable && var.lambda_processor_enable ? 1 : 0
   s3_bucket     = "cx-cw-metrics-tags-lambda-processor-${data.aws_region.current_region.name}"
-  s3_key        = "function.zip"
+  s3_key        = "bootstrap.zip"
   function_name = local.lambda_processor_name
   role          = aws_iam_role.lambda_iam_role[count.index].arn
-  handler       = "function"
-  runtime       = "go1.x"
+  handler       = "bootstrap"
+  runtime       = "provided.al2"
   timeout       = "60"
   memory_size   = 512
+  architectures = ["arm64"]
   tags          = local.tags
 
   environment {
