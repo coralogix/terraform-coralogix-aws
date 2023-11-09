@@ -86,7 +86,7 @@ service:
 
   pipelines:
     logs:
-      receivers: 
+      receivers:
         - filelog
       processors:
         - resourcedetection

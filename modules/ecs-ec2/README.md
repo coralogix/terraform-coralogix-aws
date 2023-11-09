@@ -18,7 +18,6 @@ module "ecs-ec2" {
   metrics                  = [true|false]
 }
 ```
-> TODO after merge, update ```source``` to: "github.com/coralogix/terraform-coralogix-aws//modules/ecs-ec2"
 
 ## Requirements
 
