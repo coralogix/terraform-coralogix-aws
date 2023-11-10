@@ -11,10 +11,12 @@ module "ecs-ec2" {
   source                   = "../../modules/ecs-ec2"
   ecs_cluster_name         = "ecs-cluster-name"
   cdot_image_version       = "latest"
-  memory                   = 256
+  memory                   = numeric MiB
   coralogix_region         = ["Europe"|"Europe2"|"India"|"Singapore"|"US"|"US2"|"Custom"]
   default_application_name = "Coralogix Application Name"
+  default_subsystem_name   = "Coralogix Subsystem Name"
   private_key              = var.private_key
+  otel_config_file         = "[optional] file path to custom OTEL collector config file"
   metrics                  = [true|false]
 }
 ```
@@ -32,6 +34,10 @@ module "ecs-ec2" {
 |------|---------|
 | aws | 5.24.0 |
 
+## Modules
+
+No modules.
+
 ## Resources
 
 | Name | Type |
@@ -48,11 +54,11 @@ module "ecs-ec2" {
 | default\_subsystem\_name | The default Coralogix Subsystem name. | `string` | `"default"` | no |
 | ecs\_cluster\_name | Name of the AWS ECS Cluster to deploy the Coralogix OTEL Collector. Supports Amazon EC2 instances only, not Fargate. | `string` | n/a | yes |
 | image | The OpenTelemetry Collector Image to use. Defaults to "coralogixrepo/coralogix-otel-collector". Should accept default unless advised by Coralogix support. | `string` | `"coralogixrepo/coralogix-otel-collector"` | no |
-| image\_version | The Coralogix Open Telemetry Distribution Image Version/Tag. Defaults to "latest". See: https://hub.docker.com/r/coralogixrepo/coralogix-otel-collector/tags | `string` | `"latest"` | no |
-| memory | The amount of memory (in MiB) used by the task. Note that your cluster must have sufficient memory available to support the given value. | `number` | `256` | no |
-| metrics | If true, cadivisor will be deployed on each node to collect metrics | `bool` | `false` | no |
-| otel\_config | The opentelemetry configuration as a base64 encoded string. Defaults to an embedded configuration. Should accept default unless advised by Coralogix support. | `string` | `null` | no |
-| private\_key | The Coralogix Send-Your-Data API key for your Coralogix account. | `string` | n/a | yes |
+| image\_version | The Coralogix Open Telemetry Distribution Image Version/Tag. See: https://hub.docker.com/r/coralogixrepo/coralogix-otel-collector/tags | `string` | n/a | yes |
+| memory | The amount of memory (in MiB) used by the task. Note that your cluster must have sufficient memory available to support the given value. Minimum "256" MiB. CPU Units will be allocated directly proportional to Memory. | `number` | `256` | no |
+| metrics | If true, collects ECS task resource usage metrics (such as CPU, memory, network, and disk) and publishes to Coralogix. See: https://github.com/coralogix/coralogix-otel-collector/tree/master/receiver/awsecscontainermetricsdreceiver | `bool` | `false` | no |
+| otel\_config\_file | File path to a custom opentelemetry configuration file. Defaults to an embedded configuration. See https://opentelemetry.io/docs/collector/configuration/ and https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/coralogixexporter | `string` | `null` | no |
+| private\_key | The Send-Your-Data API key for your Coralogix account. See: https://coralogix.com/docs/send-your-data-api-key/ | `string` | n/a | yes |
 
 ## Outputs
 

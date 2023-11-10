@@ -4,9 +4,8 @@ variable "ecs_cluster_name" {
 }
 
 variable "image_version" {
-  description = "The Coralogix Open Telemetry Distribution Image Version/Tag. Defaults to \"latest\". See: https://hub.docker.com/r/coralogixrepo/coralogix-otel-collector/tags"
+  description = "The Coralogix Open Telemetry Distribution Image Version/Tag. See: https://hub.docker.com/r/coralogixrepo/coralogix-otel-collector/tags"
   type        = string
-  default     = "latest"
 }
 
 variable "image" {
@@ -16,7 +15,7 @@ variable "image" {
 }
 
 variable "memory" {
-  description = "The amount of memory (in MiB) used by the task. Note that your cluster must have sufficient memory available to support the given value."
+  description = "The amount of memory (in MiB) used by the task. Note that your cluster must have sufficient memory available to support the given value. Minimum \"256\" MiB. CPU Units will be allocated directly proportional to Memory."
   type        = number
   default     = 256
 }
@@ -50,19 +49,19 @@ variable "default_subsystem_name" {
 }
 
 variable "private_key" {
-  description = "The Coralogix Send-Your-Data API key for your Coralogix account."
+  description = "The Send-Your-Data API key for your Coralogix account. See: https://coralogix.com/docs/send-your-data-api-key/"
   type        = string
   sensitive   = true
 }
 
 variable "metrics" {
   type        = bool
-  description = "If true, cadivisor will be deployed on each node to collect metrics"
+  description = "If true, collects ECS task resource usage metrics (such as CPU, memory, network, and disk) and publishes to Coralogix. See: https://github.com/coralogix/coralogix-otel-collector/tree/master/receiver/awsecscontainermetricsdreceiver"
   default     = false
 }
 
-variable "otel_config" {
+variable "otel_config_file" {
   type        = string
-  description = "The opentelemetry configuration as a base64 encoded string. Defaults to an embedded configuration. Should accept default unless advised by Coralogix support."
+  description = "File path to a custom opentelemetry configuration file. Defaults to an embedded configuration. See https://opentelemetry.io/docs/collector/configuration/ and https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/coralogixexporter"
   default     = null
 }

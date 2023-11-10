@@ -11,13 +11,15 @@ provider "aws" {
 }
 
 module "otel_ecs_ec2_coralogix" {
-  source                   = "github.com/coralogix/terraform-coralogix-aws//modules/ecs-ec2"
+  source                   = "github.com/coralogix/terraform-coralogix-aws/modules/ecs-ec2"
   ecs_cluster_name         = var.ecs_cluster_name
+  image_version            = var.image_version
   memory                   = var.memory
   coralogix_region         = var.coralogix_region
   default_application_name = var.default_application_name
   default_subsystem_name   = var.default_subsystem_name
   private_key              = var.private_key
+  otel_config_file         = var.otel_config_file
   metrics                  = var.metrics
 }
 ```
