@@ -92,5 +92,12 @@ jobs:
             cd "tests/${{ matrix.package }}"
             terraform plan
           fi
+      - name: Terraform apply
+        run:  |
+          if [[ ${{ matrix.package }} != "locals_variables" ]];then
+            cd "tests/${{ matrix.package }}"
+            terraform apply -auto-approve
+            terraform destroy -auto-approve
+          fi
 
         
