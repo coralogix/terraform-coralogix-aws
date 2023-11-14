@@ -1,5 +1,2 @@
-api_keys = {
-    sg = "replace me"
-    in = "replace me"
-    us = "replace me"
-}
+coralogix_region = "Singapore"
+api_key          = "XXXX_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"

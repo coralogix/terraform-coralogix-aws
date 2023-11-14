@@ -1,13 +1,14 @@
 locals {
-  coralogix_region_endpoint_map = {
-    "Europe"    = "coralogix.com"
-    "Europe2"   = "eu2.coralogix.com"
-    "India"     = "coralogix.in"
-    "Singapore" = "coralogixsg.com"
-    "US"        = "coralogix.us"
-    "US2"       = "cx498.coralogix.com"
+  coralogix_region_domain_map = {
+    "europe"    = "coralogix.com"
+    "europe2"   = "eu2.coralogix.com"
+    "india"     = "coralogix.in"
+    "singapore" = "coralogixsg.com"
+    "us"        = "coralogix.us"
+    "us2"       = "cx498.coralogix.com"
+    "custom"    = null
   }
-  coralogix_region_endpoint = coalesce(var.coralogix_endpoint, local.coralogix_region_endpoint_map[var.coralogix_region])
+  coralogix_domain = coalesce(var.custom_domain, local.coralogix_region_domain_map[lower(var.coralogix_region)])
   otel_config_file = coalesce(var.otel_config_file,
     (var.metrics ? "${path.module}/otel_config_metrics.tftpl.yaml" : "${path.module}/otel_config.tftpl.yaml")
   )
@@ -69,7 +70,7 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
       "environment" : [
         {
           "name" : "CORALOGIX_DOMAIN"
-          "value" : "${local.coralogix_region_endpoint}"
+          "value" : "${local.coralogix_domain}"
         },
         {
           "name" : "PRIVATE_KEY"

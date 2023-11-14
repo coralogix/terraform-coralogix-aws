@@ -3,13 +3,8 @@
 ## Prereqs
 
 * Setup ECS cluster on EC2.
-* Setup AWS session environment variables.
-* Setup Terraform workspace name(s) for the region(s) tested, i.e.: sg, in, us, us2, eu, eu2. Switch to the desired workspace, e.g. to test in Singapore region:
-    ```
-    terraform workspace new sg
-    terraform workspace select sg
-    ```
-* Configure file "terraform.tfvars" with your api_keys. See [./terraform.tfvars.template](./terraform.tfvars.template). As this contains your keys, ensure your ```.gitignore``` prevents checking-in .tfvars files.
+* Setup AWS profile, or AWS session environment variables including ```AWS_DEFAULT_REGION```.
+* Configure file "terraform.tfvars" accordingly from [./terraform.tfvars.template](./terraform.tfvars.template). 
 * Edit ```cluster-name``` in  [./ecs-ec2.tf](./ecs-ec2.tf) to match your environment ECS cluster name accordingly.
 
 ## Test provisioning ECS/EC2 OTEL collector
@@ -33,19 +28,19 @@ terraform apply -var otel_config_file="$(pwd)/otel_config_custom.tftpl.yaml"
 ```
 
 Expected results:
-* All logs captured at your Coralogix endpoint are set to ```Warning``` severity.
+* Any logs to application containers are captured at ```Warning``` severity.
 
-## Test custom endpoint
+## Test custom domain
 
-To test using an optional custom Coralogix endpoint, such as a [Private Link Endpoint](https://coralogix.com/docs/coralogix-amazon-web-services-aws-privatelink-endpoints/), staging endpoint, or an endpoint different from the AWS region,
+To test using an optional custom Coralogix domain, such as a [Private Link Endpoint](https://coralogix.com/docs/coralogix-amazon-web-services-aws-privatelink-endpoints/).
 
 ```
-terraform plan -var coralogix_endpoint=your-custom-endpoint.com
-terraform apply -var coralogix_endpoint=your-custom-endpoint.com
+terraform plan -var custom_domain=your-custom-domain.com -var api_key=your-api-key
+terraform apply -var custom_domain=your-custom-domain.com -var api_key=your-api-key
 ```
 
 Expected results:
-* Logs, traces, and metrics, are captured at your Coralogix endpoint.
+* Logs, traces, and metrics, are captured at the specified Coralogix domain.
 
 ## Test de-provisioning ECS/EC2 OTEL collector
 

@@ -9,15 +9,13 @@ For parameter details, see [ECS EC2 module README](../../modules/ecs-ec2/README.
 For test sample, see [ECS EC2 tests README](../../tests/ecs-ec2/README.md)
 
 ```hcl
-provider "aws" {
-}
-
 module "otel_ecs_ec2_coralogix" {
   source                   = "github.com/coralogix/terraform-coralogix-aws/modules/ecs-ec2"
   ecs_cluster_name         = var.ecs_cluster_name
   image_version            = var.image_version
   memory                   = var.memory
   coralogix_region         = var.coralogix_region
+  custom_domain            = var.custom_domain
   default_application_name = var.default_application_name
   default_subsystem_name   = var.default_subsystem_name
   api_key                  = var.api_key

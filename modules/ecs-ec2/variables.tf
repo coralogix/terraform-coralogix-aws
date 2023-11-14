@@ -9,28 +9,28 @@ variable "image_version" {
 }
 
 variable "image" {
-  description = "The OpenTelemetry Collector Image to use. Defaults to \"coralogixrepo/coralogix-otel-collector\". Should accept default unless advised by Coralogix support."
+  description = "The OpenTelemetry Collector Image to use. Should accept default unless advised by Coralogix support."
   type        = string
   default     = "coralogixrepo/coralogix-otel-collector"
 }
 
 variable "memory" {
-  description = "The amount of memory (in MiB) used by the task. Note that your cluster must have sufficient memory available to support the given value. Minimum \"256\" MiB. CPU Units will be allocated directly proportional to Memory."
+  description = "The amount of memory (in MiB) used by the task. Note that your cluster must have sufficient memory available to support the given value. Minimum __256__ MiB. CPU Units will be allocated directly proportional to Memory."
   type        = number
   default     = 256
 }
 
 variable "coralogix_region" {
-  description = "The Coralogix region: [Europe, Europe2, India, Singapore, US, US2]. This determines the corresponding public Coralogix endpoint."
+  description = "The region of the Coralogix endpoint domain: [Europe, Europe2, India, Singapore, US, US2, Custom]. If \"Custom\" then __custom_domain__ parameter must be specified."
   type        = string
   validation {
-    condition     = can(regex("^(Europe|Europe2|India|Singapore|US|US2)$", var.coralogix_region))
-    error_message = "Must be one of [Europe, Europe2, India, Singapore, US, US2]"
+    condition     = can(regex("^(europe|europe2|india|singapore|us|us2|custom)$", lower(var.coralogix_region)))
+    error_message = "Must be one of [Europe, Europe2, India, Singapore, US, US2, Custom]"
   }
 }
 
-variable "coralogix_endpoint" {
-  description = "[Optional] Custom Coralogix endpoint URL, e.g. Private Link endpoint. If specified, takes precedence over the public endpoint of the coralogix_region."
+variable "custom_domain" {
+  description = "[Optional] Coralogix custom domain, e.g. \"private.coralogix.com\" Private Link domain. If specified, overrides the public domain corresponding to the __coralogix_region__ parameter."
   type        = string
   default     = null
 }
@@ -61,7 +61,7 @@ variable "api_key" {
 
 variable "metrics" {
   type        = bool
-  description = "Toggles Metrics collection of ECS Task resource usage (such as CPU, memory, network, and disk) and publishes to Coralogix. Default \"false\". Note that Logs and Traces are always enabled."
+  description = "Toggles Metrics collection of ECS Task resource usage (such as CPU, memory, network, and disk) and publishes to Coralogix. Default __'false'__ . Note that Logs and Traces are always enabled."
   default     = false
 }
 

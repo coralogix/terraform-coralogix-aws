@@ -13,6 +13,7 @@ module "ecs-ec2" {
   image_version            = "latest"
   memory                   = numeric MiB
   coralogix_region         = ["Europe"|"Europe2"|"India"|"Singapore"|"US"|"US2"]
+  custom_domain            = "your custom Coralogix domain"
   default_application_name = "Coralogix Application Name"
   default_subsystem_name   = "Coralogix Subsystem Name"
   api_key                  = var.api_key
@@ -46,15 +47,15 @@ module "ecs-ec2" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | api\_key | The Send-Your-Data API key for your Coralogix account. See: https://coralogix.com/docs/send-your-data-api-key/ | `string` | n/a | yes |
-| coralogix\_endpoint | [Optional] Custom Coralogix endpoint URL, e.g. Private Link endpoint. If specified, takes precedence over the public endpoint of the coralogix\_region. | `string` | `null` | no |
-| coralogix\_region | The Coralogix region: [Europe, Europe2, India, Singapore, US, US2]. This determines the corresponding public Coralogix endpoint. | `string` | n/a | yes |
+| coralogix\_region | The region of the Coralogix endpoint domain: [Europe, Europe2, India, Singapore, US, US2, Custom]. If "Custom" then __custom\_domain__ parameter must be specified. | `string` | n/a | yes |
+| custom\_domain | [Optional] Coralogix custom domain, e.g. "private.coralogix.com" Private Link domain. If specified, overrides the public domain corresponding to the __coralogix\_region__ parameter. | `string` | `null` | no |
 | default\_application\_name | The default Coralogix Application name. | `string` | n/a | yes |
-| default\_subsystem\_name | The default Coralogix Subsystem name. | `string` | `"default"` | no |
+| default\_subsystem\_name | The default Coralogix Subsystem name. | `string` | n/a | yes |
 | ecs\_cluster\_name | Name of the AWS ECS Cluster to deploy the Coralogix OTEL Collector. Supports Amazon EC2 instances only, not Fargate. | `string` | n/a | yes |
-| image | The OpenTelemetry Collector Image to use. Defaults to "coralogixrepo/coralogix-otel-collector". Should accept default unless advised by Coralogix support. | `string` | `"coralogixrepo/coralogix-otel-collector"` | no |
+| image | The OpenTelemetry Collector Image to use. Should accept default unless advised by Coralogix support. | `string` | `"coralogixrepo/coralogix-otel-collector"` | no |
 | image\_version | The Coralogix Open Telemetry Distribution Image Version/Tag. See: https://hub.docker.com/r/coralogixrepo/coralogix-otel-collector/tags | `string` | n/a | yes |
-| memory | The amount of memory (in MiB) used by the task. Note that your cluster must have sufficient memory available to support the given value. Minimum "256" MiB. CPU Units will be allocated directly proportional to Memory. | `number` | `256` | no |
-| metrics | Toggles Metrics collection of ECS Task resource usage (such as CPU, memory, network, and disk) and publishes to Coralogix. Default "false". Note that Logs and Traces are always enabled. | `bool` | `false` | no |
+| memory | The amount of memory (in MiB) used by the task. Note that your cluster must have sufficient memory available to support the given value. Minimum __256__ MiB. CPU Units will be allocated directly proportional to Memory. | `number` | `256` | no |
+| metrics | Toggles Metrics collection of ECS Task resource usage (such as CPU, memory, network, and disk) and publishes to Coralogix. Default __'false'__ . Note that Logs and Traces are always enabled. | `bool` | `false` | no |
 | otel\_config\_file | File path to a custom opentelemetry configuration file. Defaults to an embedded configuration. | `string` | `null` | no |
 
 ## Outputs
