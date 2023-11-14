@@ -8,8 +8,8 @@ module "locals" {
 data "aws_region" "this" {}
 
 data "aws_cloudwatch_log_group" "this" {
-  count = length(var.log_groups)
-  name  = element(var.log_groups, count.index)
+  for_each = local.log_groups
+  name     = each.key
 }
 
 resource "random_string" "this" {
@@ -25,10 +25,10 @@ resource "null_resource" "s3_bucket" {
 }
 
 module "lambda" {
-  source  = "terraform-aws-modules/lambda/aws"
-  version = "3.3.1"
-  create  = var.secret_manager_enabled == false ? true : false
-  depends_on             = [ null_resource.s3_bucket ]
+  source                 = "terraform-aws-modules/lambda/aws"
+  version                = "3.3.1"
+  create                 = var.secret_manager_enabled == false ? true : false
+  depends_on             = [null_resource.s3_bucket]
   function_name          = module.locals.function_name
   description            = "Send CloudWatch logs to Coralogix."
   handler                = "index.handler"
@@ -62,19 +62,19 @@ module "lambda" {
   create_async_event_config               = true
   attach_async_event_policy               = true
   allowed_triggers = {
-    for index in range(length(var.log_groups)) : "AllowExecutionFromCloudWatch-${index}" => {
+    for key, value in local.log_groups : value => {
       principal  = "logs.amazonaws.com"
-      source_arn = "${data.aws_cloudwatch_log_group.this[index].arn}:*"
+      source_arn = "${data.aws_cloudwatch_log_group.this[key].arn}:*"
     }
   }
   tags = merge(var.tags, module.locals.tags)
 }
 
 module "lambdaSM" {
-  source  = "terraform-aws-modules/lambda/aws"
-  version = "3.3.1"
-  create  = var.secret_manager_enabled ? true : false
-  depends_on             = [ null_resource.s3_bucket ]
+  source                 = "terraform-aws-modules/lambda/aws"
+  version                = "3.3.1"
+  create                 = var.secret_manager_enabled ? true : false
+  depends_on             = [null_resource.s3_bucket]
   layers                 = [var.layer_arn]
   function_name          = module.locals.function_name
   description            = "Send CloudWatch logs to Coralogix."
@@ -124,9 +124,9 @@ module "lambdaSM" {
     }
   }
   allowed_triggers = {
-    for index in range(length(var.log_groups)) : "AllowExecutionFromCloudWatch-${index}" => {
+    for key, value in local.log_groups : value => {
       principal  = "logs.amazonaws.com"
-      source_arn = "${data.aws_cloudwatch_log_group.this[index].arn}:*"
+      source_arn = "${data.aws_cloudwatch_log_group.this[key].arn}:*"
     }
   }
   tags = merge(var.tags, module.locals.tags)
@@ -140,9 +140,9 @@ resource "aws_cloudwatch_log_subscription_filter" "this" {
   # finish applying before these start.
   depends_on = [module.lambda]
 
-  count           = length(var.log_groups)
-  name            = "${module.lambda.lambda_function_name}-Subscription-${count.index}"
-  log_group_name  = data.aws_cloudwatch_log_group.this[count.index].name
+  for_each        = local.log_groups
+  name            = "${module.lambda.lambda_function_name}-Subscription-${each.key}"
+  log_group_name  = data.aws_cloudwatch_log_group.this[each.key].name
   destination_arn = var.secret_manager_enabled ? module.lambdaSM.lambda_function_arn : module.lambda.lambda_function_arn
   filter_pattern  = ""
 }
@@ -162,14 +162,14 @@ resource "aws_sns_topic_subscription" "this" {
 }
 
 resource "aws_secretsmanager_secret" "private_key_secret" {
-  count       = var.secret_manager_enabled && var.create_secret == "True"  ? 1 : 0
+  count       = var.secret_manager_enabled && var.create_secret == "True" ? 1 : 0
   depends_on  = [module.lambdaSM]
   name        = "lambda/coralogix/${data.aws_region.this.name}/${module.locals.function_name}"
   description = "Coralogix Send Your Data key Secret"
 }
 
 resource "aws_secretsmanager_secret_version" "service_user" {
-  count         = var.secret_manager_enabled && var.create_secret == "True"  ? 1 : 0
+  count         = var.secret_manager_enabled && var.create_secret == "True" ? 1 : 0
   depends_on    = [aws_secretsmanager_secret.private_key_secret]
   secret_id     = aws_secretsmanager_secret.private_key_secret[count.index].id
   secret_string = var.private_key
