@@ -17,7 +17,7 @@ resource "aws_s3_bucket" "logs_bucket_name" {
   count  = local.logs_validations ? 1 : 0
   bucket = var.logs_bucket_name
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = var.bypass_bucket_lifecycle_prevent_destroy
   }
 }
 
@@ -25,7 +25,7 @@ resource "aws_s3_bucket" "metrics_bucket_name" {
   count  = local.metrics_validations ? 1 : 0
   bucket = var.metrics_bucket_name
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = var.bypass_bucket_lifecycle_prevent_destroy
   }
 }
 
