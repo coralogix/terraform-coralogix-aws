@@ -7,20 +7,10 @@ terraform {
   }
 }
 
-# Configure the AWS Provider
 provider "aws" {
-#  region = "ap-southeast-1"
+  region = local.env.aws_region_name
 }
 
-variable "private_key" {
-  description = "The Coralogix Send-Your-Data API key for your Coralogix account."
-  type        = string
-  sensitive   = true
-}
-
-# To test custom config file "$(pwd)/otel_config_custom.tftpl.yaml"
-# Run  ```terraform plan -var otel_config_file="$(pwd)/otel_config_custom.tftpl.yaml"```
-# This config file sets all logs severity to WARNING. Verify in your Coralogix account.
 variable "otel_config_file" {
   description = "[Optional] Path to a custom opentelemetry configuration file"
   type        = string
@@ -32,10 +22,11 @@ module "ecs-ec2" {
   ecs_cluster_name         = "test-lab-cluster"
   image_version            = "latest"
   memory                   = 256
-  coralogix_region         = "Singapore" # TODO set dynamically from region?
+  coralogix_region         = local.env.coralogix_region
+  coralogix_endpoint       = var.coralogix_endpoint
   default_application_name = "ecs-ec2"
-  default_subsystem_name   = "default"
-  private_key              = var.private_key
+  default_subsystem_name   = "collector"
+  api_key                  = local.env.api_key
   otel_config_file         = var.otel_config_file
   metrics                  = true
 }

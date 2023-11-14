@@ -6,6 +6,8 @@ To run this example you need to save this code in Terraform file, and change the
 
 For parameter details, see [ECS EC2 module README](../../modules/ecs-ec2/README.md)
 
+For test sample, see [ECS EC2 tests README](../../tests/ecs-ec2/README.md)
+
 ```hcl
 provider "aws" {
 }
@@ -18,7 +20,7 @@ module "otel_ecs_ec2_coralogix" {
   coralogix_region         = var.coralogix_region
   default_application_name = var.default_application_name
   default_subsystem_name   = var.default_subsystem_name
-  private_key              = var.private_key
+  api_key                  = var.api_key
   otel_config_file         = var.otel_config_file
   metrics                  = var.metrics
 }
