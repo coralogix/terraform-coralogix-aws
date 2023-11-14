@@ -13,7 +13,7 @@ module "ecs-ec2" {
   image_version            = "latest"
   memory                   = numeric MiB
   coralogix_region         = ["Europe"|"Europe2"|"India"|"Singapore"|"US"|"US2"]
-  custom_domain            = "your custom Coralogix domain"
+  custom_domain            = "[optional] custom Coralogix domain"
   default_application_name = "Coralogix Application Name"
   default_subsystem_name   = "Coralogix Subsystem Name"
   api_key                  = var.api_key
