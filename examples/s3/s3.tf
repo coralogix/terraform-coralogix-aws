@@ -10,5 +10,4 @@ module "coralogix-shipper" {
   subsystem_name                    = "logs"
   s3_bucket_name                    = "test-bucket-name"
   integration_type                  = "s3"
-  cloudwatch_logs_retention_in_days = 7   # optional
 }

@@ -145,6 +145,7 @@ module "lambdaSM" {
   role_path                               = "/coralogix/"
   role_name                               = "${module.locals.function_name}-Role"
   role_description                        = "Role for ${module.locals.function_name} Lambda Function."
+  cloudwatch_logs_retention_in_days       = var.cloudwatch_logs_retention_in_days
   create_current_version_allowed_triggers = false
   create_async_event_config               = true
   attach_async_event_policy               = true

@@ -151,3 +151,9 @@ variable "create_secret" {
   type        = string
   default     = "True"
 }
+
+variable "cloudwatch_logs_retention_in_days" {
+  description = "Retention time of the Cloudwatch log group in which the logs of the lambda function are written to"
+  type        = number
+  default     = null
+}
