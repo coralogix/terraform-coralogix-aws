@@ -12,11 +12,12 @@ provider "aws" {
 #   integration_type = "s3"
 # }
 module "cloudwatch_logs" {
-  source = "coralogix/aws/coralogix//modules/cloudwatch-logs"
+  source = "./modules/s3"
 
   coralogix_region = "Europe"
-  private_key      = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
-  application_name = "cloudwatch"
+  api_key      = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  application_name = "s3"
   subsystem_name   = "logs"
-  log_groups       = ["gr-test"]
+  s3_bucket_name = "gr-integrations-aws-testing"
+  integration_type = "s3"
 }
