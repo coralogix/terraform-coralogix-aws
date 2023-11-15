@@ -13,7 +13,7 @@ variable "custom_url" {
   default     = ""
 }
 
-variable "private_key" {
+variable "api_key" {
   description = "Your Coralogix Send Your Data - API Key or incase you use pre created secret (created in AWS secret manager) put here the name of the secret that contains the Coralogix send your data key"
   type        = string
   sensitive   = true
@@ -74,6 +74,7 @@ variable "debug" {
 variable "s3_bucket_name" {
   description = "The name of the S3 bucket to watch"
   type        = string
+  default     = null
 }
 
 variable "s3_key_prefix" {
@@ -86,6 +87,24 @@ variable "s3_key_suffix" {
   description = "The S3 path suffix to watch"
   type        = string
   default     = null
+}
+
+variable "log_groups" {
+  description = "The names of the CloudWatch log groups to watch"
+  type        = list(string)
+  default     = []
+}
+
+variable "subnet_ids" {
+  description = "The subnet id with the private link"
+  type        = list(string)
+  default     = [""]
+}
+
+variable "security_group_ids" {
+  description = "The security group id for assigned to the subnet_ids"
+  type        = list(string)
+  default     = [""]
 }
 
 variable "memory_size" {
@@ -122,8 +141,8 @@ variable "integration_type" {
   description = "the aws service that send the data to the s3"
   type        = string
   validation {
-    condition     = contains(["cloudtrail", "vpc-flow-logs", "s3", "s3-sns", "cloudtrail-sns"], var.integration_type)
-    error_message = "The integration type must be: [cloudtrail, vpc-flow-logs, s3, s3-sns, cloudtrail-sns]."
+    condition     = contains(["cloudwatch","cloudtrail", "vpc-flow-logs", "s3", "s3-sns", "cloudtrail-sns"], var.integration_type)
+    error_message = "The integration type must be: [cloudwatch, cloudtrail, vpc-flow-logs, s3, s3-sns, cloudtrail-sns]."
   }
 }
 

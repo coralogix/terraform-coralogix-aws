@@ -9,6 +9,11 @@ locals {
   sns_enable = var.integration_type == "s3-sns" || var.integration_type == "cloudtrail-sns" ? true : false
 }
 
+data "aws_cloudwatch_log_group" "this" {
+  count = var.integration_type == "cloudwatch" ? length(var.log_groups) : 0
+  name  = element(var.log_groups, count.index)
+}
+
 data "aws_region" "this" {}
 
 data "aws_caller_identity" "this" {}
@@ -51,7 +56,7 @@ resource "random_string" "this" {
 resource "null_resource" "s3_bucket_copy" {
   count = var.custom_s3_bucket == "" ? 0 : 1
   provisioner "local-exec" {
-    command = "curl -o ${var.integration_type}.zip https://coralogix-serverless-repo-eu-central-1.s3.eu-central-1.amazonaws.com/${var.integration_type}.zip ; aws s3 cp ./${var.integration_type}.zip s3://${var.custom_s3_bucket} ; rm ./${var.integration_type}.zip"
+    command = "curl -o ${var.integration_type}.zip https://coralogix-serverless-repo-eu-central-1.s3.eu-central-1.amazonaws.com/coralogix-aws-serverless-rust.zip ; aws s3 cp ./coralogix-aws-serverless-rust.zip s3://coralogix-aws-serverless-rust.zip ; rm ./coralogix-aws-serverless-rust.zip"
   }
 }
 
@@ -61,18 +66,20 @@ module "lambda" {
   source                 = "terraform-aws-modules/lambda/aws"
   version                = "3.2.1"
   function_name          = module.locals.function_name
-  description            = "Send logs from S3 bucket to Coralogix."
-  handler                = "index.handler"
-  runtime                = "nodejs16.x"
+  description            = "Send logs to Coralogix."
+  handler                = "bootstrap"
+  runtime                = "provided.al2"
   architectures          = [var.architecture]
   memory_size            = var.memory_size
   timeout                = var.timeout
   create_package         = false
   destination_on_failure = aws_sns_topic.this.arn
+  vpc_subnet_ids         = var.subnet_ids
+  vpc_security_group_ids = var.security_group_ids
   environment_variables = {
     CORALOGIX_URL         = var.custom_url == "" ? "https://${lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe")}${module.locals.coralogix_url_seffix}" : var.custom_url
     CORALOGIX_BUFFER_SIZE = tostring(var.buffer_size)
-    private_key           = var.private_key
+    private_key           = var.api_key
     app_name              = var.application_name
     sub_name              = var.subsystem_name
     newline_pattern       = var.newline_pattern
@@ -82,7 +89,7 @@ module "lambda" {
   }
   s3_existing_package = {
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
-    key    = "${var.integration_type}.zip"
+    key    = "coralogix-aws-serverless-rust.zip"
   }
   policy_path                             = "/coralogix/"
   role_path                               = "/coralogix/"
@@ -100,7 +107,15 @@ module "lambda" {
       resources = ["${data.aws_s3_bucket.this.arn}/*"]
     }
   }
-  allowed_triggers = local.sns_enable != true ? {
+  #The condition will first check if the integration type is cloudwatch, in that case, it will
+  #Allow the trigger from the log groups otherwise it will check if sns in enabled in
+  # case that it's not then the trigger will be triggered from the bucket
+  allowed_triggers = var.integration_type == "cloudwatch" ? {
+    for index in range(length(var.log_groups)) : "AllowExecutionFromCloudWatch-${index}" => {
+      principal  = "logs.amazonaws.com"
+      source_arn = "${data.aws_cloudwatch_log_group.this[index].arn}:*"
+    }
+  } : local.sns_enable != true ? {
     AllowExecutionFromS3 = {
       principal  = "s3.amazonaws.com"
       source_arn = data.aws_s3_bucket.this.arn
@@ -117,19 +132,21 @@ module "lambdaSM" {
   version                = "3.2.1"
   layers                 = [var.layer_arn]
   function_name          = module.locals.function_name
-  description            = "Send logs from S3 bucket to Coralogix."
-  handler                = "index.handler"
-  runtime                = "nodejs16.x"
+  description            = "Send logs to Coralogix."
+  handler                = "bootstrap"
+  runtime                = "provided.al2"
   architectures          = [var.architecture]
   memory_size            = var.memory_size
   timeout                = var.timeout
   create_package         = false
   destination_on_failure = aws_sns_topic.this.arn
+  vpc_subnet_ids         = var.subnet_ids
+  vpc_security_group_ids = var.security_group_ids
   environment_variables = {
     CORALOGIX_URL           = var.custom_url == "" ? "https://${lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe")}${module.locals.coralogix_url_seffix}" : var.custom_url
     CORALOGIX_BUFFER_SIZE   = tostring(var.buffer_size)
     AWS_LAMBDA_EXEC_WRAPPER = "/opt/wrapper.sh"
-    SECRET_NAME             = var.create_secret == "False" ? var.private_key : ""
+    SECRET_NAME             = var.create_secret == "False" ? var.api_key : ""
     app_name                = var.application_name
     sub_name                = var.subsystem_name
     newline_pattern         = var.newline_pattern
@@ -139,7 +156,7 @@ module "lambdaSM" {
   }
   s3_existing_package = {
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
-    key    = "${var.integration_type}.zip"
+    key    = "coralogix-aws-serverless-rust.zip"
   }
   policy_path                             = "/coralogix/"
   role_path                               = "/coralogix/"
@@ -167,7 +184,15 @@ module "lambdaSM" {
       resources = ["*"]
     }
   }
-  allowed_triggers = local.sns_enable != true ? {
+  #The condition will first check if the integration type is cloudwatch, in that case, it will
+  #Allow the trigger from the log groups otherwise it will check if sns in enabled in
+  # case that it's not then the trigger will be triggered from the bucket
+  allowed_triggers = var.integration_type == "cloudwatch" ? {
+    for index in range(length(var.log_groups)) : "AllowExecutionFromCloudWatch-${index}" => {
+      principal  = "logs.amazonaws.com"
+      source_arn = "${data.aws_cloudwatch_log_group.this[index].arn}:*"
+    }
+  } : local.sns_enable != true ? {
     AllowExecutionFromS3 = {
       principal  = "s3.amazonaws.com"
       source_arn = data.aws_s3_bucket.this.arn
@@ -175,9 +200,12 @@ module "lambdaSM" {
   } : {}
   tags = merge(var.tags, module.locals.tags)
 }
+###################################
+#### s3  integration resources ####
+###################################
 
 resource "aws_s3_bucket_notification" "lambda_notification" {
-  count  = local.sns_enable == false ? 1 : 0
+  count  = var.integration_type == "cloudwatch" ? 0 : local.sns_enable == false ? 1 : 0
   bucket = data.aws_s3_bucket.this.bucket
   lambda_function {
     lambda_function_arn = var.secret_manager_enabled ? module.lambdaSM.lambda_function_arn : module.lambda.lambda_function_arn
@@ -188,7 +216,7 @@ resource "aws_s3_bucket_notification" "lambda_notification" {
 }
 
 resource "aws_s3_bucket_notification" "topic_notification" {
-  count  = local.sns_enable == true ? 1 : 0
+  count  = var.integration_type == "cloudwatch" ? 0 : local.sns_enable == true ? 1 : 0
   bucket = data.aws_s3_bucket.this.bucket
   topic {
     topic_arn     = data.aws_sns_topic.sns_topic[count.index].arn
@@ -196,6 +224,25 @@ resource "aws_s3_bucket_notification" "topic_notification" {
     filter_prefix = var.integration_type == "s3-sns" || var.s3_key_prefix != null ? var.s3_key_prefix : "AWSLogs/${data.aws_caller_identity.this.account_id}/Cloudtrail/"
     filter_suffix = var.integration_type == "s3-sns" || var.s3_key_suffix != null ? var.s3_key_suffix : ".json.gz"
   }
+}
+
+###########################################
+#### cloudwatch  integration resources ####
+###########################################
+
+##################################### need to fix it  so that it will not create it in case i use the s3 integration--__(*_*)__--
+resource "aws_cloudwatch_log_subscription_filter" "this" {
+  # The depends_on is required here for the allowed_triggers in the above
+  # lambda module, which creates aws_lambda_permission resources that are
+  # prerequisite for these aws_cloudwatch_log_subscription_filter resources, to
+  # finish applying before these start.
+  depends_on = [module.lambda]
+
+  count           = var.integration_type == "cloudwatch" ? length(var.log_groups) : 0
+  name            = "${module.lambda.lambda_function_name}-Subscription-${count.index}"
+  log_group_name  = data.aws_cloudwatch_log_group.this[count.index].name
+  destination_arn = var.secret_manager_enabled ? module.lambdaSM.lambda_function_arn : module.lambda.lambda_function_arn
+  filter_pattern  = ""
 }
 
 resource "aws_sns_topic" "this" {
@@ -210,12 +257,14 @@ resource "aws_secretsmanager_secret" "private_key_secret" {
   name        = "lambda/coralogix/${data.aws_region.this.name}/${module.locals.function_name}"
   description = "Coralogix Send Your Data key Secret"
 }
+
 resource "aws_secretsmanager_secret_version" "service_user" {
   count         = var.secret_manager_enabled && var.create_secret == "True"  ? 1 : 0
   depends_on    = [aws_secretsmanager_secret.private_key_secret]
   secret_id     = aws_secretsmanager_secret.private_key_secret[count.index].id
-  secret_string = var.private_key
+  secret_string = var.api_key
 }
+
 resource "aws_sns_topic_subscription" "this" {
   depends_on = [aws_sns_topic.this]
   count      = var.notification_email != null ? 1 : 0

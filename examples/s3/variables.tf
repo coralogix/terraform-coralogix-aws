@@ -1,5 +1,5 @@
 variable "coralogix_region" {
-  description = "The Coralogix location region, possible options are [Europe, Europe2, India, Singapore, US]"
+  description = "The Coralogix location region, possible options are [Europe, Europe2, India, Singapore, US, US2, Custom]"
   type        = string
   validation {
     condition     = contains(["Europe", "Europe2", "India", "Singapore", "US", "US2", "Custom"], var.coralogix_region)
@@ -20,18 +20,6 @@ variable "private_key" {
   sensitive   = true
 }
 
-variable "secret_manager_enabled" {
-  description = "Set to true in case that you want to keep your Coralogix Send Your Data API Key as a secret in aws Secret Manager "
-  type        = bool
-  default     = false
-}
-
-variable "layer_arn" {
-  description = "In case you are using Secret Manager This is the ARN of the Coralogix Security lambda Layer."
-  type        = string
-  default     = ""
-}
-
 variable "application_name" {
   description = "The name of your application"
   type        = string
@@ -40,12 +28,7 @@ variable "application_name" {
 variable "subsystem_name" {
   description = "The subsystem name of your application"
   type        = string
-}
-
-variable "package_name" {
-  description = "The name of the package to use for the function"
-  type        = string
-  default     = "s3"
+  default     = ""
 }
 
 variable "newline_pattern" {
@@ -54,16 +37,10 @@ variable "newline_pattern" {
   default     = "(?:\\r\\n|\\r|\\n)"
 }
 
-variable "blocking_pattern" {
-  description = "The pattern for lines blocking"
+variable "buffer_charset" {
+  description = "The charset to use for buffer decoding, possible options are [utf8, ascii]"
   type        = string
-  default     = ""
-}
-
-variable "buffer_size" {
-  description = "Coralogix logger buffer size"
-  type        = number
-  default     = 134217728
+  default     = "utf8"
 }
 
 variable "sampling_rate" {
@@ -72,27 +49,9 @@ variable "sampling_rate" {
   default     = 1
 }
 
-variable "debug" {
-  description = "Coralogix logger debug mode"
-  type        = bool
-  default     = false
-}
-
-variable "s3_bucket_name" {
-  description = "The name of the S3 bucket to watch"
-  type        = string
-}
-
-variable "s3_key_prefix" {
-  description = "The S3 path prefix to watch"
-  type        = string
-  default     = null
-}
-
-variable "s3_key_suffix" {
-  description = "The S3 path suffix to watch"
-  type        = string
-  default     = null
+variable "log_groups" {
+  description = "The names of the CloudWatch log groups to watch"
+  type        = list(string)
 }
 
 variable "memory_size" {
@@ -125,19 +84,28 @@ variable "tags" {
   default     = {}
 }
 
-variable "integration_type" {
-  description = "the aws service that send the data to the s3"
-  type        = string
-  validation {
-    condition     = contains(["cloudtrail", "vpc-flow-logs", "s3", "s3-sns", "cloudtrail-sns"], var.integration_type)
-    error_message = "The integration type must be: [cloudtrail, vpc-flow-logs, s3, s3-sns, cloudtrail-sns]."
-  }
+variable "secret_manager_enabled" {
+  description = "Set to true in case that you want to keep your Coralogix Send Your Data API Key as a secret in aws Secret Manager "
+  type        = bool
+  default     = false
 }
 
-variable "sns_topic_name" {
-  description = "The name of your SNS topic"
+variable "layer_arn" {
+  description = "In case you are using Secret Manager This is the ARN of the Coralogix Security lambda Layer."
   type        = string
   default     = ""
+}
+
+variable "subnet_ids" {
+  description = "The subnet id with the private link"
+  type        = list(string)
+  default     = [""]
+}
+
+variable "security_group_ids" {
+  description = "The security group id for assigned to the subnet_ids"
+  type        = list(string)
+  default     = [""]
 }
 
 variable "custom_s3_bucket" {

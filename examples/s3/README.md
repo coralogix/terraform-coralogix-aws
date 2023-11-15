@@ -82,6 +82,20 @@ module "coralogix-shipper-cloudtrail-sns" {
 }
 ```
 
+### use the cloudwatch integration
+```hcl
+module "coralogix-shipper-cloudwatch" {
+  source = "coralogix/aws/coralogix//modules/s3"
+
+  coralogix_region   = "Europe"
+  api_key            = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  application_name = "cloudwatch-logs"
+  subsystem_name   = "logs"
+  log_groups       = ["log_gruop"]
+  integration_type = "cloudwatch"
+}
+```
+
 now execute:
 ```bash
 $ terraform init
