@@ -21,17 +21,26 @@ module "cloudwatch_firehose_coralogix" {
 }
 ```
 
-### Dynamic Values Table
+### Log Dynamic Values Table
 
-For `application_name` and/or `subsystem_name` to be set dynamically in relation to their `integrationType` resource (e.g. CloudWatch_JSON loggroup names, EksFargate k8s namespace name). The source's pre-defined `var` has to be mapped as a string literal.
+For `application_name` and/or `subsystem_name` to be set dynamically in relation to their `integrationType` resource (e.g. CloudWatch_JSON's loggroup names, EksFargate's k8s namespace name). The source's pre-defined `var` has to be mapped as a string literal.
 
-The parameter value expected is in the format of `${var}`, but in terraform is required to be escaped with `$$` to be interpreted as a string literal. For example, to set the `subsystemName` to the `${logGroup}` variable, the value would be `$${logGroup}`.
+
+* `logGroup` (for CloudWatch LogGroup names in _CloudWatch_JSON_ & _CloudWatch_CloudTrail_)
+* `kubernetesNamespaceName` (kubernetes.namespace_name log field in _EksFargate_)
+* `kubernetesContainerName` (kubernetes.container_name log field in _EksFargate_)
+* `webAclName` (name part of the log.webaclId field in _WAF_)
+
+The parameter value expected is in the string format of `${var}`, but in terraform is required to be escaped with `$$` to be interpreted as a string literal. For example, to set the `subsystem_name` to the `${logGroup}` variable would be `subsystem_name = "$${logGroup}"`.
 
 For more information read [Kinesis Data Firehose - Logs](https://coralogix.com/docs/aws-firehose/).
 
-| Source Var | Pre-Defined Var | Example | Integration | Notes |
-| applicationName | applicationName | `application_name = "$${applicationName}"` | Default | `applicationName` field need to be supplied in the log to be used. |
-| subsystemName | subsystemName | `subsystem_name = "$${subsystemName}"` | Default | `applicationName` field need to be supplied in the log to be used. |
+| Source `var` | Expected String Literal | Integration | Notes |
+| applicationName | `${applicationName}` | Default | `applicationName` field need to be supplied in the log to be used |
+| subsystemName | `${subsystemName}` | Default | `subsystemName` field need to be supplied in the log to be used |
+| logGroup | `${logGroup}` | CloudWatch_JSON/CloudWatch_CloudTrail | supplied by aws |
+| kubernetesNamespaceName | `${kubernetesNamespaceName}` | EksFargate | supplied by the default configuration |
+
 
 ## Metrics - Usage
 
