@@ -21,6 +21,26 @@ module "cloudwatch_firehose_coralogix" {
 }
 ```
 
+### Dynamic Values Table for Logs
+
+For `application_name` and/or `subsystem_name` to be set dynamically in relation to their `integrationType`'s resource fields (e.g. CloudWatch_JSON's loggroup name, EksFargate's k8s namespace). The source's `var` has to be mapped as a string literal to the `integrationType`'s as a DyanamicFromFrield with pre-defined values:
+
+| Field | Source `var` | Expected String Literal | Integration Type | Notes |
+|-------|--------------|-------------------------|------------------|-------|
+| `applicationName` field in logs | applicationName | `${applicationName}` | Default | need to be supplied in the log to be used |
+| `subsystemName` field in logs | subsystemName | `${subsystemName}` | Default |  need to be supplied in the log to be used |
+| CloudWatch LogGroup name | logGroup | `${logGroup}` | CloudWatch_JSON <br/> CloudWatch_CloudTrail | supplied by aws |
+| `kubernetes.namespace_name` field | kubernetesNamespaceName | `${kubernetesNamespaceName}` | EksFargate | supplied by the default configuration |
+| `kubernetes.container_name` field | kubernetesContainerName | `${kubernetesContainerName}` | EksFargate | supplied by the default configuration |
+| name part of the `log.webaclId` field | webAclName | `${webAclName}` | WAF | supplied by aws |
+
+As the parameter value expected is in string format of `${var}`, it is required to be escaped with `$$` in terraform to be interpreted as a string literal. For example, to set `subsystem_name` to the `${logGroup}` variable would be `subsystem_name = "$${logGroup}"`.
+
+Note: `RawText` integrationType does not support dynamic values.
+
+For more information - visit [Kinesis Data Firehose - Logs](https://coralogix.com/docs/aws-firehose/).
+
+
 ## Metrics - Usage
 
 ### Delivering all CloudWatch metrics
@@ -168,6 +188,7 @@ The application name by default is the firehose delivery stream name, but it can
 # Coralogix account region
 The coralogix region variable accepts one of the following regions:
 * us
+* us2
 * singapore
 * ireland
 * india
@@ -207,7 +228,7 @@ then the CloudWatch metric stream must be configured with the same format, confi
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 4.17.1 |
 
-## Inputs 
+## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
@@ -216,13 +237,14 @@ then the CloudWatch metric stream must be configured with the same format, confi
 | <a name="input_firehose_stream"></a> [firehose\_stream](#input\_firehose\_stream) | AWS Kinesis firehose delivery stream name | `string` | n/a | yes |
 | <a name="input_application_name"></a> [application_name](#input\_application_name) | The name of your application in Coralogix | `string` | n/a | yes |
 | <a name="input_subsystem_name"></a> [subsystem_name](#input\_subsystem_name) | The subsystem name of your application in Coralogix | `string` | n/a | yes |
-| <a name="input_logs_enable"></a> [logs_enable](#input\_logs_enable) | Enble sending logs to Coralogix | `bool` | `false` | no |
+| <a name="input_user_supplied_tags"></a> [user_supplied_tags](#input\_user_supplied_tags) | Tags supplied by the user to populate to all generated resources | `map(string)` | n/a | no |
+| <a name="input_override_default_tags"></a> [override_default_tags](#input\_override_default_tags) | Override and remove the default tags by setting to true | `bool` | `false` | no |
 | <a name="input_cloudwatch_retention_days"></a> [cloudwatch_retention_days](#input\_cloudwatch_retention_days) | Days of retention in Cloudwatch retention days | `number` | n/a | no |
+| <a name="input_logs_enable"></a> [logs_enable](#input\_logs_enable) | Enble sending logs to Coralogix | `bool` | `false` | no |
 | <a name="input_coralogix_firehose_custom_endpoint"></a> [coralogix_firehose_custom_endpoint](#input\_coralogix_firehose_custom_endpoint) | Custom endpoint for Coralogix firehose integration endpoint (https://firehose-ingress.private.coralogix.net:8443/firehose) | `string` | `null` | no |
 | <a name="input_source_type_logs"></a> [source_type_logs](#input\_source_type_logs) | The source_type of kinesis firehose: KinesisStreamAsSource or DirectPut | `string` | `DirectPut` | no |
 | <a name="input_kinesis_stream_arn"></a> [kinesis_stream_arn](#input\_kinesis_stream_arn) | If 'KinesisStreamAsSource' set as source_type_logs. Set the kinesis stream's ARN as the source of the firehose log stream | `string` | `""` | no |
 | <a name="input_integration_type_logs"></a> [integration_type_logs](#input\_integration_type_logs) | The integration type of the firehose delivery stream: 'CloudWatch_JSON', 'WAF', 'CloudWatch_CloudTrail', 'EksFargate', 'Default', 'RawText' | `string` | `Default` | no |
-| <a name="input_dynamic_metadata_logs"></a> [dynamic_metadata_logs](#input\_dynamic_metadata_logs) | When set to true, field fetched dynamically for fields like applicationName / subsystemName | `bool` | `false` | no |
 | <a name="input_metric_enable"></a> [metric_enable](#input\_metric_enable) | Enable sending of metrics to Coralogix | `bool` | `true` | no |
 | <a name="input_integration_type_metrics"></a> [integration\_type](#input\_integration\_type) | The integration type of the firehose delivery stream: 'CloudWatch\_Metrics\_JSON' or 'CloudWatch\_Metrics\_OpenTelemetry070' | `string` | `"CloudWatch_Metrics_OpenTelemetry070"` | no |
 | <a name="input_enable_cloudwatch_metricstream"></a> [enable\_cloudwatch\_metricstream](#input\_enable\_cloudwatch\_metricstream) | Should be true if you want to create a new Cloud Watch metric stream and attach it to Firehose | `bool` | `true` | no |
@@ -231,14 +253,18 @@ then the CloudWatch metric stream must be configured with the same format, confi
 | <a name="input_include_metric_stream_filter"></a> [include\_metric\_stream\_filter](#input\_include\_metric\_stream\_filter) | Guide to view specific metric names of namespaces, see https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/viewing_metrics_with_cloudwatch.html | `list(object({namespace=string, metric_names=list(string)})` | `[]` | no |
 | <a name="input_additional_metric_statistics_enable"></a> [input\_additional\_metric\_statistics\_enable](#input\_additional\_metric\_statistics\_enable) | To enable the inclusion of additional statistics to the streaming metrics | `bool` | `true` | no |
 | <a name="input_additional_metric_statistics"></a> [input\_additional\_metric\_statistics](#input\_additional\_metric\_statistics) | For each entry, specify one or more metrics (metric_name and namespace) and the list of additional statistics to stream for those metrics. Each configuration of metric name and namespace can have a list of additional_statistics included into the AWS CloudWatch Metric Stream. | `list(object({additional_statistics=list(string), metric_name=string, namespace=string}))` | See variables.tf | no |
-| <a name="input_user_supplied_tags"></a> [user_supplied_tags](#input\_user_supplied_tags) | Tags supplied by the user to populate to all generated resources | `map(string)` | n/a | no |
-| <a name="input_override_default_tags"></a> [override_default_tags](#input\_override_default_tags) | Override and remove the default tags by setting to true | `bool` | `false` | no |
+
+
+## Inputs - Custom Resource Naming
+If there are conflicts with existing resources, the following variables can be used to customize the names of the resources created by this module.
+
 | <a name="input_cloudwatch_metric_stream_custom_name"></a> [cloudwatch_metric_stream_custom_name](#input\_cloudwatch_metric_stream_custom_name) | Set the name of the CloudWatch metric stream, otherwise variable 'firehose_stream' will be used | `string` | `null` | no |
 | <a name="input_s3_backup_custom_name"></a> [s3_backup_custom_name](#input\_s3_backup_custom_name) | Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup' will be used | `string` | `null` | no |
 | <a name="input_lambda_processor_custom_name"></a> [lambda_processor_custom_name](#input\_lambda_processor_custom_name) | Set the name of the lambda processor function, otherwise variable '{firehose_stream}-metrics-tags-processor' will be used | `string` | `null` | no |
 | <a name="input_lambda_processor_enable"></a> [lambda_processor_enable](#input\_lambda_processor_enable) | Enable the lambda processor function. Set to false to remove the lambda and all associated resources. | `bool` | `true` | no |
 
 ## Coralgoix regions
+
 | Coralogix region | AWS Region | Coralogix Domain |
 |------|------------|------------|
 | `Ireland` | `eu-west-1` | coralogix.com |

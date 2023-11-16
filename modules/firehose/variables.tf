@@ -66,12 +66,6 @@ variable "integration_type_logs" {
   default     = null
 }
 
-variable "dynamic_metadata_logs" {
-  description = "When set to true, field fetched dynamically for fields like applicationName / subsystemName"
-  type        = bool
-  default     = null
-}
-
 variable "metric_enable" {
   description = "Enable sending of metrics to Coralogix"
   type        = bool

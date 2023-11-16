@@ -45,12 +45,6 @@ variable "integration_type_logs" {
   default     = "Default"
 }
 
-variable "dynamic_metadata_logs" {
-  description = "Dynamic values search for specific fields in the logs to populate the fields"
-  type        = bool
-  default     = false
-}
-
 variable "application_name" {
   description = "The name of your application in Coralogix"
   type        = string

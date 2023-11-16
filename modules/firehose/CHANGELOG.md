@@ -18,3 +18,6 @@
 ### 0.0.1 / 16.10.23
 * [Update] changed applicationNameDefault and subsystemNameDefault in following the changes made on firehose logs documentation.
 * [Update] added `lambda_processor_enable` variable to enable/disable lambda transformation processor
+
+### 0.0.2 / 16.11.23
+* [Update] remove dynamic_metadata_logs, applicationNameDefault and subsystemNameDefault in following the changes made on firehose logs documentation.

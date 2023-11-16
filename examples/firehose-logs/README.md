@@ -11,7 +11,7 @@ In this example you need to configure the following variables:
 * `logs_enable` --> Enables sending logs
 * `source_type_logs` --> The type of the logs you send to firehose
 * `integration_type_logs` --> The integration type of the firehose delivery stream: `CloudWatch_JSON`, `WAF`, `CloudWatch_CloudTrail`, `EksFargate`, `Default`, `RawText`
-* `kinesis_stream_arn` --> If sending logs from kinesis data stream add its arn here. In addition the next values should be: `source_type_logs=KinesisStreamAsSource` and `integration_type_logs=RawText`
+* `kinesis_stream_arn` --> If sending logs from kinesis data stream add its arn here. In addition the next values should be: `source_type_logs=KinesisStreamAsSource` and `integration_type_logs=RawText` or `Default` (following [Api Log Format](https://coralogix.com/docs/coralogix-rest-api-logs/))
 * `firehose_stream` --> The name of the Firehose delivery stream
 * `coralogix_region` --> The region of Coralogix account
 * `privatekey` --> Coralogix account logs privatekey
