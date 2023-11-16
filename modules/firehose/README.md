@@ -28,7 +28,7 @@ For `application_name` and/or `subsystem_name` to be set dynamically in relation
 The parameter value expected is in the string format of `${var}`, but in terraform is required to be escaped with `$$` to be interpreted as a string literal. For example, to set the `subsystem_name` to the `${logGroup}` variable would be `subsystem_name = "$${logGroup}"`.
 
 | Field | Source `var` | Expected String Literal | Integration Type | Notes |
-|--------------|-------------------------|------------------|-------|
+|-------|--------------|-------------------------|------------------|-------|
 | `applicationName` field in logs | applicationName | `${applicationName}` | Default | need to be supplied in the log to be used |
 | `subsystemName` field in logs | subsystemName | `${subsystemName}` | Default |  need to be supplied in the log to be used |
 | CloudWatch LogGroup name | logGroup | `${logGroup}` | CloudWatch_JSON/nCloudWatch_CloudTrail | supplied by aws |
