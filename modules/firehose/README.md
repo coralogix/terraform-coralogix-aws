@@ -23,8 +23,7 @@ module "cloudwatch_firehose_coralogix" {
 
 ### Log Dynamic Values Table
 
-For `application_name` and/or `subsystem_name` to be set dynamically in relation to their `integrationType` resource (e.g. CloudWatch_JSON's loggroup names, EksFargate's k8s namespace name). The source's pre-defined `var` has to be mapped as a string literal.
-
+For `application_name` and/or `subsystem_name` to be set dynamically in relation to their `integrationType` resource (e.g. CloudWatch_JSON's loggroup names, EksFargate's k8s namespace name). The source's pre-defined `var` has to be mapped as a string literal to the `integrationType`'s source:
 
 * `logGroup` (for CloudWatch LogGroup names in _CloudWatch_JSON_ & _CloudWatch_CloudTrail_)
 * `kubernetesNamespaceName` (kubernetes.namespace_name log field in _EksFargate_)
@@ -36,6 +35,7 @@ The parameter value expected is in the string format of `${var}`, but in terrafo
 For more information read [Kinesis Data Firehose - Logs](https://coralogix.com/docs/aws-firehose/).
 
 | Source `var` | Expected String Literal | Integration | Notes |
+|--------------|-------------------------|-------------|-------|
 | applicationName | `${applicationName}` | Default | `applicationName` field need to be supplied in the log to be used |
 | subsystemName | `${subsystemName}` | Default | `subsystemName` field need to be supplied in the log to be used |
 | logGroup | `${logGroup}` | CloudWatch_JSON/CloudWatch_CloudTrail | supplied by aws |
