@@ -194,7 +194,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs" {
       dynamic "common_attributes" {
         for_each = var.application_name == null ? [] : [1]
         content {
-          name  = "applicationNameDefault"
+          name  = "applicationName"
           value = var.application_name
         }
       }
@@ -202,16 +202,8 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs" {
       dynamic "common_attributes" {
         for_each = var.subsystem_name == null ? [] : [1]
         content {
-          name  = "subsystemNameDefault"
+          name  = "subsystemName"
           value = var.subsystem_name
-        }
-      }
-
-      dynamic "common_attributes" {
-        for_each = var.dynamic_metadata_logs == null ? [] : [1]
-        content {
-          name  = "dynamicMetadata"
-          value = var.dynamic_metadata_logs
         }
       }
     }
