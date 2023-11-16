@@ -36,6 +36,8 @@ For `application_name` and/or `subsystem_name` to be set dynamically in relation
 
 As the parameter value expected is in string format of `${var}`, it is required to be escaped with `$$` in terraform to be interpreted as a string literal. For example, to set `subsystem_name` to the `${logGroup}` variable would be `subsystem_name = "$${logGroup}"`.
 
+Note: `RawText` integrationType does not support dynamic values.
+
 For more information - visit [Kinesis Data Firehose - Logs](https://coralogix.com/docs/aws-firehose/).
 
 
