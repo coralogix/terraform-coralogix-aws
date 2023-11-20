@@ -19,6 +19,7 @@ data "aws_region" "this" {}
 data "aws_caller_identity" "this" {}
 
 data "aws_s3_bucket" "this" {
+  count = var.s3_bucket_name == null ? 0 : 1
   bucket = var.s3_bucket_name
 }
 
@@ -28,7 +29,7 @@ data "aws_sns_topic" "sns_topic" {
 }
 
 data "aws_iam_policy_document" "topic" {
-  count = local.sns_enable ? 1 : 0
+  count = local.sns_enable && var.integration_type != "cloudwatch" ? 1 : 0
   statement {
     effect = "Allow"
 
@@ -43,7 +44,7 @@ data "aws_iam_policy_document" "topic" {
     condition {
       test     = "ArnLike"
       variable = "aws:SourceArn"
-      values   = [data.aws_s3_bucket.this.arn]
+      values   = [data.aws_s3_bucket.this[0].arn]
     }
   }
 }
@@ -61,8 +62,8 @@ resource "null_resource" "s3_bucket_copy" {
 }
 
 module "lambda" {
-  create                 = var.secret_manager_enabled == false ? true : false
-  depends_on             = [ null_resource.s3_bucket_copy ]
+  depends_on             = [null_resource.s3_bucket_copy]
+  count = var.api_key == "" ? 1:1
   source                 = "terraform-aws-modules/lambda/aws"
   version                = "3.2.1"
   function_name          = module.locals.function_name
@@ -77,15 +78,16 @@ module "lambda" {
   vpc_subnet_ids         = var.subnet_ids
   vpc_security_group_ids = var.security_group_ids
   environment_variables = {
-    CORALOGIX_URL         = var.custom_url == "" ? "https://${lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe")}${module.locals.coralogix_url_seffix}" : var.custom_url
+    CORALOGIX_ENDPOINT    = var.custom_url == "" ? "https://${lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe")}${module.locals.coralogix_url_seffix}" : var.custom_url
     CORALOGIX_BUFFER_SIZE = tostring(var.buffer_size)
-    private_key           = var.api_key
+    INTEGRATION_TYPE      = var.integration_type
+    RUST_LOG              = var.rust_log
+    CORALOGIX_API_KEY     = var.store_api_key_in_secrets_manager ? aws_secretsmanager_secret_version.service_user[count.index].secret_string : var.api_key
     app_name              = var.application_name
     sub_name              = var.subsystem_name
-    newline_pattern       = var.newline_pattern
+    NEWLINE_PATTERN       = var.newline_pattern
     blocking_pattern      = var.blocking_pattern
     sampling              = tostring(var.sampling_rate)
-    debug                 = tostring(var.debug)
   }
   s3_existing_package = {
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
@@ -99,116 +101,42 @@ module "lambda" {
   create_current_version_allowed_triggers = false
   create_async_event_config               = true
   attach_async_event_policy               = true
-  attach_policy_statements                = true
-  policy_statements = {
+  attach_policy_statements                = true # this is the problem that i had
+  policy_statements = var.integration_type != "cloudwatch" ? {
     S3 = {
       effect    = "Allow"
       actions   = ["s3:GetObject"]
-      resources = ["${data.aws_s3_bucket.this.arn}/*"]
-    }
-  }
-  #The condition will first check if the integration type is cloudwatch, in that case, it will
-  #Allow the trigger from the log groups otherwise it will check if sns in enabled in
+      resources = ["${data.aws_s3_bucket.this[0].arn}/*"]
+      }
+  } : {}
+  # The condition will first check if the integration type is cloudwatch, in that case, it will
+  # Allow the trigger from the log groups otherwise it will check if sns in enabled in
   # case that it's not then the trigger will be triggered from the bucket
+
   allowed_triggers = var.integration_type == "cloudwatch" ? {
     for index in range(length(var.log_groups)) : "AllowExecutionFromCloudWatch-${index}" => {
       principal  = "logs.amazonaws.com"
       source_arn = "${data.aws_cloudwatch_log_group.this[index].arn}:*"
     }
-  } : local.sns_enable != true ? {
+    } : local.sns_enable != true ? {
     AllowExecutionFromS3 = {
       principal  = "s3.amazonaws.com"
-      source_arn = data.aws_s3_bucket.this.arn
+      source_arn = data.aws_s3_bucket.this[0].arn
     }
   } : {}
 
   tags = merge(var.tags, module.locals.tags)
 }
 
-module "lambdaSM" {
-  source                 = "terraform-aws-modules/lambda/aws"
-  create                 = var.secret_manager_enabled ? true : false
-  depends_on             = [ null_resource.s3_bucket_copy ]
-  version                = "3.2.1"
-  layers                 = [var.layer_arn]
-  function_name          = module.locals.function_name
-  description            = "Send logs to Coralogix."
-  handler                = "bootstrap"
-  runtime                = "provided.al2"
-  architectures          = [var.architecture]
-  memory_size            = var.memory_size
-  timeout                = var.timeout
-  create_package         = false
-  destination_on_failure = aws_sns_topic.this.arn
-  vpc_subnet_ids         = var.subnet_ids
-  vpc_security_group_ids = var.security_group_ids
-  environment_variables = {
-    CORALOGIX_URL           = var.custom_url == "" ? "https://${lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe")}${module.locals.coralogix_url_seffix}" : var.custom_url
-    CORALOGIX_BUFFER_SIZE   = tostring(var.buffer_size)
-    AWS_LAMBDA_EXEC_WRAPPER = "/opt/wrapper.sh"
-    SECRET_NAME             = var.create_secret == "False" ? var.api_key : ""
-    app_name                = var.application_name
-    sub_name                = var.subsystem_name
-    newline_pattern         = var.newline_pattern
-    blocking_pattern        = var.blocking_pattern
-    sampling                = tostring(var.sampling_rate)
-    debug                   = tostring(var.debug)
-  }
-  s3_existing_package = {
-    bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
-    key    = "coralogix-aws-serverless-rust.zip"
-  }
-  policy_path                             = "/coralogix/"
-  role_path                               = "/coralogix/"
-  role_name                               = "${module.locals.function_name}-Role"
-  role_description                        = "Role for ${module.locals.function_name} Lambda Function."
-  cloudwatch_logs_retention_in_days       = var.cloudwatch_logs_retention_in_days
-  create_current_version_allowed_triggers = false
-  create_async_event_config               = true
-  attach_async_event_policy               = true
-  attach_policy_statements                = true
-  policy_statements = {
-    S3 = {
-      effect    = "Allow"
-      actions   = ["s3:GetObject"]
-      resources = ["${data.aws_s3_bucket.this.arn}/*"]
-    }
-    secret_access_policy = {
-      effect = "Allow"
-      actions = [
-        "secretsmanager:DescribeSecret",
-        "secretsmanager:GetSecretValue",
-        "secretsmanager:PutSecretValue",
-        "secretsmanager:UpdateSecret"
-      ]
-      resources = ["*"]
-    }
-  }
-  #The condition will first check if the integration type is cloudwatch, in that case, it will
-  #Allow the trigger from the log groups otherwise it will check if sns in enabled in
-  # case that it's not then the trigger will be triggered from the bucket
-  allowed_triggers = var.integration_type == "cloudwatch" ? {
-    for index in range(length(var.log_groups)) : "AllowExecutionFromCloudWatch-${index}" => {
-      principal  = "logs.amazonaws.com"
-      source_arn = "${data.aws_cloudwatch_log_group.this[index].arn}:*"
-    }
-  } : local.sns_enable != true ? {
-    AllowExecutionFromS3 = {
-      principal  = "s3.amazonaws.com"
-      source_arn = data.aws_s3_bucket.this.arn
-    }
-  } : {}
-  tags = merge(var.tags, module.locals.tags)
-}
 ###################################
 #### s3  integration resources ####
 ###################################
 
 resource "aws_s3_bucket_notification" "lambda_notification" {
   count  = var.integration_type == "cloudwatch" ? 0 : local.sns_enable == false ? 1 : 0
-  bucket = data.aws_s3_bucket.this.bucket
+  bucket = data.aws_s3_bucket.this[0].bucket
   lambda_function {
-    lambda_function_arn = var.secret_manager_enabled ? module.lambdaSM.lambda_function_arn : module.lambda.lambda_function_arn
+    lambda_function_arn =  module.lambda[count.index].lambda_function_arn
     events              = ["s3:ObjectCreated:*"]
     filter_prefix       = var.integration_type == "s3" || var.s3_key_prefix != null ? var.s3_key_prefix : "AWSLogs/${data.aws_caller_identity.this.account_id}/${lookup(module.locals.s3_prefix_map, var.integration_type)}/"
     filter_suffix       = var.integration_type == "s3" || var.s3_key_suffix != null ? var.s3_key_suffix : lookup(module.locals.s3_suffix_map, var.integration_type)
@@ -217,7 +145,7 @@ resource "aws_s3_bucket_notification" "lambda_notification" {
 
 resource "aws_s3_bucket_notification" "topic_notification" {
   count  = var.integration_type == "cloudwatch" ? 0 : local.sns_enable == true ? 1 : 0
-  bucket = data.aws_s3_bucket.this.bucket
+  bucket = data.aws_s3_bucket.this[0].bucket
   topic {
     topic_arn     = data.aws_sns_topic.sns_topic[count.index].arn
     events        = ["s3:ObjectCreated:*"]
@@ -230,7 +158,6 @@ resource "aws_s3_bucket_notification" "topic_notification" {
 #### cloudwatch  integration resources ####
 ###########################################
 
-##################################### need to fix it  so that it will not create it in case i use the s3 integration--__(*_*)__--
 resource "aws_cloudwatch_log_subscription_filter" "this" {
   # The depends_on is required here for the allowed_triggers in the above
   # lambda module, which creates aws_lambda_permission resources that are
@@ -239,9 +166,9 @@ resource "aws_cloudwatch_log_subscription_filter" "this" {
   depends_on = [module.lambda]
 
   count           = var.integration_type == "cloudwatch" ? length(var.log_groups) : 0
-  name            = "${module.lambda.lambda_function_name}-Subscription-${count.index}"
+  name            = "${module.lambda[count.index].lambda_function_name}-Subscription-${count.index}"
   log_group_name  = data.aws_cloudwatch_log_group.this[count.index].name
-  destination_arn = var.secret_manager_enabled ? module.lambdaSM.lambda_function_arn : module.lambda.lambda_function_arn
+  destination_arn = module.lambda[count.index].lambda_function_arn
   filter_pattern  = ""
 }
 
@@ -249,20 +176,6 @@ resource "aws_sns_topic" "this" {
   name_prefix  = "${module.locals.function_name}-Failure"
   display_name = "${module.locals.function_name}-Failure"
   tags         = merge(var.tags, module.locals.tags)
-}
-
-resource "aws_secretsmanager_secret" "private_key_secret" {
-  count       = var.secret_manager_enabled && var.create_secret == "True"  ? 1 : 0
-  depends_on  = [module.lambdaSM]
-  name        = "lambda/coralogix/${data.aws_region.this.name}/${module.locals.function_name}"
-  description = "Coralogix Send Your Data key Secret"
-}
-
-resource "aws_secretsmanager_secret_version" "service_user" {
-  count         = var.secret_manager_enabled && var.create_secret == "True"  ? 1 : 0
-  depends_on    = [aws_secretsmanager_secret.private_key_secret]
-  secret_id     = aws_secretsmanager_secret.private_key_secret[count.index].id
-  secret_string = var.api_key
 }
 
 resource "aws_sns_topic_subscription" "this" {
@@ -291,8 +204,26 @@ resource "aws_sns_topic_policy" "test" {
 
 resource "aws_sns_topic_subscription" "lambda_sns_subscription" {
   count      = local.sns_enable ? 1 : 0
-  depends_on = [module.lambdaSM, module.lambda]
+  depends_on = [module.lambda]
   topic_arn  = data.aws_sns_topic.sns_topic[count.index].arn
   protocol   = "lambda"
-  endpoint   = var.secret_manager_enabled ? module.lambdaSM.lambda_function_arn : module.lambda.lambda_function_arn
+  endpoint   = module.lambda[count.index].lambda_function_arn
+}
+
+resource "aws_secretsmanager_secret" "coralogix_secret" {
+  count              = var.store_api_key_in_secrets_manager ? 1 : 0
+  # depends_on  = [module.lambda]
+  name        = "CoralogixApiKey"
+  description = "Coralogix Send Your Data key Secret"
+  
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_secretsmanager_secret_version" "service_user" {
+  count              = var.store_api_key_in_secrets_manager ? 1 : 0
+  depends_on    = [aws_secretsmanager_secret.coralogix_secret]
+  secret_id     = aws_secretsmanager_secret.coralogix_secret[count.index].id
+  secret_string = var.api_key
 }
