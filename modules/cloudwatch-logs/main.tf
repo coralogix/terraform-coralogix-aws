@@ -17,6 +17,12 @@ resource "random_string" "this" {
   special = false
 }
 
+resource "null_resource" "s3_bucket" {
+  count = var.custom_s3_bucket == "" ? 0 : 1
+  provisioner "local-exec" {
+    command = "curl -o cloudwatch-logs.zip https://coralogix-serverless-repo-eu-central-1.s3.eu-central-1.amazonaws.com/cloudwatch-logs.zip ; aws s3 cp ./cloudwatch-logs.zip s3://${var.custom_s3_bucket} ; rm ./cloudwatch-logs.zip"
+  }
+}
 
 module "lambda" {
   source                 = "terraform-aws-modules/lambda/aws"
@@ -126,6 +132,7 @@ module "lambdaSM" {
   tags = merge(var.tags, module.locals.tags)
 }
 
+resource "aws_cloudwatch_log_subscription_filter" "this" {
 
   # The depends_on is required here for the allowed_triggers in the above
   # lambda module, which create aws_lambda_permission resources that are
