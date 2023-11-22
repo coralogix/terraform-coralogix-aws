@@ -15,12 +15,6 @@ variable "private_key" {
   sensitive   = true
 }
 
-variable "metric_enable" {
-  description = "Enable sending of metrics to Coralogix"
-  type        = bool
-  default     = true
-}
-
 variable "integration_type_metrics" {
   description = "The integration type of the firehose delivery stream: 'CloudWatch_Metrics_JSON' or 'CloudWatch_Metrics_OpenTelemetry070'"
   type        = string

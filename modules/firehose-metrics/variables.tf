@@ -1,9 +1,9 @@
 variable "coralogix_region" {
-  description = "Coralogix account region: us, us2, singapore, ireland, india, stockholm [in lower-case letters]"
+  description = "Coralogix account region: Europe, Europe2, India, Singapore, US, US2"
   type        = string
   validation {
-    condition     = contains(["ireland", "stockholm", "india", "singapore", "us", "us2"], var.coralogix_region)
-    error_message = "The coralogix region must be one of these values: [ireland, stockholm, india, singapore, us, us2]."
+    condition     = contains(["Europe", "Europe2", "India", "Singapore", "US", "US2"], var.coralogix_region)
+    error_message = "The coralogix region must be one of these values: [Europe, Europe2, India, Singapore, US, US2]."
   }
 }
 
@@ -30,46 +30,16 @@ variable "subsystem_name" {
   default     = null
 }
 
-variable "logs_enable" {
-  description = "Enable sending logs to Coralogix"
-  type        = bool
-  default     = false
-}
-
 variable "cloudwatch_retention_days" {
   description = "Days of retention in Cloudwatch retention days"
   type        = number
   default     = 1
 }
 
-variable "coralogix_firehose_custom_endpoint" {
-  description = "Custom endpoint for Coralogix firehose integration endpoint (https://firehose-ingress.private.coralogix.net:8443/firehose)"
+variable "custom_domain" {
+  description = "Custom domain for Coralogix firehose integration endpoint (e.g. private.coralogix.net:8443 for https://firehose-ingress.private.coralogix.net:8443/firehose)"
   type        = string
   default     = null
-}
-
-variable "source_type_logs" {
-  description = "The source_type of kinesis firehose: KinesisStreamAsSource or DirectPut"
-  type        = string
-  default     = "DirectPut"
-}
-
-variable "kinesis_stream_arn" {
-  description = "If 'KinesisStreamAsSource' set as source_type_logs. Set the kinesis stream's ARN as the source of the firehose log stream"
-  type        = string
-  default     = null
-}
-
-variable "integration_type_logs" {
-  description = "The integration type of the firehose delivery stream: 'CloudWatch_JSON', 'WAF', 'CloudWatch_CloudTrail', 'EksFargate', 'Default', 'RawText'"
-  type        = string
-  default     = null
-}
-
-variable "metric_enable" {
-  description = "Enable sending of metrics to Coralogix"
-  type        = bool
-  default     = true
 }
 
 variable "enable_cloudwatch_metricstream" {
@@ -79,7 +49,7 @@ variable "enable_cloudwatch_metricstream" {
 }
 
 variable "integration_type_metrics" {
-  description = "The integration type of the firehose delivery stream: 'CloudWatch_Metrics_JSON' or 'CloudWatch_Metrics_OpenTelemetry070'"
+  description = "The integration type of the firehose delivery stream: 'CloudWatch_Metrics_JSON', 'CloudWatch_Metrics_OpenTelemetry070' or 'CloudWatch_Metrics_OpenTelemetry070_WithAggregations'"
   type        = string
   default     = "CloudWatch_Metrics_OpenTelemetry070"
 }

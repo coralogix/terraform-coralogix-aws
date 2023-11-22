@@ -26,7 +26,7 @@ locals {
   }) : var.user_supplied_tags
 
   # default namings
-  s3_logs_backup_bucket_name     = var.s3_backup_custom_name != null ? var.s3_backup_custom_name : "${var.firehose_stream}-backup-logs"
+  s3_logs_backup_bucket_name = var.s3_backup_custom_name != null ? var.s3_backup_custom_name : "${var.firehose_stream}-backup-logs"
 }
 
 data "aws_caller_identity" "current_identity" {}
@@ -43,7 +43,7 @@ resource "random_string" "this" {
 
 resource "aws_cloudwatch_log_group" "firehose_loggroup" {
   tags              = local.tags
-  name              = "/aws/kinesisfirehose/${var.firehose_stream}"
+  name              = "/aws/kinesisfirehoselogs/${var.firehose_stream}"
   retention_in_days = var.cloudwatch_retention_days
 }
 
@@ -73,7 +73,7 @@ resource "aws_s3_bucket_public_access_block" "firehose_bucket_bucket_access" {
 
 resource "aws_iam_role" "firehose_to_coralogix" {
   tags = local.tags
-  name = "${var.firehose_stream}-firehose"
+  name = "${var.firehose_stream}-firehose-logs"
   assume_role_policy = jsonencode({
     "Version" = "2012-10-17",
     "Statement" = [

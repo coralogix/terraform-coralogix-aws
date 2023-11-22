@@ -46,7 +46,6 @@ Metric namespaces are also case-sensitive, please see the [AWS namespaces list](
 ```terraform
 module "cloudwatch_firehose_coralogix" {
   source                           = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
-  metric_enable                    = true
   firehose_stream                  = var.coralogix_firehose_stream_name
   private_key                      = var.private_key
   

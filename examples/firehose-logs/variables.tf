@@ -15,18 +15,6 @@ variable "private_key" {
   sensitive   = true
 }
 
-variable "logs_enable" {
-  description = "Enable sending logs to Coralogix"
-  type        = bool
-  default     = false
-}
-
-variable "metric_enable" {
-  description = "Enable sending metrics to Coralogix"
-  type        = bool
-  default     = true
-}
-
 variable "source_type_logs" {
   description = "The source_type of kinesis firehose: KinesisStreamAsSource or DirectPut"
   type        = string

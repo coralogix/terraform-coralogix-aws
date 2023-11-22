@@ -1,8 +1,7 @@
 module "cloudwatch_firehose_coralogix" {
-  source                              = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
+  source                              = "github.com/coralogix/terraform-coralogix-aws//modules/firehose-metrics"
   firehose_stream                     = var.firehose_stream
   private_key                         = var.private_key
-  metric_enable                       = var.metric_enable
   enable_cloudwatch_metricstream      = var.enable_cloudwatch_metricstream
   integration_type_metrics            = var.integration_type_metrics
   include_metric_stream_namespaces    = var.include_metric_stream_namespaces
