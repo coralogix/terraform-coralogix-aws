@@ -10,7 +10,7 @@ Provision a firehose delivery stream for streaming logs to [Coralogix](https://c
 
 ```terraform
 module "cloudwatch_firehose_coralogix" {
-  source                         = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
+  source                         = "github.com/coralogix/terraform-coralogix-aws//modules/firehose-logs"
   firehose_stream                = var.coralogix_firehose_stream_name
   private_key                    = var.private_key
   coralogix_region               = var.coralogix_region
@@ -18,6 +18,25 @@ module "cloudwatch_firehose_coralogix" {
   source_type_logs               = "DirectPut"
 }
 ```
+
+### Dynamic Values Table for Logs
+
+For `application_name` and/or `subsystem_name` to be set dynamically in relation to their `integrationType`'s resource fields (e.g. CloudWatch_JSON's loggroup name, EksFargate's k8s namespace). The source's `var` has to be mapped as a string literal to the `integrationType`'s as a DyanamicFromFrield with pre-defined values:
+
+| Field | Source `var` | Expected String Literal | Integration Type | Notes |
+|-------|--------------|-------------------------|------------------|-------|
+| `applicationName` field in logs | applicationName | `${applicationName}` | Default | need to be supplied in the log to be used |
+| `subsystemName` field in logs | subsystemName | `${subsystemName}` | Default |  need to be supplied in the log to be used |
+| CloudWatch LogGroup name | logGroup | `${logGroup}` | CloudWatch_JSON <br/> CloudWatch_CloudTrail | supplied by aws |
+| `kubernetes.namespace_name` field | kubernetesNamespaceName | `${kubernetesNamespaceName}` | EksFargate | supplied by the default configuration |
+| `kubernetes.container_name` field | kubernetesContainerName | `${kubernetesContainerName}` | EksFargate | supplied by the default configuration |
+| name part of the `log.webaclId` field | webAclName | `${webAclName}` | WAF | supplied by aws |
+
+As the parameter value expected is in string format of `${var}`, it is required to be escaped with `$$` in terraform to be interpreted as a string literal. For example, to set `subsystem_name` to the `${logGroup}` variable would be `subsystem_name = "$${logGroup}"`.
+
+Note: `RawText` integrationType does not support dynamic values.
+
+For more information - visit [Kinesis Data Firehose - Logs](https://coralogix.com/docs/aws-firehose/).
 
 ### Examples
 Examples can be found under the [firehose-logs examples directory](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/firehose-logs)
