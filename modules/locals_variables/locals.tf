@@ -10,6 +10,15 @@ locals {
     US2       = "ingress.cx498.coralogix.com"
   }
 
+  coralogix_domains = {
+    Europe    = "coralogix.com"
+    Europe2   = "eu2.coralogix.com"
+    India     = "coralogix.in"
+    Singapore = "coralogixsg.com"
+    US        = "coralogix.us"
+    US2       = "cx498.coralogix.com"
+  }
+
   coralogix_url_seffix = "/api/v1/logs"
 
   tags = {

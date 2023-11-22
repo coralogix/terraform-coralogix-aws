@@ -6,6 +6,10 @@ output "coralogix_regions" {
   value = local.coralogix_regions
 }
 
+output "coralogix_domains" {
+  value = local.coralogix_domains
+}
+
 output "coralogix_url_seffix" {
   value = local.coralogix_url_seffix
 }
