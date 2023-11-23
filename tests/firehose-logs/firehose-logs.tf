@@ -12,10 +12,10 @@ provider "aws" {
   region = "us-east-1"
 }
 
-module "firehose" {
-  source = "../../modules/firehose"
+module "firehose-logs" {
+  source = "../../modules/firehose-logs"
 
-  coralogix_region = "ireland"
+  coralogix_region = "Europe"
   private_key      = "{{ secrets.TESTING_PRIVATE_KEY }}"
   firehose_stream  = "test-stream"
 }

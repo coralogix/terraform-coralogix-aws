@@ -1,4 +1,4 @@
-# Firehose Delivery Stream
+# Firehose Logs Delivery Stream
 Configuration in this directory creates a firehose delivery stream only for logs.
 This firehose delivery stream can be used with CloudWatch, CloudTrail, [etc..](https://coralogix.com/docs/aws-firehose/)
 

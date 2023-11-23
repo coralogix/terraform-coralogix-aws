@@ -1,4 +1,4 @@
-module "cloudwatch_firehose_coralogix" {
+module "cloudwatch_firehose_logs_coralogix" {
   source                    = "github.com/coralogix/terraform-coralogix-aws//modules/firehose-logs"
   firehose_stream           = var.firehose_stream
   private_key               = var.private_key
