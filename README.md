@@ -108,27 +108,50 @@ $ terraform apply
 
 Run `terraform destroy` when you don't need these resources.
 
-### firehose:
+### firehose-logs:
 
 ```hcl
 provider "aws" {
 }
 
-module "cloudwatch_firehose_coralogix" {
-  source = "coralogix/aws/coralogix//modules/firehose"
+module "cloudwatch_firehose_logs_coralogix" {
+  source = "coralogix/aws/coralogix//modules/firehose-logs"
 
-  coralogix_region      = "ireland"
+  coralogix_region      = "Europe"
   private_key           = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
-  application_name      = "firehose"
-  subsystem_name        = "logs-and-metrics"
+  application_name      = "firehose-logs"
+  subsystem_name        = "logs"
   firehose_stream       = "<your kinesis stream name>"
 
   #logs:
-  logs_enable           = true
   integration_type_logs = "CloudWatch_JSON"
+}
+```
+now execute:
+```bash
+$ terraform init
+$ terraform plan
+$ terraform apply
+```
 
-  #metric:
-  metric_enable                  = true
+Then create subscription filters in your CloudWatch log groups to send logs to the firehose logs delivery stream.
+
+### firehose-metrics:
+
+```hcl
+provider "aws" {
+}
+
+module "cloudwatch_firehose_metrics_coralogix" {
+  source = "coralogix/aws/coralogix//modules/firehose-metrics"
+
+  coralogix_region      = "Europe"
+  private_key           = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  application_name      = "firehose-metrics"
+  subsystem_name        = "metrics"
+  firehose_stream       = "<your kinesis stream name>"
+
+  #metrics:
   enable_cloudwatch_metricstream = true
 }
 ```
@@ -138,6 +161,8 @@ $ terraform init
 $ terraform plan
 $ terraform apply
 ```
+
+Metrics collected by the created CloudWatch Metric Stream will be sent to the firehose metrics delivery stream.
 
 ### resource-metadata:
 

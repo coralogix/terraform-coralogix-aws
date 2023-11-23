@@ -1,8 +1,6 @@
-module "cloudwatch_firehose_coralogix" {
-  source                    = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
+module "cloudwatch_firehose_logs_coralogix" {
+  source                    = "github.com/coralogix/terraform-coralogix-aws//modules/firehose-logs"
   firehose_stream           = var.firehose_stream
-  logs_enable               = true
-  metric_enable             = false
   private_key               = var.private_key
   coralogix_region          = var.coralogix_region
   integration_type_logs     = "Default"

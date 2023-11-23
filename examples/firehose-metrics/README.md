@@ -1,6 +1,6 @@
-# Firehose Delivery Streams
+# Firehose Metrics Delivery Streams
 
-To enable metrics, set `enable_metrics` and `enable_cloudwatch_metricstream` to true. This will create a firehose delivery stream and a CloudWatch metrics stream. Also set `integration_type_metrics` to either 'CloudWatch_Metrics_JSON' or 'CloudWatch_Metrics_OpenTelemetry070' for coralogix to be notified on the format type of metrics streamed.
+To enable `enable_cloudwatch_metricstream` to true. This will create a firehose delivery stream and a CloudWatch metrics stream. Also set `integration_type_metrics` to either 'CloudWatch_Metrics_JSON' or 'CloudWatch_Metrics_OpenTelemetry070' for coralogix to be notified on the format type of metrics streamed.
 
 ## With the different metrics configurations
 
@@ -85,7 +85,7 @@ Read more about the following:
 ## Usage
 
 In this example you need to configure the following variables:
-* `firehose_stream` --> The name of the Firehose delivery stream
+* `firehose_stream` --> The name of the Firehose Metrics delivery stream
 * `coralogix_region` --> The region of Coralogix account
 * `private_key` --> Coralogix account logs private_key
 Since the private_key is private and we cant put it hardcoded, it can be exported instead of insert it as an input each time:
