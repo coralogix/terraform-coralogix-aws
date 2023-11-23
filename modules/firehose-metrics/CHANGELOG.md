@@ -19,7 +19,7 @@
 ### 0.0.1 / 25 10 23
 * [Update] Migrate transformation Lambda runtime
 
-### 0.0.2 / 22.11.23
+### 1.0.64 / 23.11.23
 * [Update] firehose split logs and metrics
 * [Update] add to metrics CloudWatch_Metrics_OpenTelemetry070_WithAggregations
 * [Update] configure to coralogix domain based
