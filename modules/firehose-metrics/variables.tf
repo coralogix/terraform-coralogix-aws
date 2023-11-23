@@ -42,12 +42,6 @@ variable "custom_domain" {
   default     = null
 }
 
-variable "enable_cloudwatch_metricstream" {
-  description = "Should be true if you want to create a new Cloud Watch metric stream and attach it to Firehose"
-  type        = bool
-  default     = true
-}
-
 variable "integration_type_metrics" {
   description = "The integration type of the firehose delivery stream: 'CloudWatch_Metrics_JSON', 'CloudWatch_Metrics_OpenTelemetry070' or 'CloudWatch_Metrics_OpenTelemetry070_WithAggregations'"
   type        = string
@@ -58,6 +52,18 @@ variable "output_format" {
   description = "The output format of the cloudwatch metric stream: 'json' or 'opentelemetry0.7'"
   type        = string
   default     = "opentelemetry0.7"
+}
+
+variable "enable_cloudwatch_metricstream" {
+  description = "Should be true if you want to create a new Cloud Watch metric stream and attach it to Firehose"
+  type        = bool
+  default     = true
+}
+
+variable "cloudwatch_metric_stream_custom_name" {
+  description = "Set the name of the CloudWatch metric stream, otherwise variable 'firehose_stream' will be used"
+  type        = string
+  default     = null
 }
 
 variable "include_metric_stream_namespaces" {
@@ -128,6 +134,18 @@ variable "additional_metric_statistics" {
   ]
 }
 
+variable "lambda_processor_enable" {
+  description = "Enable lambda processor function, defaults to true"
+  type        = bool
+  default     = true
+}
+
+variable "lambda_processor_custom_name" {
+  description = "Set the name of the lambda processor function, otherwise variable '{firehose_stream}-metrics-tags-processor' will be used"
+  type        = string
+  default     = null
+}
+
 variable "user_supplied_tags" {
   description = "Tags supplied by the user to populate to all generated resources"
   type        = map(string)
@@ -140,26 +158,8 @@ variable "override_default_tags" {
   default     = false
 }
 
-variable "cloudwatch_metric_stream_custom_name" {
-  description = "Set the name of the CloudWatch metric stream, otherwise variable 'firehose_stream' will be used"
-  type        = string
-  default     = null
-}
-
 variable "s3_backup_custom_name" {
   description = "Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup' will be used"
-  type        = string
-  default     = null
-}
-
-variable "lambda_processor_enable" {
-  description = "Enable lambda processor function, defaults to true"
-  type        = bool
-  default     = true
-}
-
-variable "lambda_processor_custom_name" {
-  description = "Set the name of the lambda processor function, otherwise variable '{firehose_stream}-metrics-tags-processor' will be used"
   type        = string
   default     = null
 }

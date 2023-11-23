@@ -41,8 +41,8 @@ For more information - visit [Kinesis Data Firehose - Logs](https://coralogix.co
 ### Examples
 Examples can be found under the [firehose-logs examples directory](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/firehose-logs)
 
-## Override Coralogix applicationName
-The application name by default is the firehose delivery stream name, but it can be overriden by setting an environment variable called `application_name`. 
+## Override Coralogix applicationName and subsystemName
+The application name and subsystem name by default is the firehose delivery stream arn and name, but it can be overriden by setting an environment variable called `application_name` and `subsystem_name`. 
 
 # Coralogix account region
 The coralogix region variable accepts one of the following regions:
@@ -67,13 +67,6 @@ The coralogix region variable accepts one of the following regions:
 ### Custom Domain
 It is possible to pass a custom coralogix domain by using the `custom_domain` variable.
 
-# Metrics Output Format
-Coralogix suppots both `JSON` format and `OpenTelemtry` format. 
-The default format configured here is `OpenTelemtry`.
-if using `Json` in the firehose output format, which is configured via the `integration_type_metrics` variable,
-then the CloudWatch metric stream must be configured with the same format, configured via the `output_format` variable.
-
-
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
@@ -91,21 +84,26 @@ then the CloudWatch metric stream must be configured with the same format, confi
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | Coralogix account region: us, us2, singapore, ireland, india, stockholm [in lower-case letters] | `any` | n/a | yes |
+| <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | Coralogix account region: Europe, Europe2, India, Singapore, US, US2 [exact] | `any` | n/a | yes |
 | <a name="input_private_key"></a> [private_key](#input\_private_key) | Coralogix account logs private key | `any` | n/a | yes |
 | <a name="input_firehose_stream"></a> [firehose\_stream](#input\_firehose\_stream) | AWS Kinesis firehose delivery stream name | `string` | n/a | yes |
 | <a name="input_application_name"></a> [application_name](#input\_application_name) | The name of your application in Coralogix | `string` | n/a | yes |
 | <a name="input_subsystem_name"></a> [subsystem_name](#input\_subsystem_name) | The subsystem name of your application in Coralogix | `string` | n/a | yes |
-| <a name="input_cloudwatch_retention_days"></a> [cloudwatch_retention_days](#input\_cloudwatch_retention_days) | Days of retention in Cloudwatch retention days | `number` | n/a | no |
+| <a name="input_cloudwatch_retention_days"></a> [cloudwatch\_retention\_days](#input\_cloudwatch_retention_days) | Days of retention in Cloudwatch retention days | `number` | n/a | no |
 | <a name="input_custom_domain"></a> [custom_domain](#input\_custom_domain) | Custom domain for Coralogix firehose integration endpoint (private.coralogix.net:8443) | `string` | `null` | no |
 | <a name="input_source_type_logs"></a> [source_type_logs](#input\_source_type_logs) | The source_type of kinesis firehose: KinesisStreamAsSource or DirectPut | `string` | `DirectPut` | no |
 | <a name="input_kinesis_stream_arn"></a> [kinesis_stream_arn](#input\_kinesis_stream_arn) | If 'KinesisStreamAsSource' set as source_type_logs. Set the kinesis stream's ARN as the source of the firehose log stream | `string` | `""` | no |
 | <a name="input_integration_type_logs"></a> [integration_type_logs](#input\_integration_type_logs) | The integration type of the firehose delivery stream: 'CloudWatch_JSON', 'WAF', 'CloudWatch_CloudTrail', 'EksFargate', 'Default', 'RawText' | `string` | `Default` | no |
 | <a name="input_user_supplied_tags"></a> [user_supplied_tags](#input\_user_supplied_tags) | Tags supplied by the user to populate to all generated resources | `map(string)` | n/a | no |
 | <a name="input_override_default_tags"></a> [override_default_tags](#input\_override_default_tags) | Override and remove the default tags by setting to true | `bool` | `false` | no |
-| <a name="input_s3_backup_custom_name"></a> [s3_backup_custom_name](#input\_s3_backup_custom_name) | Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup' will be used | `string` | `null` | no |
+
+## Inputs - Custom Resource Naming
+
+| <a name="input_s3_backup_custom_name"></a> [s3_backup_custom_name](#input\_s3_backup_custom_name) | Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup-logs' will be used | `string` | `null` | no |
+
 
 ## Coralgoix regions
+
 | Coralogix region | AWS Region | Coralogix Domain |
 |------------------|------------|------------------|
 | `Europe` | `eu-west-1` | coralogix.com |
