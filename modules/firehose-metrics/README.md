@@ -5,8 +5,7 @@ Firehose Metrics module is designed to support AWS Firehose Metrics integration 
 ## Metrics - Usage
 
 ### Delivering all CloudWatch metrics
-Provision a firehose delivery stream with [CloudWatch metric stream](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html).
-The metric stream includes all namespaces [AWS/EC2, AWS/EBS, etc..], and sends the metrics to Coralogix:
+Provision a firehose delivery stream with [CloudWatch metric stream](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html) to stream metrics to [Coralogix](https://coralogix.com/docs/amazon-kinesis-data-firehose-metrics/).
 
 ```terraform
 module "cloudwatch_firehose_coralogix" {
@@ -16,6 +15,9 @@ module "cloudwatch_firehose_coralogix" {
   coralogix_region = var.coralogix_region
 }
 ```
+
+By default, the metric stream includes all namespaces [AWS/EC2, AWS/EBS, etc..] and metric names.
+
 
 ### Delivering selected CloudWatch metrics by namespaces
 Provision a firehose delivery stream with [CloudWatch metric stream](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html).
