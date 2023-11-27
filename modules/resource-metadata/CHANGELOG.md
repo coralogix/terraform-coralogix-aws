@@ -2,6 +2,9 @@
 
 ## resource-metadata
 
+### 0.0.6 / 27.11.2023
+* [Change] Add an option to specify the retention time of the CloudWatch log group that is created by the lambda
+
 ### 0.0.5 / 4.10.2023
 * [bug_fix] Add secret_manager_enabled variable to allow the use of lambda-SecretLayer in the same run with this module 
 
