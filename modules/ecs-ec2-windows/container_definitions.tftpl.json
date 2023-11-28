@@ -1,0 +1,114 @@
+[
+  %{ if app_image != "" }
+  {
+      "name"      : "custom_demo_app",
+      "image"     : "${app_image}",
+      "cpu"       : 512,
+      "memory"    : 1024,
+      "essential" : true,
+      "portMappings" : [
+        {
+          "containerPort" : 80,
+          "hostPort" : 80
+        }
+      ],
+      "dependsOn": [
+        {
+          "containerName": "coralogix-otel-agent",
+          "condition": "HEALTHY"
+        }
+      ]
+  },
+  %{else}
+  {
+    "name"      : "demo_app",
+    "image"     : "mcr.microsoft.com/windows/servercore:ltsc2019",
+    "cpu"       : 512,
+    "memory"    : 1024,
+    "essential" : true,
+    "entryPoint" : [
+      "Powershell",
+      "-Command"
+    ],
+    "command" : [
+      "$count=1;while(1) { Write-Host \"Hello from console writer.\" $count; sleep 1; $count=$count+1;}"
+    ],
+    "dependsOn": [
+      {
+        "containerName": "coralogix-otel-agent",
+        "condition": "HEALTHY"
+      }
+    ]
+  },
+  %{ endif }
+  {
+    "name" : "coralogix-otel-agent",
+    "image" : "${otel_image}",
+    "essential" : true,
+    "cpu"   : 512,
+    "memory" : 1024,
+    "mountPoints" : [
+      {
+        "sourceVolume" : "hostfs",
+        "containerPath" : "C:\\hostfs",
+        "readOnly" : true
+      }
+    ],
+    "portMappings" : [
+      {
+        "containerPort" : 4317,
+        "hostPort" : 4317
+      },
+      {
+        "containerPort" : 4318,
+        "hostPort" : 4318
+      },
+      {
+        "containerPort" : 8888,
+        "hostPort" : 8888
+      },
+      {
+        "containerPort" : 13133,
+        "hostPort" : 13133
+      }
+    ],
+    "environment" : [
+      {
+        "name" : "CORALOGIX_DOMAIN",
+        "value" : "${coralogix_domain}"
+      },
+      {
+        "name" : "PRIVATE_KEY",
+        "value" : "${api_key}"
+      },
+      {
+        "name" : "APP_NAME",
+        "value" : "${application_name}"
+      },
+      {
+        "name" : "SUB_SYS",
+        "value" : "${subsystem_name}"
+      },
+      {
+        "name" : "OTEL_CONFIG",
+        "value" : ${jsonencode(otel_config)}
+      }
+    ],
+    "healthCheck" : {
+      "command" : ["CMD-SHELL", "curl localhost:13133"],
+      "startPeriod" : 60,
+      "interval" : 30,
+      "timeout" : 5,
+      "retries" : 5
+    },
+    "logConfiguration" : {
+      "logDriver" : "awslogs",
+      "options" : {
+        "awslogs-group" : "/ecs/coralogix-otel-agent",
+        "awslogs-region" : "${region}",
+        "awslogs-stream-prefix" : "coralogix-otel-agent",
+        "awslogs-create-group" : "true"
+      }
+    }
+  }
+]
