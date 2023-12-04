@@ -32,7 +32,7 @@ variable "subsystem_name" {
 variable "newline_pattern" {
   description = "The pattern for lines splitting"
   type        = string
-  default     = "(?:\\r\\n|\\r|\\n)"
+  default     = ""
 }
 
 variable "blocking_pattern" {
@@ -41,22 +41,10 @@ variable "blocking_pattern" {
   default     = ""
 }
 
-variable "buffer_size" {
-  description = "Coralogix logger buffer size"
-  type        = number
-  default     = 134217728
-}
-
 variable "sampling_rate" {
   description = "Send messages with specific rate"
   type        = number
   default     = 1
-}
-
-variable "debug" {
-  description = "Coralogix logger debug mode"
-  type        = bool
-  default     = false
 }
 
 variable "s3_bucket_name" {
@@ -107,12 +95,6 @@ variable "timeout" {
   default     = 300
 }
 
-variable "architecture" {
-  description = "Lambda function architecture"
-  type        = string
-  default     = "arm64"
-}
-
 variable "notification_email" {
   description = "Failure notification email address"
   type        = string
@@ -129,8 +111,8 @@ variable "integration_type" {
   description = "the aws service that send the data to the s3"
   type        = string
   validation {
-    condition     = contains(["cloudwatch", "cloudtrail", "vpc-flow-logs", "s3", "s3-sns", "cloudtrail-sns"], var.integration_type)
-    error_message = "The integration type must be: [cloudwatch, cloudtrail, vpc-flow-logs, s3, s3-sns, cloudtrail-sns]."
+    condition     = contains(["cloudwatch", "cloudtrail", "vpcflow", "s3", "s3-sns", "cloudtrail-sns","s3_csv"], var.integration_type)
+    error_message = "The integration type must be: [cloudwatch, cloudtrail, vpcflow, s3, s3-sns, cloudtrail-sns,s3_csv]."
   }
 }
 
@@ -164,6 +146,28 @@ variable "cloudwatch_logs_retention_in_days" {
 
 variable "store_api_key_in_secrets_manager" {
   description = "Store the API key in AWS Secrets Manager. ApiKeys are stored in secret manager \nby default. If this option is set to false, the ApiKey will apeear in plain text as an \n environment variable in the lambda function console."
-  type       = bool
-  default    = false 
+  type        = bool
+  default     = false
 }
+
+variable "log_info" {
+  type = map(object({
+    s3_key_prefix    = optional(string)
+    s3_key_suffix    = optional(string)
+    application_name = string
+    subsystem_name   = string
+    integration_type = string
+    newline_pattern  = optional(string)
+    blocking_pattern = optional(string)
+  }))
+  validation {
+    condition = alltrue([
+      for bucket_info in var.log_info : contains([
+        "cloudtrail", "vpc-flow-logs", "s3", "cloudwatch"
+      ], bucket_info.integration_type)
+    ])
+    error_message = "All integration types must be: [cloudtrail, vpc-flow-logs, s3, s3-sns, cloudtrail-sns]."
+  }
+
+}
+  

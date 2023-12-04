@@ -28,11 +28,11 @@ locals {
 
   s3_prefix_map = {
     cloudtrail    = "CloudTrail"
-    vpc-flow-logs = "vpcflowlogs"
+    vpcflow = "vpcflowlogs"
   }
 
   s3_suffix_map = {
     cloudtrail    = ".json.gz"
-    vpc-flow-logs = ".log.gz"
+    vpcflow = ".log.gz"
   }
 }

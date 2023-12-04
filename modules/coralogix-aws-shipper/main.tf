@@ -6,12 +6,16 @@ module "locals" {
 }
 
 locals {
-  sns_enable = var.integration_type == "s3-sns" || var.integration_type == "cloudtrail-sns" ? true : false
+  sns_enable = var.sns_topic_name != "" ? true : false
+  log_groups = {
+    for group in var.log_groups : group =>
+    length(group) > 100 ? "${substr(replace(group, "/", "_"), 0, 95)}_${substr(sha256(group), 0, 4)}" : replace(group, "/", "_")
+  }
 }
 
 data "aws_cloudwatch_log_group" "this" {
-  count = var.integration_type == "cloudwatch" ? length(var.log_groups) : 0
-  name  = element(var.log_groups, count.index)
+  for_each = local.log_groups
+  name     = each.key
 }
 
 data "aws_region" "this" {}
@@ -19,7 +23,7 @@ data "aws_region" "this" {}
 data "aws_caller_identity" "this" {}
 
 data "aws_s3_bucket" "this" {
-  count = var.s3_bucket_name == null ? 0 : 1
+  count  = var.s3_bucket_name == null ? 0 : 1
   bucket = var.s3_bucket_name
 }
 
@@ -63,14 +67,13 @@ resource "null_resource" "s3_bucket_copy" {
 
 module "lambda" {
   depends_on             = [null_resource.s3_bucket_copy]
-  count = var.api_key == "" ? 1:1
   source                 = "terraform-aws-modules/lambda/aws"
   version                = "3.2.1"
   function_name          = module.locals.function_name
   description            = "Send logs to Coralogix."
   handler                = "bootstrap"
   runtime                = "provided.al2"
-  architectures          = [var.architecture]
+  architectures          = ["arm64"]
   memory_size            = var.memory_size
   timeout                = var.timeout
   create_package         = false
@@ -78,20 +81,19 @@ module "lambda" {
   vpc_subnet_ids         = var.subnet_ids
   vpc_security_group_ids = var.security_group_ids
   environment_variables = {
-    CORALOGIX_ENDPOINT    = var.custom_url == "" ? "https://${lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe")}${module.locals.coralogix_url_seffix}" : var.custom_url
-    CORALOGIX_BUFFER_SIZE = tostring(var.buffer_size)
+    CORALOGIX_ENDPOINT    = var.custom_url == "" ? "https://${lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe")}" : var.custom_url
     INTEGRATION_TYPE      = var.integration_type
     RUST_LOG              = var.rust_log
     CORALOGIX_API_KEY     = var.store_api_key_in_secrets_manager ? "CoralogixApiKey" : var.api_key
-    app_name              = var.application_name
-    sub_name              = var.subsystem_name
-    NEWLINE_PATTERN       = var.newline_pattern
-    blocking_pattern      = var.blocking_pattern
-    sampling              = tostring(var.sampling_rate)
+    APP_NAME         = var.application_name
+    SUB_NAME         = var.subsystem_name
+    NEWLINE_PATTERN  = var.newline_pattern
+    BLOCKING_PATTERN = var.blocking_pattern
+    SAMPLING         = tostring(var.sampling_rate)
   }
   s3_existing_package = {
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
-    key    = "coralogix-aws-serverless-rust.zip"
+    key    = "coralogix-aws-shipper.zip"
   }
   policy_path                             = "/coralogix/"
   role_path                               = "/coralogix/"
@@ -101,13 +103,13 @@ module "lambda" {
   create_current_version_allowed_triggers = false
   create_async_event_config               = true
   attach_async_event_policy               = true
-  attach_policy_statements                = var.integration_type == "cloudwatch"? false : true
+  attach_policy_statements                = var.integration_type == "cloudwatch" ? false : true
   policy_statements = var.integration_type != "cloudwatch" ? {
     S3 = {
       effect    = "Allow"
       actions   = ["s3:GetObject"]
       resources = ["${data.aws_s3_bucket.this[0].arn}/*"]
-      }
+    }
     secret_access_policy = {
       effect = "Allow"
       actions = [
@@ -118,7 +120,7 @@ module "lambda" {
       ]
       resources = ["*"]
     }
-  } : {
+    } : {
     secret_access_policy = {
       effect = "Allow"
       actions = [
@@ -135,9 +137,9 @@ module "lambda" {
   # case that it's not then the trigger will be triggered from the bucket
 
   allowed_triggers = var.integration_type == "cloudwatch" ? {
-    for index in range(length(var.log_groups)) : "AllowExecutionFromCloudWatch-${index}" => {
+    for key, value in local.log_groups : value => {
       principal  = "logs.amazonaws.com"
-      source_arn = "${data.aws_cloudwatch_log_group.this[index].arn}:*"
+      source_arn = "${data.aws_cloudwatch_log_group.this[key].arn}:*"
     }
     } : local.sns_enable != true ? {
     AllowExecutionFromS3 = {
@@ -157,23 +159,23 @@ resource "aws_s3_bucket_notification" "lambda_notification" {
   count  = var.integration_type == "cloudwatch" ? 0 : local.sns_enable == false ? 1 : 0
   bucket = data.aws_s3_bucket.this[0].bucket
   lambda_function {
-    lambda_function_arn =  module.lambda[count.index].lambda_function_arn
+    lambda_function_arn = module.lambda.lambda_function_arn
     events              = ["s3:ObjectCreated:*"]
     filter_prefix       = var.integration_type == "s3" || var.s3_key_prefix != null ? var.s3_key_prefix : "AWSLogs/${data.aws_caller_identity.this.account_id}/${lookup(module.locals.s3_prefix_map, var.integration_type)}/"
     filter_suffix       = var.integration_type == "s3" || var.s3_key_suffix != null ? var.s3_key_suffix : lookup(module.locals.s3_suffix_map, var.integration_type)
   }
 }
 
-resource "aws_s3_bucket_notification" "topic_notification" {
-  count  = var.integration_type == "cloudwatch" ? 0 : local.sns_enable == true ? 1 : 0
-  bucket = data.aws_s3_bucket.this[0].bucket
-  topic {
-    topic_arn     = data.aws_sns_topic.sns_topic[count.index].arn
-    events        = ["s3:ObjectCreated:*"]
-    filter_prefix = var.integration_type == "s3-sns" || var.s3_key_prefix != null ? var.s3_key_prefix : "AWSLogs/${data.aws_caller_identity.this.account_id}/Cloudtrail/"
-    filter_suffix = var.integration_type == "s3-sns" || var.s3_key_suffix != null ? var.s3_key_suffix : ".json.gz"
-  }
-}
+# resource "aws_s3_bucket_notification" "topic_notification" {
+#   count  = var.integration_type == "cloudwatch" ? 0 : local.sns_enable == true ? 1 : 0
+#   bucket = data.aws_s3_bucket.this.bucket
+#   topic {
+#     topic_arn     = data.aws_sns_topic.sns_topic[count.index].arn
+#     events        = ["s3:ObjectCreated:*"]
+#     filter_prefix = var.integration_type == "s3-sns" || var.s3_key_prefix != null ? var.s3_key_prefix : "AWSLogs/${data.aws_caller_identity.this.account_id}/Cloudtrail/"
+#     filter_suffix = var.integration_type == "s3-sns" || var.s3_key_suffix != null ? var.s3_key_suffix : ".json.gz"
+#   }
+# }
 
 ###########################################
 #### cloudwatch  integration resources ####
@@ -186,10 +188,10 @@ resource "aws_cloudwatch_log_subscription_filter" "this" {
   # finish applying before these start.
   depends_on = [module.lambda]
 
-  count           = var.integration_type == "cloudwatch" ? length(var.log_groups) : 0
-  name            = "${module.lambda[count.index].lambda_function_name}-Subscription-${count.index}"
-  log_group_name  = data.aws_cloudwatch_log_group.this[count.index].name
-  destination_arn = module.lambda[count.index].lambda_function_arn
+  for_each        = local.log_groups
+  name            = "${module.lambda.lambda_function_name}-Subscription-${each.key}"
+  log_group_name  = data.aws_cloudwatch_log_group.this[each.key].name
+  destination_arn = module.lambda.lambda_function_arn
   filter_pattern  = ""
 }
 
@@ -228,22 +230,21 @@ resource "aws_sns_topic_subscription" "lambda_sns_subscription" {
   depends_on = [module.lambda]
   topic_arn  = data.aws_sns_topic.sns_topic[count.index].arn
   protocol   = "lambda"
-  endpoint   = module.lambda[count.index].lambda_function_arn
+  endpoint   = module.lambda.lambda_function_arn
 }
 
 resource "aws_secretsmanager_secret" "coralogix_secret" {
-  count              = var.store_api_key_in_secrets_manager ? 1 : 0
-  # depends_on  = [module.lambda]
-  name        = "CoralogixApiKey3"
+  count       = var.store_api_key_in_secrets_manager ? 1 : 0
+  name        = "CoralogixApiKey-${module.locals.function_name}"
   description = "Coralogix Send Your Data key Secret"
-  
+
   lifecycle {
     create_before_destroy = true
   }
 }
 
 resource "aws_secretsmanager_secret_version" "service_user" {
-  count              = var.store_api_key_in_secrets_manager ? 1 : 0
+  count         = var.store_api_key_in_secrets_manager ? 1 : 0
   depends_on    = [aws_secretsmanager_secret.coralogix_secret]
   secret_id     = aws_secretsmanager_secret.coralogix_secret[count.index].id
   secret_string = var.api_key

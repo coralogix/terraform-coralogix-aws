@@ -13,7 +13,7 @@ provider "aws" {
 }
 
 module "s3" {
-  source = "../../modules/s3"
+  source = "../../modules/coralogix-aws-shipper"
 
   coralogix_region = "Europe"
   api_key          = "{{ secrets.TESTING_PRIVATE_KEY }}"
@@ -23,7 +23,7 @@ module "s3" {
   integration_type = "s3"
 }
 module "cloudwatch" {
-  source = "../../modules/s3"
+  source = "../../modules/coralogix-aws-shipper"
 
   coralogix_region = "Europe"
   api_key          = "{{ secrets.TESTING_PRIVATE_KEY }}"
