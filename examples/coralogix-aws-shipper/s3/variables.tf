@@ -14,7 +14,7 @@ variable "custom_url" {
 }
 
 variable "api_key" {
-  description = "Your Coralogix Send Your Data - API Key which is used to validate your authenticity, This value can be a Coralogix API Key or an AWS Secret Manager ARN that holds the API Key"
+  description = "Your Coralogix Send Your Data - API Key or incase you use pre created secret (created in AWS secret manager) put here the name of the secret that contains the Coralogix send your data key"
   type        = string
   sensitive   = true
 }
@@ -72,13 +72,13 @@ variable "log_groups" {
 }
 
 variable "subnet_ids" {
-  description = "ID of Subnet into which to deploy the integration"
+  description = "The subnet id with the private link"
   type        = list(string)
   default     = [""]
 }
 
 variable "security_group_ids" {
-  description = "ID of the SecurityGroup into which to deploy the integration"
+  description = "The security group id for assigned to the subnet_ids"
   type        = list(string)
   default     = [""]
 }
