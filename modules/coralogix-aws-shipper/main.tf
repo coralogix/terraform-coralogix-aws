@@ -101,10 +101,10 @@ module "lambda" {
   vpc_subnet_ids         = var.subnet_ids
   vpc_security_group_ids = var.security_group_ids
   environment_variables = {
-    CORALOGIX_ENDPOINT    = var.custom_url != "" ? var.custom_url : var.subnet_ids == "" ? "https://ingress.${lookup(local.coralogix_regions, var.coralogix_region, "Europe")}" :  "https://ingress.private.${lookup(local.coralogix_regions, var.coralogix_region, "Europe")}"
+    CORALOGIX_ENDPOINT    = var.custom_url != "" ? var.custom_url : var.subnet_ids == null ? "https://ingress.${lookup(local.coralogix_regions, var.coralogix_region, "Europe")}" :  "https://ingress.private.${lookup(local.coralogix_regions, var.coralogix_region, "Europe")}"
     INTEGRATION_TYPE      = var.integration_type
     RUST_LOG              = var.log_level
-    CORALOGIX_API_KEY     = var.store_api_key_in_secrets_manager && !local.api_key_is_arn ? aws_secretsmanager_secret.coralogix_secret[0].name : var.api_key
+    CORALOGIX_API_KEY     = var.store_api_key_in_secrets_manager && !local.api_key_is_arn ? aws_secretsmanager_secret.coralogix_secret[0].arn : var.api_key
     APP_NAME         = var.application_name
     SUB_NAME         = var.subsystem_name
     NEWLINE_PATTERN  = var.newline_pattern

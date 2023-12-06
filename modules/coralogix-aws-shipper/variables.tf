@@ -74,13 +74,13 @@ variable "log_groups" {
 variable "subnet_ids" {
   description = "ID of Subnet into which to deploy the integration"
   type        = list(string)
-  default     = [""]
+  default     = null
 }
 
 variable "security_group_ids" {
   description = "ID of the SecurityGroup into which to deploy the integration"
   type        = list(string)
-  default     = [""]
+  default     = null
 }
 
 variable "memory_size" {
