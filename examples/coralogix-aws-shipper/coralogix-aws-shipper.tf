@@ -9,5 +9,5 @@ module "coralogix-shipper" {
   application_name = "s3"
   subsystem_name   = "logs"
   s3_bucket_name   = "test-bucket-name"
-  integration_type = "s3"
+  integration_type = "S3"
 }
