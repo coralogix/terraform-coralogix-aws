@@ -145,7 +145,7 @@ variable "lambda_log_retention" {
 }
 
 variable "store_api_key_in_secrets_manager" {
-  description = "Store the API key in AWS Secrets Manager. ApiKeys are stored in secret manager \nby default. If this option is set to false, the ApiKey will apeear in plain text as an \n environment variable in the lambda function console."
+  description = "Store the API key in AWS Secrets Manager. ApiKeys are stored in secret manager \nby default. If this option is set to false, the ApiKey will appear in plain text as an \n environment variable in the lambda function console."
   type        = bool
   default     = true
 }
