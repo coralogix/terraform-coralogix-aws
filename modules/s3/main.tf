@@ -70,7 +70,7 @@ module "lambda" {
   create_package         = false
   destination_on_failure = aws_sns_topic.this.arn
   environment_variables = {
-    CORALOGIX_URL         = var.custom_url == "" ? "https://ingress.${lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe")}${module.locals.coralogix_url_seffix}" : var.custom_url
+    CORALOGIX_URL         = var.custom_url == "" ? "https://${lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe")}${module.locals.coralogix_url_seffix}" : var.custom_url
     CORALOGIX_BUFFER_SIZE = tostring(var.buffer_size)
     private_key           = var.private_key
     app_name              = var.application_name
@@ -125,7 +125,7 @@ module "lambdaSM" {
   create_package         = false
   destination_on_failure = aws_sns_topic.this.arn
   environment_variables = {
-    CORALOGIX_URL           = var.custom_url == "" ? "https://ingress.${lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe")}${module.locals.coralogix_url_seffix}" : var.custom_url
+    CORALOGIX_URL           = var.custom_url == "" ? "https://${lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe")}${module.locals.coralogix_url_seffix}" : var.custom_url
     CORALOGIX_BUFFER_SIZE   = tostring(var.buffer_size)
     AWS_LAMBDA_EXEC_WRAPPER = "/opt/wrapper.sh"
     SECRET_NAME             = var.create_secret == "False" ? var.private_key : ""

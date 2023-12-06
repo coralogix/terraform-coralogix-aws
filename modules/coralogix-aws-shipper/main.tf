@@ -1,16 +1,36 @@
-module "locals" {
-  source = "../locals_variables"
-
-  integration_type = var.integration_type
-  random_string    = random_string.this.result
-}
-
 locals {
+
+  function_name = "Coralogix-${var.integration_type}-${random_string.this.result}"
+
+  coralogix_regions = {
+    Europe    = "coralogix.com"
+    Europe2   = "eu2.coralogix.com"
+    India     = "coralogix.in"
+    Singapore = "coralogixsg.com"
+    US        = "coralogix.us"
+    US2       = "cx498.coralogix.com"
+  }
+
+  coralogix_url_seffix = "/api/v1/logs"
+
+  tags = {
+    Provider = "Coralogix"
+    License  = "Apache-2.0"
+  }
+
+  s3_suffix_map = {
+    CloudTrail    = ".json.gz"
+    VpcFlow = ".log.gz"
+  }
+
   sns_enable = var.sns_topic_name != "" ? true : false
+
   log_groups = {
     for group in var.log_groups : group =>
     length(group) > 100 ? "${substr(replace(group, "/", "_"), 0, 95)}_${substr(sha256(group), 0, 4)}" : replace(group, "/", "_")
   }
+
+  api_key_is_arn = replace(var.api_key, ":", "") != var.api_key ? true : false
 }
 
 data "aws_cloudwatch_log_group" "this" {
@@ -33,7 +53,7 @@ data "aws_sns_topic" "sns_topic" {
 }
 
 data "aws_iam_policy_document" "topic" {
-  count = local.sns_enable && var.integration_type != "cloudwatch" ? 1 : 0
+  count = local.sns_enable && var.integration_type != "CloudWatch" ? 1 : 0
   statement {
     effect = "Allow"
 
@@ -69,7 +89,7 @@ module "lambda" {
   depends_on             = [null_resource.s3_bucket_copy]
   source                 = "terraform-aws-modules/lambda/aws"
   version                = "3.2.1"
-  function_name          = module.locals.function_name
+  function_name          = local.function_name
   description            = "Send logs to Coralogix."
   handler                = "bootstrap"
   runtime                = "provided.al2"
@@ -81,10 +101,10 @@ module "lambda" {
   vpc_subnet_ids         = var.subnet_ids
   vpc_security_group_ids = var.security_group_ids
   environment_variables = {
-    CORALOGIX_ENDPOINT    = var.custom_url == "" ? "https://ingress.${lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe")}" : var.custom_url
+    CORALOGIX_ENDPOINT    = var.custom_url != "" ? var.custom_url : var.subnet_ids == "" ? "https://ingress.${lookup(local.coralogix_regions, var.coralogix_region, "Europe")}" :  "https://ingress.private.${lookup(local.coralogix_regions, var.coralogix_region, "Europe")}"
     INTEGRATION_TYPE      = var.integration_type
-    RUST_LOG              = var.rust_log
-    CORALOGIX_API_KEY     = var.store_api_key_in_secrets_manager ? "CoralogixApiKey" : var.api_key
+    RUST_LOG              = var.log_level
+    CORALOGIX_API_KEY     = var.store_api_key_in_secrets_manager && !local.api_key_is_arn ? aws_secretsmanager_secret.coralogix_secret[0].name : var.api_key
     APP_NAME         = var.application_name
     SUB_NAME         = var.subsystem_name
     NEWLINE_PATTERN  = var.newline_pattern
@@ -97,14 +117,14 @@ module "lambda" {
   }
   policy_path                             = "/coralogix/"
   role_path                               = "/coralogix/"
-  role_name                               = "${module.locals.function_name}-Role"
-  role_description                        = "Role for ${module.locals.function_name} Lambda Function."
-  cloudwatch_logs_retention_in_days       = var.cloudwatch_logs_retention_in_days
+  role_name                               = "${local.function_name}-Role"
+  role_description                        = "Role for ${local.function_name} Lambda Function."
+  cloudwatch_logs_retention_in_days       = var.lambda_log_retention
   create_current_version_allowed_triggers = false
   create_async_event_config               = true
   attach_async_event_policy               = true
-  attach_policy_statements                = var.integration_type == "cloudwatch" ? false : true
-  policy_statements = var.integration_type != "cloudwatch" ? {
+  attach_policy_statements                = var.integration_type == "CloudWatch" ? false : true
+  policy_statements = var.integration_type != "CloudWatch" ? {
     S3 = {
       effect    = "Allow"
       actions   = ["s3:GetObject"]
@@ -136,7 +156,7 @@ module "lambda" {
   # Allow the trigger from the log groups otherwise it will check if sns in enabled in
   # case that it's not then the trigger will be triggered from the bucket
 
-  allowed_triggers = var.integration_type == "cloudwatch" ? {
+  allowed_triggers = var.integration_type == "CloudWatch" ? {
     for key, value in local.log_groups : value => {
       principal  = "logs.amazonaws.com"
       source_arn = "${data.aws_cloudwatch_log_group.this[key].arn}:*"
@@ -148,7 +168,7 @@ module "lambda" {
     }
   } : {}
 
-  tags = merge(var.tags, module.locals.tags)
+  tags = merge(var.tags, local.tags)
 }
 
 ###################################
@@ -156,26 +176,15 @@ module "lambda" {
 ###################################
 
 resource "aws_s3_bucket_notification" "lambda_notification" {
-  count  = var.integration_type == "cloudwatch" ? 0 : local.sns_enable == false ? 1 : 0
+  count  = var.integration_type == "CloudWatch" ? 0 : local.sns_enable == false ? 1 : 0
   bucket = data.aws_s3_bucket.this[0].bucket
   lambda_function {
     lambda_function_arn = module.lambda.lambda_function_arn
     events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = var.integration_type == "s3" || var.s3_key_prefix != null ? var.s3_key_prefix : "AWSLogs/${data.aws_caller_identity.this.account_id}/${lookup(module.locals.s3_prefix_map, var.integration_type)}/"
-    filter_suffix       = var.integration_type == "s3" || var.s3_key_suffix != null ? var.s3_key_suffix : lookup(module.locals.s3_suffix_map, var.integration_type)
+    filter_prefix       = var.integration_type == "S3" || var.s3_key_prefix != null ? var.s3_key_prefix : "AWSLogs/"
+    filter_suffix       = var.integration_type == "S3" || var.s3_key_suffix != null ? var.s3_key_suffix : lookup(local.s3_suffix_map, var.integration_type)
   }
 }
-
-# resource "aws_s3_bucket_notification" "topic_notification" {
-#   count  = var.integration_type == "cloudwatch" ? 0 : local.sns_enable == true ? 1 : 0
-#   bucket = data.aws_s3_bucket.this.bucket
-#   topic {
-#     topic_arn     = data.aws_sns_topic.sns_topic[count.index].arn
-#     events        = ["s3:ObjectCreated:*"]
-#     filter_prefix = var.integration_type == "s3-sns" || var.s3_key_prefix != null ? var.s3_key_prefix : "AWSLogs/${data.aws_caller_identity.this.account_id}/Cloudtrail/"
-#     filter_suffix = var.integration_type == "s3-sns" || var.s3_key_suffix != null ? var.s3_key_suffix : ".json.gz"
-#   }
-# }
 
 ###########################################
 #### cloudwatch  integration resources ####
@@ -196,9 +205,9 @@ resource "aws_cloudwatch_log_subscription_filter" "this" {
 }
 
 resource "aws_sns_topic" "this" {
-  name_prefix  = "${module.locals.function_name}-Failure"
-  display_name = "${module.locals.function_name}-Failure"
-  tags         = merge(var.tags, module.locals.tags)
+  name_prefix  = "${local.function_name}-Failure"
+  display_name = "${local.function_name}-Failure"
+  tags         = merge(var.tags, local.tags)
 }
 
 resource "aws_sns_topic_subscription" "this" {
@@ -213,7 +222,7 @@ resource "aws_lambda_permission" "sns_lambda_permission" {
   count         = local.sns_enable ? 1 : 0
   statement_id  = "AllowExecutionFromSNS"
   action        = "lambda:InvokeFunction"
-  function_name = module.locals.function_name
+  function_name = local.function_name
   principal     = "sns.amazonaws.com"
   source_arn    = data.aws_sns_topic.sns_topic[count.index].arn
   depends_on    = [data.aws_sns_topic.sns_topic]
@@ -234,8 +243,8 @@ resource "aws_sns_topic_subscription" "lambda_sns_subscription" {
 }
 
 resource "aws_secretsmanager_secret" "coralogix_secret" {
-  count       = var.store_api_key_in_secrets_manager ? 1 : 0
-  name        = "CoralogixApiKey-${module.locals.function_name}"
+  count       = var.store_api_key_in_secrets_manager && !local.api_key_is_arn? 1 : 0
+  name        = "lambda/coralogix/${data.aws_region.this.name}/coralogix-aws-shipper/${local.function_name}"
   description = "Coralogix Send Your Data key Secret"
 
   lifecycle {
@@ -244,7 +253,7 @@ resource "aws_secretsmanager_secret" "coralogix_secret" {
 }
 
 resource "aws_secretsmanager_secret_version" "service_user" {
-  count         = var.store_api_key_in_secrets_manager ? 1 : 0
+  count         = var.store_api_key_in_secrets_manager && !local.api_key_is_arn? 1 : 0
   depends_on    = [aws_secretsmanager_secret.coralogix_secret]
   secret_id     = aws_secretsmanager_secret.coralogix_secret[count.index].id
   secret_string = var.api_key

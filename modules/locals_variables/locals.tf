@@ -2,12 +2,12 @@ locals {
   function_name = "Coralogix-${var.integration_type}-${var.random_string}"
 
   coralogix_regions = {
-    Europe    = "coralogix.com"
-    Europe2   = "eu2.coralogix.com"
-    India     = "coralogix.in"
-    Singapore = "coralogixsg.com"
-    US        = "coralogix.us"
-    US2       = "cx498.coralogix.com"
+    Europe    = "ingress.coralogix.com"
+    Europe2   = "ingress.eu2.coralogix.com"
+    India     = "ingress.coralogix.in"
+    Singapore = "ingress.coralogixsg.com"
+    US        = "ingress.coralogix.us"
+    US2       = "ingress.cx498.coralogix.com"
   }
 
   coralogix_domains = {
