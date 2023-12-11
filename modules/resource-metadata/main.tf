@@ -68,13 +68,16 @@ module "lambda" {
   create_package         = false
   destination_on_failure = aws_sns_topic.this.arn
   environment_variables = {
-    CORALOGIX_METADATA_URL       = lookup(local.coralogix_regions, var.coralogix_region, "Europe")
-    private_key                  = var.private_key
-    LATEST_VERSIONS_PER_FUNCTION = var.latest_versions_per_function
-    COLLECT_ALIASES              = var.collect_aliases
-    RESOURCE_TTL_MINUTES         = var.resource_ttl_minutes
-    AWS_RETRY_MODE               = "adaptive"
-    AWS_MAX_ATTEMPTS             = 10
+    CORALOGIX_METADATA_URL               = lookup(local.coralogix_regions, var.coralogix_region, "Europe")
+    private_key                          = var.private_key
+    LATEST_VERSIONS_PER_FUNCTION         = var.latest_versions_per_function
+    COLLECT_ALIASES                      = var.collect_aliases
+    LAMBDA_FUNCTION_INCLUDE_REGEX_FILTER = var.lambda_function_include_regex_filter
+    LAMBDA_FUNCTION_EXCLUDE_REGEX_FILTER = var.lambda_function_exclude_regex_filter
+    LAMBDA_FUNCTION_TAG_FILTERS          = var.lambda_function_tag_filters
+    RESOURCE_TTL_MINUTES                 = var.resource_ttl_minutes
+    AWS_RETRY_MODE                       = "adaptive"
+    AWS_MAX_ATTEMPTS                     = 10
   }
   s3_existing_package = {
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
@@ -130,14 +133,17 @@ module "lambdaSM" {
   create_package         = false
   destination_on_failure = aws_sns_topic.this.arn
   environment_variables = {
-    CORALOGIX_METADATA_URL       = lookup(local.coralogix_regions, var.coralogix_region, "Europe")
-    AWS_LAMBDA_EXEC_WRAPPER      =  "/opt/wrapper.sh"
-    SECRET_NAME                  = var.create_secret == "False" ? var.private_key : ""
-    LATEST_VERSIONS_PER_FUNCTION = var.latest_versions_per_function
-    RESOURCE_TTL_MINUTES         = var.resource_ttl_minutes
-    COLLECT_ALIASES              = var.collect_aliases
-    AWS_RETRY_MODE               = "adaptive"
-    AWS_MAX_ATTEMPTS             = 10
+    CORALOGIX_METADATA_URL               = lookup(local.coralogix_regions, var.coralogix_region, "Europe")
+    AWS_LAMBDA_EXEC_WRAPPER              =  "/opt/wrapper.sh"
+    SECRET_NAME                          = var.create_secret == "False" ? var.private_key : ""
+    LATEST_VERSIONS_PER_FUNCTION         = var.latest_versions_per_function
+    RESOURCE_TTL_MINUTES                 = var.resource_ttl_minutes
+    COLLECT_ALIASES                      = var.collect_aliases
+    LAMBDA_FUNCTION_INCLUDE_REGEX_FILTER = var.lambda_function_include_regex_filter
+    LAMBDA_FUNCTION_EXCLUDE_REGEX_FILTER = var.lambda_function_exclude_regex_filter
+    LAMBDA_FUNCTION_TAG_FILTERS          = var.lambda_function_tag_filters
+    AWS_RETRY_MODE                       = "adaptive"
+    AWS_MAX_ATTEMPTS                     = 10
   }
   s3_existing_package = {
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket

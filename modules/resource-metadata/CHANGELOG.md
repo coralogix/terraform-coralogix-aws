@@ -2,6 +2,9 @@
 
 ## resource-metadata
 
+### 0.0.6 / 11.12.2023
+* [Update] Add filtering of Lambda functions.
+
 ### 0.0.5 / 4.10.2023
 * [bug_fix] Add secret_manager_enabled variable to allow the use of lambda-SecretLayer in the same run with this module 
 
