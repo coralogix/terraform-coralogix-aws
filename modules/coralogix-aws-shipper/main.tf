@@ -170,7 +170,7 @@ resource "aws_s3_bucket_notification" "lambda_notification" {
   lambda_function {
     lambda_function_arn = module.lambda.lambda_function_arn
     events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = var.s3_key_prefix != null || var.integration_type != "CloudTrail" ? var.s3_key_prefix : "AWSLogs/"
+    filter_prefix       = var.s3_key_prefix != null || (var.integration_type != "CloudTrail" && var.integration_type != "VpcFlow") ? var.s3_key_prefix : "AWSLogs/"
     filter_suffix       = var.integration_type == "S3" || var.s3_key_suffix != null ? var.s3_key_suffix : lookup(local.s3_suffix_map, var.integration_type)
   }
 }
