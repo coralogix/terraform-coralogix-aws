@@ -7,8 +7,8 @@ variable "coralogix_region" {
   }
 }
 
-variable "custom_url" {
-  description = "Your Custom URL for the Coralogix account."
+variable "custom_domain" {
+  description = "Your Custom domain for the Coralogix account."
   type        = string
   default     = ""
 }
@@ -111,8 +111,8 @@ variable "integration_type" {
   description = "the aws service that send the data to the s3"
   type        = string
   validation {
-    condition     = contains(["CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv"], var.integration_type)
-    error_message = "The integration type must be: [CloudWatch, CloudTrail, VpcFlow, S3, S3Csv]."
+    condition     = contains(["CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv", "Sns"], var.integration_type)
+    error_message = "The integration type must be: [CloudWatch, CloudTrail, VpcFlow, S3, S3Csv, Sns]."
   }
 }
 

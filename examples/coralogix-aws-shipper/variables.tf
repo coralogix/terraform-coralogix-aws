@@ -7,8 +7,8 @@ variable "coralogix_region" {
   }
 }
 
-variable "custom_url" {
-  description = "Your Custom URL for the Coralogix account."
+variable "custom_domain" {
+  description = "Your Custom domain for the Coralogix account."
   type        = string
   default     = ""
 }
@@ -74,13 +74,13 @@ variable "log_groups" {
 variable "subnet_ids" {
   description = "ID of Subnet into which to deploy the integration"
   type        = list(string)
-  default     = [""]
+  default     = null
 }
 
 variable "security_group_ids" {
   description = "ID of the SecurityGroup into which to deploy the integration"
   type        = list(string)
-  default     = [""]
+  default     = null
 }
 
 variable "memory_size" {
@@ -111,8 +111,8 @@ variable "integration_type" {
   description = "the aws service that send the data to the s3"
   type        = string
   validation {
-    condition     = contains(["CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv"], var.integration_type)
-    error_message = "The integration type must be: [CloudWatch, CloudTrail, VpcFlow, S3, S3Csv]."
+    condition     = contains(["CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv", "Sns"], var.integration_type)
+    error_message = "The integration type must be: [CloudWatch, CloudTrail, VpcFlow, S3, S3Csv, Sns]."
   }
 }
 
@@ -133,7 +133,7 @@ variable "log_level" {
   description = "Log level for the Lambda function. Can be one of: INFO, WARNING, ERROR, DEBUG"
   default     = "INFO"
   validation {
-    condition     = contains(["INFO", "ERROR", "WARNING", "DEBUG"], var.rust_log)
+    condition     = contains(["INFO", "ERROR", "WARNING", "DEBUG"], var.log_level)
     error_message = "The log leavel must be one of these values: [DEBUG, WARNING, ERROR, INFO]."
   }
 }

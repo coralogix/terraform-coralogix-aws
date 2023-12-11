@@ -1,23 +1,5 @@
 locals {
 
-  function_name = "Coralogix-${var.integration_type}-${random_string.this.result}"
-
-  coralogix_regions = {
-    Europe    = "coralogix.com"
-    Europe2   = "eu2.coralogix.com"
-    India     = "coralogix.in"
-    Singapore = "coralogixsg.com"
-    US        = "coralogix.us"
-    US2       = "cx498.coralogix.com"
-  }
-
-  coralogix_url_seffix = "/api/v1/logs"
-
-  tags = {
-    Provider = "Coralogix"
-    License  = "Apache-2.0"
-  }
-
   s3_suffix_map = {
     CloudTrail    = ".json.gz"
     VpcFlow = ".log.gz"
@@ -31,6 +13,13 @@ locals {
   }
 
   api_key_is_arn = replace(var.api_key, ":", "") != var.api_key ? true : false
+}
+
+module "locals" {
+  source = "../locals_variables"
+
+  integration_type = var.integration_type
+  random_string    = random_string.this.result
 }
 
 data "aws_cloudwatch_log_group" "this" {
@@ -53,7 +42,7 @@ data "aws_sns_topic" "sns_topic" {
 }
 
 data "aws_iam_policy_document" "topic" {
-  count = local.sns_enable && var.integration_type != "CloudWatch" ? 1 : 0
+  count = local.sns_enable && var.integration_type != "CloudWatch" && var.integration_type != "Sns" ? 1 : 0
   statement {
     effect = "Allow"
 
@@ -81,7 +70,7 @@ resource "random_string" "this" {
 resource "null_resource" "s3_bucket_copy" {
   count = var.custom_s3_bucket == "" ? 0 : 1
   provisioner "local-exec" {
-    command = "curl -o ${var.integration_type}.zip https://coralogix-serverless-repo-eu-central-1.s3.eu-central-1.amazonaws.com/coralogix-aws-serverless-rust.zip ; aws s3 cp ./coralogix-aws-serverless-rust.zip s3://coralogix-aws-serverless-rust.zip ; rm ./coralogix-aws-serverless-rust.zip"
+    command = "curl -o coralogix-aws-shipper.zip https://coralogix-serverless-repo-eu-central-1.s3.eu-central-1.amazonaws.com/coralogix-aws-shipper.zip ; aws s3 cp ./coralogix-aws-shipper.zip s3://coralogix-aws-shipper.zip ; rm ./coralogix-aws-shipper.zip"
   }
 }
 
@@ -89,7 +78,7 @@ module "lambda" {
   depends_on             = [null_resource.s3_bucket_copy]
   source                 = "terraform-aws-modules/lambda/aws"
   version                = "3.2.1"
-  function_name          = local.function_name
+  function_name          = module.locals.function_name
   description            = "Send logs to Coralogix."
   handler                = "bootstrap"
   runtime                = "provided.al2"
@@ -101,7 +90,7 @@ module "lambda" {
   vpc_subnet_ids         = var.subnet_ids
   vpc_security_group_ids = var.security_group_ids
   environment_variables = {
-    CORALOGIX_ENDPOINT    = var.custom_url != "" ? var.custom_url : var.subnet_ids == null ? "https://ingress.${lookup(local.coralogix_regions, var.coralogix_region, "Europe")}" :  "https://ingress.private.${lookup(local.coralogix_regions, var.coralogix_region, "Europe")}"
+    CORALOGIX_ENDPOINT    = var.custom_domain != "" ? "https://ingress.${var.custom_domain}" : var.subnet_ids == null ? "https://ingress.${lookup(module.locals.coralogix_domains, var.coralogix_region, "Europe")}" :  "https://ingress.private.${lookup(module.locals.coralogix_domains, var.coralogix_region, "Europe")}"
     INTEGRATION_TYPE      = var.integration_type
     RUST_LOG              = var.log_level
     CORALOGIX_API_KEY     = var.store_api_key_in_secrets_manager && !local.api_key_is_arn ? aws_secretsmanager_secret.coralogix_secret[0].arn : var.api_key
@@ -117,14 +106,14 @@ module "lambda" {
   }
   policy_path                             = "/coralogix/"
   role_path                               = "/coralogix/"
-  role_name                               = "${local.function_name}-Role"
-  role_description                        = "Role for ${local.function_name} Lambda Function."
+  role_name                               = "${module.locals.function_name}-Role"
+  role_description                        = "Role for ${module.locals.function_name} Lambda Function."
   cloudwatch_logs_retention_in_days       = var.lambda_log_retention
   create_current_version_allowed_triggers = false
   create_async_event_config               = true
   attach_async_event_policy               = true
-  attach_policy_statements                = var.integration_type == "CloudWatch" ? false : true
-  policy_statements = var.integration_type != "CloudWatch" ? {
+  attach_policy_statements                = true
+  policy_statements = var.integration_type != "CloudWatch"  && var.integration_type != "Sns" ? {
     S3 = {
       effect    = "Allow"
       actions   = ["s3:GetObject"]
@@ -168,7 +157,7 @@ module "lambda" {
     }
   } : {}
 
-  tags = merge(var.tags, local.tags)
+  tags = merge(var.tags, module.locals.tags)
 }
 
 ###################################
@@ -181,7 +170,7 @@ resource "aws_s3_bucket_notification" "lambda_notification" {
   lambda_function {
     lambda_function_arn = module.lambda.lambda_function_arn
     events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = var.integration_type == "S3" || var.s3_key_prefix != null ? var.s3_key_prefix : "AWSLogs/"
+    filter_prefix       = var.s3_key_prefix != null || var.integration_type != "CloudTrail" ? var.s3_key_prefix : "AWSLogs/"
     filter_suffix       = var.integration_type == "S3" || var.s3_key_suffix != null ? var.s3_key_suffix : lookup(local.s3_suffix_map, var.integration_type)
   }
 }
@@ -205,9 +194,9 @@ resource "aws_cloudwatch_log_subscription_filter" "this" {
 }
 
 resource "aws_sns_topic" "this" {
-  name_prefix  = "${local.function_name}-Failure"
-  display_name = "${local.function_name}-Failure"
-  tags         = merge(var.tags, local.tags)
+  name_prefix  = "${module.locals.function_name}-Failure"
+  display_name = "${module.locals.function_name}-Failure"
+  tags         = merge(var.tags, module.locals.tags)
 }
 
 resource "aws_sns_topic_subscription" "this" {
@@ -222,14 +211,14 @@ resource "aws_lambda_permission" "sns_lambda_permission" {
   count         = local.sns_enable ? 1 : 0
   statement_id  = "AllowExecutionFromSNS"
   action        = "lambda:InvokeFunction"
-  function_name = local.function_name
+  function_name = module.locals.function_name
   principal     = "sns.amazonaws.com"
   source_arn    = data.aws_sns_topic.sns_topic[count.index].arn
   depends_on    = [data.aws_sns_topic.sns_topic]
 }
 
 resource "aws_sns_topic_policy" "test" {
-  count  = local.sns_enable ? 1 : 0
+  count  = local.sns_enable && var.integration_type != "Sns" ? 1 : 0
   arn    = data.aws_sns_topic.sns_topic[count.index].arn
   policy = data.aws_iam_policy_document.topic[count.index].json
 }
@@ -244,7 +233,7 @@ resource "aws_sns_topic_subscription" "lambda_sns_subscription" {
 
 resource "aws_secretsmanager_secret" "coralogix_secret" {
   count       = var.store_api_key_in_secrets_manager && !local.api_key_is_arn? 1 : 0
-  name        = "lambda/coralogix/${data.aws_region.this.name}/coralogix-aws-shipper/${local.function_name}"
+  name        = "lambda/coralogix/${data.aws_region.this.name}/coralogix-aws-shipper/${module.locals.function_name}"
   description = "Coralogix Send Your Data key Secret"
 
   lifecycle {

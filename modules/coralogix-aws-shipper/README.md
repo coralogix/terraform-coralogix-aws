@@ -29,8 +29,8 @@ Coralogix provides a predefined AWS Lambda function to easily forward your logs 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | The Coralogix location region, possible options are [`Europe`, `Europe2`, `India`, `Singapore`, `US`, `US2`, `Custom`] | `string` | n/a | yes |
-| <a name="input_custom_url"></a> [custom_url](#input\_custom\_domain) | The Custom Domain. If set, will be the domain used to send telemetry (e.g. cx123.coralogix.com)| `string` | n/a | no |
-| <a name="input_integration_type"></a> [integration_type](#input\_data\_type) | The integration type. Can be one of: CloudWatch, CloudTrail, VpcFlow, S3, S3Csv' | `string` | n/a | yes |
+| <a name="input_custom_domain"></a> [custom_domain](#input\_custom\_domain) | The Custom Domain. If set, will be the domain used to send telemetry (e.g. cx123.coralogix.com)| `string` | n/a | no |
+| <a name="input_integration_type"></a> [integration_type](#input\_data\_type) | The integration type. Can be one of: CloudWatch, CloudTrail, VpcFlow, S3, S3Csv,Sns' | `string` | n/a | yes |
 | <a name="input_api_key"></a> [api\_key](#input\_api_\_key) | Your Coralogix Send Your Data - [API Key](https://coralogix.com/docs/send-your-data-api-key/) which is used to validate your authenticity, This value can be a Coralogix API Key or an AWS Secret Manager ARN that holds the API Key| `string` | n/a | yes |
 | <a name="input_store_api_key_in_secrets_manager"></a> [store\_api\_key\_in\_secrets\_manager](#input\_store\_api\_key\_in\_secrets\_manager) | Store the API key in AWS Secrets Manager.  If this option is set to false, the ApiKey will appear in plain text as an environment variable in the lambda function console.| bool | true | no |
 | <a name="application_name"></a> [application\_name](#input\_application\_name) | The [name](https://coralogix.com/docs/application-and-subsystem-names/) of your application. for dynamically value from the log you should use $.my_log.field | string | n\a | yes | 
@@ -44,7 +44,6 @@ Coralogix provides a predefined AWS Lambda function to easily forward your logs 
 | <a name="input_s3_bucket_name"></a> [s3\_bucket\_name](#input\_s3\_bucket\_name) | The name of the S3 bucket to watch | `string` | n/a | yes |
 | <a name="input_s3_key_prefix"></a> [s3\_key\_prefix](#input\_s3\_key\_prefix) | The S3 path prefix to watch | `string` |  n/a | no |
 | <a name="input_s3_key_suffix"></a> [s3\_key\_suffix](#input\_s3\_key\_suffix) | The S3 path suffix to watch | `string` |  n/a` | no |
-| <a name="input_sns_topic_name"></a> [sns_topic_name](#input\_sns\_topic\_name) | The SNS topic that will contain the SNS subscription, need only if you use the sns integration | `string` |  n/a | no |
 | <a name="input_csv_delimiter"></a> [csv_delimiter](#input\_csv\_delimiter) | Single Character for using as a Delimiter when ingesting CSV (This value is applied when the s3_csv integration type is selected), e.g. "," or " "  | `string` |  n/a | no |
 | <a name="input_newline_pattern"></a> [newline\_pattern](#input\_newline\_pattern) | The pattern for lines splitting | `string` | n/a | no |
 
@@ -53,8 +52,12 @@ Coralogix provides a predefined AWS Lambda function to easily forward your logs 
 
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
-| <a name="input_log_groups"></a> [log\_groups](#input\_log\_groups) | The names of the CloudWatch log groups to watch | `list(string)` | n/a | yes |
+| <a name="input_sns_topic_name"></a> [sns_topic_name](#input\_sns\_topic\_name) | The SNS topic that will contain the SNS subscription, need only if you use the sns integration | `string` |  n/a | no |
 
+### Integration SNS configuration
+| Name | Description | Type | Default | Required | 
+|------|-------------|------|---------|:--------:|
+| <a name="input_log_groups"></a> [log\_groups](#input\_log\_groups) | The names of the CloudWatch log groups to watch | `list(string)` | n/a | yes |
 
 ### Integration Generic Config (Optional)
 
