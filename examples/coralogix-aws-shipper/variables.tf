@@ -5,31 +5,18 @@ variable "coralogix_region" {
     condition     = contains(["Europe", "Europe2", "India", "Singapore", "US", "US2", "Custom"], var.coralogix_region)
     error_message = "The coralogix region must be one of these values: [Europe, Europe2, India, Singapore, US, US2, Custom]."
   }
-  default = "Europe"
 }
 
-variable "custom_url" {
-  description = "Your Custom URL for the Coralogix account."
+variable "custom_domain" {
+  description = "Your Custom domain for the Coralogix account."
   type        = string
   default     = ""
 }
 
-variable "private_key" {
-  description = "Your Coralogix Send Your Data - API Key or incase you use pre created secret (created in AWS secret manager) put here the name of the secret that contains the Coralogix send your data key"
+variable "api_key" {
+  description = "Your Coralogix Send Your Data - API Key which is used to validate your authenticity, This value can be a Coralogix API Key or an AWS Secret Manager ARN that holds the API Key"
   type        = string
   sensitive   = true
-}
-
-variable "secret_manager_enabled" {
-  description = "Set to true in case that you want to keep your Coralogix Send Your Data API Key as a secret in aws Secret Manager "
-  type        = bool
-  default     = false
-}
-
-variable "layer_arn" {
-  description = "In case you are using Secret Manager This is the ARN of the Coralogix Security lambda Layer."
-  type        = string
-  default     = ""
 }
 
 variable "application_name" {
@@ -42,16 +29,10 @@ variable "subsystem_name" {
   type        = string
 }
 
-variable "package_name" {
-  description = "The name of the package to use for the function"
-  type        = string
-  default     = "s3"
-}
-
 variable "newline_pattern" {
   description = "The pattern for lines splitting"
   type        = string
-  default     = "(?:\\r\\n|\\r|\\n)"
+  default     = ""
 }
 
 variable "blocking_pattern" {
@@ -60,38 +41,45 @@ variable "blocking_pattern" {
   default     = ""
 }
 
-variable "buffer_size" {
-  description = "Coralogix logger buffer size"
-  type        = number
-  default     = 134217728
-}
-
 variable "sampling_rate" {
   description = "Send messages with specific rate"
   type        = number
   default     = 1
 }
 
-variable "debug" {
-  description = "Coralogix logger debug mode"
-  type        = bool
-  default     = false
-}
-
 variable "s3_bucket_name" {
   description = "The name of the S3 bucket to watch"
   type        = string
+  default     = null
 }
 
 variable "s3_key_prefix" {
-  description = "The S3 path prefix to watch"
+  description = "The AWS S3 path prefix to watch. This value is ignored when the SNSTopicArn parameter is provided."
   type        = string
   default     = null
 }
 
 variable "s3_key_suffix" {
-  description = "The S3 path suffix to watch"
+  description = "The AWS S3 path suffix to watch. This value is ignored when the SNSTopicArn parameter is provided."
   type        = string
+  default     = null
+}
+
+variable "log_groups" {
+  description = "The names of the CloudWatch log groups to watch"
+  type        = list(string)
+  default     = []
+}
+
+variable "subnet_ids" {
+  description = "ID of Subnet into which to deploy the integration"
+  type        = list(string)
+  default     = null
+}
+
+variable "security_group_ids" {
+  description = "ID of the SecurityGroup into which to deploy the integration"
+  type        = list(string)
   default     = null
 }
 
@@ -105,12 +93,6 @@ variable "timeout" {
   description = "Lambda function timeout limit"
   type        = number
   default     = 300
-}
-
-variable "architecture" {
-  description = "Lambda function architecture"
-  type        = string
-  default     = "x86_64"
 }
 
 variable "notification_email" {
@@ -129,8 +111,8 @@ variable "integration_type" {
   description = "the aws service that send the data to the s3"
   type        = string
   validation {
-    condition     = contains(["cloudtrail", "vpc-flow-logs", "s3", "s3-sns", "cloudtrail-sns"], var.integration_type)
-    error_message = "The integration type must be: [cloudtrail, vpc-flow-logs, s3, s3-sns, cloudtrail-sns]."
+    condition     = contains(["CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv", "Sns"], var.integration_type)
+    error_message = "The integration type must be: [CloudWatch, CloudTrail, VpcFlow, S3, S3Csv, Sns]."
   }
 }
 
@@ -146,14 +128,30 @@ variable "custom_s3_bucket" {
   default     = ""
 }
 
-variable "create_secret" {
-  description = "Set to False In case you want to use secrets manager with a predefine secret that was already created and contains Coralogix Send Your Data API key"
+variable "log_level" {
   type        = string
-  default     = "True"
+  description = "Log level for the Lambda function. Can be one of: INFO, WARNING, ERROR, DEBUG"
+  default     = "INFO"
+  validation {
+    condition     = contains(["INFO", "ERROR", "WARNING", "DEBUG"], var.log_level)
+    error_message = "The log leavel must be one of these values: [DEBUG, WARNING, ERROR, INFO]."
+  }
 }
 
-variable "cloudwatch_logs_retention_in_days" {
-  description = "Retention time of the Cloudwatch log group in which the logs of the lambda function are written to"
+variable "lambda_log_retention" {
+  description = "CloudWatch log retention days for logs generated by the Lambda function"
   type        = number
-  default     = null
+  default     = 5
+}
+
+variable "store_api_key_in_secrets_manager" {
+  description = "Store the API key in AWS Secrets Manager. ApiKeys are stored in secret manager \nby default. If this option is set to false, the ApiKey will appear in plain text as an \n environment variable in the lambda function console."
+  type        = bool
+  default     = true
+}
+
+variable "cs_delimiter" {
+  type = string
+  description = "The delimiter used in the CSV file to process This value is applied when the S3Csv integration type is selected"
+  default = ","
 }
