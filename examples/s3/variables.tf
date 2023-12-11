@@ -157,4 +157,3 @@ variable "cloudwatch_logs_retention_in_days" {
   type        = number
   default     = null
 }
-

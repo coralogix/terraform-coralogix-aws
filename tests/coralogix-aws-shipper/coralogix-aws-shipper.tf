@@ -20,7 +20,7 @@ module "s3" {
   application_name = "s3"
   subsystem_name   = "logs"
   s3_bucket_name   = "github-action-bucket-testing"
-  integration_type = "s3"
+  integration_type = "S3"
 }
 module "cloudwatch" {
   source = "../../modules/coralogix-aws-shipper"
@@ -30,5 +30,5 @@ module "cloudwatch" {
   application_name = "cloudwatch-logs"
   subsystem_name   = "logs"
   log_groups       = ["github-action-testing-log-stream"]
-  integration_type = "cloudwatch"
+  integration_type = "CloudWatch"
 }
