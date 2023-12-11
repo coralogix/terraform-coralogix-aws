@@ -42,7 +42,7 @@ module "lambda" {
   vpc_security_group_ids = var.security_group_ids
   attach_network_policy  = true
   environment_variables = {
-    CORALOGIX_URL   = var.custom_url == "" ? "${lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe")}" : var.custom_url
+    CORALOGIX_URL   = var.custom_url == "" ? lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe") : var.custom_url
     private_key     = var.private_key
     app_name        = var.application_name
     sub_name        = var.subsystem_name
@@ -89,7 +89,7 @@ module "lambdaSM" {
   vpc_security_group_ids = var.security_group_ids
   attach_network_policy  = true
   environment_variables = {
-    CORALOGIX_URL           = var.custom_url == "" ? "${lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe")}" : var.custom_url
+    CORALOGIX_URL           = var.custom_url == "" ? lookup(module.locals.coralogix_regions, var.coralogix_region, "Europe") : var.custom_url
     AWS_LAMBDA_EXEC_WRAPPER = "/opt/wrapper.sh"
     SECRET_NAME             = var.create_secret == "False" ? var.private_key : ""
     private_key             = "****"
