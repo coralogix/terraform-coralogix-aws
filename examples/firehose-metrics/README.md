@@ -1,6 +1,6 @@
 # Firehose Metrics Delivery Streams
 
-To enable `enable_cloudwatch_metricstream` to true. This will create a firehose delivery stream and a CloudWatch metrics stream. Also set `integration_type_metrics` to either 'CloudWatch_Metrics_JSON' or 'CloudWatch_Metrics_OpenTelemetry070' for coralogix to be notified on the format type of metrics streamed.
+To enable `enable_cloudwatch_metricstream` to true. This will create a firehose delivery stream and a CloudWatch metrics stream. Also set `integration_type_metrics` to either 'CloudWatch_Metrics_OpenTelemetry070' or 'CloudWatch_Metrics_OpenTelemetry070_WithAggregations' for coralogix to be notified on the format type of metrics streamed.
 
 ## With the different metrics configurations
 

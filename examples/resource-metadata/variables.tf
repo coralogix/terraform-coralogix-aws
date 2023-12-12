@@ -85,6 +85,24 @@ variable "collect_aliases" {
   default     = "False"
 }
 
+variable "lambda_function_include_regex_filter" {
+  description = "If specified, only lambda functions with ARNs matching the regex will be included in the collected metadata"
+  type        = string
+  default     = null
+}
+
+variable "lambda_function_exclude_regex_filter" {
+  description = "If specified, only lambda functions with ARNs NOT matching the regex will be included in the collected metadata"
+  type        = string
+  default     = null
+}
+
+variable "lambda_function_tag_filters" {
+  description = "If specified, only lambda functions with tags matching the filters will be included in the collected metadata. Values should follow the JSON syntax for --tag-filters as documented here: https://docs.aws.amazon.com/cli/latest/reference/resourcegroupstaggingapi/get-resources.html#options"
+  type        = string
+  default     = null
+}
+
 variable "tags" {
   description = "A map of tags to add to all resources"
   type        = map(string)

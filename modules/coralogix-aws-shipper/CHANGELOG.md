@@ -1,0 +1,3 @@
+# Changelog
+
+## coralogix-aws-shipper
