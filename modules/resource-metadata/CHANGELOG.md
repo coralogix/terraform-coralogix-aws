@@ -2,6 +2,9 @@
 
 ## resource-metadata
 
+### 0.0.7 / 12.11.2023
+* [Change] Add an option to specify the retention time of the CloudWatch log group that is created by the lambda
+
 ### 0.0.6 / 11.12.2023
 * [Update] Add filtering of Lambda functions.
 
