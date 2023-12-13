@@ -13,6 +13,9 @@ locals {
   }
 
   api_key_is_arn = replace(var.api_key, ":", "") != var.api_key ? true : false
+  is_s3_integration = var.integration_type == "S3" || var.integration_type == "CloudTrail" || var.integration_type == "VpcFlow" ? true : false
+  is_sns_integration = local.sns_enable && (var.integration_type == "S3" || var.integration_type == "Sns"  || var.integration_type == "CloudTrail" ) ? true : false
+  is_sqs_integration = var.sqs_name != null && (var.integration_type == "S3" || var.integration_type == "CloudTrail" || var.integration_type == "Sqs") ? true : false
 }
 
 module "locals" {
@@ -31,6 +34,11 @@ data "aws_region" "this" {}
 
 data "aws_caller_identity" "this" {}
 
+data "aws_sqs_queue" "name" {
+  count = var.sqs_name != null ? 1 : 0
+  name = var.sqs_name
+}
+
 data "aws_s3_bucket" "this" {
   count  = var.s3_bucket_name == null ? 0 : 1
   bucket = var.s3_bucket_name
@@ -42,7 +50,7 @@ data "aws_sns_topic" "sns_topic" {
 }
 
 data "aws_iam_policy_document" "topic" {
-  count = local.sns_enable && var.integration_type != "CloudWatch" && var.integration_type != "Sns" ? 1 : 0
+  count = local.sns_enable || var.sqs_name != null ? 1 : 0
   statement {
     effect = "Allow"
 
@@ -51,8 +59,8 @@ data "aws_iam_policy_document" "topic" {
       identifiers = ["s3.amazonaws.com"]
     }
 
-    actions   = ["SNS:Publish"]
-    resources = ["arn:aws:sns:*:*:${data.aws_sns_topic.sns_topic[count.index].name}"]
+    actions   = local.sns_enable ? ["SNS:Publish"] : ["SQS:SendMessage"]
+    resources = local.sns_enable ? ["arn:aws:sns:*:*:${data.aws_sns_topic.sns_topic[count.index].name}"] : ["arn:aws:sqs:*:*:${data.aws_sqs_queue.name[count.index].name}"]
 
     condition {
       test     = "ArnLike"
@@ -113,7 +121,7 @@ module "lambda" {
   create_async_event_config               = true
   attach_async_event_policy               = true
   attach_policy_statements                = true
-  policy_statements = var.integration_type != "CloudWatch"  && var.integration_type != "Sns" ? {
+  policy_statements = local.is_s3_integration && var.sqs_name == null ? {
     S3 = {
       effect    = "Allow"
       actions   = ["s3:GetObject"]
@@ -127,10 +135,30 @@ module "lambda" {
         "secretsmanager:PutSecretValue",
         "secretsmanager:UpdateSecret"
       ]
+      resources = ["*"] 
+    }
+    } : var.sqs_name != null ? {
+    SQS = {
+      effect    = "Allow"
+      actions   = [
+        "sqs:ReceiveMessage",
+        "sqs:DeleteMessage", 
+        "sqs:GetQueueAttributes"
+        ]
+      resources = [data.aws_sqs_queue.name[0].arn]
+    }
+    secret_access_policy = {
+      effect = "Allow"
+      actions = [
+        "secretsmanager:DescribeSecret",
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:PutSecretValue",
+        "secretsmanager:UpdateSecret"
+      ]
       resources = ["*"]
     }
-    } : {
-    secret_access_policy = {
+  } : {
+        secret_access_policy = {
       effect = "Allow"
       actions = [
         "secretsmanager:DescribeSecret",
@@ -150,7 +178,7 @@ module "lambda" {
       principal  = "logs.amazonaws.com"
       source_arn = "${data.aws_cloudwatch_log_group.this[key].arn}:*"
     }
-    } : local.sns_enable != true ? {
+    } : local.sns_enable != true && var.integration_type != "Sqs" ? {
     AllowExecutionFromS3 = {
       principal  = "s3.amazonaws.com"
       source_arn = data.aws_s3_bucket.this[0].arn
@@ -165,7 +193,7 @@ module "lambda" {
 ###################################
 
 resource "aws_s3_bucket_notification" "lambda_notification" {
-  count  = var.integration_type == "CloudWatch" ? 0 : local.sns_enable == false ? 1 : 0
+  count  = local.is_s3_integration && local.sns_enable != true  && var.sqs_name == null? 1 : 0
   bucket = data.aws_s3_bucket.this[0].bucket
   lambda_function {
     lambda_function_arn = module.lambda.lambda_function_arn
@@ -174,6 +202,7 @@ resource "aws_s3_bucket_notification" "lambda_notification" {
     filter_suffix       = (var.integration_type != "CloudTrail" && var.integration_type != "VpcFlow") || var.s3_key_suffix != null ? var.s3_key_suffix : lookup(local.s3_suffix_map, var.integration_type)
   }
 }
+
 
 ###########################################
 #### cloudwatch  integration resources ####
@@ -191,6 +220,63 @@ resource "aws_cloudwatch_log_subscription_filter" "this" {
   log_group_name  = data.aws_cloudwatch_log_group.this[each.key].name
   destination_arn = module.lambda.lambda_function_arn
   filter_pattern  = ""
+}
+
+####################################
+#### SNS  integration resources ####
+####################################
+
+resource "aws_s3_bucket_notification" "topic_notification" {
+  count  = local.sns_enable == true && (var.integration_type == "S3" || var.integration_type == "CloudTrail" ) ? 1 : 0
+  bucket = data.aws_s3_bucket.this[0].bucket
+  topic {
+    topic_arn     = data.aws_sns_topic.sns_topic[0].arn
+    events        = ["s3:ObjectCreated:*"]
+    filter_prefix       = var.s3_key_prefix != null || var.integration_type != "CloudTrail" ? var.s3_key_prefix : "AWSLogs/"
+    filter_suffix       = var.integration_type != "CloudTrail" || var.s3_key_suffix != null ? var.s3_key_suffix : lookup(local.s3_suffix_map, var.integration_type)
+  }
+}
+
+resource "aws_sns_topic_policy" "test" {
+  count  = local.is_sns_integration ? 1 : 0
+  arn    = data.aws_sns_topic.sns_topic[count.index].arn
+  policy = data.aws_iam_policy_document.topic[count.index].json
+}
+
+resource "aws_sns_topic_subscription" "lambda_sns_subscription" {
+  count      = local.sns_enable ? 1 : 0
+  depends_on = [module.lambda]
+  topic_arn  = data.aws_sns_topic.sns_topic[count.index].arn
+  protocol   = "lambda"
+  endpoint   = module.lambda.lambda_function_arn
+}
+
+####################################
+#### SQS  integration resources ####
+####################################
+
+resource "aws_s3_bucket_notification" "sqs_notification" {
+  count  = var.sqs_name != null && (var.integration_type == "S3" || var.integration_type == "CloudTrail" ) ? 1 : 0
+  bucket = data.aws_s3_bucket.this[0].bucket
+  queue {
+    queue_arn     = data.aws_sqs_queue.name[0].arn
+    events        = ["s3:ObjectCreated:*"]
+    filter_prefix       = var.s3_key_prefix != null || var.integration_type != "CloudTrail" ? var.s3_key_prefix : "AWSLogs/"
+    filter_suffix       = var.integration_type != "CloudTrail" || var.s3_key_suffix != null ? var.s3_key_suffix : lookup(local.s3_suffix_map, var.integration_type)
+  }
+}
+
+resource "aws_lambda_event_source_mapping" "sqs" {
+  count = local.is_sqs_integration ? 1 : 0
+  event_source_arn = data.aws_sqs_queue.name[0].arn
+  function_name    = module.lambda.lambda_function_name
+  enabled          = true
+}
+
+resource "aws_sqs_queue_policy" "sqs_policy" {
+  count       = local.is_sqs_integration ? 1 : 0
+  queue_url   = data.aws_sqs_queue.name[count.index].id
+  policy      = data.aws_iam_policy_document.topic[count.index].json
 }
 
 resource "aws_sns_topic" "this" {
@@ -215,20 +301,6 @@ resource "aws_lambda_permission" "sns_lambda_permission" {
   principal     = "sns.amazonaws.com"
   source_arn    = data.aws_sns_topic.sns_topic[count.index].arn
   depends_on    = [data.aws_sns_topic.sns_topic]
-}
-
-resource "aws_sns_topic_policy" "test" {
-  count  = local.sns_enable && var.integration_type != "Sns" ? 1 : 0
-  arn    = data.aws_sns_topic.sns_topic[count.index].arn
-  policy = data.aws_iam_policy_document.topic[count.index].json
-}
-
-resource "aws_sns_topic_subscription" "lambda_sns_subscription" {
-  count      = local.sns_enable ? 1 : 0
-  depends_on = [module.lambda]
-  topic_arn  = data.aws_sns_topic.sns_topic[count.index].arn
-  protocol   = "lambda"
-  endpoint   = module.lambda.lambda_function_arn
 }
 
 resource "aws_secretsmanager_secret" "coralogix_secret" {
