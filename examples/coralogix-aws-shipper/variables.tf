@@ -130,11 +130,11 @@ variable "custom_s3_bucket" {
 
 variable "log_level" {
   type        = string
-  description = "Log level for the Lambda function. Can be one of: INFO, WARNING, ERROR, DEBUG"
-  default     = "INFO"
+  description = "Log level for the Lambda function. Can be one of: INFO, WARN, ERROR, DEBUG"
+  default     = "WARN"
   validation {
-    condition     = contains(["INFO", "ERROR", "WARNING", "DEBUG"], var.log_level)
-    error_message = "The log leavel must be one of these values: [DEBUG, WARNING, ERROR, INFO]."
+    condition     = contains(["INFO", "ERROR", "WARN", "DEBUG"], var.log_level)
+    error_message = "The log leavel must be one of these values: [DEBUG, WARN, ERROR, INFO]."
   }
 }
 
