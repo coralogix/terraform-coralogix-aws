@@ -28,7 +28,7 @@ Coralogix provides a predefined AWS Lambda function to easily forward your logs 
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | The Coralogix location region, possible options are [`Europe`, `Europe2`, `India`, `Singapore`, `US`, `US2`, `Custom`] | `string` | n/a | yes |
+| <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | The Coralogix location region, possible options are [`EU1`, `EU2`, `AP1`, `AP2`, `US1`, `US2`, `Custom`] | `string` | n/a | yes |
 | <a name="input_custom_domain"></a> [custom_domain](#input\_custom\_domain) | The Custom Domain. If set, will be the domain used to send telemetry (e.g. cx123.coralogix.com)| `string` | n/a | no |
 | <a name="input_integration_type"></a> [integration_type](#input\_data\_type) | The integration type. Can be one of: CloudWatch, CloudTrail, VpcFlow, S3, S3Csv,Sns' | `string` | n/a | yes |
 | <a name="input_api_key"></a> [api\_key](#input\_api_\_key) | Your Coralogix Send Your Data - [API Key](https://coralogix.com/docs/send-your-data-api-key/) which is used to validate your authenticity, This value can be a Coralogix API Key or an AWS Secret Manager ARN that holds the API Key| `string` | n/a | yes |
@@ -93,6 +93,9 @@ To use privatelink please follow the instructions in this [link](https://coralog
 
 ### Note:
 * You should use the `custom_s3_bucket` variable only when you need to deploy the integration in aws region that coralogix doesn't have a public bucket in (i.e for GovCloud), when using this variable you will need to create a bucket in the region that you want to run the integration in, and pass this bucket name as `custom_s3_bucket`. The module will download the integration file to your local workspace, and then upload these files to the `custom_s3_bucket`, and remove the file from your local workspace.
+
+### Coralogix Region
+You can see in this [link](https://coralogix.com/docs/coralogix-domain/) what is your coralogix region.
 
 ## Outputs
 

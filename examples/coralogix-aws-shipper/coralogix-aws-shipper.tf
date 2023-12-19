@@ -4,7 +4,7 @@ provider "aws" {
 module "coralogix-shipper" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
 
-  coralogix_region = "Europe"
+  coralogix_region = "EU1"
   api_key          = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
   application_name = "s3"
   subsystem_name   = "logs"

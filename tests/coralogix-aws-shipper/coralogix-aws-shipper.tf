@@ -15,7 +15,7 @@ provider "aws" {
 module "s3" {
   source = "../../modules/coralogix-aws-shipper"
 
-  coralogix_region = "Europe"
+  coralogix_region = "EU1"
   api_key          = "{{ secrets.TESTING_PRIVATE_KEY }}"
   application_name = "s3"
   subsystem_name   = "logs"
@@ -25,7 +25,7 @@ module "s3" {
 module "cloudwatch" {
   source = "../../modules/coralogix-aws-shipper"
 
-  coralogix_region = "Europe"
+  coralogix_region = "EU1"
   api_key          = "{{ secrets.TESTING_PRIVATE_KEY }}"
   application_name = "cloudwatch-logs"
   subsystem_name   = "logs"
