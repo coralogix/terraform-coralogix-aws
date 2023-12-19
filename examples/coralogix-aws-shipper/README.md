@@ -15,7 +15,7 @@ module "coralogix-shipper-s3"
 {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
 
-  coralogix_region   = "Europe"
+  coralogix_region   = "EU1"
   integration_type   = "S3"
   api_key            = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
   application_name   = "s3"
@@ -30,7 +30,7 @@ module "coralogix-shipper-cloudtrail"
 {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
 
-  coralogix_region   = "Europe"
+  coralogix_region   = "EU1"
   integration_type   = "CloudTrail"
   api_key            = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
   application_name   = "cloudtrail-sns"
@@ -47,7 +47,7 @@ module "coralogix-shipper-S3Csv"
 {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
 
-  coralogix_region   = "Europe"
+  coralogix_region   = "EU1"
   integration_type   = "S3Csv"
   api_key            = "arn of secret that contain the api_key"
   application_name   = "S3Csv"
@@ -75,7 +75,7 @@ module "coralogix-shipper-sns"
 {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
 
-  coralogix_region   = "Europe"
+  coralogix_region   = "EU1"
   integration_type   = "S3"
   api_key            = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
   application_name   = "s3-sns"
@@ -92,7 +92,7 @@ module "coralogix-shipper-cloudtrail"
 {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
 
-  coralogix_region   = "Europe"
+  coralogix_region   = "EU1"
   integration_type   = "CloudTrail"
   api_key            = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
   application_name   = "cloudtrail"
@@ -108,7 +108,7 @@ module "coralogix-shipper-cloudwatch"
 {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
 
-  coralogix_region   = "Europe"
+  coralogix_region   = "EU1"
   integration_type   = "CloudWatch"
   api_key            = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
   application_name   = "cloudwatch-logs"
