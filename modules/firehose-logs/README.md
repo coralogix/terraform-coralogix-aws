@@ -9,8 +9,8 @@ Firehose Logs module is designed to support AWS Firehose Logs integration with C
 Provision a firehose delivery stream for streaming logs to [Coralogix](https://coralogix.com/docs/aws-firehose/) - add this parameters to the configuration of the integration to enable to stream logs:
 
 ```terraform
-module "cloudwatch_firehose_coralogix" {
-  source                         = "github.com/coralogix/terraform-coralogix-aws//modules/firehose-logs"
+module "cloudwatch_firehose_logs_coralogix" {
+  source                         = "coralogix/aws/coralogix//modules/firehose-logs"
   firehose_stream                = var.coralogix_firehose_stream_name
   private_key                    = var.private_key
   coralogix_region               = var.coralogix_region

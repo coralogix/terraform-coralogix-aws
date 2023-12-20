@@ -8,8 +8,8 @@ Firehose Metrics module is designed to support AWS Firehose Metrics integration 
 Provision a firehose delivery stream with [CloudWatch metric stream](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html) to stream metrics to [Coralogix](https://coralogix.com/docs/amazon-kinesis-data-firehose-metrics/).
 
 ```terraform
-module "cloudwatch_firehose_coralogix" {
-  source           = "github.com/coralogix/terraform-coralogix-aws//modules/firehose-metrics"
+module "cloudwatch_firehose_metrics_coralogix" {
+  source           = "coralogix/aws/coralogix//modules/firehose-metrics"
   firehose_stream  = var.coralogix_firehose_stream_name
   private_key      = var.private_key
   coralogix_region = var.coralogix_region
@@ -26,8 +26,8 @@ When including specific namespaces, the variable 'include_metric_stream_namespac
 which are case-sensitive. please see the [AWS namespaces list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html). 
 
 ```terraform
-module "cloudwatch_firehose_coralogix" {
-  source                           = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
+module "cloudwatch_firehose_metrics_coralogix" {
+  source                           = "coralogix/aws/coralogix//modules/firehose-metrics"
   firehose_stream                  = var.coralogix_firehose_stream_name
   private_key                      = var.private_key
   include_metric_stream_namespaces = var.include_metric_stream_namespaces
@@ -46,8 +46,8 @@ The variable `include_metric_stream_filter` can be used to send only conditional
 Metric namespaces are also case-sensitive, please see the [AWS namespaces list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html). For case-sensitive metric names belonging to a namespace, please see the [AWS View available metrics guide](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/viewing_metrics_with_cloudwatch.html)
 
 ```terraform
-module "cloudwatch_firehose_coralogix" {
-  source                           = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
+module "cloudwatch_firehose_metrics_coralogix" {
+  source                           = "coralogix/aws/coralogix//modules/firehose-metrics"
   firehose_stream                  = var.coralogix_firehose_stream_name
   private_key                      = var.private_key
   
@@ -122,8 +122,8 @@ additional_metric_statistics = [
 By default, a [Coralogix Lambda Transformation Function](https://github.com/coralogix/cloudwatch-metric-streams-lambda-transformation) has been added to the [Kinesis Firehose Data Transformation](https://docs.aws.amazon.com/firehose/latest/dev/data-transformation.html) as a `processing_configuration`. This is done, to enrich the metrics from CloudWatch Metric Streams with AWS resource tags. The optional lambda function is deployed as part of the module, and can be removed by setting the variable `lambda_processor_enable` to `false`.
 
 ```terraform
-module "cloudwatch_firehose_coralogix" {
-  source                           = "github.com/coralogix/terraform-coralogix-aws//modules/firehose"
+module "cloudwatch_firehose_metrics_coralogix" {
+  source                           = "coralogix/aws/coralogix//modules/firehose-metrics"
   lambda_processor_enable          = false
   firehose_stream                  = var.coralogix_firehose_stream_name
   private_key                      = var.private_key
