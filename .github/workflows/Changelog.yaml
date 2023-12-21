@@ -37,6 +37,7 @@ jobs:
         chmod +x changelog_check.sh
         for changed_file in "${changed_files_array[@]}"; do
           if [[ "$changed_file" == *"/main.tf" ]] && [[ "$changed_file" != "examples"* ]]; then
-            ./changelog_check.sh $(dirname $changed_file)
+            ./changelog_check.sh
+            exit 0
           fi
         done
