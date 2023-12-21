@@ -13,6 +13,6 @@ If you'd like to contribute to our code or documentation, the best way to go abo
 We require all of our commits to be signed, please make sure they are signed by following [this guide](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits).
 
 ## Requried changes
-When you submit a change to a module you will need to make sure that you made all of the necessary changes:
-- Update the CHANGELOG.md file of the module
+When you submit a change you will need to make sure that you made all of the necessary changes:
+- Update the CHANGELOG.md file
 - In case you add a variable make sure that you also add him to the example/<module name>/variable.tf and README files
