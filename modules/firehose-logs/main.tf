@@ -6,7 +6,7 @@ terraform {
     }
   }
 }
-
+#change has been made here
 module "locals" {
   source = "../locals_variables"
 
