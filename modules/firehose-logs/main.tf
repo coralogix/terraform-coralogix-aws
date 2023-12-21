@@ -6,7 +6,7 @@ terraform {
     }
   }
 }
-
+//change check
 module "locals" {
   source = "../locals_variables"
 
