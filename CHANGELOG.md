@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.74
+### 🧰 Bug fixes 🧰
+#### ֿ**coralogix-aws-shipper**
+- Fix bug related to attach_async_event_policy in the lamabda module
+
 ## v1.0.73
 ### 🧰 Bug fixes 🧰
 #### ֿ**firehose-logs**
