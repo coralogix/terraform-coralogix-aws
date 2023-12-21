@@ -13,7 +13,7 @@ module "locals" {
   integration_type = "firehose-logs"
   random_string    = random_string.this.result
 }
-
+#another change has been made here
 locals {
   endpoint_domain = var.custom_domain != null ? var.custom_domain : module.locals.coralogix_domains[var.coralogix_region]
   endpoint_url    = "https://firehose-ingress.${local.endpoint_domain}/firehose"
