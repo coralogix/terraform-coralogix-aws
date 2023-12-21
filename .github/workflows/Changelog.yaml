@@ -35,9 +35,10 @@ jobs:
         changed_files_string="${{ steps.changed-files.outputs.all_changed_files }}"
         read -ra changed_files_array <<< "$changed_files_string"
         chmod +x changelog_check.sh
+        change_required = false
         for changed_file in "${changed_files_array[@]}"; do
-          if [[ "$changed_file" == *"/main.tf" ]] && [[ "$changed_file" != "examples"* ]]; then
+          if [[ "$changed_file" == *"/main.tf" ]] && [[ "$changed_file" != "examples"* ]] && change_required == false; then
             ./changelog_check.sh
-            exit 0
+            change_required = true
           fi
         done
