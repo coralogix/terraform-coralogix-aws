@@ -79,6 +79,7 @@ module "lambda" {
   source                 = "terraform-aws-modules/lambda/aws"
   function_name          = module.locals.function_name
   description            = "Send logs to Coralogix."
+  version                = "6.5.0"
   handler                = "bootstrap"
   runtime                = "provided.al2"
   architectures          = ["arm64"]
