@@ -77,7 +77,6 @@ resource "null_resource" "s3_bucket_copy" {
 module "lambda" {
   depends_on             = [null_resource.s3_bucket_copy]
   source                 = "terraform-aws-modules/lambda/aws"
-  version                = "3.2.1"
   function_name          = module.locals.function_name
   description            = "Send logs to Coralogix."
   handler                = "bootstrap"
@@ -110,8 +109,6 @@ module "lambda" {
   role_description                        = "Role for ${module.locals.function_name} Lambda Function."
   cloudwatch_logs_retention_in_days       = var.lambda_log_retention
   create_current_version_allowed_triggers = false
-  create_async_event_config               = true
-  attach_async_event_policy               = true
   attach_policy_statements                = true
   policy_statements = var.integration_type != "CloudWatch"  && var.integration_type != "Sns" ? {
     S3 = {
@@ -129,6 +126,11 @@ module "lambda" {
       ]
       resources = ["*"]
     }
+    destination_on_failure_policy = {
+      effect    = "Allow"
+      actions   = ["sns:publish"]
+      resources = [aws_sns_topic.this.arn]
+    }
     } : {
     secret_access_policy = {
       effect = "Allow"
@@ -139,6 +141,11 @@ module "lambda" {
         "secretsmanager:UpdateSecret"
       ]
       resources = ["*"]
+    }
+    destination_on_failure_policy = {
+      effect    = "Allow"
+      actions   = ["sns:publish"]
+      resources = [aws_sns_topic.this.arn]
     }
   }
   # The condition will first check if the integration type is cloudwatch, in that case, it will
@@ -160,12 +167,25 @@ module "lambda" {
   tags = merge(var.tags, module.locals.tags)
 }
 
+resource "aws_lambda_function_event_invoke_config" "invoke_on_failure" {
+  depends_on = [ module.lambda ]
+  count = var.notification_email != null ? 1 : 0
+  function_name = module.locals.function_name
+
+  destination_config {
+    on_failure {
+      destination = aws_sns_topic.this.arn
+    }
+  }
+}
+
 ###################################
 #### s3  integration resources ####
 ###################################
 
 resource "aws_s3_bucket_notification" "lambda_notification" {
   count  = var.integration_type == "CloudWatch" ? 0 : local.sns_enable == false ? 1 : 0
+  depends_on = [ module.lambda ]
   bucket = data.aws_s3_bucket.this[0].bucket
   lambda_function {
     lambda_function_arn = module.lambda.lambda_function_arn

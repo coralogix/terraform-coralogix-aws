@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.74
+### 🧰 Bug fixes 🧰
+#### ֿ**coralogix-aws-shipper**
+- Fix bug related to lamabda module, which makes you run terraform apply twice
+
 ## v1.0.73
 ### 🧰 Bug fixes 🧰
 #### ֿ**firehose-logs**
