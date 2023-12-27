@@ -13,6 +13,21 @@ locals {
   }
 
   api_key_is_arn = replace(var.api_key, ":", "") != var.api_key ? true : false
+
+    secret_access_policy = var.store_api_key_in_secrets_manager || local.api_key_is_arn ? {
+      effect    = "Allow"
+      actions   = ["secretsmanager:GetSecretValue"]
+      resources = local.api_key_is_arn ? [var.api_key] : [aws_secretsmanager_secret.coralogix_secret[0].arn]
+    } : {
+      effect    = "Deny"
+      actions   = ["secretsmanager:GetSecretValue"]
+      resources = ["*"]
+    }
+  destination_on_failure_policy = {
+      effect    = "Allow"
+      actions   = ["sns:publish"]
+      resources = [aws_sns_topic.this.arn]
+    }
 }
 
 module "locals" {
@@ -117,37 +132,11 @@ module "lambda" {
       actions   = ["s3:GetObject"]
       resources = ["${data.aws_s3_bucket.this[0].arn}/*"]
     }
-    secret_access_policy = {
-      effect = "Allow"
-      actions = [
-        "secretsmanager:DescribeSecret",
-        "secretsmanager:GetSecretValue",
-        "secretsmanager:PutSecretValue",
-        "secretsmanager:UpdateSecret"
-      ]
-      resources = ["*"]
-    }
-    destination_on_failure_policy = {
-      effect    = "Allow"
-      actions   = ["sns:publish"]
-      resources = [aws_sns_topic.this.arn]
-    }
+    secret_permission = local.secret_access_policy
+    destination_on_failure_policy = local.destination_on_failure_policy
     } : {
-    secret_access_policy = {
-      effect = "Allow"
-      actions = [
-        "secretsmanager:DescribeSecret",
-        "secretsmanager:GetSecretValue",
-        "secretsmanager:PutSecretValue",
-        "secretsmanager:UpdateSecret"
-      ]
-      resources = ["*"]
-    }
-    destination_on_failure_policy = {
-      effect    = "Allow"
-      actions   = ["sns:publish"]
-      resources = [aws_sns_topic.this.arn]
-    }
+    secret_permission = local.secret_access_policy
+    destination_on_failure_policy = local.destination_on_failure_policy
   }
   # The condition will first check if the integration type is cloudwatch, in that case, it will
   # Allow the trigger from the log groups otherwise it will check if sns in enabled in
