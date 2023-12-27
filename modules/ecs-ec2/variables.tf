@@ -70,3 +70,9 @@ variable "otel_config_file" {
   description = "File path to a custom opentelemetry configuration file. Defaults to an embedded configuration."
   default     = null
 }
+
+variable "tags" {
+  type    = map(string)
+  description = "Resurce tags"
+  default = null
+}

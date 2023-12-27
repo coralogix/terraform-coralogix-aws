@@ -1,4 +1,12 @@
 locals {
+  name = "coralogix-otel-agent"
+  tags = merge(
+    {
+      Name                             = local.name
+      "ecs:taskDefinition:createdFrom" = "terraform"
+    },
+    var.tags
+  )
   coralogix_region_domain_map = {
     "europe"    = "coralogix.com"
     "europe2"   = "eu2.coralogix.com"
@@ -16,7 +24,7 @@ locals {
 }
 
 resource "aws_ecs_task_definition" "coralogix_otel_agent" {
-  family                   = "coralogix-otel-agent"
+  family                   = local.name
   cpu                      = max(var.memory, 256)
   memory                   = var.memory
   requires_compatibilities = ["EC2"]
@@ -28,12 +36,10 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
     name      = "docker-socket"
     host_path = "/var/run/docker.sock"
   }
-  tags = {
-    "ecs:taskDefinition:createdFrom" = "terraform"
-  }
+  tags = local.tags
   container_definitions = jsonencode(
     [{
-      "name" : "coralogix-otel-agent"
+      "name" : local.name
       "networkMode" : "host"
       "image" : "${var.image}:${var.image_version}"
       "essential" : true
@@ -100,7 +106,7 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
 }
 
 resource "aws_ecs_service" "coralogix_otel_agent" {
-  name                               = "coralogix-otel-agent"
+  name                               = local.name
   cluster                            = var.ecs_cluster_name
   launch_type                        = "EC2"
   task_definition                    = aws_ecs_task_definition.coralogix_otel_agent.arn
@@ -118,4 +124,5 @@ resource "aws_ecs_service" "coralogix_otel_agent" {
     enabled = false
   }
   enable_ecs_managed_tags = true
+  tags = local.tags
 }
