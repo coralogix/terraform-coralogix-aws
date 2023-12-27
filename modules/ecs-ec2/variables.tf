@@ -72,7 +72,7 @@ variable "otel_config_file" {
 }
 
 variable "tags" {
-  type    = map(string)
+  type        = map(string)
   description = "Resurce tags"
-  default = null
+  default     = null
 }

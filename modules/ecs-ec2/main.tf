@@ -124,5 +124,5 @@ resource "aws_ecs_service" "coralogix_otel_agent" {
     enabled = false
   }
   enable_ecs_managed_tags = true
-  tags = local.tags
+  tags                    = local.tags
 }
