@@ -31,6 +31,8 @@ resource "random_string" "id" {
 }
 
 resource "aws_ecs_task_definition" "coralogix_otel_agent" {
+  count = var.task_definition_arn == null ? 1 : 0
+
   family                   = "${local.name}-${random_string.id.result}"
   cpu                      = max(var.memory, 256)
   memory                   = var.memory
@@ -120,7 +122,7 @@ resource "aws_ecs_service" "coralogix_otel_agent" {
   name                               = "${local.name}-${random_string.id.result}"
   cluster                            = var.ecs_cluster_name
   launch_type                        = "EC2"
-  task_definition                    = aws_ecs_task_definition.coralogix_otel_agent.arn
+  task_definition                    = var.task_definition_arn == null ? aws_ecs_task_definition.coralogix_otel_agent.arn : var.task_definition_arn
   scheduling_strategy                = "DAEMON"
   deployment_maximum_percent         = 100
   deployment_minimum_healthy_percent = 0

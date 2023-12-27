@@ -76,3 +76,9 @@ variable "tags" {
   description = "Resurce tags"
   default     = null
 }
+
+variable "task_definition_arn" {
+  type = string
+  description = "Existing Coralogix OTEL task definition ARN"
+  default = null
+}
