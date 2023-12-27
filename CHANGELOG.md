@@ -1,7 +1,7 @@
 # Changelog
 
 ## v1.0.75
-### 💡 Enhancements 💡
+### 🧰 Bug fixes 🧰
 #### **coralogix-aws-shipper**
 - Reduce Secret Manage IAM permissions
 
