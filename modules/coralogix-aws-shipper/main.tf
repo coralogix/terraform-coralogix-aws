@@ -13,9 +13,27 @@ locals {
   }
 
   api_key_is_arn = replace(var.api_key, ":", "") != var.api_key ? true : false
+<<<<<<< HEAD
   is_s3_integration = var.integration_type == "S3" || var.integration_type == "CloudTrail" || var.integration_type == "VpcFlow" ? true : false
   is_sns_integration = local.sns_enable && (var.integration_type == "S3" || var.integration_type == "Sns"  || var.integration_type == "CloudTrail" ) ? true : false
   is_sqs_integration = var.sqs_name != null && (var.integration_type == "S3" || var.integration_type == "CloudTrail" || var.integration_type == "Sqs") ? true : false
+=======
+
+    secret_access_policy = var.store_api_key_in_secrets_manager || local.api_key_is_arn ? {
+      effect    = "Allow"
+      actions   = ["secretsmanager:GetSecretValue"]
+      resources = local.api_key_is_arn ? [var.api_key] : [aws_secretsmanager_secret.coralogix_secret[0].arn]
+    } : {
+      effect    = "Deny"
+      actions   = ["secretsmanager:GetSecretValue"]
+      resources = ["*"]
+    }
+  destination_on_failure_policy = {
+      effect    = "Allow"
+      actions   = ["sns:publish"]
+      resources = [aws_sns_topic.this.arn]
+    }
+>>>>>>> da64b59 (Reduce Secret Manager IAM permissions (#121))
 }
 
 module "locals" {
@@ -125,6 +143,7 @@ module "lambda" {
       actions   = ["s3:GetObject"]
       resources = ["${data.aws_s3_bucket.this[0].arn}/*"]
     }
+<<<<<<< HEAD
     secret_access_policy = {
       effect = "Allow"
       actions = [
@@ -181,6 +200,13 @@ module "lambda" {
       actions   = ["sns:publish"]
       resources = [aws_sns_topic.this.arn]
     }
+=======
+    secret_permission = local.secret_access_policy
+    destination_on_failure_policy = local.destination_on_failure_policy
+    } : {
+    secret_permission = local.secret_access_policy
+    destination_on_failure_policy = local.destination_on_failure_policy
+>>>>>>> da64b59 (Reduce Secret Manager IAM permissions (#121))
   }
   # The condition will first check if the integration type is cloudwatch, in that case, it will
   # Allow the trigger from the log groups otherwise it will check if sns in enabled in
