@@ -37,71 +37,70 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
     host_path = "/var/run/docker.sock"
   }
   tags = local.tags
-  container_definitions = jsonencode(
-    [{
-      "name" : local.name
-      "networkMode" : "host"
-      "image" : "${var.image}:${var.image_version}"
-      "essential" : true
-      "portMappings" : [
-        {
-          "containerPort" : 4317
-          "hostPort" : 4317
-        },
-        {
-          "containerPort" : 4318
-          "hostPort" : 4318
-        },
-        {
-          "containerPort" : 8888
-          "hostPort" : 8888
-        },
-        {
-          "containerPort" : 13133
-          "hostPort" : 13133
-        }
-      ],
-      "privileged" : true,
-      "mountPoints" : [
-        {
-          "sourceVolume" : "hostfs"
-          "containerPath" : "/hostfs"
-          "readOnly" : true
-        },
-        {
-          "sourceVolume" : "docker-socket"
-          "containerPath" : "/var/run/docker.sock"
-        }
-      ],
-      "environment" : [
-        {
-          "name" : "CORALOGIX_DOMAIN"
-          "value" : "${local.coralogix_domain}"
-        },
-        {
-          "name" : "PRIVATE_KEY"
-          "value" : "${var.api_key}"
-        },
-        {
-          "name" : "APP_NAME"
-          "value" : "${var.default_application_name}"
-        },
-        {
-          "name" : "SUB_SYS"
-          "value" : "${var.default_subsystem_name}"
-        },
-        {
-          "name" : "OTEL_CONFIG"
-          "value" : "${local.otel_config}"
-        }
-      ],
-      "healthCheck" : {
-        "command" : ["CMD-SHELL", "nc -vz localhost 13133 || exit 1"]
-        "startPeriod" : 30
-        "interval" : 30
-        "timeout" : 5
-        "retries" : 3
+  container_definitions = jsonencode([{
+    name : local.name
+    networkMode : "host"
+    image : "${var.image}:${var.image_version}"
+    essential : true
+    portMappings : [
+      {
+        containerPort : 4317
+        hostPort : 4317
+      },
+      {
+        containerPort : 4318
+        hostPort : 4318
+      },
+      {
+        containerPort : 8888
+        hostPort : 8888
+      },
+      {
+        containerPort : 13133
+        hostPort : 13133
       }
+    ],
+    privileged : true,
+    mountPoints : [
+      {
+        sourceVolume : "hostfs"
+        containerPath : "/hostfs"
+        readOnly : true
+      },
+      {
+        sourceVolume : "docker-socket"
+        containerPath : "/var/run/docker.sock"
+      }
+    ],
+    environment : [
+      {
+        name : "CORALOGIX_DOMAIN"
+        value : local.coralogix_domain
+      },
+      {
+        name : "PRIVATE_KEY"
+        value : var.api_key
+      },
+      {
+        name : "APP_NAME"
+        value : var.default_application_name
+      },
+      {
+        name : "SUB_SYS"
+        value : var.default_subsystem_name
+      },
+      {
+        name : "OTEL_CONFIG"
+        value : local.otel_config
+      }
+    ],
+    healthCheck : {
+      command : ["CMD-SHELL", "nc -vz localhost 13133 || exit 1"]
+      startPeriod : 30
+      interval : 30
+      timeout : 5
+      retries : 3
+    }
   }])
 }
 
