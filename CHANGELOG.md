@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.76
+### 💡 Enhancements 💡
+#### **ecs-ec2**  
+- Use unique resource names - this will allow the deployment of the service multiple times on the same cluster (for configuration tests for example) and to maintain separate definitions within the same account/region
+- [optionally] Allow tagging
+- [optionally] Reuse task definition for multiple service deployments
+
 ## v1.0.75
 ### 🧰 Bug fixes 🧰
 #### **coralogix-aws-shipper**
