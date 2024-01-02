@@ -71,6 +71,8 @@ module "ecs-ec2" {
   api_key                  = var.api_key
   otel_config_file         = "[optional] file path to custom OTEL collector config file"
   metrics                  = [true|false]
+  tags                     = {} # optional
+  task_definition_arn      = "[optional] arn"
 }
 ```
 
