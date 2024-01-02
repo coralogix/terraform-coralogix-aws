@@ -70,3 +70,15 @@ variable "otel_config_file" {
   description = "File path to a custom opentelemetry configuration file. Defaults to an embedded configuration."
   default     = null
 }
+
+variable "tags" {
+  type        = map(string)
+  description = "Resource tags"
+  default     = null
+}
+
+variable "task_definition_arn" {
+  type = string
+  description = "Existing Coralogix OTEL task definition ARN"
+  default = null
+}
