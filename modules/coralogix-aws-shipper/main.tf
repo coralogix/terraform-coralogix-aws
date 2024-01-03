@@ -13,27 +13,9 @@ locals {
   }
 
   api_key_is_arn = replace(var.api_key, ":", "") != var.api_key ? true : false
-<<<<<<< HEAD
   is_s3_integration = var.integration_type == "S3" || var.integration_type == "CloudTrail" || var.integration_type == "VpcFlow" ? true : false
   is_sns_integration = local.sns_enable && (var.integration_type == "S3" || var.integration_type == "Sns"  || var.integration_type == "CloudTrail" ) ? true : false
   is_sqs_integration = var.sqs_name != null && (var.integration_type == "S3" || var.integration_type == "CloudTrail" || var.integration_type == "Sqs") ? true : false
-=======
-
-    secret_access_policy = var.store_api_key_in_secrets_manager || local.api_key_is_arn ? {
-      effect    = "Allow"
-      actions   = ["secretsmanager:GetSecretValue"]
-      resources = local.api_key_is_arn ? [var.api_key] : [aws_secretsmanager_secret.coralogix_secret[0].arn]
-    } : {
-      effect    = "Deny"
-      actions   = ["secretsmanager:GetSecretValue"]
-      resources = ["*"]
-    }
-  destination_on_failure_policy = {
-      effect    = "Allow"
-      actions   = ["sns:publish"]
-      resources = [aws_sns_topic.this.arn]
-    }
->>>>>>> da64b59 (Reduce Secret Manager IAM permissions (#121))
 }
 
 module "locals" {
@@ -103,9 +85,9 @@ resource "null_resource" "s3_bucket_copy" {
 module "lambda" {
   depends_on             = [null_resource.s3_bucket_copy]
   source                 = "terraform-aws-modules/lambda/aws"
+  version                = "3.2.1"
   function_name          = module.locals.function_name
   description            = "Send logs to Coralogix."
-  version                = "6.5.0"
   handler                = "bootstrap"
   runtime                = "provided.al2"
   architectures          = ["arm64"]
@@ -136,6 +118,8 @@ module "lambda" {
   role_description                        = "Role for ${module.locals.function_name} Lambda Function."
   cloudwatch_logs_retention_in_days       = var.lambda_log_retention
   create_current_version_allowed_triggers = false
+  create_async_event_config               = true
+  attach_async_event_policy               = true
   attach_policy_statements                = true
   policy_statements = local.is_s3_integration && var.sqs_name == null ? {
     S3 = {
@@ -143,7 +127,6 @@ module "lambda" {
       actions   = ["s3:GetObject"]
       resources = ["${data.aws_s3_bucket.this[0].arn}/*"]
     }
-<<<<<<< HEAD
     secret_access_policy = {
       effect = "Allow"
       actions = [
@@ -174,18 +157,8 @@ module "lambda" {
       ]
       resources = ["*"]
     }
-<<<<<<< HEAD
   } : {
         secret_access_policy = {
-=======
-    destination_on_failure_policy = {
-      effect    = "Allow"
-      actions   = ["sns:publish"]
-      resources = [aws_sns_topic.this.arn]
-    }
-    } : {
-    secret_access_policy = {
->>>>>>> ab0f927 (fix the bug that is related to the lambda module[CDS-915] (#120))
       effect = "Allow"
       actions = [
         "secretsmanager:DescribeSecret",
@@ -195,18 +168,6 @@ module "lambda" {
       ]
       resources = ["*"]
     }
-    destination_on_failure_policy = {
-      effect    = "Allow"
-      actions   = ["sns:publish"]
-      resources = [aws_sns_topic.this.arn]
-    }
-=======
-    secret_permission = local.secret_access_policy
-    destination_on_failure_policy = local.destination_on_failure_policy
-    } : {
-    secret_permission = local.secret_access_policy
-    destination_on_failure_policy = local.destination_on_failure_policy
->>>>>>> da64b59 (Reduce Secret Manager IAM permissions (#121))
   }
   # The condition will first check if the integration type is cloudwatch, in that case, it will
   # Allow the trigger from the log groups otherwise it will check if sns in enabled in
@@ -227,29 +188,12 @@ module "lambda" {
   tags = merge(var.tags, module.locals.tags)
 }
 
-resource "aws_lambda_function_event_invoke_config" "invoke_on_failure" {
-  depends_on = [ module.lambda ]
-  count = var.notification_email != null ? 1 : 0
-  function_name = module.locals.function_name
-
-  destination_config {
-    on_failure {
-      destination = aws_sns_topic.this.arn
-    }
-  }
-}
-
 ###################################
 #### s3  integration resources ####
 ###################################
 
 resource "aws_s3_bucket_notification" "lambda_notification" {
-<<<<<<< HEAD
   count  = local.is_s3_integration && local.sns_enable != true  && var.sqs_name == null? 1 : 0
-=======
-  count  = var.integration_type == "CloudWatch" ? 0 : local.sns_enable == false ? 1 : 0
-  depends_on = [ module.lambda ]
->>>>>>> ab0f927 (fix the bug that is related to the lambda module[CDS-915] (#120))
   bucket = data.aws_s3_bucket.this[0].bucket
   lambda_function {
     lambda_function_arn = module.lambda.lambda_function_arn
