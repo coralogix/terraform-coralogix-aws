@@ -62,6 +62,7 @@ Coralogix provides a predefined AWS Lambda function to easily forward your logs 
 
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
+| <a name="input_lambda_name"></a> [lambda\_name](#input\_lambda\_name) | You can specifie the name of the lambda function that will get created by the module | `string` | n/a | no |
 | <a name="input_blocking_pattern"></a> [blocking\_pattern](#input\_blocking\_pattern) | The pattern for lines blocking | `string` | n/a | no |
 | <a name="input_sampling_rate"></a> [sampling\_rate](#input\_sampling\_rate) | Send messages with specific rate | `number` | `1` | no |
 | <a name="input_notification_email"></a> [notification_email](#input\_notification\_email) | Failure notification email address | `string` |  n/a | no |

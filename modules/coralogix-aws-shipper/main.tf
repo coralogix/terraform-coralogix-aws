@@ -89,10 +89,18 @@ resource "null_resource" "s3_bucket_copy" {
   }
 }
 
+resource "aws_lambda_permission" "cloudwatch_trigger_premission" {
+  for_each      = local.log_groups
+  action        = "lambda:InvokeFunction"
+  function_name = var.lambda_name == null ? module.locals.function_name : var.lambda_name
+  principal     = "logs.amazonaws.com"
+  source_arn    = "${data.aws_cloudwatch_log_group.this[each.key].arn}:*"
+}
+
 module "lambda" {
   depends_on             = [null_resource.s3_bucket_copy]
   source                 = "terraform-aws-modules/lambda/aws"
-  function_name          = module.locals.function_name
+  function_name          = var.lambda_name == null ? module.locals.function_name : var.lambda_name
   description            = "Send logs to Coralogix."
   version                = "6.5.0"
   handler                = "bootstrap"
@@ -121,8 +129,8 @@ module "lambda" {
   }
   policy_path                             = "/coralogix/"
   role_path                               = "/coralogix/"
-  role_name                               = "${module.locals.function_name}-Role"
-  role_description                        = "Role for ${module.locals.function_name} Lambda Function."
+  role_name                               = var.lambda_name == null ? "${module.locals.function_name}-Role" : "${var.lambda_name}-Role"
+  role_description                        = var.lambda_name == null ? "Role for ${module.locals.function_name} Lambda Function." : "Role for ${var.lambda_name} Lambda Function."
   cloudwatch_logs_retention_in_days       = var.lambda_log_retention
   create_current_version_allowed_triggers = false
   attach_policy_statements                = true
@@ -138,16 +146,8 @@ module "lambda" {
     secret_permission = local.secret_access_policy
     destination_on_failure_policy = local.destination_on_failure_policy
   }
-  # The condition will first check if the integration type is cloudwatch, in that case, it will
-  # Allow the trigger from the log groups otherwise it will check if sns in enabled in
-  # case that it's not then the trigger will be triggered from the bucket
 
-  allowed_triggers = var.integration_type == "CloudWatch" ? {
-    for key, value in local.log_groups : value => {
-      principal  = "logs.amazonaws.com"
-      source_arn = "${data.aws_cloudwatch_log_group.this[key].arn}:*"
-    }
-    } : local.sns_enable != true ? {
+  allowed_triggers = var.integration_type != "CloudWatch" && local.sns_enable != true ? {
     AllowExecutionFromS3 = {
       principal  = "s3.amazonaws.com"
       source_arn = data.aws_s3_bucket.this[0].arn
@@ -160,7 +160,7 @@ module "lambda" {
 resource "aws_lambda_function_event_invoke_config" "invoke_on_failure" {
   depends_on = [ module.lambda ]
   count = var.notification_email != null ? 1 : 0
-  function_name = module.locals.function_name
+  function_name = var.lambda_name == null ? module.locals.function_name : var.lambda_name
 
   destination_config {
     on_failure {
@@ -190,11 +190,7 @@ resource "aws_s3_bucket_notification" "lambda_notification" {
 ###########################################
 
 resource "aws_cloudwatch_log_subscription_filter" "this" {
-  # The depends_on is required here for the allowed_triggers in the above
-  # lambda module, which creates aws_lambda_permission resources that are
-  # prerequisite for these aws_cloudwatch_log_subscription_filter resources, to
-  # finish applying before these start.
-  depends_on = [module.lambda]
+  depends_on = [aws_lambda_permission.cloudwatch_trigger_premission]
 
   for_each        = local.log_groups
   name            = "${module.lambda.lambda_function_name}-Subscription-${each.key}"
@@ -204,8 +200,8 @@ resource "aws_cloudwatch_log_subscription_filter" "this" {
 }
 
 resource "aws_sns_topic" "this" {
-  name_prefix  = "${module.locals.function_name}-Failure"
-  display_name = "${module.locals.function_name}-Failure"
+  name_prefix  = var.lambda_name == null ? "${module.locals.function_name}-Failure" : "${var.lambda_name}-Failure"
+  display_name = var.lambda_name == null ? "${module.locals.function_name}-Failure" : "${var.lambda_name}-Failure"
   tags         = merge(var.tags, module.locals.tags)
 }
 
@@ -217,11 +213,22 @@ resource "aws_sns_topic_subscription" "this" {
   endpoint   = var.notification_email
 }
 
+resource "aws_s3_bucket_notification" "topic_notification" {
+  count  = local.sns_enable == true && (var.integration_type == "S3" || var.integration_type == "CloudTrail" ) ? 1 : 0
+  bucket = data.aws_s3_bucket.this[0].bucket
+  topic {
+    topic_arn     = data.aws_sns_topic.sns_topic[0].arn
+    events        = ["s3:ObjectCreated:*"]
+    filter_prefix       = var.s3_key_prefix != null || var.integration_type != "CloudTrail" ? var.s3_key_prefix : "AWSLogs/"
+    filter_suffix       = var.integration_type != "CloudTrail" || var.s3_key_suffix != null ? var.s3_key_suffix : lookup(local.s3_suffix_map, var.integration_type)
+  }
+}
+
 resource "aws_lambda_permission" "sns_lambda_permission" {
   count         = local.sns_enable ? 1 : 0
   statement_id  = "AllowExecutionFromSNS"
   action        = "lambda:InvokeFunction"
-  function_name = module.locals.function_name
+  function_name = var.lambda_name == null ? module.locals.function_name : var.lambda_name
   principal     = "sns.amazonaws.com"
   source_arn    = data.aws_sns_topic.sns_topic[count.index].arn
   depends_on    = [data.aws_sns_topic.sns_topic]
@@ -243,7 +250,7 @@ resource "aws_sns_topic_subscription" "lambda_sns_subscription" {
 
 resource "aws_secretsmanager_secret" "coralogix_secret" {
   count       = var.store_api_key_in_secrets_manager && !local.api_key_is_arn? 1 : 0
-  name        = "lambda/coralogix/${data.aws_region.this.name}/coralogix-aws-shipper/${module.locals.function_name}"
+  name        = var.lambda_name == null ? "lambda/coralogix/${data.aws_region.this.name}/coralogix-aws-shipper/${module.locals.function_name}" : "lambda/coralogix/${data.aws_region.this.name}/coralogix-aws-shipper/${var.lambda_name}"
   description = "Coralogix Send Your Data key Secret"
 
   lifecycle {

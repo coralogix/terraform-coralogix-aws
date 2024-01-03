@@ -155,3 +155,9 @@ variable "cs_delimiter" {
   description = "The delimiter used in the CSV file to process This value is applied when the S3Csv integration type is selected"
   default = ","
 }
+
+variable "lambda_name" {
+  type = string
+  description = "The name of the lambda function"
+  default = null
+}
