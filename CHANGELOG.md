@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.77
+### 🧰 Bug fixes 🧰
+#### **coralogix-aws-shipper**
+- Allow log group with a dot in the name to be a trigger for lambda
+- Add variable lambda_name to allow users to specify the name of the lambda that gets created by the module
+
 ## v1.0.76
 ### 💡 Enhancements 💡
 #### **ecs-ec2**  
