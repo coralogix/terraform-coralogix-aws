@@ -161,3 +161,9 @@ variable "lambda_name" {
   description = "The name of the lambda function"
   default = null
 }
+
+variable "sqs_name" {
+  description = "The name of the SQS that you want watch"
+  type = string
+  default = null
+}
