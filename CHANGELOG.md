@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.78
+### 🚀 New components 🚀
+#### **coralogix-aws-shipper**
+- Add option to use Sqs with out without s3 bucket
+
 ## v1.0.77
 ### 🧰 Bug fixes 🧰
 #### **coralogix-aws-shipper**
