@@ -111,8 +111,8 @@ variable "integration_type" {
   description = "the aws service that send the data to the s3"
   type        = string
   validation {
-    condition     = contains(["CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv", "Sns"], var.integration_type)
-    error_message = "The integration type must be: [CloudWatch, CloudTrail, VpcFlow, S3, S3Csv, Sns]."
+    condition     = contains(["CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv", "Sns", "Sqs"], var.integration_type)
+    error_message = "The integration type must be: [CloudWatch, CloudTrail, VpcFlow, S3, S3Csv, Sns, Sqs]."
   }
 }
 
@@ -159,5 +159,11 @@ variable "cs_delimiter" {
 variable "lambda_name" {
   type = string
   description = "The name of the lambda function"
+  default = null
+}
+
+variable "sqs_name" {
+  description = "The name of the SQS that you want watch"
+  type = string
   default = null
 }
