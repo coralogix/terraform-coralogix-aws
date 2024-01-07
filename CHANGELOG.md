@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.79
+### 🧰 Bug fixes 🧰
+#### **s3-archive**
+- Update the role to the s3 bucket
+
 ## v1.0.78
 ### 🚀 New components 🚀
 #### **coralogix-aws-shipper**

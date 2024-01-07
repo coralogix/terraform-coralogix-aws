@@ -56,3 +56,16 @@ variable "metrics_kms_arn" {
   description = "The arn for the metrics bucket KMS"
   default     = ""
 }
+
+variable "aws_role_region"  {
+  type = map
+  default = {
+      "eu-west-1"="eu1"
+      "eu-north-1"="eu2"
+      "ap-southeast-1"="ap1"
+      "ap-south-1"="ap2"
+      "us-east-2"="us1"
+      "us-west-2"="us2"
+    }
+  }
+  
