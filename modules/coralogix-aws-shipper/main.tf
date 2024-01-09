@@ -66,6 +66,11 @@ data "aws_sqs_queue" "name" {
   name = var.sqs_name
 }
 
+data "aws_kinesis_stream" "kinesis_stream" {
+  count = var.Kinesis_stream_name != null ? 1 : 0
+  name = var.Kinesis_stream_name
+}
+
 data "aws_iam_policy_document" "topic" {
   count = (local.sns_enable || var.sqs_name != null) && local.is_s3_integration ? 1 : 0
   statement {
@@ -170,6 +175,22 @@ module "lambda" {
         "s3:GetObject"
         ]
       resources = ["*"]
+    }
+    secret_permission = local.secret_access_policy
+    destination_on_failure_policy = local.destination_on_failure_policy
+  } : var.Kinesis_stream_name != null ? {
+    Kinesis = {
+      effect    = "Allow"
+      actions   = [
+        "kinesis:GetRecords",
+        "kinesis:GetShardIterator",
+        "kinesis:DescribeStream",
+        "kinesis:ListStreams",
+        "kinesis:ListShards",
+        "kinesis:DescribeStreamSummary",
+        "kinesis:SubscribeToShard"
+        ]
+      resources = [data.aws_kinesis_stream.kinesis_stream[0].arn]
     }
     secret_permission = local.secret_access_policy
     destination_on_failure_policy = local.destination_on_failure_policy
@@ -295,6 +316,17 @@ resource "aws_sqs_queue_policy" "sqs_policy" {
   policy      = data.aws_iam_policy_document.topic[count.index].json
 }
 
+
+####################################
+## Kinesis  integration resources ##
+####################################
+
+resource "aws_lambda_event_source_mapping" "example" {
+  count = var.Kinesis_stream_name != null ? 1 : 0
+  event_source_arn  = data.aws_kinesis_stream.kinesis_stream[0].arn
+  function_name     = module.lambda.lambda_function_name
+  starting_position = "LATEST"
+}
 
 ####################################
 ###lambda  integration resources ###
