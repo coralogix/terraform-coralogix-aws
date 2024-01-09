@@ -111,8 +111,8 @@ variable "integration_type" {
   description = "the aws service that send the data to the s3"
   type        = string
   validation {
-    condition     = contains(["CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv", "Sns", "Sqs"], var.integration_type)
-    error_message = "The integration type must be: [CloudWatch, CloudTrail, VpcFlow, S3, S3Csv, Sns, Sqs]."
+    condition     = contains(["CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv", "Sns", "Sqs", "Kinesis"], var.integration_type)
+    error_message = "The integration type must be: [CloudWatch, CloudTrail, VpcFlow, S3, S3Csv, Sns, Sqs, Kinesis]."
   }
 }
 
@@ -164,6 +164,12 @@ variable "lambda_name" {
 
 variable "sqs_name" {
   description = "The name of the SQS that you want watch"
+  type = string
+  default = null
+}
+
+variable "Kinesis_stream_name" {
+  description = "The name of Kinesis stream to subscribe to retrieving messages"
   type = string
   default = null
 }

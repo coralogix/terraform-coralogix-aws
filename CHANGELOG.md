@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.80
+### 🚀 New components 🚀
+#### **coralogix-aws-shipper**
+- Add option to use Kinesis stream
+
 ## v1.0.79
 ### 🧰 Bug fixes 🧰
 #### **s3-archive**

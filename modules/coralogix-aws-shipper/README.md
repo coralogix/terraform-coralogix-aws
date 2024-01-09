@@ -64,6 +64,11 @@ Coralogix provides a predefined AWS Lambda function to easily forward your logs 
 |------|-------------|------|---------|:--------:|
 | <a name="input_sqs_topic_name"></a> [sqs_topic_name](#input\_sqs\_topic\_name) | The SQS name queue to subscribe to retrieving messages| `string` |  n/a | no |
 
+### Integration Kinesis configuration
+| Name | Description | Type | Default | Required | 
+|------|-------------|------|---------|:--------:|
+| <a name="input_Kinesis_stream_name"></a> [Kinesis_stream_name](#input\_Kinesis_\_stream_\_name) | The name of Kinesis stream to subscribe to retrieving messages| `string` |  n/a | no |
+
 ### Integration Generic Config (Optional)
 
 | Name | Description | Type | Default | Required | 

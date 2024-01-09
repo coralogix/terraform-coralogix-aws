@@ -167,3 +167,9 @@ variable "sqs_name" {
   type = string
   default = null
 }
+
+variable "Kinesis_stream_name" {
+  description = "The name of Kinesis stream to subscribe to retrieving messages"
+  type = string
+  default = null
+}
