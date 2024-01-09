@@ -122,7 +122,7 @@ resource "aws_ecs_service" "coralogix_otel_agent" {
   name                               = "${local.name}-${random_string.id.result}"
   cluster                            = var.ecs_cluster_name
   launch_type                        = "EC2"
-  task_definition                    = var.task_definition_arn == null ? aws_ecs_task_definition.coralogix_otel_agent.arn : var.task_definition_arn
+  task_definition                    = var.task_definition_arn == null ? aws_ecs_task_definition.coralogix_otel_agent[0].arn : var.task_definition_arn
   scheduling_strategy                = "DAEMON"
   deployment_maximum_percent         = 100
   deployment_minimum_healthy_percent = 0
