@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.81
+### 🧰 Bug fixes 🧰
+#### **ecs-ec2**  
+- Missing resource instance key
+
 ## v1.0.80
 ### 🚀 New components 🚀
 #### **coralogix-aws-shipper**
