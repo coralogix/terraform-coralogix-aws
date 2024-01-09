@@ -1,5 +1,5 @@
 output "coralogix_otel_agent_task_definition_arn" {
-  value       = var.task_definition_arn == null ? null : aws_ecs_task_definition.coralogix_otel_agent[0].arn
+  value       = one(aws_ecs_task_definition.coralogix_otel_agent[*].arn)
   description = "ARN of the ECS Task Definition for the OTEL Agent Daemon"
 }
 
