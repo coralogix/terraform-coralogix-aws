@@ -105,6 +105,7 @@ resource "null_resource" "s3_bucket_copy" {
 }
 
 module "lambda" {
+  for_each = var.log_info
   depends_on             = [null_resource.s3_bucket_copy]
   source                 = "terraform-aws-modules/lambda/aws"
   function_name          = var.lambda_name == null ? module.locals.function_name : var.lambda_name
@@ -124,9 +125,9 @@ module "lambda" {
     INTEGRATION_TYPE      = var.integration_type
     RUST_LOG              = var.log_level
     CORALOGIX_API_KEY     = var.store_api_key_in_secrets_manager && !local.api_key_is_arn ? aws_secretsmanager_secret.coralogix_secret[0].arn : var.api_key
-    APP_NAME         = var.application_name
-    SUB_NAME         = var.subsystem_name
-    NEWLINE_PATTERN  = var.newline_pattern
+    APP_NAME         = each.value.application_name
+    SUB_NAME         = each.value.subsystem_name
+    NEWLINE_PATTERN  = each.value.newline_pattern
     BLOCKING_PATTERN = var.blocking_pattern
     SAMPLING         = tostring(var.sampling_rate)
     ADD_METADATA     = var.add_metadata
@@ -230,11 +231,21 @@ resource "aws_s3_bucket_notification" "lambda_notification" {
   count  = local.is_s3_integration && local.sns_enable != true  && var.sqs_name == null? 1 : 0
   depends_on = [ module.lambda ]
   bucket = data.aws_s3_bucket.this[0].bucket
-  lambda_function {
-    lambda_function_arn = module.lambda.lambda_function_arn
-    events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = var.s3_key_prefix != null || (var.integration_type != "CloudTrail" && var.integration_type != "VpcFlow") ? var.s3_key_prefix : "AWSLogs/"
-    filter_suffix       = (var.integration_type != "CloudTrail" && var.integration_type != "VpcFlow") || var.s3_key_suffix != null ? var.s3_key_suffix : lookup(local.s3_suffix_map, var.integration_type)
+  dynamic "lambda_function" {
+    for_each = var.log_info
+    iterator = log_info #why do i need this line?
+    content {
+      lambda_function_arn = module.lambda[log_info.key].lambda_function_arn #maybe need to use each.key
+      events              = ["s3:ObjectCreated:*"]
+      filter_prefix       = log_info.value.s3_key_prefix != null || (log_info.value.integration_type != "CloudTrail" && log_info.value.integration_type != "VpcFlow") ? log_info.value.s3_key_prefix : "AWSLogs/"
+      filter_suffix       = (log_info.value.integration_type != "CloudTrail" && log_info.value.integration_type != "VpcFlow") || log_info.value.s3_key_suffix != null ? log_info.value.s3_key_suffix : lookup(local.s3_suffix_map, log_info.value.integration_type)
+    }
+  # lambda_function {
+  #   lambda_function_arn = module.lambda.lambda_function_arn
+  #   events              = ["s3:ObjectCreated:*"]
+  #   filter_prefix       = var.s3_key_prefix != null || (var.integration_type != "CloudTrail" && var.integration_type != "VpcFlow") ? var.s3_key_prefix : "AWSLogs/"
+  #   filter_suffix       = (var.integration_type != "CloudTrail" && var.integration_type != "VpcFlow") || var.s3_key_suffix != null ? var.s3_key_suffix : lookup(local.s3_suffix_map, var.integration_type)
+  # }
   }
 }
 
@@ -251,8 +262,8 @@ resource "aws_lambda_permission" "cloudwatch_trigger_premission" {
 }
 
 resource "aws_cloudwatch_log_subscription_filter" "this" {
-  depends_on = [aws_lambda_permission.cloudwatch_trigger_premission]
-
+  depends_on = [aws_lambda_permission.cloudwatch_trigger_premission,module.lambda]
+  # count = 0
   for_each        = local.log_groups
   name            = "${module.lambda.lambda_function_name}-Subscription-${each.key}"
   log_group_name  = data.aws_cloudwatch_log_group.this[each.key].name

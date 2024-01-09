@@ -179,3 +179,23 @@ variable "add_metadata" {
   default = null
   type = string
 }
+
+variable "log_info" {
+  type = map(object({
+    s3_key_prefix    = optional(string)
+    s3_key_suffix    = optional(string)
+    application_name = string
+    subsystem_name   = string
+    integration_type = string
+    newline_pattern  = optional(string)
+    blocking_pattern = optional(string)
+  }))
+  validation {
+    condition = alltrue([
+      for bucket_info in var.log_info : contains([
+        "CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv", "Sns", "Sqs"
+      ], bucket_info.integration_type)
+    ])
+    error_message = "The integration type must be: [CloudWatch, CloudTrail, VpcFlow, S3, S3Csv, Sns, Sqs]."
+  }
+  }
