@@ -181,22 +181,25 @@ variable "add_metadata" {
 }
 
 variable "log_info" {
+  description = "Values of s3 integraion in case that you want to deploy more than one integration"
   type = map(object({
     s3_key_prefix    = optional(string)
     s3_key_suffix    = optional(string)
     application_name = string
     subsystem_name   = string
     integration_type = string
+    lambda_name      = optional(string)
     newline_pattern  = optional(string)
     blocking_pattern = optional(string)
   }))
-  validation {
-    condition = alltrue([
-      for bucket_info in var.log_info : contains([
-        "CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv", "Sns", "Sqs"
-      ], bucket_info.integration_type)
-    ])
-    error_message = "The integration type must be: [CloudWatch, CloudTrail, VpcFlow, S3, S3Csv, Sns, Sqs]."
-  }
+  default = null
+  # validation {
+  #   condition = alltrue([
+  #     for bucket_info in var.log_info : contains([
+  #       "CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv", "Sns", "Sqs"
+  #     ], bucket_info.integration_type)
+  #   ])
+  #   error_message = "The integration type must be: [CloudWatch, CloudTrail, VpcFlow, S3, S3Csv, Sns, Sqs]."
+  # }
   }
   
