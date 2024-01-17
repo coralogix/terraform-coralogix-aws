@@ -30,7 +30,7 @@ locals {
       resources = [aws_sns_topic.this.arn]
     }
 
-  is_s3_integration = var.integration_type == "S3" || var.integration_type == "CloudTrail" || var.integration_type == "VpcFlow" ? true : false
+  is_s3_integration = var.integration_type == "CloudFront" || var.integration_type == "S3" || var.integration_type == "CloudTrail" || var.integration_type == "VpcFlow" ? true : false
   is_sns_integration = local.sns_enable && (var.integration_type == "S3" || var.integration_type == "Sns"  || var.integration_type == "CloudTrail" ) ? true : false
   is_sqs_integration = var.sqs_name != null && (var.integration_type == "S3" || var.integration_type == "CloudTrail" || var.integration_type == "Sqs") ? true : false
 }
@@ -129,6 +129,7 @@ module "lambda" {
     NEWLINE_PATTERN  = var.newline_pattern
     BLOCKING_PATTERN = var.blocking_pattern
     SAMPLING         = tostring(var.sampling_rate)
+    ADD_METADATA     = var.add_metadata
   }
   s3_existing_package = {
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket

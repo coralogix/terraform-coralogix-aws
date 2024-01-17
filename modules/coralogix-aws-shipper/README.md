@@ -30,7 +30,7 @@ Coralogix provides a predefined AWS Lambda function to easily forward your logs 
 |------|-------------|------|---------|:--------:|
 | <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | The Coralogix location region, possible options are [`EU1`, `EU2`, `AP1`, `AP2`, `US1`, `US2`, `Custom`] | `string` | n/a | yes |
 | <a name="input_custom_domain"></a> [custom_domain](#input\_custom\_domain) | The Custom Domain. If set, will be the domain used to send telemetry (e.g. cx123.coralogix.com)| `string` | n/a | no |
-| <a name="input_integration_type"></a> [integration_type](#input\_data\_type) | The integration type. Can be one of: CloudWatch, CloudTrail, VpcFlow, S3, S3Csv,Sns' | `string` | n/a | yes |
+| <a name="input_integration_type"></a> [integration_type](#input\_data\_type) | The integration type. Can be one of: CloudWatch, CloudTrail, VpcFlow, S3, S3Csv, Sns, Sqs, Kinesis, CloudFront' | `string` | n/a | yes |
 | <a name="input_api_key"></a> [api\_key](#input\_api_\_key) | Your Coralogix Send Your Data - [API Key](https://coralogix.com/docs/send-your-data-api-key/) which is used to validate your authenticity, This value can be a Coralogix API Key or an AWS Secret Manager ARN that holds the API Key| `string` | n/a | yes |
 | <a name="input_store_api_key_in_secrets_manager"></a> [store\_api\_key\_in\_secrets\_manager](#input\_store\_api\_key\_in\_secrets\_manager) | Store the API key in AWS Secrets Manager.  If this option is set to false, the ApiKey will appear in plain text as an environment variable in the lambda function console.| bool | true | no |
 | <a name="application_name"></a> [application\_name](#input\_application\_name) | The [name](https://coralogix.com/docs/application-and-subsystem-names/) of your application. for dynamically value from the log you should use $.my_log.field | string | n\a | yes | 
@@ -73,6 +73,7 @@ Coralogix provides a predefined AWS Lambda function to easily forward your logs 
 
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
+| <a name="input_add_metadata"></a> [add\_metadata](#input\_add\_metadata) | Add metadata to the log message. Expects comma separated values. Options for S3 are bucket_name,key_name. For CloudWatch stream_name | `string` | n/a | no |
 | <a name="input_lambda_name"></a> [lambda\_name](#input\_lambda\_name) | You can specifie the name of the lambda function that will get created by the module | `string` | n/a | no |
 | <a name="input_blocking_pattern"></a> [blocking\_pattern](#input\_blocking\_pattern) | The pattern for lines blocking | `string` | n/a | no |
 | <a name="input_sampling_rate"></a> [sampling\_rate](#input\_sampling\_rate) | Send messages with specific rate | `number` | `1` | no |

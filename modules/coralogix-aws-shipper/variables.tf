@@ -111,8 +111,8 @@ variable "integration_type" {
   description = "the aws service that send the data to the s3"
   type        = string
   validation {
-    condition     = contains(["CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv", "Sns", "Sqs", "Kinesis"], var.integration_type)
-    error_message = "The integration type must be: [CloudWatch, CloudTrail, VpcFlow, S3, S3Csv, Sns, Sqs, Kinesis]."
+    condition     = contains(["CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv", "Sns", "Sqs", "Kinesis", "CloudFront"], var.integration_type)
+    error_message = "The integration type must be: [CloudWatch, CloudTrail, VpcFlow, S3, S3Csv, Sns, Sqs, Kinesis, CloudFront]."
   }
 }
 
@@ -172,4 +172,10 @@ variable "Kinesis_stream_name" {
   description = "The name of Kinesis stream to subscribe to retrieving messages"
   type = string
   default = null
+}
+
+variable "add_metadata" {
+  description = "Add metadata to the log message. Expect comma-separated values. Options for S3 are bucket_name,key_name. For CloudWatch stream_name"
+  default = null
+  type = string
 }
