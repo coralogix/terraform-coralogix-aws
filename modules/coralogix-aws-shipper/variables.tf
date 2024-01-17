@@ -22,11 +22,13 @@ variable "api_key" {
 variable "application_name" {
   description = "The name of your application"
   type        = string
+  default = null
 }
 
 variable "subsystem_name" {
   description = "The subsystem name of your application"
   type        = string
+  default = null
 }
 
 variable "newline_pattern" {
@@ -114,6 +116,7 @@ variable "integration_type" {
     condition     = contains(["CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv", "Sns", "Sqs", "Kinesis", "CloudFront"], var.integration_type)
     error_message = "The integration type must be: [CloudWatch, CloudTrail, VpcFlow, S3, S3Csv, Sns, Sqs, Kinesis, CloudFront]."
   }
+  default = "CloudWatch"
 }
 
 variable "sns_topic_name" {
@@ -191,6 +194,7 @@ variable "log_info" {
     lambda_name      = optional(string)
     newline_pattern  = optional(string)
     blocking_pattern = optional(string)
+    lambda_log_retention = optional(number)
   }))
   default = null
   # validation {
