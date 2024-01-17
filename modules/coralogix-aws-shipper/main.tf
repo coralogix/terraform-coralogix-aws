@@ -1,5 +1,3 @@
-
-
 module "locals" {
   source = "../locals_variables"
   for_each = var.log_info != null ? var.log_info : local.log_info

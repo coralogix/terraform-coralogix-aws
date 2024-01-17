@@ -206,4 +206,4 @@ variable "log_info" {
   #   error_message = "The integration type must be: [CloudWatch, CloudTrail, VpcFlow, S3, S3Csv, Sns, Sqs]."
   # }
   }
-  
+
