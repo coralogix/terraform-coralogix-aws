@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.82
+### 🧰 Bug fixes 🧰
+#### **s3-archive**  
+- Update the role for the metrics bucket
+
 ## v1.0.81
 ### 🧰 Bug fixes 🧰
 #### **ecs-ec2**  
