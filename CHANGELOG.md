@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.83
+### 🚀 New components 🚀
+#### **coralogix-aws-shipper**
+- Add support for CloudFront Access logs
+- Support for adding metadata to logs (bucket_name, key_name, stream_name)
+
 ## v1.0.82
 ### 🧰 Bug fixes 🧰
 #### **s3-archive**  
