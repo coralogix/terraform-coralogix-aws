@@ -41,6 +41,7 @@ Coralogix provides a predefined AWS Lambda function to easily forward your logs 
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_s3_bucket_name"></a> [s3\_bucket\_name](#input\_s3\_bucket\_name) | The name of the S3 bucket to watch | `string` | n/a | yes |
 | <a name="input_s3_key_prefix"></a> [s3\_key\_prefix](#input\_s3\_key\_prefix) | The S3 path prefix to watch | `string` |  n/a | no |
 | <a name="input_s3_key_suffix"></a> [s3\_key\_suffix](#input\_s3\_key\_suffix) | The S3 path suffix to watch | `string` |  n/a` | no |
 | <a name="input_csv_delimiter"></a> [csv_delimiter](#input\_csv\_delimiter) | Single Character for using as a Delimiter when ingesting CSV (This value is applied when the s3_csv integration type is selected), e.g. "," or " "  | `string` |  n/a | no |
