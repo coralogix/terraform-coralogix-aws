@@ -1,6 +1,6 @@
 module "locals" {
   source = "../locals_variables"
-  for_each = var.log_info != null ? var.log_info : local.log_info
+  for_each = var.integration_info != null ? var.integration_info : local.integration_info
   
   integration_type = each.value.integration_type
   random_string    = random_string.this.result
@@ -19,7 +19,7 @@ resource "null_resource" "s3_bucket_copy" {
 }
 
 module "lambda" {
-  for_each = var.log_info != null ? var.log_info : local.log_info
+  for_each = var.integration_info != null ? var.integration_info : local.integration_info
   
   depends_on             = [null_resource.s3_bucket_copy]
   source                 = "terraform-aws-modules/lambda/aws"
@@ -37,12 +37,12 @@ module "lambda" {
   vpc_security_group_ids = var.security_group_ids
   environment_variables = {
     CORALOGIX_ENDPOINT    = var.custom_domain != "" ? "https://ingress.${var.custom_domain}" : var.subnet_ids == null ? "https://ingress.${lookup(module.locals[each.key].coralogix_domains, var.coralogix_region, "Europe")}" :  "https://ingress.private.${lookup(module.locals.coralogix_domains, var.coralogix_region, "Europe")}"
-    INTEGRATION_TYPE      = var.integration_type
+    INTEGRATION_TYPE      = each.value.integration_type
     RUST_LOG              = var.log_level
     CORALOGIX_API_KEY     = var.store_api_key_in_secrets_manager && !local.api_key_is_arn ? aws_secretsmanager_secret.coralogix_secret[0].arn : var.api_key
     APP_NAME         = each.value.application_name
     SUB_NAME         = each.value.subsystem_name
-    NEWLINE_PATTERN  = var.log_info != null ? each.value.newline_pattern : ""
+    NEWLINE_PATTERN  = var.integration_info != null ? each.value.newline_pattern : null
     BLOCKING_PATTERN = var.blocking_pattern
     SAMPLING         = tostring(var.sampling_rate)
     ADD_METADATA     = var.add_metadata
@@ -58,7 +58,7 @@ module "lambda" {
   cloudwatch_logs_retention_in_days       = each.value.lambda_log_retention
   create_current_version_allowed_triggers = false
   attach_policy_statements                = true
-  policy_statements = local.is_s3_integration && var.sqs_name == null ? {
+  policy_statements = var.s3_bucket_name != null && var.sqs_name == null ? {
     S3 = {
       effect    = "Allow"
       actions   = ["s3:GetObject"]
@@ -119,7 +119,7 @@ module "lambda" {
       actions   = ["sns:publish"]
       resources = [aws_sns_topic.this[each.key].arn]
     }
-  } : var.Kinesis_stream_name != null ? {
+  } : var.kinesis_stream_name != null ? {
     Kinesis = {
       effect    = "Allow"
       actions   = [
@@ -164,7 +164,7 @@ module "lambda" {
     }
   }
 
-  allowed_triggers = local.is_s3_integration && local.sns_enable != true ? {
+  allowed_triggers = var.s3_bucket_name != null && local.sns_enable != true ? {
     AllowExecutionFromS3 = {
       principal  = "s3.amazonaws.com"
       source_arn = data.aws_s3_bucket.this[0].arn
@@ -176,7 +176,7 @@ module "lambda" {
 
 resource "aws_lambda_function_event_invoke_config" "invoke_on_failure" {
   for_each =  {
-    for key, log_info in  var.log_info != null ?  var.log_info : local.log_info : key => log_info
+    for key, integration_info in  var.integration_info != null ?  var.integration_info : local.integration_info : key => integration_info
     if var.notification_email != null
   }
   depends_on = [ module.lambda ]
@@ -192,7 +192,7 @@ resource "aws_lambda_function_event_invoke_config" "invoke_on_failure" {
 resource "aws_sns_topic_subscription" "this" {
   depends_on = [aws_sns_topic.this]
   for_each =  {
-    for key, log_info in  var.log_info != null ?  var.log_info : local.log_info : key => log_info
+    for key, integration_info in  var.integration_info != null ?  var.integration_info : local.integration_info : key => integration_info
     if var.notification_email != null
   }
   topic_arn  = aws_sns_topic.this[each.key].arn
@@ -204,7 +204,7 @@ resource "aws_lambda_permission" "sns_lambda_permission" {
   count         = local.sns_enable ? 1 : 0
   statement_id  = "AllowExecutionFromSNS"
   action        = "lambda:InvokeFunction"
-  function_name = local.log_info.lambda_name == null ? module.locals.integration.function_name : local.log_info.lambda_name
+  function_name = local.integration_info.integration.lambda_name == null ? module.locals.integration.function_name : local.integration_info.integration.lambda_name
   principal     = "sns.amazonaws.com"
   source_arn    = data.aws_sns_topic.sns_topic[count.index].arn
   depends_on    = [data.aws_sns_topic.sns_topic]
@@ -218,10 +218,6 @@ resource "aws_sns_topic_policy" "test" {
 
 
 resource "aws_secretsmanager_secret" "coralogix_secret" {
-  # for_each = {
-  #   for key, log_info in var.log_info != null ?  var.log_info : local.log_info : key => log_info
-  #   if var.store_api_key_in_secrets_manager && !local.api_key_is_arn
-  # }
   count       = var.store_api_key_in_secrets_manager && !local.api_key_is_arn? 1 : 0
   name        = "lambda/coralogix/${data.aws_region.this.name}/coralogix-aws-shipper/coralogix-${random_string.this.result}"
   description = "Coralogix Send Your Data key Secret"
@@ -232,10 +228,6 @@ resource "aws_secretsmanager_secret" "coralogix_secret" {
 }
 
 resource "aws_secretsmanager_secret_version" "service_user" {
-  # for_each = {
-  #   for key, log_info in var.log_info != null ?  var.log_info : local.log_info : key => log_info
-    # if var.store_api_key_in_secrets_manager && !local.api_key_is_arn
-  # }
   count         = var.store_api_key_in_secrets_manager && !local.api_key_is_arn? 1 : 0
   depends_on    = [aws_secretsmanager_secret.coralogix_secret]
   secret_id     = aws_secretsmanager_secret.coralogix_secret[0].id

@@ -13,7 +13,7 @@ resource "aws_lambda_event_source_mapping" "sqs" {
   depends_on = [ module.lambda ]
   count = local.is_sqs_integration ? 1 : 0
   event_source_arn = data.aws_sqs_queue.name[0].arn
-  function_name    = local.log_info.integration.lambda_name
+  function_name    = local.integration_info.integration.lambda_name == null ? module.locals.integration.function_name : local.integration_info.integration.lambda_name
   enabled          = true
 }
 

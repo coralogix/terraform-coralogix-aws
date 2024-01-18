@@ -22,11 +22,13 @@ variable "api_key" {
 variable "application_name" {
   description = "The name of your application"
   type        = string
+  default = null
 }
 
 variable "subsystem_name" {
   description = "The subsystem name of your application"
   type        = string
+  default = null
 }
 
 variable "newline_pattern" {
@@ -111,9 +113,10 @@ variable "integration_type" {
   description = "the aws service that send the data to the s3"
   type        = string
   validation {
-    condition     = contains(["CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv", "Sns", "Sqs", "Kinesis", "CloudFront"], var.integration_type)
+    condition     = contains(["CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv", "Sns", "Sqs", "Kinesis", "CloudFront", ""], var.integration_type)
     error_message = "The integration type must be: [CloudWatch, CloudTrail, VpcFlow, S3, S3Csv, Sns, Sqs, Kinesis, CloudFront]."
   }
+  default = ""
 }
 
 variable "sns_topic_name" {
@@ -168,7 +171,7 @@ variable "sqs_name" {
   default = null
 }
 
-variable "Kinesis_stream_name" {
+variable "kinesis_stream_name" {
   description = "The name of Kinesis stream to subscribe to retrieving messages"
   type = string
   default = null
@@ -179,3 +182,20 @@ variable "add_metadata" {
   default = null
   type = string
 }
+
+variable "integration_info" {
+  description = "Values of s3 integraion in case that you want to deploy more than one integration"
+  type = map(object({
+    s3_key_prefix    = optional(string)
+    s3_key_suffix    = optional(string)
+    application_name = string
+    subsystem_name   = string
+    integration_type = string
+    lambda_name      = optional(string)
+    newline_pattern  = optional(string)
+    blocking_pattern = optional(string)
+    lambda_log_retention = optional(number)
+  }))
+  default = null
+  }
+

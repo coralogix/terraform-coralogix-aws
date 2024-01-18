@@ -13,11 +13,7 @@ locals {
 
   api_key_is_arn = replace(var.api_key, ":", "") != var.api_key ? true : false
 
-  is_s3_integration = var.integration_type == "S3" || var.integration_type == "CloudTrail" || var.integration_type == "VpcFlow" ? true : false
-  is_sns_integration = local.sns_enable && (var.integration_type == "S3" || var.integration_type == "Sns"  || var.integration_type == "CloudTrail" ) ? true : false
-  is_sqs_integration = var.sqs_name != null && (var.integration_type == "S3" || var.integration_type == "CloudTrail" || var.integration_type == "Sqs") ? true : false
-
-  log_info = var.log_info == null ? {
+  integration_info = var.integration_info == null ? {
     integration = {
       application_name = var.application_name
       subsystem_name   = var.subsystem_name
@@ -30,4 +26,9 @@ locals {
       lambda_log_retention = var.lambda_log_retention
     }
   } : {}
+
+  is_s3_integration  = var.integration_type == "S3Csv" || var.integration_type == "CloudFront" || var.integration_type == "S3" || var.integration_type == "CloudTrail" || var.integration_type == "VpcFlow" ? true : false
+  is_sns_integration = local.sns_enable && (var.integration_type == "S3" || var.integration_type == "Sns"  || var.integration_type == "CloudTrail" ) ? true : false
+  is_sqs_integration = var.sqs_name != null && (var.integration_type == "S3" || var.integration_type == "CloudTrail" || var.integration_type == "Sqs") ? true : false
+
 }

@@ -22,8 +22,8 @@ data "aws_sqs_queue" "name" {
 }
 
 data "aws_kinesis_stream" "kinesis_stream" {
-  count = var.Kinesis_stream_name != null ? 1 : 0
-  name = var.Kinesis_stream_name
+  count = var.kinesis_stream_name != null ? 1 : 0
+  name = var.kinesis_stream_name
 }
 
 data "aws_iam_policy_document" "topic" {

@@ -113,10 +113,10 @@ variable "integration_type" {
   description = "the aws service that send the data to the s3"
   type        = string
   validation {
-    condition     = contains(["CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv", "Sns", "Sqs", "Kinesis", "CloudFront"], var.integration_type)
+    condition     = contains(["CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv", "Sns", "Sqs", "Kinesis", "CloudFront", ""], var.integration_type)
     error_message = "The integration type must be: [CloudWatch, CloudTrail, VpcFlow, S3, S3Csv, Sns, Sqs, Kinesis, CloudFront]."
   }
-  default = "CloudWatch"
+  default = ""
 }
 
 variable "sns_topic_name" {
@@ -171,7 +171,7 @@ variable "sqs_name" {
   default = null
 }
 
-variable "Kinesis_stream_name" {
+variable "kinesis_stream_name" {
   description = "The name of Kinesis stream to subscribe to retrieving messages"
   type = string
   default = null
@@ -183,7 +183,7 @@ variable "add_metadata" {
   type = string
 }
 
-variable "log_info" {
+variable "integration_info" {
   description = "Values of s3 integraion in case that you want to deploy more than one integration"
   type = map(object({
     s3_key_prefix    = optional(string)
@@ -197,13 +197,5 @@ variable "log_info" {
     lambda_log_retention = optional(number)
   }))
   default = null
-  # validation {
-  #   condition = alltrue([
-  #     for bucket_info in var.log_info : contains([
-  #       "CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv", "Sns", "Sqs"
-  #     ], bucket_info.integration_type)
-  #   ])
-  #   error_message = "The integration type must be: [CloudWatch, CloudTrail, VpcFlow, S3, S3Csv, Sns, Sqs]."
-  # }
   }
 
