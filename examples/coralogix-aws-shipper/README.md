@@ -119,6 +119,31 @@ module "coralogix-shipper-cloudwatch"
 }
 ```
 
+### Use the multiple s3 integrations at once using the integration_info variable
+```bash
+module "coralogix-shipper-multiple-s3-integrations" 
+{
+  source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
+
+  coralogix_region   = "EU1"
+  api_key            = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  s3_bucket_name     = "bucket name"
+  integration_info = {
+    "CloudTrail_integration" = {
+      integration_type = "CloudTrail"
+      application_name = "CloudTrail_application"
+      subsystem_name   = "logs_from_cloudtrail"
+    }
+    "VpcFlow_integration" = {
+      integration_type = "VpcFlow"
+      application_name = "VpcFlow_application"
+      subsystem_name   = "logs_from_vpcflow"
+    }
+  }
+}
+```
+### This example will create 2 lambda functions 1 for cloudtrail integration and 1 for vpcflow integration
+
 now execute:
 ```bash
 $ terraform init

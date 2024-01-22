@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.0.84
+### 🧰 Bug fixes 🧰
+#### **coralogix-aws-shipper**
+- Fix a bug that won't allow you to use more than one s3 integration on 1 terraform configuration file
+
+### 💡 Enhancements 💡
+#### **coralogix-aws-shipper**
+- Split main.tf file, every integration resource will be in its file.
+
 ## v1.0.83
 ### 🚀 New components 🚀
 #### **coralogix-aws-shipper**
