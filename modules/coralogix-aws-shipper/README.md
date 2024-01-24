@@ -91,7 +91,7 @@ You need to use an existing Coralogix [Send-Your-Data API key](https://coralogix
 
 You should use the `custom_s3_bucket` variable only when you need to deploy the integration in an AWS Region where Coralogix does not have a public bucket in (i.e for GovCloud). 
 
-When using this variable you will need to create a bucket in the region where you want to run the integration. Then, pass this bucket name as `custom_s3_bucket`. The module will download the integration file to your local workspace, and then upload these files to the `custom_s3_bucket`. At the end, the file will be removed from your local workspace.
+When using this variable you will need to create an S3 bucket in the region where you want to run the integration. Then, pass this bucket name as `custom_s3_bucket`. The module will download the integration file to your local workspace, and then upload these files to the `custom_s3_bucket`. At the end, the file will be removed from your local workspace.
 
 ### Lambda Configuration (Optional)
 
