@@ -1,7 +1,10 @@
 # coralogix-aws-shipper (Beta)
 
 ## Overview
-Coralogix provides a predefined AWS Lambda function to easily forward your logs to the Coralogix platform.
+
+Our newest AWS integration offers the most seamless way to link up with Coralogix. Using a predefined Lambda function, you can send your AWS logs and events to your Coralogix subscription for in-depth analysis, monitoring, and troubleshooting.
+
+This integration guide shows you how to complete our predefined Lambda function template via Terraform. Your task will be to provide specific configuration parameters, based on the service that you wish to connect. The reference list for these parameters is provided below.
 
 ## Requirements
 
@@ -24,112 +27,112 @@ Coralogix provides a predefined AWS Lambda function to easily forward your logs 
 | <a name="module_terraform_aws_modules_lambda_aws"></a> [terraform-aws-modules/lambda/aws](#module\_terraform\_aws\_modules\_lambda\_aws) | >= 3.3.1 |
 
 
-### Coralogix configuration
+### Universal Configuration
+
+You need to use an existing Coralogix [Send-Your-Data API key](https://coralogix.com/docs/send-your-data-management-api/) to make the connection. Also, please make sure your integration is [Region-specific](https://coralogix.com/docs/coralogix-domain/). You should always deploy the AWS Lambda function in the same AWS Region as your resource (e.g. the S3 bucket).
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | The Coralogix location region, possible options are [`EU1`, `EU2`, `AP1`, `AP2`, `US1`, `US2`, `Custom`] | `string` | n/a | yes |
-| <a name="input_custom_domain"></a> [custom_domain](#input\_custom\_domain) | The Custom Domain. If set, will be the domain used to send telemetry (e.g. cx123.coralogix.com)| `string` | n/a | no |
-| <a name="input_integration_type"></a> [integration_type](#input\_data\_type) | The integration type. Can be one of: CloudWatch, CloudTrail, VpcFlow, S3, S3Csv, Sns, Sqs, Kinesis, CloudFront' | `string` | n/a | yes |
-| <a name="input_api_key"></a> [api\_key](#input\_api_\_key) | Your Coralogix Send Your Data - [API Key](https://coralogix.com/docs/send-your-data-api-key/) which is used to validate your authenticity, This value can be a Coralogix API Key or an AWS Secret Manager ARN that holds the API Key| `string` | n/a | yes |
-| <a name="input_store_api_key_in_secrets_manager"></a> [store\_api\_key\_in\_secrets\_manager](#input\_store\_api\_key\_in\_secrets\_manager) | Store the API key in AWS Secrets Manager.  If this option is set to false, the ApiKey will appear in plain text as an environment variable in the lambda function console.| bool | true | no |
-| <a name="application_name"></a> [application\_name](#input\_application\_name) | The [name](https://coralogix.com/docs/application-and-subsystem-names/) of your application. for dynamically value from the log you should use $.my_log.field | string | n\a | yes | 
-| <a name="subsystem_name"></a> [subsystem\_name](#input\_subsysten_\_name) | The [name](https://coralogix.com/docs/application-and-subsystem-names/) of your subsystem. for dynamic value from the log you should use $.my_log.field . for CloudWatch log group leave empty | string | n\a | yes |
+| <a name="input_custom_domain"></a> [custom_domain](#input\_custom\_domain) | If you choose a custom domain name for your private cluster, Coralogix will send telemetry from the specified address (e.g. custom.coralogix.com).| `string` | n/a | no |
+| <a name="input_integration_type"></a> [integration_type](#input\_data\_type) | Choose the AWS service that you wish to integrate with Coralogix. Can be one of: S3, CloudTrail, VpcFlow, CloudWatch, S3Csv, SNS, SQS, Kinesis, CloudFront. | `string` | n/a | yes |
+| <a name="input_api_key"></a> [api\_key](#input\_api_\_key) | The Coralogix Send Your Data - [API Key](https://coralogix.com/docs/send-your-data-api-key/) validates your authenticity. This value can be a direct Coralogix API Key or an AWS Secret Manager ARN containing the API Key.| `string` | n/a | yes |
+| <a name="input_store_api_key_in_secrets_manager"></a> [store\_api\_key\_in\_secrets\_manager](#input\_store\_api\_key\_in\_secrets\_manager) | Enable this to store your API Key securely. Otherwise, it will remain exposed in plain text as an environment variable in the Lambda function console.| bool | true | no |
+| <a name="application_name"></a> [application\_name](#input\_application\_name) | The [name](https://coralogix.com/docs/application-and-subsystem-names/) of your application. for dynamically value from the log you should use `$.my_log.field` | string | n\a | yes | 
+| <a name="subsystem_name"></a> [subsystem\_name](#input\_subsysten_\_name) | The [name](https://coralogix.com/docs/application-and-subsystem-names/) of your subsystem. for dynamic value from the log you should use `$.my_log.field` for CloudWatch log group leave empty | string | n\a | yes |
 
-
-### Integration S3/CloudTrail/VpcFlow/S3Csv configuration
+### S3/CloudTrail/VpcFlow/S3Csv Configuration
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_s3_bucket_name"></a> [s3\_bucket\_name](#input\_s3\_bucket\_name) | The name of the S3 bucket to watch | `string` | n/a | yes |
-| <a name="input_s3_key_prefix"></a> [s3\_key\_prefix](#input\_s3\_key\_prefix) | The S3 path prefix to watch | `string` |  n/a | no |
-| <a name="input_s3_key_suffix"></a> [s3\_key\_suffix](#input\_s3\_key\_suffix) | The S3 path suffix to watch | `string` |  n/a` | no |
-| <a name="input_csv_delimiter"></a> [csv_delimiter](#input\_csv\_delimiter) | Single Character for using as a Delimiter when ingesting CSV (This value is applied when the s3_csv integration type is selected), e.g. "," or " "  | `string` |  n/a | no |
-| <a name="input_newline_pattern"></a> [newline\_pattern](#input\_newline\_pattern) | The pattern for lines splitting | `string` | n/a | no |
-| <a name="input_integration_info"></a> [integration\_info](#input\_integration\_info\) | A map of integration information, use when you want to deploy more then 1 integration using the same s3 bucket. | `mapping` | n/a | no |
+| <a name="input_s3_bucket_name"></a> [s3\_bucket\_name](#input\_s3\_bucket\_name) | The name of the S3 bucket to watch. | `string` | n/a | yes |
+| <a name="input_s3_key_prefix"></a> [s3\_key\_prefix](#input\_s3\_key\_prefix) | The S3 path prefix to watch. | `string` |  n/a | no |
+| <a name="input_s3_key_suffix"></a> [s3\_key\_suffix](#input\_s3\_key\_suffix) | The S3 path suffix to watch. | `string` |  n/a | no |
+| <a name="input_csv_delimiter"></a> [csv_delimiter](#input\_csv\_delimiter) | Specify a single character to be used as a delimiter when ingesting a CSV file with a header line. This value is applicable when the S3Csv integration type is selected, for example, “,” or ” “.  | `string` |  n/a | no |
+| <a name="input_newline_pattern"></a> [newline\_pattern](#input\_newline\_pattern) | nter a regular expression to detect a new log line for multiline logs, e.g., \n(?=\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}.\d{3}). | `string` | n/a | no |
+| [integration_info](#integration_info) | A map of integration information. Use this when you want to deploy more then one integration using the same s3 bucket. [Parameters are here.](#integration_info)| `mapping` | n/a | no |
 
-
-### Integration Cloudwatch configuration
-
-| Name | Description | Type | Default | Required | 
-|------|-------------|------|---------|:--------:|
-| <a name="input_log_groups"></a> [log\_groups](#input\_log\_groups) | The names of the CloudWatch log groups to watch | `list(string)` | n/a | yes |
-
-### Integration SNS configuration
-| Name | Description | Type | Default | Required | 
-|------|-------------|------|---------|:--------:|
-| <a name="input_sns_topic_name"></a> [sns_topic_name](#input\_sns\_topic\_name) | The SNS topic that will contain the SNS subscription, need only if you use the sns integration | `string` |  n/a | no |
-
-### Integration SQS configuration
-| Name | Description | Type | Default | Required | 
-|------|-------------|------|---------|:--------:|
-| <a name="input_sqs_topic_name"></a> [sqs_topic_name](#input\_sqs\_topic\_name) | The SQS name queue to subscribe to retrieving messages| `string` |  n/a | no |
-
-### Integration Kinesis configuration
-| Name | Description | Type | Default | Required | 
-|------|-------------|------|---------|:--------:|
-| <a name="input_kinesis_stream_name"></a> [kinesis_stream_name](#input\_Kinesis_\_stream_\_name) | The name of Kinesis stream to subscribe to retrieving messages| `string` |  n/a | no |
-
-### Integration Generic Config (Optional)
+### CloudWatch Configuration
 
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
-| <a name="input_add_metadata"></a> [add\_metadata](#input\_add\_metadata) | Add metadata to the log message. Expects comma separated values. Options for S3 are bucket_name,key_name. For CloudWatch stream_name | `string` | n/a | no |
-| <a name="input_lambda_name"></a> [lambda\_name](#input\_lambda\_name) | You can specifie the name of the lambda function that will get created by the module | `string` | n/a | no |
-| <a name="input_blocking_pattern"></a> [blocking\_pattern](#input\_blocking\_pattern) | The pattern for lines blocking | `string` | n/a | no |
-| <a name="input_sampling_rate"></a> [sampling\_rate](#input\_sampling\_rate) | Send messages with specific rate | `number` | `1` | no |
-| <a name="input_notification_email"></a> [notification_email](#input\_notification\_email) | Failure notification email address | `string` |  n/a | no |
+| <a name="input_log_groups"></a> [log\_groups](#input\_log\_groups) | Provide a comma-separated list of CloudWatch log group names to monitor, for example, (log-group1, log-group2, log-group3). | `list(string)` | n/a | yes |
+
+### SNS Configuration
+
+| Name | Description | Type | Default | Required | 
+|------|-------------|------|---------|:--------:|
+| <a name="input_sns_topic_name"></a> [sns_topic_name](#input\_sns\_topic\_name) | The SNS topic that will contain the SNS subscription. You need this only if you use the SNS integration. | `string` |  n/a | no |
+
+### SQS Configuration
+
+| Name | Description | Type | Default | Required | 
+|------|-------------|------|---------|:--------:|
+| <a name="input_sqs_topic_name"></a> [sqs_topic_name](#input\_sqs\_topic\_name) | Provide the name of the SQS queue to which you want to subscribe for retrieving messages.| `string` |  n/a | no |
+
+### Kinesis Configuration
+
+| Name | Description | Type | Default | Required | 
+|------|-------------|------|---------|:--------:|
+| <a name="input_kinesis_stream_name"></a> [kinesis_stream_name](#input\_Kinesis_\_stream_\_name) | Provide the name of the Kinesis Stream to which you want to subscribe for retrieving messages.| `string` |  n/a | no |
+
+### Generic Configuration (Optional)
+
+| Name | Description | Type | Default | Required | 
+|------|-------------|------|---------|:--------:|
+| <a name="input_add_metadata"></a> [add\_metadata](#input\_add\_metadata) | Add metadata to the log message. Expects comma separated values. Options for S3 are `bucket_name`,`key_name`. For CloudWatch `stream_name` | `string` | n/a | no |
+| <a name="input_lambda_name"></a> [lambda\_name](#input\_lambda\_name) | Name the Lambda function that you want to create. | `string` | n/a | no |
+| <a name="input_blocking_pattern"></a> [blocking\_pattern](#input\_blocking\_pattern) | Enter a regular expression to identify lines excluded from being sent to Coralogix. For example, use `MainActivity.java:\d{3}` to match log lines with MainActivity followed by exactly three digits. | `string` | n/a | no |
+| <a name="input_sampling_rate"></a> [sampling\_rate](#input\_sampling\_rate) | Send messages at a specific rate, such as 1 out of every N logs. For example, if your value is 10, a message will be sent for every 10th log. | `number` | `1` | no |
+| <a name="input_notification_email"></a> [notification_email](#input\_notification\_email) | A failure notification will be sent to this email address. | `string` |  n/a | no |
 | <a name="input_custom_s3_bucket"></a> [custom\_s3\_bucket](#input\_custom\_s3\_bucket) | The name of an existing s3 bucket in your region, in which the lambda zip code will be uploaded to. | `string` | n/a | no |
 
+**Custom S3 Bucket**
 
-### Lambda configuration (Optional)
+You should use the `custom_s3_bucket` variable only when you need to deploy the integration in an AWS Region where Coralogix does not have a public bucket in (i.e for GovCloud). 
 
-| Name | Description | Type | Default | Required | 
-|------|-------------|------|---------|:--------:|
-| <a name="input_memory_size"></a> [memory\_size](#input\_memory\_size) | Lambda function memory limit | `number` | `1024` | no |
-| <a name="input_timeout"></a> [timeout](#input\_timeout) | Lambda function timeout limit | `number` | `300` | no |
-| <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to add to all resources | `map(string)` |  n/a | no |
-| <a name="lambda_log_retention"></a> [lambda_log_retention](#lambda\_log\_retention) | CloudWatch log retention days for logs generated by the Lambda function | `number` | 5 | no |
-| <a name="log_level"></a> [log_level](#input\_log\_level) | Log level for the Lambda function. Can be one of: INFO, WARNING, ERROR, DEBUG | `string` | INFO | no |
+When using this variable you will need to create an S3 bucket in the region where you want to run the integration. Then, pass this bucket name as `custom_s3_bucket`. The module will download the integration file to your local workspace, and then upload these files to the `custom_s3_bucket`. At the end, the file will be removed from your local workspace.
 
-
-
-### VPC configuration (Optional)
+### Lambda Configuration (Optional)
 
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
-| <a name="input_subnet_ids"></a> [vpc\_subnet\_ids](#input\_subnet\_ids) | The ID of the subnet with the private_link that the lambda will be created in | `list(string)` | n/a | no |
-| <a name="input_security_group_ids"></a> [security\_group\_ids](#input\_security\_group\_ids) | The ID of the security group of the subnet | `list(string)` | n/a | no |
+| <a name="input_memory_size"></a> [memory\_size](#input\_memory\_size) | Specify the memory size limit for the Lambda function in megabytes. | `number` | `1024` | no |
+| <a name="input_timeout"></a> [timeout](#input\_timeout) | Set a timeout limit for the Lambda function in seconds. | `number` | `300` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | Add a map of tags to all resources. | `map(string)` |  n/a | no |
+| <a name="lambda_log_retention"></a> [lambda_log_retention](#lambda\_log\_retention) | Set the CloudWatch log retention period (in days) for logs generated by the Lambda function. | `number` | 5 | no |
+| <a name="log_level"></a> [log_level](#input\_log\_level) | Specify the log level for the Lambda function, choosing from the following options: INFO, WARN, ERROR, DEBUG. | `string` | INFO | no |
 
-### integration_info variables options
+### VPC Configuration (Optional)
 
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
-| <a name="input_integration_type"></a> [integration_type](#input\_data\_type) | The integration type. Can be one of: CloudWatch, CloudTrail, VpcFlow, S3, S3Csv, Sns, Sqs, Kinesis, CloudFront' | `string` | n/a | yes |
-| <a name="application_name"></a> [application\_name](#input\_application\_name) | The [name](https://coralogix.com/docs/application-and-subsystem-names/) of your application. for dynamically value from the log you should use $.my_log.field | string | n\a | yes | 
-| <a name="subsystem_name"></a> [subsystem\_name](#input\_subsysten_\_name) | The [name](https://coralogix.com/docs/application-and-subsystem-names/) of your subsystem. for dynamic value from the log you should use $.my_log.field | string | n\a | yes |
-| <a name="lambda_log_retention"></a> [lambda_log_retention](#lambda\_log\_retention) | CloudWatch log retention days for logs generated by the Lambda function | `number` | 5 | no |
-| <a name="input_lambda_name"></a> [lambda\_name](#input\_lambda\_name) | You can specifie the name of the lambda function that will get created by the module | `string` | n/a | no |
-| <a name="input_s3_key_prefix"></a> [s3\_key\_prefix](#input\_s3\_key\_prefix) | The S3 path prefix to watch | `string` |  n/a | no |
-| <a name="input_s3_key_suffix"></a> [s3\_key\_suffix](#input\_s3\_key\_suffix) | The S3 path suffix to watch | `string` |  n/a` | no |
-| <a name="input_newline_pattern"></a> [newline\_pattern](#input\_newline\_pattern) | The pattern for lines splitting | `string` | n/a | no |
+| <a name="input_subnet_ids"></a> [vpc\_subnet\_ids](#input\_subnet\_ids) | Specify the ID of the subnet where the integration should be deployed. | `list(string)` | n/a | no |
+| <a name="input_security_group_ids"></a> [security\_group\_ids](#input\_security\_group\_ids) | Specify the ID of the Security Group where the integration should be deployed. | `list(string)` | n/a | no |
 
+### integration_info 
 
-### AWS PrivateLink
-To use privatelink please follow the instructions in this [link](https://coralogix.com/docs/coralogix-amazon-web-services-aws-privatelink-endpoints/)
+| Name | Description | Type | Default | Required | 
+|------|-------------|------|---------|:--------:|
+| <a name="input_integration_type"></a> [integration_type](#input\_data\_type) | Choose the AWS service that you wish to integrate with Coralogix. Can be one of: S3, CloudTrail, VpcFlow, CloudWatch, S3Csv, SNS, SQS, Kinesis, CloudFront. | `string` | n/a | yes |
+| <a name="application_name"></a> [application\_name](#input\_application\_name) | Specify the [name](https://coralogix.com/docs/application-and-subsystem-names/) of your application. for dynamic values from the log use `$.my_log.field` | string | n\a | yes | 
+| <a name="subsystem_name"></a> [subsystem\_name](#input\_subsysten_\_name) | Specify the [name](https://coralogix.com/docs/application-and-subsystem-names/) of your subsystem. For dynamic values from the log use `$.my_log.field` | string | n\a | yes |
+| <a name="lambda_log_retention"></a> [lambda_log_retention](#lambda\_log\_retention) | Set the CloudWatch log retention period (in days) for logs generated by the Lambda function. | `number` | 5 | no |
+| <a name="input_lambda_name"></a> [lambda\_name](#input\_lambda\_name) | Name the Lambda function that you want to create. | `string` | n/a | no |
+| <a name="input_s3_key_prefix"></a> [s3\_key\_prefix](#input\_s3\_key\_prefix) | The S3 path prefix to watch. | `string` |  n/a | no |
+| <a name="input_s3_key_suffix"></a> [s3\_key\_suffix](#input\_s3\_key\_suffix) | The S3 path suffix to watch. | `string` |  n/a` | no |
+| <a name="input_newline_pattern"></a> [newline\_pattern](#input\_newline\_pattern) | Enter a regular expression to detect a new log line for multiline logs, e.g., \n(?=\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}.\d{3}). | `string` | n/a | no |
 
-### Note:
-* You should use the `custom_s3_bucket` variable only when you need to deploy the integration in aws region that coralogix doesn't have a public bucket in (i.e for GovCloud), when using this variable you will need to create a bucket in the region that you want to run the integration in, and pass this bucket name as `custom_s3_bucket`. The module will download the integration file to your local workspace, and then upload these files to the `custom_s3_bucket`, and remove the file from your local workspace.
+**AWS PrivateLink**
 
-### Coralogix Region
-You can see in this [link](https://coralogix.com/docs/coralogix-domain/) what is your coralogix region.
+If you want to bypass using the public internet, you can use AWS PrivateLink to facilitate secure connections between your VPCs and AWS Services. This option is available under [VPC Configuration](#vpc-configuration-optional). For additional instructions on AWS PrivateLink, please [follow our dedicated tutorial](https://coralogix.com/docs/coralogix-amazon-web-services-aws-privatelink-endpoints/).
+
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_lambda_function_arn"></a> [lambda\_function\_arn](#output\_lambda\_function\_arn) | The ARN of the Lambda Function |
-| <a name="output_lambda_function_name"></a> [lambda\_function\_name](#output\_lambda\_function\_name) | The name of the Lambda Function |
-| <a name="output_lambda_role_arn"></a> [lambda\_role\_arn](#output\_lambda\_role\_arn) | The ARN of the IAM role created for the Lambda Function |
-| <a name="output_lambda_role_name"></a> [lambda\_role\_name](#output\_lambda\_role\_name) | The name of the IAM role created for the Lambda Function |
-
+| <a name="output_lambda_function_arn"></a> [lambda\_function\_arn](#output\_lambda\_function\_arn) | The ARN of the Lambda Function. |
+| <a name="output_lambda_function_name"></a> [lambda\_function\_name](#output\_lambda\_function\_name) | The name of the Lambda Function. |
+| <a name="output_lambda_role_arn"></a> [lambda\_role\_arn](#output\_lambda\_role\_arn) | The ARN of the IAM role created for the Lambda Function. |
+| <a name="output_lambda_role_name"></a> [lambda\_role\_name](#output\_lambda\_role\_name) | The name of the IAM role created for the Lambda Function. |
