@@ -7,7 +7,7 @@ resource "aws_lambda_permission" "cloudwatch_trigger_premission" {
 }
 
 resource "aws_cloudwatch_log_subscription_filter" "this" {
-  depends_on = [aws_lambda_permission.cloudwatch_trigger_premission,module.lambda]
+  depends_on      = [aws_lambda_permission.cloudwatch_trigger_premission, module.lambda]
   for_each        = local.log_groups
   name            = "${module.lambda.integration.lambda_function_name}-Subscription-${each.key}"
   log_group_name  = data.aws_cloudwatch_log_group.this[each.key].name

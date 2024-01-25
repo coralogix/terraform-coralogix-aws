@@ -18,12 +18,12 @@ data "aws_sns_topic" "sns_topic" {
 
 data "aws_sqs_queue" "name" {
   count = var.sqs_name != null ? 1 : 0
-  name = var.sqs_name
+  name  = var.sqs_name
 }
 
 data "aws_kinesis_stream" "kinesis_stream" {
   count = var.kinesis_stream_name != null ? 1 : 0
-  name = var.kinesis_stream_name
+  name  = var.kinesis_stream_name
 }
 
 data "aws_iam_policy_document" "topic" {
@@ -45,4 +45,8 @@ data "aws_iam_policy_document" "topic" {
       values   = [data.aws_s3_bucket.this[0].arn]
     }
   }
+}
+
+data "aws_iam_policy" "AWSLambdaMSKExecutionRole" {
+  arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaMSKExecutionRole"
 }
