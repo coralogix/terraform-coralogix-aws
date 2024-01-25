@@ -29,3 +29,4 @@ override.tf.json
 terraform.rc
 .idea/
 .vscode/
+modules/.DS_Store
