@@ -26,10 +26,15 @@ This integration guide shows you how to complete our predefined Lambda function 
 |------|---------|
 | <a name="module_terraform_aws_modules_lambda_aws"></a> [terraform-aws-modules/lambda/aws](#module\_terraform\_aws\_modules\_lambda\_aws) | >= 3.3.1 |
 
-
 ### Universal Configuration
 
 You need to use an existing Coralogix [Send-Your-Data API key](https://coralogix.com/docs/send-your-data-management-api/) to make the connection. Also, please make sure your integration is [Region-specific](https://coralogix.com/docs/coralogix-domain/). You should always deploy the AWS Lambda function in the same AWS Region as your resource (e.g. the S3 bucket).
+
+**Note:** If you have an existing Lambda function with an S3 trigger already set up, this Terraform deployment will remove that trigger. This holds for the following integration types on the same S3 bucket: S3, CloudTrail, VpcFlow, S3Csv, or CloudFront.
+
+If you want to avoid this issue, you can deploy in other ways:
+  1. Deploy the integration using CF Quick Create or SAR. [Dedicated documentation](https://coralogix.com/docs/coralogix-aws-shipper/).  
+  2. Migrate your existing integrations to Terraform and use the `integration_info` variable.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
@@ -122,11 +127,6 @@ When using this variable you will need to create an S3 bucket in the region wher
 | <a name="input_s3_key_prefix"></a> [s3\_key\_prefix](#input\_s3\_key\_prefix) | The S3 path prefix to watch. | `string` |  n/a | no |
 | <a name="input_s3_key_suffix"></a> [s3\_key\_suffix](#input\_s3\_key\_suffix) | The S3 path suffix to watch. | `string` |  n/a` | no |
 | <a name="input_newline_pattern"></a> [newline\_pattern](#input\_newline\_pattern) | Enter a regular expression to detect a new log line for multiline logs, e.g., \n(?=\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}.\d{3}). | `string` | n/a | no |
-
-## Note
-In case you have an existing lambda with an S3 trigger, and you deploy our TF module with one of these integration types: S3, CloudTrail, VpcFlow, S3Csv, or CloudFront on the same S3 bucket it will remove the existing triggers that you have. In case you want to avoid this issue you can follow one of this options:
-  1. Deploy the integration using SAR or CF
-  2. Migrate your existing integrations to Terraform and use the integration_info variable
 
 **AWS PrivateLink**
 
