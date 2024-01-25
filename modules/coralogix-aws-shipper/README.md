@@ -2,7 +2,7 @@
 
 ## Overview
 
-Our newest AWS integration offers the most seamless way to link up with Coralogix. Using a predefined Lambda function, you can send your AWS logs and events to your Coralogix subscription for in-depth analysis, monitoring, and troubleshooting.
+This integration guide focuses on connecting your AWS environment to Coralogix using AWS Lambda functions. To complete this integration, you may either use the Coralogix platform UI, CloudFormation templates from AWS, AWS SAM applications, or this dedicated Terraform module from our GitHub repository.
 
 This integration guide shows you how to complete our predefined Lambda function template via Terraform. Your task will be to provide specific configuration parameters, based on the service that you wish to connect. The reference list for these parameters is provided below.
 
@@ -30,10 +30,10 @@ This integration guide shows you how to complete our predefined Lambda function 
 
 You need to use an existing Coralogix [Send-Your-Data API key](https://coralogix.com/docs/send-your-data-management-api/) to make the connection. Also, please make sure your integration is [Region-specific](https://coralogix.com/docs/coralogix-domain/). You should always deploy the AWS Lambda function in the same AWS Region as your resource (e.g. the S3 bucket).
 
-**Note:** If you have an existing Lambda function with an S3 trigger already set up, this Terraform deployment will remove that trigger. This holds for the following integration types on the same S3 bucket: S3, CloudTrail, VpcFlow, S3Csv, or CloudFront.
+**Note:** In case you have an existing Lambda with an S3 trigger, and you deploy our module with an integration on the same S3 bucket, it will remove the existing triggers that you have. This holds for the following integration types: S3, CloudTrail, VpcFlow, S3Csv, or CloudFront.
 
-If you want to avoid this issue, you can deploy in other ways:
-  1. Deploy the integration using CF Quick Create or SAR. [Dedicated documentation](https://coralogix.com/docs/coralogix-aws-shipper/).  
+If you want to avoid this issue, you can run the integration in other ways:
+  1. Deploy using CF Quick Create or SAR. [Dedicated documentation](https://coralogix.com/docs/coralogix-aws-shipper/).  
   2. Migrate your existing integrations to Terraform and use the `integration_info` variable.
 
 | Name | Description | Type | Default | Required |
@@ -48,6 +48,8 @@ If you want to avoid this issue, you can deploy in other ways:
 
 ### S3/CloudTrail/VpcFlow/S3Csv Configuration
 
+**Note:** You can deploy more than one integration with the same specified S3 bucket. For this, you will need to add additional parameters under `integration_info`. [Configuration for integration_info](#configuration-for-integration_info).
+
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_s3_bucket_name"></a> [s3\_bucket\_name](#input\_s3\_bucket\_name) | The name of the S3 bucket to watch. | `string` | n/a | yes |
@@ -55,7 +57,7 @@ If you want to avoid this issue, you can deploy in other ways:
 | <a name="input_s3_key_suffix"></a> [s3\_key\_suffix](#input\_s3\_key\_suffix) | The S3 path suffix to watch. | `string` |  n/a | no |
 | <a name="input_csv_delimiter"></a> [csv_delimiter](#input\_csv\_delimiter) | Specify a single character to be used as a delimiter when ingesting a CSV file with a header line. This value is applicable when the S3Csv integration type is selected, for example, “,” or ” “.  | `string` |  n/a | no |
 | <a name="input_newline_pattern"></a> [newline\_pattern](#input\_newline\_pattern) | nter a regular expression to detect a new log line for multiline logs, e.g., \n(?=\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}.\d{3}). | `string` | n/a | no |
-| [integration_info](#integration_info) | A map of integration information. Use this when you want to deploy more then one integration using the same s3 bucket. [Parameters are here.](#integration_info)| `mapping` | n/a | no |
+| [integration_info](#integration_info) | A map of integration information. Use this when you want to deploy more then one integration using the same S3 bucket. [Parameters are here.](#integration_info)| `mapping` | n/a | no |
 
 ### CloudWatch Configuration
 
@@ -115,7 +117,7 @@ When using this variable you will need to create an S3 bucket in the region wher
 | <a name="input_subnet_ids"></a> [vpc\_subnet\_ids](#input\_subnet\_ids) | Specify the ID of the subnet where the integration should be deployed. | `list(string)` | n/a | no |
 | <a name="input_security_group_ids"></a> [security\_group\_ids](#input\_security\_group\_ids) | Specify the ID of the Security Group where the integration should be deployed. | `list(string)` | n/a | no |
 
-### integration_info 
+### Configuration for integration_info 
 
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
