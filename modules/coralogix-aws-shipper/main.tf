@@ -48,8 +48,10 @@ module "lambda" {
     ADD_METADATA       = var.add_metadata
   }
   s3_existing_package = {
-    bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
-    key    = "coralogix-aws-shipper.zip"
+    bucket = "gr-integrations-aws-testing"
+    key    = "manager/bdf2a260d25c16253f783f9d51278bd3"
+    # bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
+    # key    = "coralogix-aws-shipper.zip"
   }
   policy_path                             = "/coralogix/"
   role_path                               = "/coralogix/"
