@@ -1,3 +1,4 @@
+# Coralogix configuration
 variable "coralogix_region" {
   description = "The Coralogix location region, possible options are [EU1, EU2, AP1, AP2, US1, US2]"
   type        = string
@@ -22,14 +23,16 @@ variable "api_key" {
 variable "application_name" {
   description = "The name of your application"
   type        = string
-  default = null
+  default     = null
 }
 
 variable "subsystem_name" {
   description = "The subsystem name of your application"
   type        = string
-  default = null
+  default     = null
 }
+
+# Integration S3/CloudTrail/VpcFlow/S3Csv configuration
 
 variable "newline_pattern" {
   description = "The pattern for lines splitting"
@@ -67,11 +70,21 @@ variable "s3_key_suffix" {
   default     = null
 }
 
+variable "cs_delimiter" {
+  type        = string
+  description = "The delimiter used in the CSV file to process This value is applied when the S3Csv integration type is selected"
+  default     = ","
+}
+
+# cloudwatch variables
+
 variable "log_groups" {
   description = "The names of the CloudWatch log groups to watch"
   type        = list(string)
   default     = []
 }
+
+# vpc variables
 
 variable "subnet_ids" {
   description = "ID of Subnet into which to deploy the integration"
@@ -97,6 +110,8 @@ variable "timeout" {
   default     = 300
 }
 
+# Integration Generic Config (Optional)
+
 variable "notification_email" {
   description = "Failure notification email address"
   type        = string
@@ -109,26 +124,16 @@ variable "tags" {
   default     = {}
 }
 
-variable "integration_type" {
-  description = "the aws service that send the data to the s3"
-  type        = string
-  validation {
-    condition     = contains(["CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv", "Sns", "Sqs", "Kinesis", "CloudFront", ""], var.integration_type)
-    error_message = "The integration type must be: [CloudWatch, CloudTrail, VpcFlow, S3, S3Csv, Sns, Sqs, Kinesis, CloudFront]."
-  }
-  default = ""
-}
-
-variable "sns_topic_name" {
-  description = "The name of your SNS topic"
-  type        = string
-  default     = ""
-}
-
 variable "custom_s3_bucket" {
   description = "The name of the s3 bucket to save the lambda zip code in"
   type        = string
   default     = ""
+}
+
+variable "lambda_name" {
+  type        = string
+  description = "The name of the lambda function"
+  default     = null
 }
 
 variable "log_level" {
@@ -147,55 +152,97 @@ variable "lambda_log_retention" {
   default     = 5
 }
 
+variable "integration_type" {
+  description = "the aws service that send the data to the s3"
+  type        = string
+  validation {
+    condition     = contains(["CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv", "Sns", "Sqs", "Kinesis", "CloudFront", "MSK", "Kafka", ""], var.integration_type)
+    error_message = "The integration type must be: [CloudWatch, CloudTrail, VpcFlow, S3, S3Csv, Sns, Sqs, Kinesis, CloudFront, MSK, Kafka]."
+  }
+  default = ""
+}
+
+variable "sns_topic_name" {
+  description = "The name of your SNS topic"
+  type        = string
+  default     = ""
+}
+
 variable "store_api_key_in_secrets_manager" {
   description = "Store the API key in AWS Secrets Manager. ApiKeys are stored in secret manager \nby default. If this option is set to false, the ApiKey will appear in plain text as an \n environment variable in the lambda function console."
   type        = bool
   default     = true
 }
 
-variable "cs_delimiter" {
-  type = string
-  description = "The delimiter used in the CSV file to process This value is applied when the S3Csv integration type is selected"
-  default = ","
-}
-
-variable "lambda_name" {
-  type = string
-  description = "The name of the lambda function"
-  default = null
-}
-
 variable "sqs_name" {
   description = "The name of the SQS that you want watch"
-  type = string
-  default = null
+  type        = string
+  default     = null
 }
 
 variable "kinesis_stream_name" {
   description = "The name of Kinesis stream to subscribe to retrieving messages"
-  type = string
-  default = null
+  type        = string
+  default     = null
 }
 
 variable "add_metadata" {
   description = "Add metadata to the log message. Expect comma-separated values. Options for S3 are bucket_name,key_name. For CloudWatch stream_name"
-  default = null
-  type = string
+  default     = null
+  type        = string
 }
 
 variable "integration_info" {
   description = "Values of s3 integraion in case that you want to deploy more than one integration"
   type = map(object({
-    s3_key_prefix    = optional(string)
-    s3_key_suffix    = optional(string)
-    application_name = string
-    subsystem_name   = string
-    integration_type = string
-    lambda_name      = optional(string)
-    newline_pattern  = optional(string)
-    blocking_pattern = optional(string)
+    s3_key_prefix        = optional(string)
+    s3_key_suffix        = optional(string)
+    application_name     = string
+    subsystem_name       = string
+    integration_type     = string
+    lambda_name          = optional(string)
+    newline_pattern      = optional(string)
+    blocking_pattern     = optional(string)
     lambda_log_retention = optional(number)
   }))
   default = null
-  }
+}
 
+# MSK variables
+variable "msk_cluster_arn" {
+  description = "The ARN of the MSK cluster to subscribe to retrieving messages"
+  type        = string
+  default     = null
+}
+
+variable "msk_topic_name" {
+  description = "The name of the Kafka topic used to store records in your Kafka cluster"
+  type        = string
+  default     = null
+}
+
+# Kafka variables
+
+variable "kafka_brokers" {
+  description = "The list of brokers in the Kafka cluster"
+  type        = string
+  default     = null
+}
+
+variable "kafka_topic" {
+  description = "The name of the Kafka topic used to store records in your Kafka cluster"
+  type        = string
+  default     = null
+}
+
+variable "kafka_subnets_ids" {
+  description = "List of Kafka subnets to use when connecting to Kafka"
+  type        = list(string)
+  default     = null
+}
+
+variable "kafka_security_groups" {
+  description = "List of Kafka security groups to use when connecting to Kafka"
+  type        = list(string)
+  default     = null
+}
