@@ -48,8 +48,10 @@ module "lambda" {
     ADD_METADATA       = var.add_metadata
   }
   s3_existing_package = {
-    bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
-    key    = "coralogix-aws-shipper.zip"
+    bucket = "gr-integrations-aws-testing"
+    key    = "manager/bdf2a260d25c16253f783f9d51278bd3"
+    # bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
+    # key    = "coralogix-aws-shipper.zip"
   }
   policy_path                             = "/coralogix/"
   role_path                               = "/coralogix/"
@@ -59,7 +61,7 @@ module "lambda" {
   create_current_version_allowed_triggers = false
   attach_policy_statements                = true
   create_role                             = var.msk_cluster_arn != null ? false : true
-  lambda_role                             = var.msk_cluster_arn != null ? aws_iam_role.role_for_all[0].arn : ""
+  lambda_role                             = var.msk_cluster_arn != null ? aws_iam_role.role_for_msk[0].arn : ""
   policy_statements = var.s3_bucket_name != null && var.sqs_name == null ? {
     S3 = {
       effect    = "Allow"
@@ -117,14 +119,14 @@ module "lambda" {
       resources = ["*"]
     }
     destination_on_failure_policy = {
-      effect    = "Allow"
+      effect = "Allow"
       actions = [
         "s3:GetObject",
         "s3:ListBucket",
         "s3:GetBucketLocation",
         "s3:GetObjectVersion",
         "s3:GetLifecycleConfiguration"
-      ]      
+      ]
       resources = [aws_sns_topic.this[each.key].arn]
     }
     } : var.kinesis_stream_name != null ? {
@@ -157,15 +159,15 @@ module "lambda" {
     }
     } : var.kafka_brokers != null ? {
     kafka_policy = {
-      effect    = "Allow"
+      effect = "Allow"
       actions = [
-          "ec2:CreateNetworkInterface",
-          "ec2:DescribeNetworkInterfaces",
-          "ec2:DescribeVpcs",
-          "ec2:DeleteNetworkInterface",
-          "ec2:DescribeSubnets",
-          "ec2:DescribeSecurityGroups"
-      ]      
+        "ec2:CreateNetworkInterface",
+        "ec2:DescribeNetworkInterfaces",
+        "ec2:DescribeVpcs",
+        "ec2:DeleteNetworkInterface",
+        "ec2:DescribeSubnets",
+        "ec2:DescribeSecurityGroups"
+      ]
       resources = ["*"]
     }
     secret_access_policy = var.store_api_key_in_secrets_manager || local.api_key_is_arn ? {

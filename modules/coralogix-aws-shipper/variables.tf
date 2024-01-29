@@ -156,8 +156,8 @@ variable "integration_type" {
   description = "the aws service that send the data to the s3"
   type        = string
   validation {
-    condition     = contains(["CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv", "Sns", "Sqs", "Kinesis", "CloudFront", "Msk", ""], var.integration_type)
-    error_message = "The integration type must be: [CloudWatch, CloudTrail, VpcFlow, S3, S3Csv, Sns, Sqs, Kinesis, CloudFront, Msk]."
+    condition     = contains(["CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv", "Sns", "Sqs", "Kinesis", "CloudFront", "MSK", "Kafka", ""], var.integration_type)
+    error_message = "The integration type must be: [CloudWatch, CloudTrail, VpcFlow, S3, S3Csv, Sns, Sqs, Kinesis, CloudFront, MSK, Kafka]."
   }
   default = ""
 }
@@ -209,6 +209,7 @@ variable "integration_info" {
 }
 
 # MSK variables
+
 variable "msk_cluster_arn" {
   description = "The ARN of the MSK cluster to subscribe to retrieving messages"
   type        = string
@@ -224,7 +225,7 @@ variable "msk_topic_name" {
 # Kafka variables
 
 variable "kafka_brokers" {
-  description = "The list of brokers in the Kafka cluster"
+  description = "Comma Delimited List of Kafka broker to connect to"
   type        = string
   default     = null
 }
@@ -236,13 +237,13 @@ variable "kafka_topic" {
 }
 
 variable "kafka_subnets_ids" {
-  description = "The list of subnets ids in the Kafka cluster"
+  description = "List of Kafka subnets to use when connecting to Kafka"
   type        = list(string)
   default     = null
 }
 
 variable "kafka_security_groups" {
-  description = "The subnets associated with your VPC for each Kafka broker"
+  description = "List of Kafka security groups to use when connecting to Kafka"
   type        = list(string)
   default     = null
 }

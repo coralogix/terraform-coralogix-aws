@@ -83,19 +83,35 @@ If you want to avoid this issue, you can deploy in other ways:
 
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
-| <a name="input_sns_topic_name"></a> [sns_topic_name](#input\_sns\_topic\_name) | The SNS topic that will contain the SNS subscription. You need this only if you use the SNS integration. | `string` |  n/a | no |
+| <a name="input_sns_topic_name"></a> [sns_topic_name](#input\_sns\_topic\_name) | The SNS topic that will contain the SNS subscription. You need this only if you use the SNS integration. | `string` |  n/a | yes |
 
 ### SQS Configuration
 
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
-| <a name="input_sqs_topic_name"></a> [sqs_topic_name](#input\_sqs\_topic\_name) | Provide the name of the SQS queue to which you want to subscribe for retrieving messages.| `string` |  n/a | no |
+| <a name="input_sqs_topic_name"></a> [sqs_topic_name](#input\_sqs\_topic\_name) | Provide the name of the SQS queue to which you want to subscribe for retrieving messages.| `string` |  n/a | yes |
 
 ### Kinesis Configuration
 
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
-| <a name="input_kinesis_stream_name"></a> [kinesis_stream_name](#input\_Kinesis_\_stream_\_name) | Provide the name of the Kinesis Stream to which you want to subscribe for retrieving messages.| `string` |  n/a | no |
+| <a name="input_kinesis_stream_name"></a> [kinesis_stream_name](#input\_Kinesis_\_stream_\_name) | Provide the name of the Kinesis Stream to which you want to subscribe for retrieving messages.| `string` |  n/a | yes |
+
+### MSK Configuration
+
+| Name | Description | Type | Default | Required | 
+|------|-------------|------|---------|:--------:|
+| <a name="input_msk_cluster_arn"></a> [msk_cluster_arn](#input\_msk\_cluster\_arn) | The ARN of the MSK cluster to subscribe to retrieving messages.| `string` |  n/a | yes |
+| <a name="input_msk_topic_name"></a> [msk_topic_name](#input\_msk\_topic\_name) | The name of the Kafka topic used to store records in your Kafka cluster.| `string` |  n/a | yes |
+
+### Kafka Configuration
+
+| Name | Description | Type | Default | Required | 
+|------|-------------|------|---------|:--------:|
+| <a name="input_kafka_brokers"></a> [kafka_brokers](#input\_kafka\_brokers) | Comma Delimited List of Kafka broker to connect to.| `string` |  n/a | yes |
+| <a name="input_kafka_topic"></a> [kafka_topic](#input\_kafka\_topic) | The Kafka topic to subscribe to.| `string` |  n/a | yes |
+| <a name="input_kafka_subnets_ids"></a> [kafka_subnets_ids](#input\_kafka\_subnets\_ids) | List of Kafka subnets to use when connecting to Kafka.| `list` |  n/a | yes |
+| <a name="input_kafka_security_groups"></a> [kafka_security_groups](#input\_kafka\_security\_groups) | List of Kafka security groups to use when connecting to Kafka.| `list` |  n/a | yes |
 
 ### Generic Configuration (Optional)
 
