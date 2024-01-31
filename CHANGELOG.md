@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.86
+### 🚀 New components 🚀
+#### **coralogix-aws-shipper**
+- Add support for Ecr
+
 ## v1.0.85
 ### 🚀 New components 🚀
 #### **coralogix-aws-shipper**
