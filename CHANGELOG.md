@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.85
+### 🚀 New components 🚀
+#### **coralogix-aws-shipper**
+- Add support for MSK and Kafka
+
 ## v1.0.84
 ### 🧰 Bug fixes 🧰
 #### **coralogix-aws-shipper**
