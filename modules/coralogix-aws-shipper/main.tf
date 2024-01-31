@@ -48,6 +48,8 @@ module "lambda" {
     ADD_METADATA       = var.add_metadata
   }
   s3_existing_package = {
+    # bucket = "gr-integrations-aws-testing"
+    # key    = "manager/bdf2a260d25c16253f783f9d51278bd3"
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
     key    = "coralogix-aws-shipper.zip"
   }
@@ -60,12 +62,7 @@ module "lambda" {
   attach_policy_statements                = true
   create_role                             = var.msk_cluster_arn != null ? false : true
   lambda_role                             = var.msk_cluster_arn != null ? aws_iam_role.role_for_msk[0].arn : ""
-  policy_statements = var.s3_bucket_name != null && var.sqs_name == null ? {
-    S3 = {
-      effect    = "Allow"
-      actions   = ["s3:GetObject"]
-      resources = ["${data.aws_s3_bucket.this[0].arn}/*"]
-    }
+  policy_statements = {
     secret_access_policy = var.store_api_key_in_secrets_manager || local.api_key_is_arn ? {
       effect    = "Allow"
       actions   = ["secretsmanager:GetSecretValue"]
@@ -80,17 +77,7 @@ module "lambda" {
       actions   = ["sns:publish"]
       resources = [aws_sns_topic.this[each.key].arn]
     }
-    } : var.sqs_name != null ? {
-    SQS = {
-      effect = "Allow"
-      actions = [
-        "sqs:ReceiveMessage",
-        "sqs:DeleteMessage",
-        "sqs:GetQueueAttributes"
-      ]
-      resources = [data.aws_sqs_queue.name[0].arn]
-    }
-    S3_SQS = local.is_s3_integration ? {
+    sqs_s3_integration_policy = var.sqs_name != null && var.s3_bucket_name != null ? {
       effect = "Allow"
       actions = [
         "s3:GetObject",
@@ -100,35 +87,24 @@ module "lambda" {
         "s3:GetLifecycleConfiguration"
       ]
       resources = ["${data.aws_s3_bucket.this[0].arn}/*", data.aws_s3_bucket.this[0].arn]
-      } : { ### can't leave this as empty so we add a deny statement to s3 as you dont need access to it if you dont use s3 integration
-      effect = "Deny"
-      actions = [
-        "s3:GetObject"
-      ]
-      resources = ["*"]
-    }
-    secret_access_policy = var.store_api_key_in_secrets_manager || local.api_key_is_arn ? {
+    } : {
+        effect = "Deny"
+        actions = ["ecr:DescribeImageScanFindings"]
+        resources = ["*"]
+    } 
+    integrations_policy = var.s3_bucket_name != null && var.sqs_name == null ? {
       effect    = "Allow"
-      actions   = ["secretsmanager:GetSecretValue"]
-      resources = local.api_key_is_arn ? [var.api_key] : [aws_secretsmanager_secret.coralogix_secret[0].arn]
-      } : {
-      effect    = "Deny"
-      actions   = ["secretsmanager:GetSecretValue"]
-      resources = ["*"]
-    }
-    destination_on_failure_policy = {
+      actions   = ["s3:GetObject"]
+      resources = ["${data.aws_s3_bucket.this[0].arn}/*"]
+    } : var.sqs_name != null ? {
       effect = "Allow"
       actions = [
-        "s3:GetObject",
-        "s3:ListBucket",
-        "s3:GetBucketLocation",
-        "s3:GetObjectVersion",
-        "s3:GetLifecycleConfiguration"
+        "sqs:ReceiveMessage",
+        "sqs:DeleteMessage",
+        "sqs:GetQueueAttributes"
       ]
-      resources = [aws_sns_topic.this[each.key].arn]
-    }
-    } : var.kinesis_stream_name != null ? {
-    Kinesis = {
+      resources = [data.aws_sqs_queue.name[0].arn]
+    }: var.kinesis_stream_name != null ? {
       effect = "Allow"
       actions = [
         "kinesis:GetRecords",
@@ -138,64 +114,27 @@ module "lambda" {
         "kinesis:ListShards",
         "kinesis:DescribeStreamSummary",
         "kinesis:SubscribeToShard"
-      ]
+        ]
       resources = [data.aws_kinesis_stream.kinesis_stream[0].arn]
-    }
-    secret_access_policy = var.store_api_key_in_secrets_manager || local.api_key_is_arn ? {
-      effect    = "Allow"
-      actions   = ["secretsmanager:GetSecretValue"]
-      resources = local.api_key_is_arn ? [var.api_key] : [aws_secretsmanager_secret.coralogix_secret[0].arn]
-      } : {
-      effect    = "Deny"
-      actions   = ["secretsmanager:GetSecretValue"]
-      resources = ["*"]
-    }
-    destination_on_failure_policy = {
-      effect    = "Allow"
-      actions   = ["sns:publish"]
-      resources = [aws_sns_topic.this[each.key].arn]
-    }
     } : var.kafka_brokers != null ? {
-    kafka_policy = {
-      effect = "Allow"
-      actions = [
-        "ec2:CreateNetworkInterface",
-        "ec2:DescribeNetworkInterfaces",
-        "ec2:DescribeVpcs",
-        "ec2:DeleteNetworkInterface",
-        "ec2:DescribeSubnets",
-        "ec2:DescribeSecurityGroups"
-      ]
-      resources = ["*"]
-    }
-    secret_access_policy = var.store_api_key_in_secrets_manager || local.api_key_is_arn ? {
-      effect    = "Allow"
-      actions   = ["secretsmanager:GetSecretValue"]
-      resources = local.api_key_is_arn ? [var.api_key] : [aws_secretsmanager_secret.coralogix_secret[0].arn]
-      } : {
-      effect    = "Deny"
-      actions   = ["secretsmanager:GetSecretValue"]
-      resources = ["*"]
-    }
-    destination_on_failure_policy = {
-      effect    = "Allow"
-      actions   = ["sns:publish"]
-      resources = [aws_sns_topic.this[each.key].arn]
-    }
-    } : {
-    secret_access_policy = var.store_api_key_in_secrets_manager || local.api_key_is_arn ? {
-      effect    = "Allow"
-      actions   = ["secretsmanager:GetSecretValue"]
-      resources = local.api_key_is_arn ? [var.api_key] : [aws_secretsmanager_secret.coralogix_secret[0].arn]
-      } : {
-      effect    = "Deny"
-      actions   = ["secretsmanager:GetSecretValue"]
-      resources = ["*"]
-    }
-    destination_on_failure_policy = {
-      effect    = "Allow"
-      actions   = ["sns:publish"]
-      resources = [aws_sns_topic.this[each.key].arn]
+        effect = "Allow"
+        actions = [
+          "ec2:CreateNetworkInterface",
+          "ec2:DescribeNetworkInterfaces",
+          "ec2:DescribeVpcs",
+          "ec2:DeleteNetworkInterface",
+          "ec2:DescribeSubnets",
+          "ec2:DescribeSecurityGroups"
+        ]
+        resources = ["*"]
+    } : var.integration_type == "Ecr" ? {
+        effect = "Allow"
+        actions = ["ecr:DescribeImageScanFindings"]
+        resources = ["*"]
+    } :  {
+        effect = "Allow"
+        actions = ["ecr:DescribeImageScanFindings"]
+        resources = ["*"]
     }
   }
 
@@ -209,7 +148,12 @@ module "lambda" {
       principal  = "kafka.amazonaws.com"
       source_arn = var.msk_cluster_arn
     }
-  } : {}
+  } : var.integration_type == "Ecr" ?{
+    AllowExecutionFromECR = {
+      principal  = "events.amazonaws.com"
+      source_arn = aws_cloudwatch_event_rule.EventBridgeRule[0].arn
+    }
+  }  :{}
 
   tags = merge(var.tags, module.locals[each.key].tags)
 }
