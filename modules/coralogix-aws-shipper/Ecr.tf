@@ -1,12 +1,12 @@
 resource "aws_cloudwatch_event_rule" "EventBridgeRule" {
-    count = var.integration_type == "Ecr" ? 1 : 0
+    count = var.integration_type == "EcrScan" ? 1 : 0
     name        = format("ECR-image-scan-lambda-invoke")
     description = "Event rule for invoking Lambda on ECR image scan"
     event_pattern = jsonencode({
     source      = ["aws.ecr"],
-    detail_type = ["ECR Image Scan"],
+    detail-type = ["ECR Image Scan"],
     detail      = {
-        scan_status = ["COMPLETE"]
+        scan-status = ["COMPLETE"]
     }
     })
 
@@ -17,7 +17,7 @@ resource "aws_cloudwatch_event_rule" "EventBridgeRule" {
 
 resource "aws_cloudwatch_event_target" "EventBridgeRuleTarget" {
     depends_on = [ aws_cloudwatch_event_rule.EventBridgeRule ]
-    count = var.integration_type == "Ecr" ? 1 : 0
+    count = var.integration_type == "EcrScan" ? 1 : 0
     rule      = aws_cloudwatch_event_rule.EventBridgeRule[0].name
     target_id = "LambdaFunction"
 

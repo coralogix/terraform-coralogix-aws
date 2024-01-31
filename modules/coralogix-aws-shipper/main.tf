@@ -48,8 +48,6 @@ module "lambda" {
     ADD_METADATA       = var.add_metadata
   }
   s3_existing_package = {
-    # bucket = "gr-integrations-aws-testing"
-    # key    = "manager/bdf2a260d25c16253f783f9d51278bd3"
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
     key    = "coralogix-aws-shipper.zip"
   }
@@ -127,12 +125,12 @@ module "lambda" {
           "ec2:DescribeSecurityGroups"
         ]
         resources = ["*"]
-    } : var.integration_type == "Ecr" ? {
+    } : var.integration_type == "EcrScan" ? {
         effect = "Allow"
         actions = ["ecr:DescribeImageScanFindings"]
         resources = ["*"]
     } :  {
-        effect = "Allow"
+        effect = "Deny"
         actions = ["ecr:DescribeImageScanFindings"]
         resources = ["*"]
     }
@@ -148,7 +146,7 @@ module "lambda" {
       principal  = "kafka.amazonaws.com"
       source_arn = var.msk_cluster_arn
     }
-  } : var.integration_type == "Ecr" ?{
+  } : var.integration_type == "EcrScan" ?{
     AllowExecutionFromECR = {
       principal  = "events.amazonaws.com"
       source_arn = aws_cloudwatch_event_rule.EventBridgeRule[0].arn
