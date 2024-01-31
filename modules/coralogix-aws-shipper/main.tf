@@ -114,7 +114,7 @@ module "lambda" {
         "kinesis:ListShards",
         "kinesis:DescribeStreamSummary",
         "kinesis:SubscribeToShard"
-        ]
+      ]
       resources = [data.aws_kinesis_stream.kinesis_stream[0].arn]
     } : var.kafka_brokers != null ? {
         effect = "Allow"
