@@ -49,6 +49,11 @@ processors:
           - set(attributes["image_id"], attributes["image.id"])
           - delete_key(attributes, "image.id")
 
+  batch:
+    send_batch_size: 8192 # default: 8192
+    send_batch_max_size: 0 # default: 0
+    timeout: "200ms" # default: 200ms
+
   # otel-collector resource detection for collector
   resourcedetection/otel-collector:
     detectors: [ecs, ec2]
@@ -88,12 +93,15 @@ service:
         - resourcedetection
         - ecsattributes
         - transform/logs
+        - batch
       exporters:
         - coralogix
 
     traces:
       receivers:
         - otlp
+      processors:
+        - batch
       exporters:
         - coralogix
 
@@ -102,6 +110,7 @@ service:
         - prometheus
       processors:
         - resourcedetection/otel-collector
+        - batch
       exporters:
         - coralogix
 

@@ -114,6 +114,9 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
       interval : 30
       timeout : 5
       retries : 3
+    },
+    logConfiguration: {
+      logDriver: "json-file"
     }
   }])
 }
