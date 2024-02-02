@@ -32,14 +32,13 @@ resource "random_string" "id" {
 
 resource "aws_ecs_task_definition" "coralogix_otel_agent" {
   count = var.task_definition_arn == null ? 1 : 0
-
   family                   = "${local.name}-${random_string.id.result}"
   cpu                      = max(var.memory, 256)
   memory                   = var.memory
   requires_compatibilities = ["EC2"]
   volume {
     name      = "hostfs"
-    host_path = "/"
+    host_path = "/var/lib/docker/"
   }
   volume {
     name      = "docker-socket"
@@ -78,7 +77,7 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
     mountPoints : [
       {
         sourceVolume : "hostfs"
-        containerPath : "/hostfs"
+        containerPath : "/hostfs/var/lib/docker/"
         readOnly : true
       },
       {
