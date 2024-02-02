@@ -5,10 +5,10 @@ Terraform module to launch Opentelemetry Collector agents on an existing ECS Clu
 ## Usage
 
 Provision an ECS Service that run the OTEL Collector Agent as a Daemon container on each EC2 container instance.
-
+<!--For local dev, set local path to source, e.g. ```source  = "../../modules/ecs-ec2"```-->
 ```terraform
 module "ecs-ec2" {
-  source                   = "../../modules/ecs-ec2"
+  source                   = "github.com/coralogix/terraform-coralogix-aws/modules/ecs-ec2"
   ecs_cluster_name         = "ecs-cluster-name"
   image_version            = "latest"
   memory                   = numeric MiB
