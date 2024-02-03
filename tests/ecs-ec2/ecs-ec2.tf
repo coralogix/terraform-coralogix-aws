@@ -7,7 +7,6 @@ terraform {
   }
 }
 
-
 module "ecs-ec2" {
   source                   = "../../modules/ecs-ec2"
   ecs_cluster_name         = var.ecs_cluster_name

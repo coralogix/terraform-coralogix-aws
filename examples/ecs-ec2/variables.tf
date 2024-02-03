@@ -24,8 +24,8 @@ variable "coralogix_region" {
   description = "The region of the Coralogix endpoint domain: [Europe, Europe2, India, Singapore, US, US2, Custom]. If \"Custom\" then __custom_domain__ parameter must be specified."
   type        = string
   validation {
-    condition     = can(regex("^(europe|europe2|india|singapore|us|us2|custom)$", lower(var.coralogix_region)))
-    error_message = "Must be one of [Europe, Europe2, India, Singapore, US, US2, Custom]"
+    condition     = contains(["Europe", "Europe2", "India", "Singapore", "US", "US2", "Custom"], var.coralogix_region)
+    error_message = "The coralogix region must be one of these values: [Europe, Europe2, India, Singapore, US, US2, Custom]."
   }
 }
 

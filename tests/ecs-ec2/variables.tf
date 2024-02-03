@@ -1,5 +1,6 @@
 variable "coralogix_region" {
   type    = string
+  default = "Europe"
 }
 
 variable "ecs_cluster_name" {
@@ -9,6 +10,7 @@ variable "ecs_cluster_name" {
 
 variable "api_key" {
   type    = string
+  default = "1234567890_DUMMY_API_KEY"
 }
 
 variable "custom_domain" {

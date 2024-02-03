@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.86
+### 💡 Enhancements and Bug fixes 🧰
+#### **ecs-ec2**
+- ECS CDOT restrict hostfs mount scope security fix; OTEL config batch fix; README improvement.
+
 ## v1.0.85
 ### 🚀 New components 🚀
 #### **coralogix-aws-shipper**
