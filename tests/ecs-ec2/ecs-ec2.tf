@@ -21,6 +21,6 @@ module "ecs-ec2" {
   default_application_name = "ecs-ec2"
   default_subsystem_name   = "collector"
   api_key                  = "1234567890_DUMMY_API_KEY"
-  otel_config_file         = "otel_config_file_DUMMY.yaml"
+  otel_config_file         = "./otel_config.tftpl.yaml"
   metrics                  = true
 }
