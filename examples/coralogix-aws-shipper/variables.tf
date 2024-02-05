@@ -162,6 +162,7 @@ variable "integration_type" {
   default = ""
 }
 
+
 variable "sns_topic_name" {
   description = "The name of your SNS topic"
   type        = string
