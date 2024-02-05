@@ -10,7 +10,7 @@ For test sample, see [ECS EC2 tests README](../../tests/ecs-ec2/README.md)
 
 ```hcl
 module "otel_ecs_ec2_coralogix" {
-  source                   = "github.com/coralogix/terraform-coralogix-aws/modules/ecs-ec2"
+  source                   = "coralogix/aws/coralogix//modules/ecs-ec2"
   ecs_cluster_name         = var.ecs_cluster_name
   image_version            = var.image_version
   memory                   = var.memory
