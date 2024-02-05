@@ -84,7 +84,6 @@ service:
   pipelines:
     logs:
       receivers:
-        - otlp
         - filelog
       processors:
         # - resourcedetection # For logs relayed from other containers, don't use otel container's resource attributes.
