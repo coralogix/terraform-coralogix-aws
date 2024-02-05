@@ -10,25 +10,28 @@ For test sample, see [ECS EC2 tests README](../../tests/ecs-ec2/README.md)
 
 ```hcl
 module "otel_ecs_ec2_coralogix" {
-  source                   = "github.com/coralogix/terraform-coralogix-aws/modules/ecs-ec2"
-  ecs_cluster_name         = var.ecs_cluster_name
-  image_version            = var.image_version
-  memory                   = var.memory
-  coralogix_region         = var.coralogix_region
-  custom_domain            = var.custom_domain
-  default_application_name = var.default_application_name
-  default_subsystem_name   = var.default_subsystem_name
-  api_key                  = var.api_key
-  otel_config_file         = var.otel_config_file
-  metrics                  = var.metrics
+  source                   = "coralogix/aws/coralogix//modules/ecs-ec2"
+  ecs_cluster_name         = "test-lab-cluster"
+  image_version            = "latest"
+  memory                   = 256
+  coralogix_region         = "EU1"
+  custom_domain            = null
+  default_application_name = "YOUR_APPLICATION_NAME"
+  default_subsystem_name   = "YOUR_SUBSYSTEM_NAME"
+  api_key                  = "1234567890_DUMMY_API_KEY"
+  otel_config_file         = "./otel_config.tftpl.yaml"
+  metrics                  = true
 }
 ```
 
-now execute:
+To setup:
 ```bash
-$ terraform init
-$ terraform plan
-$ terraform apply
+terraform init && terraform plan && time terraform apply -auto-approve
 ```
 
-Run `terraform destroy` when you don't need these resources.
+To tear-down:
+```bash
+terraform destroy
+```
+
+Please observe cost-optimization practices.

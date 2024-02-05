@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.87
+### 💡 Enhancements and Bug fixes 🧰
+#### **ecs-ec2**
+- ECS CDOT restrict hostfs mount scope security fix; OTEL config batch fix; README improvement.
+- ECS CDOT update region codes Terraform interface.
+
 ## v1.0.86
 ### 🚀 New components 🚀
 #### **coralogix-aws-shipper**

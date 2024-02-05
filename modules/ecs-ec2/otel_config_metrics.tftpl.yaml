@@ -5,7 +5,6 @@ receivers:
         endpoint: "0.0.0.0:4317"
       http:
         endpoint: "0.0.0.0:4318"
-
   prometheus:
     config:
       scrape_configs:
@@ -13,22 +12,17 @@ receivers:
         scrape_interval: 60s
         static_configs:
         - targets: ['localhost:8888']
-
+  awsecscontainermetricsd:
   filelog:
     start_at: end
     include:
       - /hostfs/var/lib/docker/containers/*/*.log
-
     include_file_path: true
-
     # add log.file.path to resource attributes
     operators:
       - type: move
         from: attributes["log.file.path"]
         to: resource["log.file.path"]
-
-  # add metrics
-  awsecscontainermetricsd:
 
 processors:
   resourcedetection:
@@ -36,12 +30,10 @@ processors:
     detectors: [env, ec2, system]
     timeout: 2s
     override: false
-
   ecsattributes:
     container_id:
       sources:
         - "log.file.path"
-
   transform/logs:
     error_mode: ignore
     log_statements:
@@ -51,9 +43,10 @@ processors:
           - set(attributes["aws_ecs_task_family"], attributes["aws.ecs.task.definition.family"])
           - set(attributes["image_id"], attributes["image.id"])
           - delete_key(attributes, "image.id")
-
   batch:
-
+    send_batch_size: 1024
+    send_batch_max_size: 2048
+    timeout: "1s"
   # otel-collector resource detection for collector
   resourcedetection/otel-collector:
     detectors: [ecs, ec2]
@@ -83,26 +76,29 @@ extensions:
 service:
   extensions:
     - health_check
-
+  telemetry:
+    metrics:
+      address: 0.0.0.0:8888
+      level: detailed
   pipelines:
     logs:
       receivers:
         - filelog
       processors:
-        - resourcedetection
+        # - resourcedetection # For logs relayed from other containers, don't use otel container's resource attributes.
         - ecsattributes
         - transform/logs
+        - batch
       exporters:
         - coralogix
-
     metrics:
       receivers:
+        - otlp
         - awsecscontainermetricsd
       processors:
         - batch
       exporters:
         - coralogix
-
     traces:
       receivers:
         - otlp
@@ -110,16 +106,11 @@ service:
         - batch
       exporters:
         - coralogix
-
     metrics/otel-collector:
       receivers:
         - prometheus
       processors:
         - resourcedetection/otel-collector
+        - batch
       exporters:
         - coralogix
-
-  telemetry:
-    metrics:
-      address: 0.0.0.0:8888
-      level: detailed
