@@ -21,11 +21,11 @@ variable "memory" {
 }
 
 variable "coralogix_region" {
-  description = "The region of the Coralogix endpoint domain: [Europe, Europe2, India, Singapore, US, US2, Custom]. If \"Custom\" then __custom_domain__ parameter must be specified."
+  description = "The region of the Coralogix endpoint domain: [EU1|EU2|AP1|AP2|US1|US2|custom]. If \"custom\" then __custom_domain__ parameter must be specified."
   type        = string
   validation {
-    condition     = can(regex(lower("^(europe|europe2|india|singapore|us|us2|custom|EU1|EU2|AP1|AP2|US1|US2)$"), lower(var.coralogix_region)))
-    error_message = "Must be one of [EU1|EU2|AP1|AP2|US1|US2]. Please note deprecation of the following legacy region codes: [Europe, Europe2, India, Singapore, US, US2, Custom]. May be removed as soon as 1-3 releases after current release (v1.0.87)."
+    condition     = can(regex("^(EU1|EU2|AP1|AP2|US1|US2|custom|Europe|Europe2|India|Singapore|US|US2)$", var.coralogix_region))
+    error_message = "Must be one of [EU1|EU2|AP1|AP2|US1|US2|custom]. Please note deprecation of previous legacy region codes."
   }
 }
 
