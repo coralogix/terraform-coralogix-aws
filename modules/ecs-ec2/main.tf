@@ -1,3 +1,9 @@
+module "locals_variables" {
+  source = "coralogix/aws/coralogix//modules/locals_variables"
+  integration_type = null
+  random_string = "foo"
+}
+
 locals {
   name = "coralogix-otel-agent"
   tags = merge(
@@ -6,7 +12,8 @@ locals {
     },
     var.tags
   )
-  coralogix_region_domain_map = {
+  coralogix_region_domain_map = locals_variables.coralogix_regions
+  coralogix_region_domain_map_DEPRECATED = {
     # The following is the new set of region codes
     "EU1"       = "coralogix.com"
     "EU2"       = "eu2.coralogix.com"
