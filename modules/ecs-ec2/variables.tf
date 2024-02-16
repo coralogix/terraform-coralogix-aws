@@ -1,5 +1,5 @@
 variable "ecs_cluster_name" {
-  description = "Name of the AWS ECS Cluster to deploy the Coralogix OTEL Collector. Supports Amazon EC2 instances only, not Fargate."
+  description = "Name of the existing AWS ECS Cluster to deploy the Coralogix OTEL Collector. Supports Amazon EC2 instances only, not Fargate."
   type        = string
 }
 

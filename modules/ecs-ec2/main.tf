@@ -1,5 +1,5 @@
 locals {
-  name = "coralogix-otel-agent"
+  name = "${var.ecs_cluster_name}"
   tags = merge(
     {
       "ecs:taskDefinition:createdFrom" = "terraform"
@@ -17,20 +17,12 @@ locals {
 module "locals_variables" {
   source = "../locals_variables"
   integration_type = "ecs-ec2"
-  random_string    = random_string.id.result
-}
-
-resource "random_string" "id" {
-  length  = 7
-  lower   = true
-  numeric = true
-  upper   = false
-  special = false
+  random_string    = uuid()
 }
 
 resource "aws_ecs_task_definition" "coralogix_otel_agent" {
   count = var.task_definition_arn == null ? 1 : 0
-  family                   = "${local.name}-${random_string.id.result}"
+  family                   = "${local.name}-otel-agent-daemon-taskdef"
   cpu                      = max(var.memory, 256)
   memory                   = var.memory
   requires_compatibilities = ["EC2"]
@@ -44,7 +36,7 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
   }
   tags = merge(
     {
-      Name = "${local.name}-${random_string.id.result}"
+      Name = "${local.name}-otel-agent-daemon-taskdef"
     },
     var.tags
   )
@@ -119,7 +111,7 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
 }
 
 resource "aws_ecs_service" "coralogix_otel_agent" {
-  name                               = "${local.name}-${random_string.id.result}"
+  name                               = "${local.name}-otel-agent-daemon-service"
   cluster                            = var.ecs_cluster_name
   launch_type                        = "EC2"
   task_definition                    = var.task_definition_arn == null ? aws_ecs_task_definition.coralogix_otel_agent[0].arn : var.task_definition_arn
@@ -139,7 +131,7 @@ resource "aws_ecs_service" "coralogix_otel_agent" {
   enable_ecs_managed_tags = true
   tags = merge(
     {
-      Name = "${local.name}-${random_string.id.result}"
+      Name = "${local.name}-otel-agent-daemon-service"
     },
     var.tags
   )
