@@ -9,8 +9,8 @@ Coralogix provides the following integration:
 AWS Lambda function used to send logs from different AWS services like S3/Kinesis/CloudWatch/etc - [coralogix-aws-shipper](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/coralogix-aws-shipper)
 
 
-### ECS-EC2
-Provision an ECS Service that run the OTEL Collector Agent as a Daemon container on each EC2 container instance - [ECS-EC2](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/ecs-ec2)
+### ecs-ec2:
+The Coralogix OpenTelemetry Agent for ECS-EC2 Terraform module deploys the Coralogix Distribution for Open Telemetry ("CDOT") Collector Agent as a Daemon ECS service on each EC2 container instance - [ecs-ec2](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/ecs-ec2)
 
 ### firehose-logs:
 Firehose Logs module is designed to support AWS Firehose Logs integration with Coralogix - [firehose-logs](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/firehose-logs)
