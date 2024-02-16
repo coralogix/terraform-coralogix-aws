@@ -1,9 +1,3 @@
-module "locals_variables" {
-  source = "coralogix/aws/coralogix//modules/locals_variables"
-  integration_type = null
-  random_string = "foo"
-}
-
 locals {
   name = "coralogix-otel-agent"
   tags = merge(
@@ -12,29 +6,18 @@ locals {
     },
     var.tags
   )
-  coralogix_region_domain_map = locals_variables.coralogix_regions
-  coralogix_region_domain_map_DEPRECATED = {
-    # The following is the new set of region codes
-    "EU1"       = "coralogix.com"
-    "EU2"       = "eu2.coralogix.com"
-    "AP1"       = "coralogix.in"
-    "AP2"       = "coralogixsg.com"
-    "US1"       = "coralogix.us"
-    "US2"       = "cx498.coralogix.com"
-    "custom"    = null
-    # The following pre-2024-02-xx legacy codes to be deprecated.
-    "Europe"    = "coralogix.com"
-    "Europe2"   = "eu2.coralogix.com"
-    "India"     = "coralogix.in"
-    "Singapore" = "coralogixsg.com"
-    "US"        = "coralogix.us"
-    "US2"       = "cx498.coralogix.com"
-  }
+  coralogix_region_domain_map = module.locals_variables.coralogix_domains
   coralogix_domain = coalesce(var.custom_domain, local.coralogix_region_domain_map[var.coralogix_region])
   otel_config_file = coalesce(var.otel_config_file,
     (var.metrics ? "${path.module}/otel_config_metrics.tftpl.yaml" : "${path.module}/otel_config.tftpl.yaml")
   )
   otel_config = templatefile(local.otel_config_file, {})
+}
+
+module "locals_variables" {
+  source = "../locals_variables" # "coralogix/aws/coralogix//modules/locals_variables"
+  integration_type = "ecs-ec2"
+  random_string    = random_string.this.result
 }
 
 resource "random_string" "id" {
