@@ -17,7 +17,7 @@ locals {
 module "locals_variables" {
   source = "../locals_variables" # "coralogix/aws/coralogix//modules/locals_variables"
   integration_type = "ecs-ec2"
-  random_string    = random_string.this.result
+  random_string    = random_string.id.result
 }
 
 resource "random_string" "id" {
