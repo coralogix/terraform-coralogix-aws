@@ -1,4 +1,4 @@
-# ECS EC2 Open Telemetry Agent
+# Coralogix OpenTelemetry Agent for ECS-EC2. Terraform module.
 
 Terraform module to launch the Coralogix Distribution for Open Telemetry ("CDOT") into an existing AWS ECS Cluster, in the OTEL [Agent deployment](https://opentelemetry.io/docs/collector/deployment/agent/) pattern. The module is available on the [Terraform Registry](https://registry.terraform.io/modules/coralogix/aws/coralogix/latest/submodules/ecs-ec2).
 
@@ -22,11 +22,11 @@ Provision an ECS Service that run the OTEL Collector Agent as a Daemon container
 <!--For local dev, set local path to source, e.g. ```source  = "../../modules/ecs-ec2"```-->
 ```terraform
 module "ecs-ec2" {
-  source                   = "github.com/coralogix/terraform-coralogix-aws/modules/ecs-ec2"
+  source                   = "coralogix/aws/coralogix//modules/ecs-ec2"
   ecs_cluster_name         = "ecs-cluster-name"
   image_version            = "latest"
   memory                   = numeric MiB
-  coralogix_region         = ["Europe"|"Europe2"|"India"|"Singapore"|"US"|"US2"]
+  coralogix_region         = ["EU1"|"EU2"|"AP1"|"AP2"|"US1"|"US2"]
   custom_domain            = "[optional] custom Coralogix domain"
   default_application_name = "Coralogix Application Name"
   default_subsystem_name   = "Coralogix Subsystem Name"

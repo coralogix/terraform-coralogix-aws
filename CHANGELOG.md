@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.88
+### 🧰 Bug fixes 🧰
+#### **ecs-ec2**
+- fixes ecs-ec2 bugs from v1.0.87
+
 ## v1.0.87
 ### 💡 Enhancements and Bug fixes 🧰
 #### **ecs-ec2**
