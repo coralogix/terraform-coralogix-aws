@@ -28,16 +28,14 @@ module "lambda" {
     SCAN_OLD_LOGGROUPS = var.scan_old_loggroups
   }
   s3_existing_package = {
-    bucket = "gr-integrations-aws-testing"
-    key    = "sam/cb168da636d6c3fa5b544b7f2ed01d89"
+    bucket = "coralogix-serverless-repo-${data.aws_region.this.name}"
+    key    = "lambda-manager.zip"
   }
   policy_path                             = "/coralogix/"
   role_path                               = "/coralogix/"
   role_name                               = "serverlessrepo-Coralogix-Lambda-Man-${random_string.this.result}-Role"
   role_description                        = "Role for serverlessrepo-Coralogix-Lambda-Man-${random_string.this.result} Lambda Function."
   create_current_version_allowed_triggers = false
-  # create_async_event_config               = true
-  # attach_async_event_policy               = true
   attach_policy_statements                = true
   policy_statements = {
     CXLambdaUpdateConfig = {
