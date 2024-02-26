@@ -1,4 +1,7 @@
 # Changelog
+## v1.0.89
+### 💡 Enhancements 💡
+- ECS-EC2 module, set log level to warn by default for otel configurations
 
 ## v1.0.89
 ### 🚀 New components 🚀
