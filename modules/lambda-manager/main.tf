@@ -20,11 +20,11 @@ module "lambda" {
   create_package         = false
   destination_on_failure = aws_sns_topic.this.arn
   environment_variables = {
-    LOGS_FILTER = var.logs_filter
-    REGEX_PATTERN = var.regex_pattern
-    DESTINATION_ARN = var.destination_arn
-    DESTINATION_ROLE = var.destination_role
-    DESTINATION_TYPE = var.destination_type
+    LOGS_FILTER        = var.logs_filter
+    REGEX_PATTERN      = var.regex_pattern
+    DESTINATION_ARN    = var.destination_arn
+    DESTINATION_ROLE   = var.destination_role
+    DESTINATION_TYPE   = var.destination_type
     SCAN_OLD_LOGGROUPS = var.scan_old_loggroups
   }
   s3_existing_package = {
@@ -63,34 +63,34 @@ module "lambda" {
 }
 
 resource "aws_cloudwatch_event_rule" "EventBridgeRule" {
-    name        = format("serverlessrepo-Coralogix--LambdaFunctionEventBridge-${random_string.this.result}")
-    event_pattern = jsonencode({
+  name = format("serverlessrepo-Coralogix--LambdaFunctionEventBridge-${random_string.this.result}")
+  event_pattern = jsonencode({
     source      = ["aws.logs"],
     detail-type = ["AWS API Call via CloudTrail"],
-    detail      = {
-        eventSource = ["logs.amazonaws.com"],
-        eventName = ["CreateLogGroup"]
+    detail = {
+      eventSource = ["logs.amazonaws.com"],
+      eventName   = ["CreateLogGroup"]
     }
-    })
+  })
 }
 
 resource "aws_cloudwatch_event_target" "EventBridgeRuleTarget" {
-    depends_on = [ aws_cloudwatch_event_rule.EventBridgeRule ]
-    rule      = aws_cloudwatch_event_rule.EventBridgeRule.name
-    target_id = "LambdaFunction"
-    arn = module.lambda.lambda_function_arn
+  depends_on = [aws_cloudwatch_event_rule.EventBridgeRule]
+  rule       = aws_cloudwatch_event_rule.EventBridgeRule.name
+  target_id  = "LambdaFunction"
+  arn        = module.lambda.lambda_function_arn
 }
 
 resource "aws_sns_topic" "this" {
-    name_prefix  = "serverlessrepo-Coralogix-Lambda-Man-LambdaFunction-${random_string.this.result}-Failure"
-    display_name = "serverlessrepo-Coralogix-Lambda-Man-LambdaFunction-${random_string.this.result}-Failure"
+  name_prefix  = "serverlessrepo-Coralogix-Lambda-Man-LambdaFunction-${random_string.this.result}-Failure"
+  display_name = "serverlessrepo-Coralogix-Lambda-Man-LambdaFunction-${random_string.this.result}-Failure"
 }
 
 resource "aws_sns_topic_subscription" "this" {
-    depends_on = [aws_sns_topic.this, module.lambda]
-    count      = var.notification_email != null ? 1 : 0
-    topic_arn  = aws_sns_topic.this.arn
-    protocol   = "email"
-    endpoint   = var.notification_email
+  depends_on = [aws_sns_topic.this, module.lambda]
+  count      = var.notification_email != null ? 1 : 0
+  topic_arn  = aws_sns_topic.this.arn
+  protocol   = "email"
+  endpoint   = var.notification_email
 }
 

@@ -2,7 +2,27 @@
 
 This Lambda Function was created to pick up newly created and existing log groups and attach them to Firehose or Lambda integration
 
-Environment variables:
+## Requirements
+
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.1 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 2.23 |
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.15.1 |
+| <a name="provider_random"></a> [random](#provider\_random) | >= 3.1.0 |
+
+## Modules
+
+| Name | Version |
+|------|---------|
+| <a name="module_terraform_aws_modules_lambda_aws"></a> [terraform-aws-modules/lambda/aws](#module\_terraform\_aws\_modules\_lambda\_aws) | >= 3.3.1 |
+
+## Environment variables:
 
 | Parameter | Description | Default Value | Required |
 |---|---|---|---|
