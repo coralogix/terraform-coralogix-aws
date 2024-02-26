@@ -6,12 +6,12 @@ Environment variables:
 
 | Parameter | Description | Default Value | Required |
 |---|---|---|---|
-| regex_pattern | Set up this regex to match the Log Groups names that you want to automatically subscribe to the destination| | :heavy_check_mark: |
-| logs_filter | Subscription filter to select which logs needs to be sent to Coralogix. For Example for Lambda Errors that are not sendable by Coralogix Lambda Layer '?REPORT ?"Task timed out" ?"Process exited before completing" ?errorMessage ?"module initialization error:" ?"Unable to import module" ?"ERROR Invoke Error" ?"EPSAGON_TRACE:"'. | | :heavy_check_mark: |
-| destination_arn | Arn for the firehose to subscribe the log groups (By default is the firehose created by Serverless Template) | | :heavy_check_mark: |
-| destination_role | Arn for the role to allow destination subscription to be pushed (Lambda or Firehose) | | :heavy_check_mark: |
-| destination_type | Type of destination (Lambda or Firehose) | | :heavy_check_mark: |
-| scan_old_loggroups | This will scan all LogGroups in the account and apply the subscription configured, will only run Once and set to false. Default is false | false | :heavy_check_mark: |
+| regex_pattern | Set up this regex to match the Log Groups names that you want to automatically subscribe to the destination| | yes |
+| logs_filter | Subscription filter to select which logs needs to be sent to Coralogix. For Example for Lambda Errors that are not sendable by Coralogix Lambda Layer '?REPORT ?"Task timed out" ?"Process exited before completing" ?errorMessage ?"module initialization error:" ?"Unable to import module" ?"ERROR Invoke Error" ?"EPSAGON_TRACE:"'. | | yes |
+| destination_arn | Arn for the firehose to subscribe the log groups (By default is the firehose created by Serverless Template) | | yes |
+| destination_role | Arn for the role to allow destination subscription to be pushed (Lambda or Firehose) | | yes |
+| destination_type | Type of destination (Lambda or Firehose) | | yes |
+| scan_old_loggroups | This will scan all LogGroups in the account and apply the subscription configured, will only run Once and set to false. Default is false | false | yes |
 | architecture | Lambda function architecture, possible options are [x86_64, arm64] | x86_64 | |
 | memory_size | The maximum allocated memory this lambda may consume. Default value is the minimum recommended setting please consult coralogix support before changing. | 1024 |  |
 | timeout | The maximum time in seconds the function may be allowed to run. Default value is the minimum recommended setting please consult coralogix support before changing. | 300 |  |
@@ -24,6 +24,7 @@ We are assuming you deployed our Firehose integration per our integration https:
 
 Firehose Destination requires a Role to allow Cloudwatch to send logs to Firehose. For that please verify that the role you are using in DESTINATION_ROLO has the following definitions.
 
+Make sure that you put it the **Resource** field the arn for the destination firehose
 Permissions policy
 
 ```
@@ -36,7 +37,7 @@ Permissions policy
                 "firehose:PutRecordBatch",
                 "firehose:UpdateDestination"
             ],
-            "Resource": "arn:aws:firehose:sa-east-1:771039649440:deliverystream/coralogixdeliverystream-sa-east-1",
+            "Resource": <destination firehose arn>,
             "Effect": "Allow"
         }
     ]
@@ -53,7 +54,7 @@ Trust relationships
             "Sid": "CloudwatchToFirehoseRole",
             "Effect": "Allow",
             "Principal": {
-                "Service": "logs.sa-east-1.amazonaws.com"
+                "Service": "logs.amazonaws.com"
             },
             "Action": "sts:AssumeRole"
         }
@@ -61,24 +62,26 @@ Trust relationships
 }
 ```
 
-### Lamba
+### Lambda
 
-Lambda destination does not need a specific role, but please check that the execution rolo of the destination lambda has the following resource based policy.
+Lambda destination does not need a specific role, but please check that the execution role of the destination lambda has the following resource based policy.
+
+Make sure that you have replaced the **Resource** to the arn of the lambda, and the account_id with your account id in the **ArnLike**
 
 ```
 {
-    "Sid": "lsdmvpsdf",
-    "Effect": "Allow",
-    "Principal": {
-        Service": "logs.amazonaws.com"
-    },
-    "Action": "lambda:InvokeFunction",
-    "Resource": "arn:aws:lambda:us-east-1:771039649440:function:coralogix-aws-shipper",
-    "Condition": {
+ "Sid": "allow-logs-to-trigger",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "logs.amazonaws.com"
+      },
+      "Action": "lambda:InvokeFunction",
+      "Resource": <arn for the destination lambda>,
+      "Condition": {
         "ArnLike": {
-        "AWS:SourceArn": "arn:aws:logs:us-east-1:771039649440:*:*:*"
+          "AWS:SourceArn": "arn:aws:logs:us-east-1:<account_id>:log-group:*:*"
         }
-    }
+      }
 }
 ```
 

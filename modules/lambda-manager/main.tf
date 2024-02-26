@@ -9,17 +9,16 @@ resource "random_string" "this" {
 
 module "lambda" {
   source                 = "terraform-aws-modules/lambda/aws"
-  version                = "3.3.1"
+  version                = "6.5.0"
   function_name          = "serverlessrepo-Coralogix-Lambda-Man-LambdaFunction-${random_string.this.result}"
   description            = "Send CloudWatch logs to Coralogix."
-  handler                = "index.handler"
-  runtime                = "nodejs16.x"
+  handler                = "lambda_function.lambda_handler"
+  runtime                = "python3.10"
   architectures          = [var.architecture]
   memory_size            = var.memory_size
   timeout                = var.timeout
   create_package         = false
   destination_on_failure = aws_sns_topic.this.arn
-  attach_network_policy  = true
   environment_variables = {
     LOGS_FILTER = var.logs_filter
     REGEX_PATTERN = var.regex_pattern
@@ -29,23 +28,24 @@ module "lambda" {
     SCAN_OLD_LOGGROUPS = var.scan_old_loggroups
   }
   s3_existing_package = {
-    bucket = "coralogix-serverless-repo-${data.aws_region.this.name}"
-    key    = "lambda-manager.zip"
+    bucket = "gr-integrations-aws-testing"
+    key    = "sam/cb168da636d6c3fa5b544b7f2ed01d89"
   }
   policy_path                             = "/coralogix/"
   role_path                               = "/coralogix/"
   role_name                               = "serverlessrepo-Coralogix-Lambda-Man-${random_string.this.result}-Role"
   role_description                        = "Role for serverlessrepo-Coralogix-Lambda-Man-${random_string.this.result} Lambda Function."
   create_current_version_allowed_triggers = false
-  create_async_event_config               = true
-  attach_async_event_policy               = true
+  # create_async_event_config               = true
+  # attach_async_event_policy               = true
+  attach_policy_statements                = true
   policy_statements = {
     CXLambdaUpdateConfig = {
       effect    = "Allow"
       actions   = ["lambda:UpdateFunctionConfiguration", "lambda:GetFunctionConfiguration"]
       resources = ["arn:aws:lambda:${data.aws_region.this.name}:${data.aws_caller_identity.current.account_id}:function:*"]
     },
-    CXLambdaUpdateConfig = {
+    CXLogConfig = {
       effect    = "Allow"
       actions   = ["logs:PutSubscriptionFilter", "logs:DescribeLogGroups", "logs:DescribeSubscriptionFilters"]
       resources = ["arn:aws:logs:*:*:*"]
@@ -57,7 +57,7 @@ module "lambda" {
     }
   }
   allowed_triggers = {
-    AllowExecutionFromECR = {
+    AllowExecutionEventBridge = {
       principal  = "events.amazonaws.com"
       source_arn = aws_cloudwatch_event_rule.EventBridgeRule.arn
     }
@@ -84,8 +84,8 @@ resource "aws_cloudwatch_event_target" "EventBridgeRuleTarget" {
 }
 
 resource "aws_sns_topic" "this" {
-    name_prefix  = "${module.lambda.lambda_function_name}-Failure"
-    display_name = "${module.lambda.lambda_function_name}-Failure"
+    name_prefix  = "serverlessrepo-Coralogix-Lambda-Man-LambdaFunction-${random_string.this.result}-Failure"
+    display_name = "serverlessrepo-Coralogix-Lambda-Man-LambdaFunction-${random_string.this.result}-Failure"
 }
 
 resource "aws_sns_topic_subscription" "this" {
