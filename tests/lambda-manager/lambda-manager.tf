@@ -13,7 +13,7 @@ provider "aws" {
 }
 
 module "lambda-manager" {
-  source = "../../lambda-manager"
+  source = "../../modules/lambda-manager"
 
   regex_pattern = ".*"
   destination_arn = "arn:aws:lambda:us-east-1:12345678910:function:*"

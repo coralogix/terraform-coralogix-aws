@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.89
+### 🚀 New components 🚀
+#### **lambda-manager**
+- Add lambda-manager module
+
 ## v1.0.88
 ### 🧰 Bug fixes 🧰
 #### **ecs-ec2**

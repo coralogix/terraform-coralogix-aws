@@ -13,7 +13,7 @@ module "lambda" {
   function_name          = "serverlessrepo-Coralogix-Lambda-Man-LambdaFunction-${random_string.this.result}"
   description            = "Send CloudWatch logs to Coralogix."
   handler                = "lambda_function.lambda_handler"
-  runtime                = "python3.10"
+  runtime                = "python3.12"
   architectures          = [var.architecture]
   memory_size            = var.memory_size
   timeout                = var.timeout
