@@ -1,0 +1,98 @@
+data "aws_region" "this" {}
+
+data "aws_caller_identity" "current" {}
+
+resource "random_string" "this" {
+  length  = 12
+  special = false
+}
+
+module "lambda" {
+  source                 = "terraform-aws-modules/lambda/aws"
+  version                = "3.3.1"
+  function_name          = "serverlessrepo-Coralogix-Lambda-Man-LambdaFunction-${random_string.this.result}"
+  description            = "Send CloudWatch logs to Coralogix."
+  handler                = "index.handler"
+  runtime                = "nodejs16.x"
+  architectures          = [var.architecture]
+  memory_size            = var.memory_size
+  timeout                = var.timeout
+  create_package         = false
+  destination_on_failure = aws_sns_topic.this.arn
+  attach_network_policy  = true
+  environment_variables = {
+    LOGS_FILTER = var.logs_filter
+    REGEX_PATTERN = var.regex_pattern
+    DESTINATION_ARN = var.destination_arn
+    DESTINATION_ROLE = var.destination_role
+    DESTINATION_TYPE = var.destination_type
+    SCAN_OLD_LOGGROUPS = var.scan_old_loggroups
+  }
+  s3_existing_package = {
+    bucket = "coralogix-serverless-repo-${data.aws_region.this.name}"
+    key    = "lambda-manager.zip"
+  }
+  policy_path                             = "/coralogix/"
+  role_path                               = "/coralogix/"
+  role_name                               = "serverlessrepo-Coralogix-Lambda-Man-${random_string.this.result}-Role"
+  role_description                        = "Role for serverlessrepo-Coralogix-Lambda-Man-${random_string.this.result} Lambda Function."
+  create_current_version_allowed_triggers = false
+  create_async_event_config               = true
+  attach_async_event_policy               = true
+  policy_statements = {
+    CXLambdaUpdateConfig = {
+      effect    = "Allow"
+      actions   = ["lambda:UpdateFunctionConfiguration", "lambda:GetFunctionConfiguration"]
+      resources = ["arn:aws:lambda:${data.aws_region.this.name}:${data.aws_caller_identity.current.account_id}:function:*"]
+    },
+    CXLambdaUpdateConfig = {
+      effect    = "Allow"
+      actions   = ["logs:PutSubscriptionFilter", "logs:DescribeLogGroups", "logs:DescribeSubscriptionFilters"]
+      resources = ["arn:aws:logs:*:*:*"]
+    },
+    CXPassRole = {
+      effect    = "Allow"
+      actions   = ["iam:PassRole"]
+      resources = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/*"]
+    }
+  }
+  allowed_triggers = {
+    AllowExecutionFromECR = {
+      principal  = "events.amazonaws.com"
+      source_arn = aws_cloudwatch_event_rule.EventBridgeRule.arn
+    }
+  }
+}
+
+resource "aws_cloudwatch_event_rule" "EventBridgeRule" {
+    name        = format("serverlessrepo-Coralogix--LambdaFunctionEventBridge-${random_string.this.result}")
+    event_pattern = jsonencode({
+    source      = ["aws.logs"],
+    detail-type = ["AWS API Call via CloudTrail"],
+    detail      = {
+        eventSource = ["logs.amazonaws.com"],
+        eventName = ["CreateLogGroup"]
+    }
+    })
+}
+
+resource "aws_cloudwatch_event_target" "EventBridgeRuleTarget" {
+    depends_on = [ aws_cloudwatch_event_rule.EventBridgeRule ]
+    rule      = aws_cloudwatch_event_rule.EventBridgeRule.name
+    target_id = "LambdaFunction"
+    arn = module.lambda.lambda_function_arn
+}
+
+resource "aws_sns_topic" "this" {
+    name_prefix  = "${module.lambda.lambda_function_name}-Failure"
+    display_name = "${module.lambda.lambda_function_name}-Failure"
+}
+
+resource "aws_sns_topic_subscription" "this" {
+    depends_on = [aws_sns_topic.this, module.lambda]
+    count      = var.notification_email != null ? 1 : 0
+    topic_arn  = aws_sns_topic.this.arn
+    protocol   = "email"
+    endpoint   = var.notification_email
+}
+
