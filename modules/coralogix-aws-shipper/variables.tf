@@ -98,6 +98,8 @@ variable "security_group_ids" {
   default     = null
 }
 
+# Lambda configuration
+
 variable "memory_size" {
   description = "Lambda function memory limit"
   type        = number
@@ -108,6 +110,16 @@ variable "timeout" {
   description = "Lambda function timeout limit"
   type        = number
   default     = 300
+}
+
+variable "cpu_arch" {
+  description = "Lambda function CPU architecture"
+  type        = string
+  default     = "arm64"
+  validation {
+    condition     = contains(["arm64", "x86-64"], var.cpu_arch)
+    error_message = "The CPU architecture must be one of these values: [arm64, x86_64]."
+  } 
 }
 
 # Integration Generic Config (Optional)
