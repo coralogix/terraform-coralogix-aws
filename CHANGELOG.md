@@ -1,4 +1,10 @@
 # Changelog
+
+## v1.0.90
+### 💡 Enhancements 💡
+#### **coralogix-aws-shipper**
+- [cds-1050] add support for x86 to template
+
 ## v1.0.89
 ### 💡 Enhancements 💡
 - ECS-EC2 module, set log level to warn by default for otel configurations
