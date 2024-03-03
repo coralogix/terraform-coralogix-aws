@@ -13,8 +13,19 @@ resource "random_string" "this" {
 
 resource "null_resource" "s3_bucket_copy" {
   count = var.custom_s3_bucket == "" ? 0 : 1
+
   provisioner "local-exec" {
-    command = "curl -o coralogix-aws-shipper.zip https://coralogix-serverless-repo-eu-central-1.s3.eu-central-1.amazonaws.com/coralogix-aws-shipper.zip ; aws s3 cp ./coralogix-aws-shipper.zip s3://coralogix-aws-shipper.zip ; rm ./coralogix-aws-shipper.zip"
+    # command = "curl -o coralogix-aws-shipper.zip https://coralogix-serverless-repo-eu-central-1.s3.eu-central-1.amazonaws.com/coralogix-aws-shipper.zip ; aws s3 cp ./coralogix-aws-shipper.zip s3://coralogix-aws-shipper.zip ; rm ./coralogix-aws-shipper.zip"
+    command = <<-EOF
+      if [[ "${var.cpu_arch}" == "x86_64" ]]; then
+        file_name="coralogix-aws-shipper-x86-64.zip"
+      else
+        file_name="coralogix-aws-shipper.zip"
+      fi
+      curl -o $file_name https://coralogix-serverless-repo-ap-east-1.s3.ap-east-1.amazonaws.com/$file_name
+      aws s3 cp ./$file_name s3://${var.custom_s3_bucket}
+      rm ./$file_name
+    EOF
   }
 }
 
@@ -28,7 +39,7 @@ module "lambda" {
   version                = "6.5.0"
   handler                = "bootstrap"
   runtime                = "provided.al2"
-  architectures          = ["arm64"]
+  architectures          = [var.cpu_arch]
   memory_size            = var.memory_size
   timeout                = var.timeout
   create_package         = false
@@ -49,7 +60,7 @@ module "lambda" {
   }
   s3_existing_package = {
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
-    key    = "coralogix-aws-shipper.zip"
+    key = var.cpu_arch == "arm64" ? "coralogix-aws-shipper.zip" : "coralogix-aws-shipper-x86-64.zip"
   }
   policy_path                             = "/coralogix/"
   role_path                               = "/coralogix/"
