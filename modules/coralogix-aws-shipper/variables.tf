@@ -117,7 +117,7 @@ variable "cpu_arch" {
   type        = string
   default     = "arm64"
   validation {
-    condition     = contains(["arm64", "x86-64"], var.cpu_arch)
+    condition     = contains(["arm64", "x86_64"], var.cpu_arch)
     error_message = "The CPU architecture must be one of these values: [arm64, x86_64]."
   } 
 }

@@ -98,6 +98,8 @@ variable "security_group_ids" {
   default     = null
 }
 
+# Lambda configuration
+
 variable "memory_size" {
   description = "Lambda function memory limit"
   type        = number
@@ -108,6 +110,16 @@ variable "timeout" {
   description = "Lambda function timeout limit"
   type        = number
   default     = 300
+}
+
+variable "cpu_arch" {
+  description = "Lambda function CPU architecture"
+  type        = string
+  default     = "arm64"
+  validation {
+    condition     = contains(["arm64", "x86-64"], var.cpu_arch)
+    error_message = "The CPU architecture must be one of these values: [arm64, x86_64]."
+  } 
 }
 
 # Integration Generic Config (Optional)
@@ -162,7 +174,6 @@ variable "integration_type" {
   default = ""
 }
 
-
 variable "sns_topic_name" {
   description = "The name of your SNS topic"
   type        = string
@@ -210,6 +221,7 @@ variable "integration_info" {
 }
 
 # MSK variables
+
 variable "msk_cluster_arn" {
   description = "The ARN of the MSK cluster to subscribe to retrieving messages"
   type        = string
@@ -225,7 +237,7 @@ variable "msk_topic_name" {
 # Kafka variables
 
 variable "kafka_brokers" {
-  description = "The list of brokers in the Kafka cluster"
+  description = "Comma Delimited List of Kafka broker to connect to"
   type        = string
   default     = null
 }
