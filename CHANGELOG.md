@@ -1,8 +1,13 @@
 # Changelog
 
+## v1.0.91
+### 🚀 New components 🚀
+#### **coralogix-aws-shipper**
+- Custom Metadata can be added to the log messages.
+
 ## v1.0.90
 ### 💡 Enhancements 💡
-#### **coralogix-aws-shipper**
+
 - [cds-1050] add support for x86 to template
 
 ## v1.0.89

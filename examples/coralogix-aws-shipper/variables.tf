@@ -117,7 +117,7 @@ variable "cpu_arch" {
   type        = string
   default     = "arm64"
   validation {
-    condition     = contains(["arm64", "x86-64"], var.cpu_arch)
+    condition     = contains(["arm64", "x86_64"], var.cpu_arch)
     error_message = "The CPU architecture must be one of these values: [arm64, x86_64]."
   } 
 }
@@ -202,6 +202,12 @@ variable "add_metadata" {
   description = "Add metadata to the log message. Expect comma-separated values. Options for S3 are bucket_name,key_name. For CloudWatch stream_name"
   default     = null
   type        = string
+}
+
+variable "custom_metadata" {
+  default = null
+  description = "Add custom metadata to the log message. Expects comma separated values. Options are key1=value1,key2=value2 "
+  type = string
 }
 
 variable "integration_info" {

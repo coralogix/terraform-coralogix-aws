@@ -117,6 +117,7 @@ If you want to avoid this issue, you can deploy in other ways:
 
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
+| <a name="input_custom_metadata"></a> [custom\_metadata](#input\_custom\_metadata) | Add custom metadata to the log message. Expects comma separated values. Options are `key1=value1,key2=value2` | `string` | n/a | no |
 | <a name="input_add_metadata"></a> [add\_metadata](#input\_add\_metadata) | Add metadata to the log message. Expects comma separated values. Options for S3 are `bucket_name`,`key_name`. For CloudWatch `stream_name` | `string` | n/a | no |
 | <a name="input_lambda_name"></a> [lambda\_name](#input\_lambda\_name) | Name the Lambda function that you want to create. | `string` | n/a | no |
 | <a name="input_blocking_pattern"></a> [blocking\_pattern](#input\_blocking\_pattern) | Enter a regular expression to identify lines excluded from being sent to Coralogix. For example, use `MainActivity.java:\d{3}` to match log lines with MainActivity followed by exactly three digits. | `string` | n/a | no |
