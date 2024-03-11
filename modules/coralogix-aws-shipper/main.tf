@@ -57,6 +57,7 @@ module "lambda" {
     BLOCKING_PATTERN   = var.blocking_pattern
     SAMPLING           = tostring(var.sampling_rate)
     ADD_METADATA       = var.add_metadata
+    CUSTOM_METADATA    = var.custom_metadata
   }
   s3_existing_package = {
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket

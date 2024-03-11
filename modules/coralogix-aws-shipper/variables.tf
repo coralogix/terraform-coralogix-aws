@@ -204,6 +204,12 @@ variable "add_metadata" {
   type        = string
 }
 
+variable "custom_metadata" {
+  default     = null
+  description = "Add custom metadata to the log message. Expects comma separated values. Options are key1=value1,key2=value2 "
+  type        = string
+}
+
 variable "integration_info" {
   description = "Values of s3 integraion in case that you want to deploy more than one integration"
   type = map(object({
