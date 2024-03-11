@@ -7,7 +7,7 @@
 
 ## v1.0.90
 ### 💡 Enhancements 💡
-
+#### **coralogix-aws-shipper**
 - [cds-1050] add support for x86 to template
 
 ## v1.0.89
