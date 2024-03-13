@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 4.0"
+      version = "~> 5.0"
     }
   }
 }
@@ -18,6 +18,5 @@ module "lambda-manager" {
   regex_pattern = ".*"
   destination_arn = "arn:aws:lambda:us-east-1:12345678910:function:*"
   logs_filter = "custome-test"
-  destination_role = "arn:aws:iam::12345678910:role/role_name"
   destination_type = "lambda"
 }
