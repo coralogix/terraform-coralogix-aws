@@ -14,11 +14,6 @@
 ### 💡 Enhancements 💡
 - ECS-EC2 module, set log level to warn by default for otel configurations
 
-## v1.0.89
-### 🚀 New components 🚀
-#### **lambda-manager**
-- Add lambda-manager module
-
 ## v1.0.88
 ### 🧰 Bug fixes 🧰
 #### **ecs-ec2**
