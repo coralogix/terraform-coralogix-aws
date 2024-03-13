@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.91
+### 🚀 New components 🚀
+#### **lambda-manager**
+- Create lambda-manager module
+
 ## v1.0.90
 ### 💡 Enhancements 💡
 #### **coralogix-aws-shipper**
