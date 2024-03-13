@@ -1,4 +1,4 @@
-# coralogix-aws-shipper (Beta)
+# coralogix-aws-shipper
 
 ## Overview
 
@@ -58,7 +58,7 @@ If you want to avoid this issue, you can deploy in other ways:
 | <a name="input_s3_key_suffix"></a> [s3\_key\_suffix](#input\_s3\_key\_suffix) | The S3 path suffix to watch. | `string` |  n/a | no |
 | <a name="input_csv_delimiter"></a> [csv_delimiter](#input\_csv\_delimiter) | Specify a single character to be used as a delimiter when ingesting a CSV file with a header line. This value is applicable when the S3Csv integration type is selected, for example, “,” or ” “.  | `string` |  n/a | no |
 | <a name="input_newline_pattern"></a> [newline\_pattern](#input\_newline\_pattern) | nter a regular expression to detect a new log line for multiline logs, e.g., \n(?=\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}.\d{3}). | `string` | n/a | no |
-| [integration_info](#integration_info) | A map of integration information. Use this when you want to deploy more then one integration using the same s3 bucket. [Parameters are here.](#integration_info)| `mapping` | n/a | no |
+| [integration_info](#additional-parameters-for-integration_info) | A map of integration information. Use this when you want to deploy more then one integration using the same s3 bucket. [Parameters are here.](#integration_info)| `mapping` | n/a | no |
 
 ### Additional parameters for integration_info 
 
