@@ -4,8 +4,9 @@ variable "regex_pattern" {
 }
 
 variable "destination_role" {
-  description = "Arn for the role to allow destination subscription to be pushed (Lambda or Firehose)"
+  description = "Arn for the role to allow destination subscription to be pushed (In case you use Firehose)"
   type        = string
+  default     = null
 }
 
 variable "logs_filter" {

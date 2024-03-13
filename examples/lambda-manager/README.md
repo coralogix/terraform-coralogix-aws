@@ -16,7 +16,6 @@ module "lambda-manager" {
   regex_pattern    = ".*"
   destination_arn  = <your destination lambda/firehose arn>
   logs_filter      = "custome-test"
-  destination_role = <your destination lambda/firehose role arn>
   destination_type = "lambda"
 }
 ```

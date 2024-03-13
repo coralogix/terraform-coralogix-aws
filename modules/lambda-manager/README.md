@@ -29,7 +29,7 @@ This Lambda Function was created to pick up newly created and existing log group
 | regex_pattern | Set up this regex to match the Log Groups names that you want to automatically subscribe to the destination| | yes |
 | logs_filter | Subscription filter to select which logs needs to be sent to Coralogix. For Example for Lambda Errors that are not sendable by Coralogix Lambda Layer '?REPORT ?"Task timed out" ?"Process exited before completing" ?errorMessage ?"module initialization error:" ?"Unable to import module" ?"ERROR Invoke Error" ?"EPSAGON_TRACE:"'. | | yes |
 | destination_arn | Arn for the firehose to subscribe the log groups (By default is the firehose created by Serverless Template) | | yes |
-| destination_role | Arn for the role to allow destination subscription to be pushed (Lambda or Firehose) | | yes |
+| destination_role | Arn for the role to allow destination subscription to be pushed (In case you use Firehose) | n/a | no |
 | destination_type | Type of destination (Lambda or Firehose) | | yes |
 | scan_old_loggroups | This will scan all LogGroups in the account and apply the subscription configured, will only run Once and set to false. Default is false | false | yes |
 | architecture | Lambda function architecture, possible options are [x86_64, arm64] | x86_64 | |
