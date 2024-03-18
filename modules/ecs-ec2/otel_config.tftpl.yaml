@@ -16,10 +16,26 @@ receivers:
   filelog:
     start_at: end
     include:
-      - /hostfs/containers/*/*.log
+      - /hostfs/var/lib/docker/containers/*/*.log
     include_file_path: true
     # add log.file.path to resource attributes
     operators:
+      - type: json_parser
+        parse_from: body
+        parse_to: body
+        timestamp:
+          parse_from: body.time
+          layout: '%Y-%m-%dT%H:%M:%S.%fZ'
+
+      - type: recombine
+        id: recombine
+        combine_field: body.log
+        source_identifier: attributes["log.file.path"]
+        is_last_entry: body.log endsWith "\n"
+        force_flush_period: 10s
+        on_error: drop
+        combine_with: ""
+
       - type: move
         from: attributes["log.file.path"]
         to: resource["log.file.path"]
