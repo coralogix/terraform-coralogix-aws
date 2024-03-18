@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.92
+### 💡 Enhancements 💡
+#### **coralogix-aws-shipper**
+- allow MSK integration to get multiple topic names as a trigger
+
 ## v1.0.91
 ### 🚀 New components 🚀
 #### **lambda-manager**
