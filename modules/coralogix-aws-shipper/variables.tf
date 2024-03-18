@@ -229,8 +229,8 @@ variable "msk_cluster_arn" {
 }
 
 variable "msk_topic_name" {
-  description = "The name of the Kafka topic used to store records in your Kafka cluster"
-  type        = string
+  description = "List of names of the Kafka topic used to store records in your Kafka cluster ( [\"topic1\", \"topic2\",])"
+  type        = list
   default     = null
 }
 

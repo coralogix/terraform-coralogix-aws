@@ -117,7 +117,7 @@ variable "cpu_arch" {
   type        = string
   default     = "arm64"
   validation {
-    condition     = contains(["arm64", "x86-64"], var.cpu_arch)
+    condition     = contains(["arm64", "x86_64"], var.cpu_arch)
     error_message = "The CPU architecture must be one of these values: [arm64, x86_64]."
   } 
 }
@@ -229,8 +229,8 @@ variable "msk_cluster_arn" {
 }
 
 variable "msk_topic_name" {
-  description = "The name of the Kafka topic used to store records in your Kafka cluster"
-  type        = string
+  description = "List of names of the Kafka topic used to store records in your Kafka cluster ( [\"topic1\", \"topic2\",])"
+  type        = list
   default     = null
 }
 
