@@ -1,3 +1,6 @@
+# Warning: This Lambda Function will be deprecated on May 1st
+We recommend using [Coralogix AWS Shipper](https://github.com/coralogix/terraform-coralogix-aws/tree/master/modules/coralogix-aws-shipper)
+
 # kinesis
 
 Manage the application which retrieves logs from `S3` bucket and sends them to your *Coralogix* account.
