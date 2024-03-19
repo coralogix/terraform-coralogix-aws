@@ -3,6 +3,11 @@
 ### 💡 Enhancements 💡
 - [cds-1099] add recombine operator to default configuration for opentelemetry ecs-ec2 integration
 
+## v1.0.92
+### 💡 Enhancements 💡
+#### **coralogix-aws-shipper**
+- allow MSK integration to get multiple topic names as a trigger
+
 ## v1.0.91
 ### 🚀 New components 🚀
 #### **lambda-manager**
