@@ -109,3 +109,5 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "metrics_encryptio
     bucket_key_enabled = true
   }
 }
+
+

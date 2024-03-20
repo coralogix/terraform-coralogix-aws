@@ -11,8 +11,7 @@ To run this example you need to save this code in Terraform file, and change the
 ```bash
 provider "aws" {}
 
-module "coralogix-shipper-s3" 
-{
+module "coralogix-shipper-s3" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
 
   coralogix_region   = "EU1"
@@ -21,13 +20,14 @@ module "coralogix-shipper-s3"
   application_name   = "s3"
   subsystem_name     = "logs"
   s3_bucket_name     = "test-bucket-name"
+  s3_key_prefix      = "files/example"
+  s3_key_suffix      = ".txt"
 }
 ```
 
 ### Use the cloudtrail-sns integration
 ```bash
-module "coralogix-shipper-cloudtrail" 
-{
+module "coralogix-shipper-cloudtrail" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
 
   coralogix_region   = "EU1"
@@ -43,8 +43,7 @@ module "coralogix-shipper-cloudtrail"
 ### Use the S3Csv integration
 #### In this example we show how to use the S3Csv option, we also use an option that allows us to not save the api_key as text in the lambda but direct it to the secret that continues the secret.
 ```bash
-module "coralogix-shipper-S3Csv" 
-{
+module "coralogix-shipper-S3Csv" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
 
   coralogix_region   = "EU1"
@@ -71,8 +70,7 @@ module "coralogix-shipper-S3Csv"
 #### the value of the subsystem will be "Subsystem name"
 
 ```bash
-module "coralogix-shipper-sns" 
-{
+module "coralogix-shipper-sns" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
 
   coralogix_region   = "EU1"
@@ -88,8 +86,7 @@ module "coralogix-shipper-sns"
 ### Use the cloudtrail integration with the dynamic subsystem name
 #### When you set the subsystem to $.eventSource then the value of subsystem will be the name of your Trail.
 ```bash
-module "coralogix-shipper-cloudtrail" 
-{
+module "coralogix-shipper-cloudtrail" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
 
   coralogix_region   = "EU1"
@@ -104,8 +101,7 @@ module "coralogix-shipper-cloudtrail"
 ### Use the cloudwatch integration with a private link
 #### For more information about how to use private link click [here](https://coralogix.com/docs/coralogix-amazon-web-services-aws-privatelink-endpoints/)
 ```bash
-module "coralogix-shipper-cloudwatch" 
-{
+module "coralogix-shipper-cloudwatch" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
 
   coralogix_region   = "EU1"
@@ -121,8 +117,7 @@ module "coralogix-shipper-cloudwatch"
 
 ### Use the multiple s3 integrations at once using the integration_info variable
 ```bash
-module "coralogix-shipper-multiple-s3-integrations" 
-{
+module "coralogix-shipper-multiple-s3-integrations" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
 
   coralogix_region   = "EU1"
@@ -138,6 +133,12 @@ module "coralogix-shipper-multiple-s3-integrations"
       integration_type = "VpcFlow"
       application_name = "VpcFlow_application"
       subsystem_name   = "logs_from_vpcflow"
+    }
+    "S3_integration" = {
+      integration_type = "S3"
+      application_name = "s3_application"
+      subsystem_name   = "s3_vpcflow"
+      s3_key_prefix    = "s3_prefix"
     }
   }
 }
