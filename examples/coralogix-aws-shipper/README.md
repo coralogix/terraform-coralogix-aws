@@ -20,8 +20,8 @@ module "coralogix-shipper-s3" {
   application_name   = "s3"
   subsystem_name     = "logs"
   s3_bucket_name     = "test-bucket-name"
-  s3_key_prefix      = "files"
-  s3_key_suffix      = "txt"
+  s3_key_prefix      = "files/example"
+  s3_key_suffix      = ".txt"
 }
 ```
 

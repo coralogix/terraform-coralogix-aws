@@ -19,7 +19,7 @@ resource "aws_s3_bucket" "logs_bucket_name" {
   count  = local.logs_validations ? 1 : 0
   bucket = var.logs_bucket_name
   lifecycle {
-    prevent_destroy = false
+    prevent_destroy = true
   }
 }
 
@@ -109,3 +109,5 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "metrics_encryptio
     bucket_key_enabled = true
   }
 }
+
+
