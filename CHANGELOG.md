@@ -1,9 +1,15 @@
 # Changelog
 
+
 ## v1.0.93
 #### **coralogix-aws-shipper**
 ### 🧰 Bug fixes 🧰
 - Update permissions for EcrScan integration
+
+## v1.0.93
+### 💡 Enhancements 
+- [cds-1099] set default force_flush_period parameter to 0 for ecs-ec2 otel filelog receiver💡
+
 
 ## v1.0.92
 ### 💡 Enhancements 💡
