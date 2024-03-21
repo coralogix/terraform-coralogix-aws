@@ -98,7 +98,7 @@ module "lambda" {
       resources = ["${data.aws_s3_bucket.this[0].arn}/*", data.aws_s3_bucket.this[0].arn]
     } : {
         effect = "Deny"
-        actions = ["ecr:DescribeImageScanFindings"]
+        actions = ["rds:DescribeAccountAttributes"]
         resources = ["*"]
     } 
     integrations_policy = var.s3_bucket_name != null && var.sqs_name == null ? {
