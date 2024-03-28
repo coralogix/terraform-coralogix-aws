@@ -76,6 +76,12 @@ variable "cs_delimiter" {
   default     = ","
 }
 
+variable "custom_csv_header" {
+  type        = string
+  description = "List seperated by cs delimiter of a new headers for your csv, the variable must be with the same delimiter as the cs_delimiter, for example if the cs_delimiter is \";\" then the value of the variable should be name;country;age so the new headers will be name, country, age"
+  default     = null
+}
+
 # cloudwatch variables
 
 variable "log_groups" {
