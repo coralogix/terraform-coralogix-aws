@@ -60,10 +60,8 @@ module "lambda" {
     CUSTOM_CSV_HEADER  = var.custom_csv_header
   }
   s3_existing_package = {
-    # bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
-    # key = var.cpu_arch == "arm64" ? "coralogix-aws-shipper.zip" : "coralogix-aws-shipper-x86-64.zip"
-    bucket = "gr-integrations-aws-testing"
-    key = "manager/9617d2252a8758d9a8a7a99ddc652e09"
+    bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
+    key = var.cpu_arch == "arm64" ? "coralogix-aws-shipper.zip" : "coralogix-aws-shipper-x86-64.zip"
   }
   policy_path                             = "/coralogix/"
   role_path                               = "/coralogix/"
