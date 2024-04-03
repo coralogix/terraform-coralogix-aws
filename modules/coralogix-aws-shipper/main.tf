@@ -47,7 +47,7 @@ module "lambda" {
   vpc_subnet_ids         = var.subnet_ids
   vpc_security_group_ids = var.security_group_ids
   environment_variables = {
-    CORALOGIX_ENDPOINT = var.custom_domain != "" ? "https://ingress.${var.custom_domain}" : var.subnet_ids == null ? "https://ingress.${lookup(module.locals[each.key].coralogix_domains, var.coralogix_region, "Europe")}" : "https://ingress.private.${lookup(module.locals.coralogix_domains, var.coralogix_region, "Europe")}"
+    CORALOGIX_ENDPOINT = var.custom_domain != "" ? "https://ingress.${var.custom_domain}" : var.subnet_ids == null ? "https://ingress.${lookup(module.locals[each.key].coralogix_domains, var.coralogix_region, "EU1")}" : "https://ingress.private.${lookup(module.locals[each.key].coralogix_domains, var.coralogix_region, "EU1")}"
     INTEGRATION_TYPE   = each.value.integration_type
     RUST_LOG           = var.log_level
     CORALOGIX_API_KEY  = var.store_api_key_in_secrets_manager && !local.api_key_is_arn ? aws_secretsmanager_secret.coralogix_secret[0].arn : var.api_key
@@ -85,6 +85,15 @@ module "lambda" {
       effect    = "Allow"
       actions   = ["sns:publish"]
       resources = [aws_sns_topic.this[each.key].arn]
+    }
+    private_link_policy = var.subnet_ids != null ? {
+      effect    = "Allow"
+      actions   = ["ec2:CreateNetworkInterface", "ec2:DescribeNetworkInterfaces", "ec2:DeleteNetworkInterface"]
+      resources = ["*"]
+    } : {
+      effect    = "Deny"
+      actions   = ["rds:DescribeAccountAttributes"]
+      resources = ["*"]
     }
     sqs_s3_integration_policy = var.sqs_name != null && var.s3_bucket_name != null ? {
       effect = "Allow"
