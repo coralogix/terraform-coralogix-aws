@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.94
+#### **coralogix-aws-shipper**
+### 🧰 Bug fixes 🧰
+- Update permissions for lambda when using private link
 
 ## v1.0.93
 #### **coralogix-aws-shipper**
