@@ -1,5 +1,5 @@
 resource "aws_lambda_permission" "cloudwatch_trigger_premission" {
-  depends_on = [ module.lambda ]
+  depends_on    = [module.lambda]
   for_each      = local.log_groups
   action        = "lambda:InvokeFunction"
   function_name = local.integration_info.integration.lambda_name == null ? module.locals.integration.function_name : local.integration_info.integration.lambda_name
