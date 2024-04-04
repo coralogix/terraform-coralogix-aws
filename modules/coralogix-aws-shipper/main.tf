@@ -235,3 +235,13 @@ resource "aws_secretsmanager_secret_version" "service_user" {
   secret_id     = aws_secretsmanager_secret.coralogix_secret[0].id
   secret_string = var.api_key
 }
+
+resource "aws_vpc_endpoint" "secretsmanager" {
+  count            = (var.store_api_key_in_secrets_manager || local.api_key_is_arn) && var.subnet_ids != null ? 1 : 0
+  vpc_id            = data.aws_subnet.subnet[0].vpc_id
+  service_name      = "com.amazonaws.${data.aws_region.this.name}.secretsmanager"
+  vpc_endpoint_type = "Interface"
+  subnet_ids        = var.subnet_ids
+  security_group_ids = var.security_group_ids
+  private_dns_enabled = true
+}
