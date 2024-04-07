@@ -47,7 +47,7 @@ module "lambda" {
   vpc_subnet_ids         = var.subnet_ids
   vpc_security_group_ids = var.security_group_ids
   environment_variables = {
-    CORALOGIX_ENDPOINT = var.custom_domain != "" ? "https://ingress.${var.custom_domain}" : var.subnet_ids == null ? "https://ingress.${lookup(module.locals[each.key].coralogix_domains, var.coralogix_region, "Europe")}" : "https://ingress.private.${lookup(module.locals.coralogix_domains, var.coralogix_region, "Europe")}"
+    CORALOGIX_ENDPOINT = var.custom_domain != "" ? "https://ingress.${var.custom_domain}" : var.subnet_ids == null ? "https://ingress.${lookup(module.locals[each.key].coralogix_domains, var.coralogix_region, "EU1")}" : "https://ingress.private.${lookup(module.locals[each.key].coralogix_domains, var.coralogix_region, "EU1")}"
     INTEGRATION_TYPE   = each.value.integration_type
     RUST_LOG           = var.log_level
     CORALOGIX_API_KEY  = var.store_api_key_in_secrets_manager && !local.api_key_is_arn ? aws_secretsmanager_secret.coralogix_secret[0].arn : var.api_key
@@ -60,7 +60,7 @@ module "lambda" {
   }
   s3_existing_package = {
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
-    key = var.cpu_arch == "arm64" ? "coralogix-aws-shipper.zip" : "coralogix-aws-shipper-x86-64.zip"
+    key    = var.cpu_arch == "arm64" ? "coralogix-aws-shipper.zip" : "coralogix-aws-shipper-x86-64.zip"
   }
   policy_path                             = "/coralogix/"
   role_path                               = "/coralogix/"
@@ -86,6 +86,15 @@ module "lambda" {
       actions   = ["sns:publish"]
       resources = [aws_sns_topic.this[each.key].arn]
     }
+    private_link_policy = var.subnet_ids != null ? {
+      effect    = "Allow"
+      actions   = ["ec2:CreateNetworkInterface", "ec2:DescribeNetworkInterfaces", "ec2:DeleteNetworkInterface"]
+      resources = ["*"]
+      } : {
+      effect    = "Deny"
+      actions   = ["rds:DescribeAccountAttributes"]
+      resources = ["*"]
+    }
     sqs_s3_integration_policy = var.sqs_name != null && var.s3_bucket_name != null ? {
       effect = "Allow"
       actions = [
@@ -96,16 +105,16 @@ module "lambda" {
         "s3:GetLifecycleConfiguration"
       ]
       resources = ["${data.aws_s3_bucket.this[0].arn}/*", data.aws_s3_bucket.this[0].arn]
-    } : {
-        effect = "Deny"
-        actions = ["rds:DescribeAccountAttributes"]
-        resources = ["*"]
-    } 
+      } : {
+      effect    = "Deny"
+      actions   = ["rds:DescribeAccountAttributes"]
+      resources = ["*"]
+    }
     integrations_policy = var.s3_bucket_name != null && var.sqs_name == null ? {
       effect    = "Allow"
       actions   = ["s3:GetObject"]
       resources = ["${data.aws_s3_bucket.this[0].arn}/*"]
-    } : var.sqs_name != null ? {
+      } : var.sqs_name != null ? {
       effect = "Allow"
       actions = [
         "sqs:ReceiveMessage",
@@ -113,7 +122,7 @@ module "lambda" {
         "sqs:GetQueueAttributes"
       ]
       resources = [data.aws_sqs_queue.name[0].arn]
-    }: var.kinesis_stream_name != null ? {
+      } : var.kinesis_stream_name != null ? {
       effect = "Allow"
       actions = [
         "kinesis:GetRecords",
@@ -125,25 +134,25 @@ module "lambda" {
         "kinesis:SubscribeToShard"
       ]
       resources = [data.aws_kinesis_stream.kinesis_stream[0].arn]
-    } : var.kafka_brokers != null ? {
-        effect = "Allow"
-        actions = [
-          "ec2:CreateNetworkInterface",
-          "ec2:DescribeNetworkInterfaces",
-          "ec2:DescribeVpcs",
-          "ec2:DeleteNetworkInterface",
-          "ec2:DescribeSubnets",
-          "ec2:DescribeSecurityGroups"
-        ]
-        resources = ["*"]
-    } : var.integration_type == "EcrScan" ? {
-        effect = "Allow"
-        actions = ["ecr:DescribeImageScanFindings"]
-        resources = ["*"]
-    } :  {
-        effect = "Deny"
-        actions = ["ecr:DescribeImageScanFindings"]
-        resources = ["*"]
+      } : var.kafka_brokers != null ? {
+      effect = "Allow"
+      actions = [
+        "ec2:CreateNetworkInterface",
+        "ec2:DescribeNetworkInterfaces",
+        "ec2:DescribeVpcs",
+        "ec2:DeleteNetworkInterface",
+        "ec2:DescribeSubnets",
+        "ec2:DescribeSecurityGroups"
+      ]
+      resources = ["*"]
+      } : var.integration_type == "EcrScan" ? {
+      effect    = "Allow"
+      actions   = ["ecr:DescribeImageScanFindings"]
+      resources = ["*"]
+      } : {
+      effect    = "Deny"
+      actions   = ["ecr:DescribeImageScanFindings"]
+      resources = ["*"]
     }
   }
 
@@ -157,12 +166,12 @@ module "lambda" {
       principal  = "kafka.amazonaws.com"
       source_arn = var.msk_cluster_arn
     }
-  } : var.integration_type == "EcrScan" ?{
+    } : var.integration_type == "EcrScan" ? {
     AllowExecutionFromECR = {
       principal  = "events.amazonaws.com"
       source_arn = aws_cloudwatch_event_rule.EventBridgeRule[0].arn
     }
-  }  :{}
+  } : {}
 
   tags = merge(var.tags, module.locals[each.key].tags)
 }
@@ -225,4 +234,14 @@ resource "aws_secretsmanager_secret_version" "service_user" {
   depends_on    = [aws_secretsmanager_secret.coralogix_secret]
   secret_id     = aws_secretsmanager_secret.coralogix_secret[0].id
   secret_string = var.api_key
+}
+
+resource "aws_vpc_endpoint" "secretsmanager" {
+  count               = (var.store_api_key_in_secrets_manager || local.api_key_is_arn) && var.subnet_ids != null ? 1 : 0
+  vpc_id              = data.aws_subnet.subnet[0].vpc_id
+  service_name        = "com.amazonaws.${data.aws_region.this.name}.secretsmanager"
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = var.subnet_ids
+  security_group_ids  = var.security_group_ids
+  private_dns_enabled = true
 }

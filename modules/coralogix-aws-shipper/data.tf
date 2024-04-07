@@ -2,6 +2,11 @@ data "aws_region" "this" {}
 
 data "aws_caller_identity" "this" {}
 
+data "aws_subnet" "subnet" {
+  count = (var.store_api_key_in_secrets_manager || local.api_key_is_arn) && var.subnet_ids != null ? 1 : 0
+  id    = var.subnet_ids[0]
+}
+
 data "aws_cloudwatch_log_group" "this" {
   for_each = local.log_groups
   name     = each.key

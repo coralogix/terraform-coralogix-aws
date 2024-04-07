@@ -119,7 +119,7 @@ variable "cpu_arch" {
   validation {
     condition     = contains(["arm64", "x86_64"], var.cpu_arch)
     error_message = "The CPU architecture must be one of these values: [arm64, x86_64]."
-  } 
+  }
 }
 
 # Integration Generic Config (Optional)
@@ -168,7 +168,7 @@ variable "integration_type" {
   description = "the aws service that send the data to the s3"
   type        = string
   validation {
-    condition     = contains(["CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv", "Sns", "Sqs", "Kinesis", "CloudFront", "MSK", "Kafka","EcrScan", ""], var.integration_type)
+    condition     = contains(["CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv", "Sns", "Sqs", "Kinesis", "CloudFront", "MSK", "Kafka", "EcrScan", ""], var.integration_type)
     error_message = "The integration type must be: [CloudWatch, CloudTrail, VpcFlow, S3, S3Csv, Sns, Sqs, Kinesis, CloudFront, MSK, Kafka, EcrScan]."
   }
   default = ""
@@ -230,7 +230,7 @@ variable "msk_cluster_arn" {
 
 variable "msk_topic_name" {
   description = "List of names of the Kafka topic used to store records in your Kafka cluster ( [\"topic1\", \"topic2\",])"
-  type        = list
+  type        = list(any)
   default     = null
 }
 
