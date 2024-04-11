@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.95
+### 🚀 New components 🚀
+#### **coralogix-aws-shipper**
+- Add new variables custom_csv_header and custom_metadata
+
 ## v1.0.94
 #### **coralogix-aws-shipper**
 ### 🧰 Bug fixes 🧰
