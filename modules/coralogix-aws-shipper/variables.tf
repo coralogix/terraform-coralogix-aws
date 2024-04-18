@@ -90,6 +90,12 @@ variable "log_groups" {
   default     = []
 }
 
+variable "log_group_prefix" {
+  description = "Prefix of the CloudWatch log groups that will trigger the lambda"
+  type        = list(string)
+  default     = null
+}
+
 # vpc variables
 
 variable "subnet_ids" {

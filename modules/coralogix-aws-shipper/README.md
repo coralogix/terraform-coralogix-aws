@@ -79,6 +79,7 @@ If you want to avoid this issue, you can deploy in other ways:
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
 | <a name="input_log_groups"></a> [log\_groups](#input\_log\_groups) | Provide a comma-separated list of CloudWatch log group names to monitor, for example, (log-group1, log-group2, log-group3). | `list(string)` | n/a | yes |
+| <a name="input_log_group_prefix"></a> [log\_group\_prefix](#input\_log\_group\_prefix) | Prefix of the CloudWatch log groups that will trigger the lambda, in case that your log groups are `log-group1, log-group2, log-group3` then you can set the value to `log-group`. When using this variable you will not be able to see the log groups as trigger for the lambda. | `list(string)` | n/a | no |
 
 ### SNS Configuration
 
