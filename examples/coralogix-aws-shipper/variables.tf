@@ -76,6 +76,12 @@ variable "cs_delimiter" {
   default     = ","
 }
 
+variable "custom_csv_header" {
+  type        = string
+  description = "List separated by cs delimiter of a new headers for your csv, the variable must be with the same delimiter as the cs_delimiter, for example if the cs_delimiter is \";\" then the value of the variable should be name;country;age so the new headers will be name, country, age"
+  default     = null
+}
+
 # cloudwatch variables
 
 variable "log_groups" {
@@ -119,7 +125,7 @@ variable "cpu_arch" {
   validation {
     condition     = contains(["arm64", "x86_64"], var.cpu_arch)
     error_message = "The CPU architecture must be one of these values: [arm64, x86_64]."
-  } 
+  }
 }
 
 # Integration Generic Config (Optional)
@@ -168,7 +174,7 @@ variable "integration_type" {
   description = "the aws service that send the data to the s3"
   type        = string
   validation {
-    condition     = contains(["CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv", "Sns", "Sqs", "Kinesis", "CloudFront", "MSK", "Kafka","EcrScan", ""], var.integration_type)
+    condition     = contains(["CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv", "Sns", "Sqs", "Kinesis", "CloudFront", "MSK", "Kafka", "EcrScan", ""], var.integration_type)
     error_message = "The integration type must be: [CloudWatch, CloudTrail, VpcFlow, S3, S3Csv, Sns, Sqs, Kinesis, CloudFront, MSK, Kafka, EcrScan]."
   }
   default = ""
@@ -201,6 +207,12 @@ variable "kinesis_stream_name" {
 variable "add_metadata" {
   description = "Add metadata to the log message. Expect comma-separated values. Options for S3 are bucket_name,key_name. For CloudWatch stream_name"
   default     = null
+  type        = string
+}
+
+variable "custom_metadata" {
+  default     = null
+  description = "Add custom metadata to the log message. Expects comma separated values. Options are key1=value1,key2=value2 "
   type        = string
 }
 

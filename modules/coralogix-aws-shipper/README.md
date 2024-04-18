@@ -57,6 +57,7 @@ If you want to avoid this issue, you can deploy in other ways:
 | <a name="input_s3_key_prefix"></a> [s3\_key\_prefix](#input\_s3\_key\_prefix) | The S3 path prefix to watch. | `string` |  n/a | no |
 | <a name="input_s3_key_suffix"></a> [s3\_key\_suffix](#input\_s3\_key\_suffix) | The S3 path suffix to watch. | `string` |  n/a | no |
 | <a name="input_csv_delimiter"></a> [csv_delimiter](#input\_csv\_delimiter) | Specify a single character to be used as a delimiter when ingesting a CSV file with a header line. This value is applicable when the S3Csv integration type is selected, for example, “,” or ” “.  | `string` |  n/a | no |
+| <a name="input_custom_csv_header"></a> [custom\_csv\_header](#input\_custom\_csv\_header) | List seperated by cs delimiter of a new headers for your csv, the variable must be with the same delimiter as the cs_delimiter, for example if the cs_delimiter is \";\" then the value of the variable should be name;country;age and the new headers that you will see in corlaogix will be name, country, age | `string` | n/a | no |
 | <a name="input_newline_pattern"></a> [newline\_pattern](#input\_newline\_pattern) | nter a regular expression to detect a new log line for multiline logs, e.g., \n(?=\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}.\d{3}). | `string` | n/a | no |
 | [integration_info](#additional-parameters-for-integration_info) | A map of integration information. Use this when you want to deploy more then one integration using the same s3 bucket. [Parameters are here.](#integration_info)| `mapping` | n/a | no |
 
@@ -117,6 +118,7 @@ If you want to avoid this issue, you can deploy in other ways:
 
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
+| <a name="input_custom_metadata"></a> [custom\_metadata](#input\_custom\_metadata) | Add custom metadata to the log message. Expects comma separated values. Options are `key1=value1,key2=value2` | `string` | n/a | no |
 | <a name="input_add_metadata"></a> [add\_metadata](#input\_add\_metadata) | Add metadata to the log message. Expects comma separated values. Options for S3 are `bucket_name`,`key_name`. For CloudWatch `stream_name` | `string` | n/a | no |
 | <a name="input_lambda_name"></a> [lambda\_name](#input\_lambda\_name) | Name the Lambda function that you want to create. | `string` | n/a | no |
 | <a name="input_blocking_pattern"></a> [blocking\_pattern](#input\_blocking\_pattern) | Enter a regular expression to identify lines excluded from being sent to Coralogix. For example, use `MainActivity.java:\d{3}` to match log lines with MainActivity followed by exactly three digits. | `string` | n/a | no |
