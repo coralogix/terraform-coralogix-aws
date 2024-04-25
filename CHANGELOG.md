@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.96
+#### **coralogix-aws-shipper**
+### 🧰 Bug fixes 🧰
+- Update the lambda runtime to Amazon 2023, the lambda module version to 7.2 and the terraform version to 5.32
+
 ## v1.0.95
 ### 🚀 New components 🚀
 #### **coralogix-aws-shipper**
