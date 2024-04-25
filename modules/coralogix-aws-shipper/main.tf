@@ -36,9 +36,9 @@ module "lambda" {
   source                 = "terraform-aws-modules/lambda/aws"
   function_name          = each.value.lambda_name == null ? module.locals[each.key].function_name : each.value.lambda_name
   description            = "Send logs to Coralogix."
-  version                = "6.5.0"
+  version                = "7.2.0"
   handler                = "bootstrap"
-  runtime                = "provided.al2"
+  runtime                = "provided.al2023"
   architectures          = [var.cpu_arch]
   memory_size            = var.memory_size
   timeout                = var.timeout
