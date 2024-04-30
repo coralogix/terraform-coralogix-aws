@@ -12,8 +12,9 @@ locals {
   }
   
   log_group_prefix = var.log_group_prefix != null ? {
+    # Need to convert the log group prefix to a map so we could use it in the for_each in CloudWatch file
     for group in var.log_group_prefix : group =>
-    length(group) > 100 ? "${substr(replace(group, "/", "_"), 0, 95)}_${substr(sha256(group), 0, 4)}" : replace(group, "/", "_")
+    group
   } : {}
 
   api_key_is_arn = replace(var.api_key, ":", "") != var.api_key ? true : false
