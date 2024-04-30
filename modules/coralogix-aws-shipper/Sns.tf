@@ -1,4 +1,5 @@
 resource "aws_s3_bucket_notification" "topic_notification" {
+  depends_on = [ module.lambda ]
   count  = local.sns_enable == true && (var.integration_type == "S3" || var.integration_type == "CloudTrail") ? 1 : 0
   bucket = data.aws_s3_bucket.this[0].bucket
   topic {

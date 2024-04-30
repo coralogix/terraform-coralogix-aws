@@ -1,4 +1,5 @@
 resource "aws_s3_bucket_notification" "sqs_notification" {
+  depends_on = [ module.lambda ]
   count  = var.sqs_name != null && (var.integration_type == "S3" || var.integration_type == "CloudTrail") ? 1 : 0
   bucket = data.aws_s3_bucket.this[0].bucket
   queue {
