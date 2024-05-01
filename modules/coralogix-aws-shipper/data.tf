@@ -11,9 +11,15 @@ data "aws_cloudwatch_log_group" "this" {
   for_each = local.log_groups
   name     = each.key
 }
+
 data "aws_s3_bucket" "this" {
   count  = var.s3_bucket_name == null ? 0 : 1
   bucket = var.s3_bucket_name
+}
+
+data "aws_s3_bucket" "dlq_bucket" {
+  count  = var.enable_dlq ? 1 : 0
+  bucket = var.dlq_s3_bucket
 }
 
 data "aws_sns_topic" "sns_topic" {
