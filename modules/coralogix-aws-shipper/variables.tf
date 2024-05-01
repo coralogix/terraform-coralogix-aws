@@ -128,6 +128,32 @@ variable "cpu_arch" {
   }
 }
 
+# DLQ configuration
+
+variable "enable_dlq" {
+  description = "Enable Dead Letter Queue for the Lambda function"
+  type        = bool
+  default     = false
+}
+
+variable "dlq_retry_limit" {
+  description = "The maximum number of times to retry the function execution in case of failure"
+  type        = number
+  default     = 3
+}
+
+variable "dlq_retry_delay" {
+  description = "The delay in seconds between retries"
+  type        = number
+  default     = 900
+}
+
+variable "dlq_s3_bucket" {
+  description = "The S3 bucket to store the DLQ failed messages after retry limit is reached"
+  type        = string
+  default     = null
+}
+
 # Integration Generic Config (Optional)
 
 variable "notification_email" {

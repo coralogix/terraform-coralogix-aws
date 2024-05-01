@@ -32,7 +32,7 @@ resource "null_resource" "s3_bucket_copy" {
 module "lambda" {
   for_each = var.integration_info != null ? var.integration_info : local.integration_info
 
-  depends_on             = [null_resource.s3_bucket_copy]
+  depends_on             = [null_resource.s3_bucket_copy,aws_sqs_queue.DLQ]
   source                 = "terraform-aws-modules/lambda/aws"
   function_name          = each.value.lambda_name == null ? module.locals[each.key].function_name : each.value.lambda_name
   description            = "Send logs to Coralogix."
@@ -59,6 +59,11 @@ module "lambda" {
     ADD_METADATA       = var.add_metadata
     CUSTOM_METADATA    = var.custom_metadata
     CUSTOM_CSV_HEADER  = var.custom_csv_header
+    DLQ_ARN            = var.enable_dlq ? aws_sqs_queue.DLQ[0].arn : null
+    DLQ_RETRY_LIMIT    = var.enable_dlq ? var.dlq_retry_limit : null
+    DLQ_S3_BUCKET      = var.enable_dlq ? var.dlq_s3_bucket : null
+    DLQ_URL            = var.enable_dlq ? aws_sqs_queue.DLQ[0].url : null
+
   }
   s3_existing_package = {
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
@@ -74,6 +79,24 @@ module "lambda" {
   create_role                             = var.msk_cluster_arn != null ? false : true
   lambda_role                             = var.msk_cluster_arn != null ? aws_iam_role.role_for_msk[0].arn : ""
   policy_statements = {
+    dlq_sqs_permissions = var.enable_dlq ? {
+      effect    = "Allow"
+      actions   = ["sqs:SendMessage","sqs:ReceiveMessage","sqs:DeleteMessage","sqs:GetQueueAttributes"]
+      resources = [aws_sqs_queue.DLQ[0].arn]
+    } : {
+      effect    = "Deny"
+      actions   = ["rds:DescribeAccountAttributes"]
+      resources = ["*"]
+    }
+    dlq_s3_permissions = var.enable_dlq ? {
+      effect    = "Allow"
+      actions   = ["s3:PutObject","s3:PutObjectAcl","s3:AbortMultipartUpload","s3:DeleteObject","s3:PutObjectTagging","s3:PutObjectVersionTagging"]
+      resources = ["${data.aws_s3_bucket.dlq_bucket[0].arn}/*", data.aws_s3_bucket.dlq_bucket[0].arn]
+    } : {
+      effect    = "Deny"
+      actions   = ["rds:DescribeAccountAttributes"]
+      resources = ["*"]
+    }
     secret_access_policy = var.store_api_key_in_secrets_manager || local.api_key_is_arn ? {
       effect    = "Allow"
       actions   = ["secretsmanager:GetSecretValue"]
@@ -246,4 +269,20 @@ resource "aws_vpc_endpoint" "secretsmanager" {
   subnet_ids          = var.subnet_ids
   security_group_ids  = var.security_group_ids
   private_dns_enabled = true
+}
+
+resource "aws_sqs_queue" "DLQ" {
+  count = var.enable_dlq ? 1 : 0
+  name                       = "coralogix-aws-shipper-dlq-${random_string.this.result}"
+  message_retention_seconds  = 1209600
+  delay_seconds              = var.dlq_retry_delay
+  visibility_timeout_seconds = var.timeout
+}
+
+resource "aws_lambda_event_source_mapping" "dlq_sqs" {
+  depends_on       = [module.lambda]
+  count            = var.enable_dlq ? 1 : 0
+  event_source_arn = aws_sqs_queue.DLQ[0].arn
+  function_name    = local.integration_info.integration.lambda_name == null ? module.locals.integration.function_name : local.integration_info.integration.lambda_name
+  enabled          = true
 }
