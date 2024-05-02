@@ -212,7 +212,9 @@ then the CloudWatch metric stream must be configured with the same format, confi
 
 ## Inputs - Custom Resource Naming
 If there are conflicts with existing resources, the following variables can be used to customize the names of the resources created by this module.
-
+ 
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
 | <a name="input_cloudwatch_metric_stream_custom_name"></a> [cloudwatch_metric_stream_custom_name](#input\_cloudwatch_metric_stream_custom_name) | Set the name of the CloudWatch metric stream, otherwise variable 'firehose_stream' will be used | `string` | `null` | no |
 | <a name="input_s3_backup_custom_name"></a> [s3_backup_custom_name](#input\_s3_backup_custom_name) | Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup-metrics' will be used | `string` | `null` | no |
 | <a name="input_lambda_processor_custom_name"></a> [lambda_processor_custom_name](#input\_lambda_processor_custom_name) | Set the name of the lambda processor function, otherwise variable '{firehose_stream}-metrics-tags-processor' will be used | `string` | `null` | no |
