@@ -90,6 +90,12 @@ variable "log_groups" {
   default     = []
 }
 
+variable "log_group_prefix" {
+  description = "Prefix of the CloudWatch log groups that will trigger the lambda"
+  type        = list(string)
+  default     = null
+}
+
 # vpc variables
 
 variable "subnet_ids" {
@@ -126,6 +132,32 @@ variable "cpu_arch" {
     condition     = contains(["arm64", "x86_64"], var.cpu_arch)
     error_message = "The CPU architecture must be one of these values: [arm64, x86_64]."
   }
+}
+
+# DLQ configuration
+
+variable "enable_dlq" {
+  description = "Enable Dead Letter Queue for the Lambda function"
+  type        = bool
+  default     = false
+}
+
+variable "dlq_retry_limit" {
+  description = "The maximum number of times to retry the function execution in case of failure"
+  type        = number
+  default     = 3
+}
+
+variable "dlq_retry_delay" {
+  description = "The delay in seconds between retries"
+  type        = number
+  default     = 900
+}
+
+variable "dlq_s3_bucket" {
+  description = "The S3 bucket to store the DLQ failed messages after retry limit is reached"
+  type        = string
+  default     = null
 }
 
 # Integration Generic Config (Optional)
@@ -242,7 +274,7 @@ variable "msk_cluster_arn" {
 
 variable "msk_topic_name" {
   description = "List of names of the Kafka topic used to store records in your Kafka cluster ( [\"topic1\", \"topic2\",])"
-  type        = list
+  type        = list(any)
   default     = null
 }
 
