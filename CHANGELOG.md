@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.97
+#### firehose-metrics
+### 💡 Enhancements 
+- [cds-1198] set default type parameter to CloudWatch_Metrics_OpenTelemetry070_WithAggregations
+
 ## v1.0.96
 #### **coralogix-aws-shipper**
 ### 🧰 Bug fixes 🧰
