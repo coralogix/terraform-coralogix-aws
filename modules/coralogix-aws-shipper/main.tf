@@ -59,6 +59,7 @@ module "lambda" {
     ADD_METADATA       = var.add_metadata
     CUSTOM_METADATA    = var.custom_metadata
     CUSTOM_CSV_HEADER  = var.custom_csv_header
+    NO_COLOR           = 1
   }
   s3_existing_package = {
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket

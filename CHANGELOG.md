@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.98
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 
+- Set NO_COLOR environment variable to avoid ascii control characters in cloudwatch logs
+
 ## v1.0.97
 #### firehose-metrics
 ### 💡 Enhancements 
