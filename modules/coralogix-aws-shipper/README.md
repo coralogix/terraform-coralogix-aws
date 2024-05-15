@@ -151,6 +151,19 @@ When using this variable you will need to create an S3 bucket in the region wher
 | <a name="input_subnet_ids"></a> [vpc\_subnet\_ids](#input\_subnet\_ids) | Specify the ID of the subnet where the integration should be deployed. | `list(string)` | n/a | no |
 | <a name="input_security_group_ids"></a> [security\_group\_ids](#input\_security\_group\_ids) | Specify the ID of the Security Group where the integration should be deployed. | `list(string)` | n/a | no |
 
+### DLQ
+
+A Dead Letter Queue (DLQ) is a queue where messages are sent if they cannot be processed by the Lambda function. This is useful for debugging and monitoring.
+
+ To enable the DLQ, you must provide the required parameters outlined below.
+
+| Parameter       | Description                                                                   | Default Value | Required           |
+|-----------------|-------------------------------------------------------------------------------|---------------|--------------------|
+| enable_dlq      | Enable the Dead Letter Queue for the Lambda function.                         | false         | :heavy_check_mark: |
+| dlq_s3_bucket   | An S3 bucket used to store all failure events that have exhausted retries.    |               | :heavy_check_mark: |
+| dlq_retry_limit | The number of times a failed event should be retried before being saved in S3 | 3             | :heavy_check_mark: |
+| dlq_retry_delay | The delay in seconds between retries of failed events                         | 900           | :heavy_check_mark: |
+
 **AWS PrivateLink**
 
 If you want to bypass using the public internet, you can use AWS PrivateLink to facilitate secure connections between your VPCs and AWS Services. This option is available under [VPC Configuration](#vpc-configuration-optional). For additional instructions on AWS PrivateLink, please [follow our dedicated tutorial](https://coralogix.com/docs/coralogix-amazon-web-services-aws-privatelink-endpoints/).
