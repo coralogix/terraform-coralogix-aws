@@ -45,7 +45,7 @@ variable "custom_domain" {
 variable "integration_type_metrics" {
   description = "The integration type of the firehose delivery stream: 'CloudWatch_Metrics_OpenTelemetry070' or 'CloudWatch_Metrics_OpenTelemetry070_WithAggregations'"
   type        = string
-  default     = "CloudWatch_Metrics_OpenTelemetry070"
+  default     = "CloudWatch_Metrics_OpenTelemetry070_WithAggregations"
 }
 
 variable "output_format" {
