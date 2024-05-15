@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.98
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 
+- Add support for DLQ
+- Add log_group_prefix variable to avoid limitation of number of log groups
+- Update versions for github actions to avoid node.js 16 issue
+
 ## v1.0.97
 #### firehose-metrics
 ### 💡 Enhancements 
