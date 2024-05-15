@@ -77,9 +77,3 @@ variable "s3_backup_custom_name" {
   type        = string
   default     = null
 }
-
-variable "s3_existing_backup_bucket" {
-  description = "Set the name of an existing S3 backup bucket to use, otherwise a new bucket will be created"
-  type        = string
-  default     = null
-}
