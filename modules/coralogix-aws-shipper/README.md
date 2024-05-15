@@ -157,12 +157,12 @@ A Dead Letter Queue (DLQ) is a queue where messages are sent if they cannot be p
 
  To enable the DLQ, you must provide the required parameters outlined below.
 
-| Parameter       | Description                                                                   | Default Value | Required           |
-|-----------------|-------------------------------------------------------------------------------|---------------|--------------------|
-| enable_dlq      | Enable the Dead Letter Queue for the Lambda function.                         | false         | :heavy_check_mark: |
-| dlq_s3_bucket   | An S3 bucket used to store all failure events that have exhausted retries.    |               | :heavy_check_mark: |
-| dlq_retry_limit | The number of times a failed event should be retried before being saved in S3 | 3             | :heavy_check_mark: |
-| dlq_retry_delay | The delay in seconds between retries of failed events                         | 900           | :heavy_check_mark: |
+| Parameter       | Description                                                                   | Default Value | Required |
+|-----------------|-------------------------------------------------------------------------------|---------------|----------|
+| enable_dlq      | Enable the Dead Letter Queue for the Lambda function.                         | false         | yes      |
+| dlq_s3_bucket   | An S3 bucket used to store all failure events that have exhausted retries.    |               | yes      |
+| dlq_retry_limit | The number of times a failed event should be retried before being saved in S3 | 3             | yes      |
+| dlq_retry_delay | The delay in seconds between retries of failed events                         | 900           | yes      |
 
 **AWS PrivateLink**
 
