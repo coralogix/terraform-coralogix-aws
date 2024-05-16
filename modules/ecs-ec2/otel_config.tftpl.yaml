@@ -21,26 +21,37 @@ receivers:
     include_file_path: true
     # add log.file.path to resource attributes
     operators:
+      - type: router
+        id: docker_log_json_parser
+        routes:
+          - output: json_parser
+            expr: 'body matches "^\\{\"log\".*\\}"'
+        default: move_log_file_path
+
       - type: json_parser
         parse_from: body
         parse_to: body
+        output: recombine
         timestamp:
           parse_from: body.time
           layout: '%Y-%m-%dT%H:%M:%S.%fZ'
+        default: move_log_file_path
 
+      # handle logs split by docker
       - type: recombine
         id: recombine
+        output: move_log_file_path
         combine_field: body.log
         source_identifier: attributes["log.file.path"]
         is_last_entry: body.log endsWith "\n"
-        force_flush_period: 10s
-        on_error: drop
+        force_flush_period: 10s	
+        on_error: send
         combine_with: ""
 
       - type: move
+        id: move_log_file_path
         from: attributes["log.file.path"]
         to: resource["log.file.path"]
-
 processors:
   resourcedetection:
     # ecs & docker detectors not required when using ecslogresourcedetection for logs
