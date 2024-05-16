@@ -1,4 +1,8 @@
 # Changelog
+## v1.0.99
+#### **ecs-ec2**
+### 💡 Enhancements 
+- Added validation using operator route to default otel config for ecs-ec2 config
 
 ## v1.0.98
 #### **coralogix-aws-shipper**
