@@ -79,6 +79,7 @@ If you want to avoid this issue, you can deploy in other ways:
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
 | <a name="input_log_groups"></a> [log\_groups](#input\_log\_groups) | Provide a comma-separated list of CloudWatch log group names to monitor, for example, (log-group1, log-group2, log-group3). | `list(string)` | n/a | yes |
+| <a name="input_log_group_prefix"></a> [log\_group\_prefix](#input\_log\_group\_prefix) | Prefix of the CloudWatch log groups that will trigger the lambda, in case that your log groups are `log-group1, log-group2, log-group3` then you can set the value to `log-group`. When using this variable you will not be able to see the log groups as trigger for the lambda. | `list(string)` | n/a | no |
 
 ### SNS Configuration
 
@@ -149,6 +150,19 @@ When using this variable you will need to create an S3 bucket in the region wher
 |------|-------------|------|---------|:--------:|
 | <a name="input_subnet_ids"></a> [vpc\_subnet\_ids](#input\_subnet\_ids) | Specify the ID of the subnet where the integration should be deployed. | `list(string)` | n/a | no |
 | <a name="input_security_group_ids"></a> [security\_group\_ids](#input\_security\_group\_ids) | Specify the ID of the Security Group where the integration should be deployed. | `list(string)` | n/a | no |
+
+### DLQ
+
+A Dead Letter Queue (DLQ) is a queue where messages are sent if they cannot be processed by the Lambda function. This is useful for debugging and monitoring.
+
+ To enable the DLQ, you must provide the required parameters outlined below.
+
+| Parameter       | Description                                                                   | Default Value | Required |
+|-----------------|-------------------------------------------------------------------------------|---------------|----------|
+| enable_dlq      | Enable the Dead Letter Queue for the Lambda function.                         | false         | yes      |
+| dlq_s3_bucket   | An S3 bucket used to store all failure events that have exhausted retries.    |               | yes      |
+| dlq_retry_limit | The number of times a failed event should be retried before being saved in S3 | 3             | yes      |
+| dlq_retry_delay | The delay in seconds between retries of failed events                         | 900           | yes      |
 
 **AWS PrivateLink**
 
