@@ -1,4 +1,11 @@
 # Changelog
+
+## v1.0.100
+#### **s3-archive**
+### 💡 Enhancements 
+- Add delete permissions to the archive buckets
+- replace ap1 region with ap2 in the aws_role_region mapping
+
 ## v1.0.99
 #### **ecs-ec2**
 ### 💡 Enhancements 
