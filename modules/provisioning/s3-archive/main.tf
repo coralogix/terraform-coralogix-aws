@@ -47,7 +47,11 @@ resource "aws_s3_bucket_policy" "logs_bucket_policy" {
           "s3:ListBucket",
           "s3:PutObject",
           "s3:PutObjectTagging",
-          "s3:GetObjectTagging"
+          "s3:GetObjectTagging",
+          "s3:DeleteObject",
+          "s3:DeleteObjectVersion",
+          "s3:DeleteObjectTagging",
+          "s3:DeleteObjectVersionTagging"
         ]
         Resource = [
           aws_s3_bucket.logs_bucket_name[count.index].arn,
@@ -85,9 +89,12 @@ resource "aws_s3_bucket_policy" "metrics_bucket_policy" {
           "s3:GetObject",
           "s3:ListBucket",
           "s3:PutObject",
-          "s3:DeleteObject",
           "s3:PutObjectTagging",
-          "s3:GetObjectTagging"
+          "s3:GetObjectTagging",
+          "s3:DeleteObject",
+          "s3:DeleteObjectVersion",
+          "s3:DeleteObjectTagging",
+          "s3:DeleteObjectVersionTagging"
         ]
         Resource = [
           aws_s3_bucket.metrics_bucket_name[count.index].arn,
