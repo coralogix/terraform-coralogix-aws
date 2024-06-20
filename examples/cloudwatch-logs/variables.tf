@@ -99,13 +99,13 @@ variable "layer_arn" {
 variable "subnet_ids" {
   description = "The subnet id with the private link"
   type        = list(string)
-  default     = [""]
+  default     = []
 }
 
 variable "security_group_ids" {
   description = "The security group id for assigned to the subnet_ids"
   type        = list(string)
-  default     = [""]
+  default     = []
 }
 
 variable "custom_s3_bucket" {
