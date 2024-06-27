@@ -43,7 +43,7 @@ module "lambda" {
   memory_size            = var.memory_size
   timeout                = var.timeout
   create_package         = false
-  destination_on_failure = aws_sns_topic.this[each.key].arn
+  destination_on_failure = var.notification_email != null ? aws_sns_topic.this[each.key].arn : null
   vpc_subnet_ids         = var.subnet_ids
   vpc_security_group_ids = var.security_group_ids
   dead_letter_target_arn    = var.enable_dlq ? aws_sqs_queue.DLQ[0].arn : null
@@ -108,10 +108,14 @@ module "lambda" {
       actions   = ["secretsmanager:GetSecretValue"]
       resources = ["*"]
     }
-    destination_on_failure_policy = {
+    destination_on_failure_policy = var.notification_email != null ? {
       effect    = "Allow"
       actions   = ["sns:publish"]
       resources = [aws_sns_topic.this[each.key].arn]
+    } : {
+      effect    = "Deny"
+      actions   = ["rds:DescribeAccountAttributes"]
+      resources = ["*"]
     }
     private_link_policy = var.subnet_ids != null ? {
       effect    = "Allow"
@@ -264,7 +268,7 @@ resource "aws_secretsmanager_secret_version" "service_user" {
 }
 
 resource "aws_vpc_endpoint" "secretsmanager" {
-  count               = (var.store_api_key_in_secrets_manager || local.api_key_is_arn) && var.subnet_ids != null ? 1 : 0
+  count               = (var.store_api_key_in_secrets_manager || local.api_key_is_arn) && var.subnet_ids != null && var.create_endpoint ? 1 : 0
   vpc_id              = data.aws_subnet.subnet[0].vpc_id
   service_name        = "com.amazonaws.${data.aws_region.this.name}.secretsmanager"
   vpc_endpoint_type   = "Interface"
