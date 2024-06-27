@@ -65,6 +65,7 @@ module "lambda" {
     DLQ_RETRY_LIMIT    = var.enable_dlq ? var.dlq_retry_limit : null
     DLQ_S3_BUCKET      = var.enable_dlq ? var.dlq_s3_bucket : null
     DLQ_URL            = var.enable_dlq ? aws_sqs_queue.DLQ[0].url : null
+    NO_COLOR           = 1
   }
   s3_existing_package = {
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
