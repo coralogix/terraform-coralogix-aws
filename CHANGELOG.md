@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.101
+#### **coralogix-aws-shipper**
+### 🧰 Bug fixes 🧰
+- Remove the creation of an SNS topic for lambda failure in case the user didn't set up notification_email
+- Add new variable create_endpoint to allow users to choose if they want to create an endpoint in case they are using a private link and store their ApiKey in secret.
+
 ## v1.0.100
 #### **s3-archive**
 ### 💡 Enhancements 
