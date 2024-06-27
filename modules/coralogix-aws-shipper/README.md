@@ -150,6 +150,7 @@ When using this variable you will need to create an S3 bucket in the region wher
 |------|-------------|------|---------|:--------:|
 | <a name="input_subnet_ids"></a> [vpc\_subnet\_ids](#input\_subnet\_ids) | Specify the ID of the subnet where the integration should be deployed. | `list(string)` | n/a | no |
 | <a name="input_security_group_ids"></a> [security\_group\_ids](#input\_security\_group\_ids) | Specify the ID of the Security Group where the integration should be deployed. | `list(string)` | n/a | no |
+| <a name="input_create_endpoint"></a> [security\_create\_endpoint](#input\_create\_endpoint) | Set to true in case that you store your ApiKey in a secret (you can have only one of this endpoints per region) | `bool` | false | no |
 
 ### DLQ
 

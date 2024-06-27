@@ -110,6 +110,12 @@ variable "security_group_ids" {
   default     = null
 }
 
+variable "create_endpoint" {
+  description = "Create a VPC endpoint for the lambda function to allow if access to the secret"
+  type        = bool
+  default     = false
+}
+
 # Lambda configuration
 
 variable "memory_size" {
