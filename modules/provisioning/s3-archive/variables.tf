@@ -14,6 +14,12 @@ variable "bypass_valid_region" {
   default     = ""
 }
 
+variable "bypass_bucket_lifecycle_prevent_destroy" {
+  type        = bool
+  description = "Use this to bypass the bucket lifecycle so that you can (if needed) use terraform destroy to turn down infrastructure"
+  default     = true
+}
+
 variable "custom_coralogix_arn" {
   type        = string
   description = "In case that you want to use a custom coralogix arn enter the aws account id that you want to use"
