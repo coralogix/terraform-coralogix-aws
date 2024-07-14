@@ -3,10 +3,12 @@ module "locals" {
   for_each = var.integration_info != null ? var.integration_info : local.integration_info
 
   integration_type = each.value.integration_type
-  random_string    = random_string.this.result
+  random_string    = random_string.this[each.key].result
 }
 
 resource "random_string" "this" {
+  for_each = var.integration_info != null ? var.integration_info : local.integration_info
+
   length  = 6
   special = false
 }
@@ -32,7 +34,7 @@ resource "null_resource" "s3_bucket_copy" {
 module "lambda" {
   for_each = var.integration_info != null ? var.integration_info : local.integration_info
 
-  depends_on             = [null_resource.s3_bucket_copy,aws_sqs_queue.DLQ]
+  depends_on             = [null_resource.s3_bucket_copy,aws_sqs_queue.DLQ, aws_secretsmanager_secret.coralogix_secret]
   source                 = "terraform-aws-modules/lambda/aws"
   function_name          = each.value.lambda_name == null ? module.locals[each.key].function_name : each.value.lambda_name
   description            = "Send logs to Coralogix."
@@ -52,7 +54,7 @@ module "lambda" {
     CORALOGIX_ENDPOINT = var.custom_domain != "" ? "https://ingress.${var.custom_domain}" : var.subnet_ids == null ? "https://ingress.${lookup(module.locals[each.key].coralogix_domains, var.coralogix_region, "EU1")}" : "https://ingress.private.${lookup(module.locals[each.key].coralogix_domains, var.coralogix_region, "EU1")}"
     INTEGRATION_TYPE   = each.value.integration_type
     RUST_LOG           = var.log_level
-    CORALOGIX_API_KEY  = var.store_api_key_in_secrets_manager && !local.api_key_is_arn ? aws_secretsmanager_secret.coralogix_secret[0].arn : var.api_key
+    CORALOGIX_API_KEY  = !local.api_key_is_arn &&  (each.value.store_api_key_in_secrets_manager == null || each.value.store_api_key_in_secrets_manager == true) ? aws_secretsmanager_secret.coralogix_secret[each.key].arn : each.value.api_key
     APP_NAME           = each.value.application_name
     SUB_NAME           = each.value.subsystem_name
     NEWLINE_PATTERN    = var.integration_info != null ? each.value.newline_pattern : null
@@ -98,10 +100,10 @@ module "lambda" {
       actions   = ["rds:DescribeAccountAttributes"]
       resources = ["*"]
     }
-    secret_access_policy = var.store_api_key_in_secrets_manager || local.api_key_is_arn ? {
+    secret_access_policy = each.value.store_api_key_in_secrets_manager == null || each.value.store_api_key_in_secrets_manager == true || local.api_key_is_arn ? {
       effect    = "Allow"
       actions   = ["secretsmanager:GetSecretValue"]
-      resources = local.api_key_is_arn ? [var.api_key] : [aws_secretsmanager_secret.coralogix_secret[0].arn]
+      resources = local.api_key_is_arn ? [var.api_key] : [aws_secretsmanager_secret.coralogix_secret[each.key].arn]
       } : {
       effect    = "Deny"
       actions   = ["secretsmanager:GetSecretValue"]
@@ -250,8 +252,12 @@ resource "aws_sns_topic_policy" "test" {
 
 
 resource "aws_secretsmanager_secret" "coralogix_secret" {
-  count       = var.store_api_key_in_secrets_manager && !local.api_key_is_arn ? 1 : 0
-  name        = "lambda/coralogix/${data.aws_region.this.name}/coralogix-aws-shipper/coralogix-${random_string.this.result}"
+  # count       = var.store_api_key_in_secrets_manager && !local.api_key_is_arn ? 1 : 0
+  for_each = {
+    for key, integration_info in var.integration_info != null ? var.integration_info : local.integration_info : key => integration_info
+    if !local.api_key_is_arn && (integration_info.store_api_key_in_secrets_manager == null || integration_info.store_api_key_in_secrets_manager == true) 
+  }
+  name        = "lambda/coralogix/${data.aws_region.this.name}/coralogix-aws-shipper/coralogix-${random_string.this[each.key].result}"
   description = "Coralogix Send Your Data key Secret"
 
   lifecycle {
@@ -260,10 +266,14 @@ resource "aws_secretsmanager_secret" "coralogix_secret" {
 }
 
 resource "aws_secretsmanager_secret_version" "service_user" {
-  count         = var.store_api_key_in_secrets_manager && !local.api_key_is_arn ? 1 : 0
+  # count         = var.store_api_key_in_secrets_manager && !local.api_key_is_arn ? 1 : 0
+  for_each = {
+    for key, integration_info in var.integration_info != null ? var.integration_info : local.integration_info : key => integration_info
+    if !local.api_key_is_arn && (integration_info.store_api_key_in_secrets_manager == null || integration_info.store_api_key_in_secrets_manager == true)
+  }
   depends_on    = [aws_secretsmanager_secret.coralogix_secret]
-  secret_id     = aws_secretsmanager_secret.coralogix_secret[0].id
-  secret_string = var.api_key
+  secret_id     = aws_secretsmanager_secret.coralogix_secret[each.key].id
+  secret_string = each.value.api_key
 }
 
 resource "aws_vpc_endpoint" "secretsmanager" {
@@ -278,7 +288,7 @@ resource "aws_vpc_endpoint" "secretsmanager" {
 
 resource "aws_sqs_queue" "DLQ" {
   count = var.enable_dlq ? 1 : 0
-  name                       = "coralogix-aws-shipper-dlq-${random_string.this.result}"
+  name                       = "coralogix-aws-shipper-dlq-${random_string.this[0].result}"
   message_retention_seconds  = 1209600
   delay_seconds              = var.dlq_retry_delay
   visibility_timeout_seconds = var.timeout

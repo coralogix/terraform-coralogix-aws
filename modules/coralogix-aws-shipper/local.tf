@@ -30,6 +30,8 @@ locals {
       blocking_pattern     = var.blocking_pattern
       lambda_name          = var.lambda_name
       lambda_log_retention = var.lambda_log_retention
+      api_key              = var.api_key
+      store_api_key_in_secrets_manager = var.store_api_key_in_secrets_manager
     }
   } : {}
 
