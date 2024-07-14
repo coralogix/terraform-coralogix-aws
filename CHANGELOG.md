@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.102
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 
+- Allow to specify multiple ApiKeys when using the parameter integration_info
+
 ## v1.0.101
 #### **coralogix-aws-shipper**
 ### 🧰 Bug fixes 🧰
