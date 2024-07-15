@@ -18,6 +18,7 @@ variable "api_key" {
   description = "Your Coralogix Send Your Data - API Key which is used to validate your authenticity, This value can be a Coralogix API Key or an AWS Secret Manager ARN that holds the API Key"
   type        = string
   sensitive   = true
+  default     = ""
 }
 
 variable "application_name" {
@@ -266,6 +267,8 @@ variable "integration_info" {
     newline_pattern      = optional(string)
     blocking_pattern     = optional(string)
     lambda_log_retention = optional(number)
+    api_key              = string
+    store_api_key_in_secrets_manager = optional(bool)
   }))
   default = null
 }

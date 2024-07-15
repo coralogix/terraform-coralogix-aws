@@ -121,24 +121,26 @@ module "coralogix-shipper-multiple-s3-integrations" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
 
   coralogix_region   = "EU1"
-  api_key            = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
   s3_bucket_name     = "bucket name"
   integration_info = {
     "CloudTrail_integration" = {
       integration_type = "CloudTrail"
       application_name = "CloudTrail_application"
       subsystem_name   = "logs_from_cloudtrail"
+      api_key            = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
     }
     "VpcFlow_integration" = {
       integration_type = "VpcFlow"
       application_name = "VpcFlow_application"
       subsystem_name   = "logs_from_vpcflow"
+      api_key            = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
     }
     "S3_integration" = {
       integration_type = "S3"
       application_name = "s3_application"
       subsystem_name   = "s3_vpcflow"
       s3_key_prefix    = "s3_prefix"
+      api_key            = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
     }
   }
 }
