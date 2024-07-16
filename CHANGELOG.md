@@ -1,15 +1,13 @@
 # Changelog
 
-## v1.0.102
-#### **coralogix-aws-shipper**
-### 💡 Enhancements 
-- Allow to specify multiple ApiKeys when using the parameter integration_info
-
 ## v1.0.101
 #### **coralogix-aws-shipper**
-### 🧰 Bug fixes 🧰
+### 💡 Enhancements 
+- Allow to specify multiple api_key when using the parameter integration_info
 - Remove the creation of an SNS topic for lambda failure in case the user didn't set up notification_email
 - Add new variable create_endpoint to allow users to choose if they want to create an endpoint in case they are using a private link and store their ApiKey in secret.
+### 🛑 Breaking changes 🛑
+when using integration_info varialbe will now need to specify the api_key as parameter in the mapping of integration_info instead of in the modules body itself [example](https://github.com/coralogix/terraform-coralogix-aws/blob/chenglog-update/examples/coralogix-aws-shipper/README.md#use-the-multiple-s3-integrations-at-once-using-the-integration_info-variable)
 
 ## v1.0.100
 #### **s3-archive**
