@@ -25,9 +25,12 @@ locals {
     custom_endpoint          = local.endpoint_url
   }) : var.user_supplied_tags
 
+  # global resource referecing
+  s3_backup_bucket_arn = var.exisiting_s3_backup_name != null ? one(data.aws_s3_bucket.exisiting_s3_backup[*].arn) : one(aws_s3_bucket.new_firehose_bucket[*].arn)
+
   # default namings
   cloud_watch_metric_stream_name = var.cloudwatch_metric_stream_custom_name != null ? var.cloudwatch_metric_stream_custom_name : var.firehose_stream
-  s3_backup_bucket_name          = var.s3_backup_custom_name != null ? var.s3_backup_custom_name : "${var.firehose_stream}-backup-metrics"
+  new_s3_backup_bucket_name      = var.s3_backup_custom_name != null ? var.s3_backup_custom_name : "${var.firehose_stream}-backup-metrics"
   lambda_processor_name          = var.lambda_processor_custom_name != null ? var.lambda_processor_custom_name : "${var.firehose_stream}-metrics-transform"
   firehose_iam_name              = var.firehose_iam_custom_name != null ? var.firehose_iam_custom_name : "${var.firehose_stream}-firehose-metrics"
 }
@@ -60,13 +63,20 @@ resource "aws_cloudwatch_log_stream" "firehose_logstream_backup" {
   log_group_name = aws_cloudwatch_log_group.firehose_loggroup.name
 }
 
-resource "aws_s3_bucket" "firehose_bucket" {
-  tags   = merge(local.tags, { Name = local.s3_backup_bucket_name })
-  bucket = local.s3_backup_bucket_name
+data "aws_s3_bucket" "exisiting_s3_backup" {
+  count  = var.exisiting_s3_backup_name != null ? 1 : 0
+  bucket = var.exisiting_s3_backup_name
 }
 
-resource "aws_s3_bucket_public_access_block" "firehose_bucket_bucket_access" {
-  bucket = aws_s3_bucket.firehose_bucket.id
+resource "aws_s3_bucket" "new_firehose_bucket" {
+  count  = var.exisiting_s3_backup_name != null ? 0 : 1
+  tags   = merge(local.tags, { Name = local.new_s3_backup_bucket_name })
+  bucket = local.new_s3_backup_bucket_name
+}
+
+resource "aws_s3_bucket_public_access_block" "new_firehose_bucket_access" {
+  count  = var.exisiting_s3_backup_name != null ? 0 : 1
+  bucket = one(aws_s3_bucket.new_firehose_bucket[*].id)
 
   block_public_acls       = true
   block_public_policy     = true
@@ -114,8 +124,8 @@ resource "aws_iam_policy" "firehose_to_coralogix" {
                 "s3:PutObject"
             ],
             "Resource": [
-                "${aws_s3_bucket.firehose_bucket.arn}",
-                "${aws_s3_bucket.firehose_bucket.arn}/*"
+                "${local.s3_backup_bucket_arn}",
+                "${local.s3_backup_bucket_arn}/*"
             ]
         },
         {
@@ -132,7 +142,7 @@ resource "aws_iam_policy" "firehose_to_coralogix" {
                    "kms:ViaService": "s3.${data.aws_region.current_region.name}.amazonaws.com"
                },
                "StringLike": {
-                   "kms:EncryptionContext:aws:s3:arn": "${aws_s3_bucket.firehose_bucket.arn}/prefix*"
+                   "kms:EncryptionContext:aws:s3:arn": "${local.s3_backup_bucket_arn}/prefix*"
                }
            }
         },
@@ -284,7 +294,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_metrics" {
 
     s3_configuration {
       role_arn           = aws_iam_role.firehose_to_coralogix.arn
-      bucket_arn         = aws_s3_bucket.firehose_bucket.arn
+      bucket_arn         = local.s3_backup_bucket_arn
       buffering_size     = 5
       buffering_interval = 300
       compression_format = "GZIP"

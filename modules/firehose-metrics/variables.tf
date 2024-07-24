@@ -152,6 +152,12 @@ variable "s3_backup_custom_name" {
   default     = null
 }
 
+variable "exisiting_s3_backup_name" {
+  description = "Use an existing S3 bucket to use as a backup bucket"
+  type        = string
+  default     = null
+}
+
 variable "firehose_iam_custom_name" {
   description = "Set the name of the IAM role, otherwise variable '{firehose_stream}-firehose-metrics' will be used"
   type        = string
