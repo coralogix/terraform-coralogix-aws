@@ -29,6 +29,7 @@ locals {
   cloud_watch_metric_stream_name = var.cloudwatch_metric_stream_custom_name != null ? var.cloudwatch_metric_stream_custom_name : var.firehose_stream
   s3_backup_bucket_name          = var.s3_backup_custom_name != null ? var.s3_backup_custom_name : "${var.firehose_stream}-backup-metrics"
   lambda_processor_name          = var.lambda_processor_custom_name != null ? var.lambda_processor_custom_name : "${var.firehose_stream}-metrics-transform"
+  firehose_iam_name              = var.firehose_iam_custom_name != null ? var.firehose_iam_custom_name : "${var.firehose_stream}-firehose-metrics"
 }
 
 data "aws_caller_identity" "current_identity" {}
@@ -73,9 +74,13 @@ resource "aws_s3_bucket_public_access_block" "firehose_bucket_bucket_access" {
   restrict_public_buckets = true
 }
 
+################################################################################
+# Firehose Metrics Stream
+################################################################################
+
 resource "aws_iam_role" "firehose_to_coralogix" {
   tags = local.tags
-  name = "${var.firehose_stream}-firehose-metrics"
+  name = local.firehose_iam_name
   assume_role_policy = jsonencode({
     "Version" = "2012-10-17",
     "Statement" = [
@@ -88,56 +93,10 @@ resource "aws_iam_role" "firehose_to_coralogix" {
       }
     ]
   })
-  inline_policy {
-    name = "${var.firehose_stream}-firehose"
-    policy = jsonencode({
-      "Version" = "2012-10-17",
-      "Statement" = [
-        {
-          "Effect" = "Allow",
-          "Action" = [
-            "s3:AbortMultipartUpload",
-            "s3:GetBucketLocation",
-            "s3:GetObject",
-            "s3:ListBucket",
-            "s3:ListBucketMultipartUploads",
-            "s3:PutObject"
-          ],
-          "Resource" = [
-            aws_s3_bucket.firehose_bucket.arn,
-            "${aws_s3_bucket.firehose_bucket.arn}/*"
-          ]
-        },
-        {
-          "Effect" = "Allow",
-          "Action" = [
-            "kinesis:DescribeStream",
-            "kinesis:GetShardIterator",
-            "kinesis:GetRecords",
-            "kinesis:ListShards"
-          ],
-          "Resource" = "arn:aws:kinesis:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_identity.account_id}:stream/*"
-        },
-        {
-          "Effect" = "Allow",
-          "Action" = [
-            "*"
-          ],
-          "Resource" = [
-            aws_cloudwatch_log_group.firehose_loggroup.arn
-          ]
-        }
-      ]
-    })
-  }
 }
 
-################################################################################
-# Firehose Metrics Stream
-################################################################################
-
-resource "aws_iam_policy" "firehose_to_coralogix_metric_policy" {
-  name   = "${var.firehose_stream}-metrics-policy"
+resource "aws_iam_policy" "firehose_to_coralogix" {
+  name   = local.firehose_iam_name
   tags   = local.tags
   policy = <<EOF
 {
@@ -213,7 +172,7 @@ EOF
 }
 
 resource "aws_iam_role_policy_attachment" "firehose_to_coralogix_metric_policy" {
-  policy_arn = aws_iam_policy.firehose_to_coralogix_metric_policy.arn
+  policy_arn = aws_iam_policy.firehose_to_coralogix.arn
   role       = aws_iam_role.firehose_to_coralogix.name
 }
 
@@ -233,14 +192,14 @@ data "aws_iam_policy_document" "lambda_assume_role" {
 
 resource "aws_iam_role" "lambda_iam_role" {
   count              = var.lambda_processor_enable == true ? 1 : 0
-  name               = "${local.lambda_processor_name}-lambda"
+  name               = local.lambda_processor_name
   tags               = local.tags
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role[count.index].json
 }
 
 resource "aws_iam_role_policy" "lambda_iam_policy" {
   count  = var.lambda_processor_enable == true ? 1 : 0
-  name   = "${local.lambda_processor_name}-lambda"
+  name   = local.lambda_processor_name
   role   = aws_iam_role.lambda_iam_role[count.index].id
   policy = <<EOF
 {

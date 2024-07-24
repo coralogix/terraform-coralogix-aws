@@ -146,6 +146,18 @@ variable "lambda_processor_custom_name" {
   default     = null
 }
 
+variable "s3_backup_custom_name" {
+  description = "Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup' will be used"
+  type        = string
+  default     = null
+}
+
+variable "firehose_iam_custom_name" {
+  description = "Set the name of the IAM role, otherwise variable '{firehose_stream}-firehose-metrics' will be used"
+  type        = string
+  default     = null
+}
+
 variable "user_supplied_tags" {
   description = "Tags supplied by the user to populate to all generated resources"
   type        = map(string)
@@ -158,8 +170,3 @@ variable "override_default_tags" {
   default     = false
 }
 
-variable "s3_backup_custom_name" {
-  description = "Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup' will be used"
-  type        = string
-  default     = null
-}
