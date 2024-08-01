@@ -10,7 +10,7 @@ terraform {
 module "locals" {
   source = "../locals_variables"
 
-  integration_type = "firehose-logs"
+  integration_type = "firehose-metrics"
   random_string    = random_string.this.result
 }
 
@@ -29,9 +29,10 @@ locals {
   s3_backup_bucket_arn = var.exisiting_s3_backup_name != null ? one(data.aws_s3_bucket.exisiting_s3_backup[*].arn) : one(aws_s3_bucket.new_firehose_bucket[*].arn)
 
   # default namings
-  cloud_watch_metric_stream_name = var.cloudwatch_metric_stream_custom_name != null ? var.cloudwatch_metric_stream_custom_name : var.firehose_stream
+  cloud_watch_metric_stream_name = var.cloudwatch_metric_stream_custom_name != null ? var.cloudwatch_metric_stream_custom_name : "${var.firehose_stream}-${random_string}"
   new_s3_backup_bucket_name      = var.s3_backup_custom_name != null ? var.s3_backup_custom_name : "${var.firehose_stream}-backup-metrics"
   lambda_processor_name          = var.lambda_processor_custom_name != null ? var.lambda_processor_custom_name : "${var.firehose_stream}-metrics-transform"
+  lambda_processor_iam_name      = var.existing_lambda_processor_iam_name
   firehose_iam_name              = var.firehose_iam_custom_name != null ? var.firehose_iam_custom_name : "${var.firehose_stream}-firehose-metrics"
 }
 
@@ -88,9 +89,15 @@ resource "aws_s3_bucket_public_access_block" "new_firehose_bucket_access" {
 # Firehose Metrics Stream
 ################################################################################
 
+data "aws_iam_role" "existing_firehose_iam_name" {
+  count = var.existing_firehose_iam_name != null ? 1 : 0
+  name  = var.existing_firehose_iam_name
+}
+
 resource "aws_iam_role" "firehose_to_coralogix" {
-  tags = local.tags
-  name = local.firehose_iam_name
+  count = var.existing_firehose_iam_name != null ? 0 : 1
+  tags  = local.tags
+  name  = local.firehose_iam_name
   assume_role_policy = jsonencode({
     "Version" = "2012-10-17",
     "Statement" = [
@@ -106,6 +113,7 @@ resource "aws_iam_role" "firehose_to_coralogix" {
 }
 
 resource "aws_iam_policy" "firehose_to_coralogix" {
+  count  = var.existing_firehose_iam_name != null ? 0 : 1
   name   = local.firehose_iam_name
   tags   = local.tags
   policy = <<EOF
@@ -182,8 +190,9 @@ EOF
 }
 
 resource "aws_iam_role_policy_attachment" "firehose_to_coralogix_metric_policy" {
-  policy_arn = aws_iam_policy.firehose_to_coralogix.arn
-  role       = aws_iam_role.firehose_to_coralogix.name
+  count      = var.existing_firehose_iam_name != null ? 0 : 1
+  policy_arn = one(aws_iam_policy.firehose_to_coralogix[*].arn)
+  role       = one(aws_iam_policy.firehose_to_coralogix[*].name)
 }
 
 data "aws_iam_policy_document" "lambda_assume_role" {
@@ -204,13 +213,13 @@ resource "aws_iam_role" "lambda_iam_role" {
   count              = var.lambda_processor_enable == true ? 1 : 0
   name               = local.lambda_processor_name
   tags               = local.tags
-  assume_role_policy = data.aws_iam_policy_document.lambda_assume_role[count.index].json
+  assume_role_policy = one(data.aws_iam_policy_document.lambda_assume_role[*].json)
 }
 
 resource "aws_iam_role_policy" "lambda_iam_policy" {
   count  = var.lambda_processor_enable == true ? 1 : 0
   name   = local.lambda_processor_name
-  role   = aws_iam_role.lambda_iam_role[count.index].id
+  role   = one(aws_iam_role.lambda_iam_role[*].id)
   policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -252,7 +261,7 @@ EOF
 
 resource "aws_cloudwatch_log_group" "loggroup" {
   count             = var.lambda_processor_enable == true ? 1 : 0
-  name              = "/aws/lambda/${aws_lambda_function.lambda_processor[count.index].function_name}"
+  name              = "/aws/lambda/${one(aws_lambda_function.lambda_processor[*].function_name)}"
   retention_in_days = var.cloudwatch_retention_days
   tags              = local.tags
 }
@@ -262,7 +271,7 @@ resource "aws_lambda_function" "lambda_processor" {
   s3_bucket     = "cx-cw-metrics-tags-lambda-processor-${data.aws_region.current_region.name}"
   s3_key        = "bootstrap.zip"
   function_name = local.lambda_processor_name
-  role          = aws_iam_role.lambda_iam_role[count.index].arn
+  role          = one(aws_iam_role.lambda_iam_role[*].arn)
   handler       = "bootstrap"
   runtime       = "provided.al2"
   timeout       = "60"
@@ -289,11 +298,11 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_metrics" {
     buffering_size     = 1
     buffering_interval = 60
     s3_backup_mode     = "FailedDataOnly"
-    role_arn           = aws_iam_role.firehose_to_coralogix.arn
+    role_arn           = var.existing_firehose_iam_name == null ? one(aws_iam_role.firehose_to_coralogix[*].arn) : one(data.aws_iam_role.existing_firehose_iam_name[*].arn)
     retry_duration     = 30
 
     s3_configuration {
-      role_arn           = aws_iam_role.firehose_to_coralogix.arn
+      role_arn           = var.existing_firehose_iam_name == null ? one(aws_iam_role.firehose_to_coralogix[*].arn) : one(data.aws_iam_role.existing_firehose_iam_name[*].arn)
       bucket_arn         = local.s3_backup_bucket_arn
       buffering_size     = 5
       buffering_interval = 300
@@ -344,7 +353,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_metrics" {
 
           parameters {
             parameter_name  = "LambdaArn"
-            parameter_value = "${aws_lambda_function.lambda_processor[0].arn}:$LATEST"
+            parameter_value = "${one(aws_lambda_function.lambda_processor[*].arn)}:$LATEST"
           }
 
           parameters {
@@ -391,7 +400,7 @@ EOF
 resource "aws_iam_role_policy" "metric_streams_to_firehose_policy" {
   count  = var.enable_cloudwatch_metricstream ? 1 : 0
   name   = "${local.cloud_watch_metric_stream_name}-cw"
-  role   = aws_iam_role.metric_streams_to_firehose_role[count.index].id
+  role   = one(aws_iam_role.metric_streams_to_firehose_role[*].id)
   policy = <<EOF
 {
     "Version": "2012-10-17",
@@ -415,7 +424,7 @@ resource "aws_cloudwatch_metric_stream" "cloudwatch_metric_stream" {
   tags          = local.tags
   count         = var.enable_cloudwatch_metricstream ? 1 : 0
   name          = local.cloud_watch_metric_stream_name
-  role_arn      = aws_iam_role.metric_streams_to_firehose_role[count.index].arn
+  role_arn      = one(aws_iam_role.metric_streams_to_firehose_role[*].arn)
   firehose_arn  = aws_kinesis_firehose_delivery_stream.coralogix_stream_metrics.arn
   output_format = var.output_format
 

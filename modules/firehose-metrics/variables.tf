@@ -146,6 +146,12 @@ variable "lambda_processor_custom_name" {
   default     = null
 }
 
+variable "existing_lambda_processor_iam_name" {
+  description = "Use an existing lambda processor IAM role"
+  type        = string
+  default     = null
+}
+
 variable "s3_backup_custom_name" {
   description = "Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup' will be used"
   type        = string
@@ -160,6 +166,12 @@ variable "exisiting_s3_backup_name" {
 
 variable "firehose_iam_custom_name" {
   description = "Set the name of the IAM role, otherwise variable '{firehose_stream}-firehose-metrics' will be used"
+  type        = string
+  default     = null
+}
+
+variable "existing_firehose_iam_name" {
+  description = "Use an existing IAM role to use as a firehose role"
   type        = string
   default     = null
 }

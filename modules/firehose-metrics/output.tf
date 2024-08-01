@@ -4,12 +4,12 @@ output "firehose_stream_name" {
 }
 
 output "firehose_iam_role_name" {
-  value       = aws_iam_role.firehose_to_coralogix.name
+  value       = one(aws_iam_role.firehose_to_coralogix[*]).name
   description = "value of the firehose IAM role name"
 }
 
 output "firehose_iam_role_arn" {
-  value       = aws_iam_role.firehose_to_coralogix.arn
+  value       = one(aws_iam_role.firehose_to_coralogix[*]).arn
   description = "value of the firehose IAM role ARN"
 }
 
