@@ -146,6 +146,36 @@ variable "lambda_processor_custom_name" {
   default     = null
 }
 
+variable "existing_lambda_processor_iam_name" {
+  description = "Use an existing lambda processor IAM role"
+  type        = string
+  default     = null
+}
+
+variable "s3_backup_custom_name" {
+  description = "Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup' will be used"
+  type        = string
+  default     = null
+}
+
+variable "exisiting_s3_backup_name" {
+  description = "Use an existing S3 bucket to use as a backup bucket"
+  type        = string
+  default     = null
+}
+
+variable "firehose_iam_custom_name" {
+  description = "Set the name of the IAM role, otherwise variable '{firehose_stream}-firehose-metrics' will be used"
+  type        = string
+  default     = null
+}
+
+variable "existing_firehose_iam_name" {
+  description = "Use an existing IAM role to use as a firehose role"
+  type        = string
+  default     = null
+}
+
 variable "user_supplied_tags" {
   description = "Tags supplied by the user to populate to all generated resources"
   type        = map(string)
@@ -158,8 +188,3 @@ variable "override_default_tags" {
   default     = false
 }
 
-variable "s3_backup_custom_name" {
-  description = "Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup' will be used"
-  type        = string
-  default     = null
-}
