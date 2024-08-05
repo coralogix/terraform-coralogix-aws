@@ -131,6 +131,12 @@ variable "timeout" {
   default     = 300
 }
 
+variable "runtime" {
+  description = "Lambda function runtime"
+  type        = string
+  default     = "provided.al2023"
+}
+
 variable "cpu_arch" {
   description = "Lambda function CPU architecture"
   type        = string
