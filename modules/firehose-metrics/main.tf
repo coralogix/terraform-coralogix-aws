@@ -29,11 +29,12 @@ locals {
   s3_backup_bucket_arn = var.exisiting_s3_backup_name != null ? one(data.aws_s3_bucket.exisiting_s3_backup[*].arn) : one(aws_s3_bucket.new_firehose_bucket[*].arn)
 
   # default namings
-  cloud_watch_metric_stream_name = var.cloudwatch_metric_stream_custom_name != null ? var.cloudwatch_metric_stream_custom_name : "${var.firehose_stream}-${random_string}"
-  new_s3_backup_bucket_name      = var.s3_backup_custom_name != null ? var.s3_backup_custom_name : "${var.firehose_stream}-backup-metrics"
-  lambda_processor_name          = var.lambda_processor_custom_name != null ? var.lambda_processor_custom_name : "${var.firehose_stream}-metrics-transform"
+  firehose_stream_name           = "${var.firehose_stream}-${random_string.this.result}"
+  cloud_watch_metric_stream_name = var.cloudwatch_metric_stream_custom_name != null ? var.cloudwatch_metric_stream_custom_name : "${var.firehose_stream}-${random_string.this.result}"
+  new_s3_backup_bucket_name      = var.s3_backup_custom_name != null ? var.s3_backup_custom_name : "${var.firehose_stream}-backup-metrics-${random_string.this.result}"
+  lambda_processor_name          = var.lambda_processor_custom_name != null ? var.lambda_processor_custom_name : "${var.firehose_stream}-metrics-transform-${random_string.this.result}"
   lambda_processor_iam_name      = var.existing_lambda_processor_iam_name
-  firehose_iam_name              = var.firehose_iam_custom_name != null ? var.firehose_iam_custom_name : "${var.firehose_stream}-firehose-metrics"
+  firehose_iam_name              = var.firehose_iam_custom_name != null ? var.firehose_iam_custom_name : "${var.firehose_stream}-firehose-metrics-${random_string.this.result}"
 }
 
 data "aws_caller_identity" "current_identity" {}
@@ -42,6 +43,7 @@ data "aws_region" "current_region" {}
 resource "random_string" "this" {
   length  = 6
   special = false
+  upper   = false
 }
 
 ################################################################################
@@ -50,7 +52,7 @@ resource "random_string" "this" {
 
 resource "aws_cloudwatch_log_group" "firehose_loggroup" {
   tags              = local.tags
-  name              = "/aws/kinesisfirehosemetrics/${var.firehose_stream}"
+  name              = "/aws/kinesisfirehosemetrics/${local.firehose_stream_name}"
   retention_in_days = var.cloudwatch_retention_days
 }
 
@@ -288,7 +290,7 @@ resource "aws_lambda_function" "lambda_processor" {
 
 resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_metrics" {
   tags        = local.tags
-  name        = "${var.firehose_stream}-metrics"
+  name        = "${local.firehose_stream_name}-metrics"
   destination = "http_endpoint"
 
   http_endpoint_configuration {
