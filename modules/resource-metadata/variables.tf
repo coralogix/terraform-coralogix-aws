@@ -81,8 +81,8 @@ variable "package_name" {
 
 variable "collect_aliases" {
   description = "Collect Aliases"
-  type        = string
-  default     = "False"
+  type        = bool
+  default     = false
 }
 
 variable "lambda_function_include_regex_filter" {
@@ -117,8 +117,8 @@ variable "custom_s3_bucket" {
 
 variable "create_secret" {
   description = "Set to False In case you want to use secrets manager with a predefine secret that was already created and contains Coralogix Send Your Data API key"
-  type        = string
-  default     = "True"
+  type        = bool
+  default     = true
 }
 
 variable "cloudwatch_logs_retention_in_days" {
