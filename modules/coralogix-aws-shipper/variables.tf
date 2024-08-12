@@ -239,6 +239,16 @@ variable "timeout" {
   default     = 300
 }
 
+variable "runtime" {
+  description = "Lambda function runtime"
+  type        = string
+  default     = "provided.al2023"
+  validation {
+    condition     = contains(["provided.al2023", "provided.al2"], var.runtime)
+    error_message = "The supported runtime are: [provided.al2023, provided.al2]."
+  }
+}
+
 variable "cpu_arch" {
   description = "Lambda function CPU architecture"
   type        = string
