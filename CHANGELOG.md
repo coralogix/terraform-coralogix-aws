@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.0.103
+#### **resource-metadata**
+### 💡 Enhancements 
+### 🛑 Breaking changes 🛑
+- Update variables: `collect_aliases` and `create_secret` to be type `bool` instead of `string`.
+- Update lambda runtime from nodejs18 to nodejs20
+
+## v1.0.102
+#### **coralogix-aws-shipper**
+### 🧰 Bug fixes 🧰
+- Add new parameter runtime, to allow users to specify lambda run time, possible options: `provided.al2023` or `provided.al2` 
+
 ## v1.0.101
 #### **coralogix-aws-shipper**
 ### 💡 Enhancements 
