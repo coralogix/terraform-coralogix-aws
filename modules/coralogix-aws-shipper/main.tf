@@ -40,7 +40,7 @@ module "lambda" {
   description            = "Send logs to Coralogix."
   version                = "7.2.0"
   handler                = "bootstrap"
-  runtime                = "provided.al2023"
+  runtime                = var.runtime
   architectures          = [var.cpu_arch]
   memory_size            = var.memory_size
   timeout                = var.timeout
