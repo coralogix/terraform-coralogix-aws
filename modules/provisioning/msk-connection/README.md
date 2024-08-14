@@ -1,0 +1,22 @@
+# 
+
+
+The module can run only on the following regions eu-west-1,eu-north-1,ap-southeast-1,ap-south-1,us-east-2.
+
+## Requirements
+
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.1 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 2.23 |
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.15.1 |
+
+| Variable name | Description | Type | Default | Required | 
+|------|-------------|------|------|:--------:|
+| aws_region | The AWS region that you want to create the S3 bucket, Must be the same as the AWS region where your [coralogix account](https://coralogix.com/docs/coralogix-domain/) is set. Allowd values: eu-west-1, eu-north-1, ap-southeast-1, ap-south-1, us-east-2, us-west-2 | `string` | n/a | :heavy_check_mark: |
+| cluster_name | Name for the Cluster that the module will create | `string` | `coralogix-msk-cluster` | |
