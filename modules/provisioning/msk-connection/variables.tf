@@ -8,19 +8,45 @@ variable "aws_region" {
 }
 
 variable "cluster_name" {
-  default = "coralogix-msk-cluster"
-  type = string
+  default     = "coralogix-msk-cluster"
+  type        = string
   description = "The name of the MSK cluster"
+}
+
+variable "vpc_cidr_block" {
+  type        = string
+  description = "The CIDR block for the VPC in formate of 10.0.0.0/20"
+  default     = null
+}
+
+variable "subnet_cidr_blocks" {
+  type        = list(string)
+  description = "The CIDR blocks for the subnets in formate of [10.0.0.0/24, 10.0.1.0/24, 10.0.2.0/24]"
+  default     = null
+  
 }
 
 variable "aws_role_region"  {
   type = map
   default = {
-      "eu-west-1"="eu1"
-      "eu-north-1"="eu2"
-      "ap-southeast-1"="ap2"
-      "ap-south-1"="ap1"
-      "us-east-2"="us1"
-      "us-west-2"="us2"
+      "eu-west-1"      = "eu1"
+      "eu-north-1"     = "eu2"
+      "ap-southeast-1" = "ap2"
+      "ap-south-1"     = "ap1"
+      "us-east-2"      = "us1"
+      "us-west-2"      = "us2"
+  }
+}
+
+variable "coralogix_arn_mapping" {
+  type = map(string)
+  default = {
+    "eu-west-1"       = "625240141681"
+    "eu-north-1"      = "625240141681"
+    "ap-southeast-1"  = "625240141681"
+    "ap-south-1"      = "625240141681"
+    "us-east-2"       = "625240141681"
+    "us-west-2"       = "739076534691"
+    ""                = "625240141681"
   }
 }

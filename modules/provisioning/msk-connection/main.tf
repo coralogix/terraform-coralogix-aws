@@ -1,5 +1,6 @@
 locals {
   coralogix_role_region = lookup(var.aws_role_region, var.aws_region)
+  coralogix_account_id  = lookup(var.coralogix_arn_mapping, var.aws_region)
 }
 
 ### data ###
@@ -35,23 +36,23 @@ resource "random_string" "unique" {
 
 ### VPC ###
 resource "aws_vpc" "vpc" {
-  cidr_block = "193.168.0.0/20"
+  cidr_block           = var.vpc_cidr_block == null ? "193.168.0.0/20" : var.vpc_cidr_block
   enable_dns_hostnames = true
   tags = {
-    Name = "coralogix-msk-endpoint-vpc-${random_string.unique.result}"
+    Name               = "coralogix-msk-endpoint-vpc-${random_string.unique.result}"
     coralogix_resource = "coralogix msk vpc"
   }
 }
 
 ### Public Subnets ###
 resource "aws_subnet" "public" {
-  count = 3
-  vpc_id     = aws_vpc.vpc.id
-  cidr_block = "193.168.${count.index + 3}.0/24"
+  count                   = 3
+  vpc_id                  = aws_vpc.vpc.id
+  cidr_block              = var.vpc_cidr_block == null ? "193.168.${count.index + 3}.0/24" : var.subnet_cidr_blocks[count.index]
   map_public_ip_on_launch = true
   availability_zone       = data.aws_availability_zones.azs.names[count.index]
   tags = {
-    Name = "coralogix-msk-endpoint-public-subnet-${random_string.unique.result}"
+    Name               = "coralogix-msk-endpoint-public-subnet-${random_string.unique.result}"
     coralogix_resource = "coralogix msk subnet"
   }
 }
@@ -64,7 +65,7 @@ resource "aws_internet_gateway" "igw" {
 }
 
 resource "aws_route_table" "public" {
-  count = 3
+  count  = 3
   vpc_id = aws_vpc.vpc.id
 
   route {
@@ -72,19 +73,19 @@ resource "aws_route_table" "public" {
     gateway_id = aws_internet_gateway.igw.id
   }
   tags = {
-    Name = "coralogix-msk-endpoint-public-route-table-${random_string.unique.result}"
+    Name               = "coralogix-msk-endpoint-public-route-table-${random_string.unique.result}"
     coralogix_resource = "coralogix msk route table"
   }
 }
 
 resource "aws_route_table_association" "public" {
-  count = 3 
+  count          = 3
   subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public[count.index].id
 }
 
 resource "aws_eip" "nat" {
-  count = 3
+  count  = 3
   domain = "vpc"
   tags = {
     coralogix_resource = "coralogix msk nat eip"
@@ -92,7 +93,7 @@ resource "aws_eip" "nat" {
 }
 
 resource "aws_nat_gateway" "nat" {
-  count = 3
+  count         = 3
   allocation_id = aws_eip.nat[count.index].id
   subnet_id     = aws_subnet.public[count.index].id
   tags = {
@@ -117,7 +118,7 @@ resource "aws_security_group" "sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   tags = {
-    Name = "coralogix-msk-endpoint-security-group-${random_string.unique.result}"
+    Name               = "coralogix-msk-endpoint-security-group-${random_string.unique.result}"
     coralogix_resource = "coralogix msk security group"
   }
 }
@@ -129,13 +130,13 @@ resource "aws_msk_cluster" "coralogix-msk-cluster" {
   number_of_broker_nodes = 3
   client_authentication {
     sasl {
-      iam =  true
+      iam = true
     }
   }
   broker_node_group_info {
     connectivity_info {
       public_access {
-          type = "SERVICE_PROVIDED_EIPS"
+        type = "SERVICE_PROVIDED_EIPS"
       }
     }
     instance_type = "kafka.m5.large"
@@ -160,29 +161,29 @@ resource "aws_msk_cluster_policy" "coralogix-msk-cluster-policy" {
   cluster_arn = aws_msk_cluster.coralogix-msk-cluster.arn
 
   policy = jsonencode({
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "AWS": [
-          "arn:aws:iam::625240141681:role/msk-access-${local.coralogix_role_region}"
-        ]
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Principal" : {
+          "AWS" : [
+            "arn:aws:iam::${local.coralogix_account_id}:role/msk-access-${local.coralogix_role_region}"
+          ]
+        },
+        "Action" : "kafka-cluster:Connect",
+        "Resource" : "arn:aws:kafka:${var.aws_region}:${data.aws_caller_identity.current.account_id}:cluster*"
       },
-      "Action": "kafka-cluster:Connect",
-      "Resource": "arn:aws:kafka:${var.aws_region}:${data.aws_caller_identity.current.account_id}:cluster*"
-    },
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "AWS": [
-          "arn:aws:iam::625240141681:role/msk-access-${local.coralogix_role_region}"
-        ]
-      },
-      "Action": "kafka-cluster:WriteData",
-      "Resource": "arn:aws:kafka:${var.aws_region}:${data.aws_caller_identity.current.account_id}:topic*"
-    }
-  ]
+      {
+        "Effect" : "Allow",
+        "Principal" : {
+          "AWS" : [
+            "arn:aws:iam::${local.coralogix_account_id}:role/msk-access-${local.coralogix_role_region}"
+          ]
+        },
+        "Action" : "kafka-cluster:WriteData",
+        "Resource" : "arn:aws:kafka:${var.aws_region}:${data.aws_caller_identity.current.account_id}:topic*"
+      }
+    ]
   })
 }
 
