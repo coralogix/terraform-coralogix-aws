@@ -26,15 +26,16 @@ variable "subnet_cidr_blocks" {
   
 }
 
-variable "aws_role_region"  {
+variable "coraloigx_roles_arn_mapping" {
   type = map
   default = {
-      "eu-west-1"      = "eu1"
-      "eu-north-1"     = "eu2"
-      "ap-southeast-1" = "ap2"
-      "ap-south-1"     = "ap1"
-      "us-east-2"      = "us1"
-      "us-west-2"      = "us2"
+      "eu-west-1"      = "arn:aws:iam::625240141681:role/msk-access-eu1"
+      "eu-north-1"     = "arn:aws:iam::625240141681:role/msk-access-eu2"
+      "ap-southeast-1" = "arn:aws:iam::625240141681:role/msk-access-ap2"
+      "ap-south-1"     = "arn:aws:iam::625240141681:role/msk-access-ap1"
+      "us-east-2"      = "arn:aws:iam::625240141681:role/msk-access-us1"
+      "us-west-2"      = "arn:aws:iam::739076534691:role/msk-access-us2"
+      ""               = "arn:aws:iam::625240141681:role/msk-access-eu1"
   }
 }
 

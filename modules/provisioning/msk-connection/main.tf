@@ -1,6 +1,5 @@
 locals {
-  coralogix_role_region = lookup(var.aws_role_region, var.aws_region)
-  coralogix_account_id  = lookup(var.coralogix_arn_mapping, var.aws_region)
+  coraloigx_role = lookup(var.coraloigx_roles_arn_mapping, var.aws_region)
 }
 
 ### data ###
@@ -36,7 +35,7 @@ resource "random_string" "unique" {
 
 ### VPC ###
 resource "aws_vpc" "vpc" {
-  cidr_block           = var.vpc_cidr_block == null ? "193.168.0.0/20" : var.vpc_cidr_block
+  cidr_block           = var.vpc_cidr_block == null ? "193.169.0.0/20" : var.vpc_cidr_block
   enable_dns_hostnames = true
   tags = {
     Name               = "coralogix-msk-endpoint-vpc-${random_string.unique.result}"
@@ -48,7 +47,7 @@ resource "aws_vpc" "vpc" {
 resource "aws_subnet" "public" {
   count                   = 3
   vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = var.vpc_cidr_block == null ? "193.168.${count.index + 3}.0/24" : var.subnet_cidr_blocks[count.index]
+  cidr_block              = var.vpc_cidr_block == null ? "193.169.${count.index + 3}.0/24" : var.subnet_cidr_blocks[count.index]
   map_public_ip_on_launch = true
   availability_zone       = data.aws_availability_zones.azs.names[count.index]
   tags = {
@@ -134,11 +133,11 @@ resource "aws_msk_cluster" "coralogix-msk-cluster" {
     }
   }
   broker_node_group_info {
-    connectivity_info {
-      public_access {
-        type = "SERVICE_PROVIDED_EIPS"
-      }
-    }
+    # connectivity_info {
+    #   public_access {
+    #     type = "SERVICE_PROVIDED_EIPS"
+    #   }
+    # }
     instance_type = "kafka.m5.large"
     client_subnets = [
       aws_subnet.public[0].id,
@@ -161,29 +160,49 @@ resource "aws_msk_cluster_policy" "coralogix-msk-cluster-policy" {
   cluster_arn = aws_msk_cluster.coralogix-msk-cluster.arn
 
   policy = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
-      {
-        "Effect" : "Allow",
-        "Principal" : {
-          "AWS" : [
-            "arn:aws:iam::${local.coralogix_account_id}:role/msk-access-${local.coralogix_role_region}"
-          ]
-        },
-        "Action" : "kafka-cluster:Connect",
-        "Resource" : "arn:aws:kafka:${var.aws_region}:${data.aws_caller_identity.current.account_id}:cluster*"
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          "arn:aws:iam::233221153619:role/msk-access-stg1"
+          # "${local.coraloigx_role}"
+        ]
       },
-      {
-        "Effect" : "Allow",
-        "Principal" : {
-          "AWS" : [
-            "arn:aws:iam::${local.coralogix_account_id}:role/msk-access-${local.coralogix_role_region}"
-          ]
-        },
-        "Action" : "kafka-cluster:WriteData",
-        "Resource" : "arn:aws:kafka:${var.aws_region}:${data.aws_caller_identity.current.account_id}:topic*"
-      }
-    ]
+      "Action": [
+        "kafka-cluster:Connect"
+      ],
+      "Resource": "${aws_msk_cluster.coralogix-msk-cluster.arn}"
+    },
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          "arn:aws:iam::233221153619:role/msk-access-stg1"
+          # "${local.coraloigx_role}"
+        ]
+      },
+      "Action": [
+        "kafka-cluster:DescribeTopic",
+        "kafka-cluster:WriteData"
+      ],
+       "Resource": "arn:aws:kafka:${var.aws_region}:${data.aws_caller_identity.current.account_id}:topic/${aws_msk_cluster.coralogix-msk-cluster.cluster_name}/*"
+    }
+  ]
   })
+}
+
+resource "null_resource" "enable-msk-public-access" {
+  depends_on = [aws_msk_cluster.coralogix-msk-cluster]
+  provisioner "local-exec" {
+    command = <<-EOF
+      current_version=$(aws --region ${var.aws_region} kafka describe-cluster --cluster-arn ${aws_msk_cluster.coralogix-msk-cluster.arn} --query 'ClusterInfo.CurrentVersion' --output text) && \
+      aws --region ${var.aws_region} kafka update-connectivity \
+        --cluster-arn ${aws_msk_cluster.coralogix-msk-cluster.arn} \
+        --current-version $${current_version} \
+        --connectivity-info '{"PublicAccess": {"Type": "SERVICE_PROVIDED_EIPS"}}'
+    EOF
+  }
 }
 
