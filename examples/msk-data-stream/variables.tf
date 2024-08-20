@@ -38,16 +38,3 @@ variable "coraloigx_roles_arn_mapping" {
       ""               = "arn:aws:iam::625240141681:role/msk-access-eu1"
   }
 }
-
-variable "coralogix_arn_mapping" {
-  type = map(string)
-  default = {
-    "eu-west-1"       = "625240141681"
-    "eu-north-1"      = "625240141681"
-    "ap-southeast-1"  = "625240141681"
-    "ap-south-1"      = "625240141681"
-    "us-east-2"       = "625240141681"
-    "us-west-2"       = "739076534691"
-    ""                = "625240141681"
-  }
-}

@@ -11,8 +11,8 @@ To run this example you need to save this code in Terraform file, and change the
 provider "aws" {
 }
 
-module "Msk-connection-module" {
-  source = "coralogix/aws/coralogix//modules/provisioning/MSK-connection"
+module "Msk-data-stream-module" {
+  source = "coralogix/aws/coralogix//modules/provisioning/msk-data-stream"
 
   aws_region      = "<your aws region>"
   cluster_name    = "<your bucket name>"

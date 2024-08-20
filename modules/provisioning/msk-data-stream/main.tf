@@ -133,11 +133,6 @@ resource "aws_msk_cluster" "coralogix-msk-cluster" {
     }
   }
   broker_node_group_info {
-    # connectivity_info {
-    #   public_access {
-    #     type = "SERVICE_PROVIDED_EIPS"
-    #   }
-    # }
     instance_type = "kafka.m5.large"
     client_subnets = [
       aws_subnet.public[0].id,
@@ -166,8 +161,7 @@ resource "aws_msk_cluster_policy" "coralogix-msk-cluster-policy" {
       "Effect": "Allow",
       "Principal": {
         "AWS": [
-          "arn:aws:iam::233221153619:role/msk-access-stg1"
-          # "${local.coraloigx_role}"
+          "${local.coraloigx_role}"
         ]
       },
       "Action": [
@@ -179,8 +173,7 @@ resource "aws_msk_cluster_policy" "coralogix-msk-cluster-policy" {
       "Effect": "Allow",
       "Principal": {
         "AWS": [
-          "arn:aws:iam::233221153619:role/msk-access-stg1"
-          # "${local.coraloigx_role}"
+          "${local.coraloigx_role}"
         ]
       },
       "Action": [
@@ -194,6 +187,7 @@ resource "aws_msk_cluster_policy" "coralogix-msk-cluster-policy" {
 }
 
 resource "null_resource" "enable-msk-public-access" {
+  # Terraform don't support an option to update msk in the creation to have public access so we need to do it manually
   depends_on = [aws_msk_cluster.coralogix-msk-cluster]
   provisioner "local-exec" {
     command = <<-EOF
@@ -201,8 +195,24 @@ resource "null_resource" "enable-msk-public-access" {
       aws --region ${var.aws_region} kafka update-connectivity \
         --cluster-arn ${aws_msk_cluster.coralogix-msk-cluster.arn} \
         --current-version $${current_version} \
-        --connectivity-info '{"PublicAccess": {"Type": "SERVICE_PROVIDED_EIPS"}}'
+        --connectivity-info '{"PublicAccess": {"Type": "SERVICE_PROVIDED_EIPS"}}' && \
+      
+      echo "Waiting for MSK cluster to finish updating..." && \
+      while true; do \
+        status=$(aws --region ${var.aws_region} kafka describe-cluster --cluster-arn ${aws_msk_cluster.coralogix-msk-cluster.arn} --query 'ClusterInfo.State' --output text); \
+        if [ "$${status}" == "ACTIVE" ]; then \
+          echo "MSK cluster is active"; \
+          break; \
+        elif [ "$${status}" == "FAILED" ]; then \
+          echo "MSK cluster update failed"; \
+          exit 1; \
+        else \
+          echo "MSK cluster is still updating..."; \
+        fi; \
+        sleep 30; \
+      done
     EOF
   }
 }
+
 
