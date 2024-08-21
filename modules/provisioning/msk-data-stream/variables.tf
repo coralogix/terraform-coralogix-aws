@@ -23,7 +23,12 @@ variable "subnet_cidr_blocks" {
   type        = list(string)
   description = "The CIDR blocks for the subnets in formate of [10.0.0.0/24, 10.0.1.0/24, 10.0.2.0/24]"
   default     = null
-  
+}
+
+variable "msk_storage_volume_size" {
+  type        = number
+  description = "The size of the storage volume for the MSK brokers"
+  default     = 1000
 }
 
 variable "coraloigx_roles_arn_mapping" {

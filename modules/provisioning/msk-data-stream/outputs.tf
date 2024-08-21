@@ -1,8 +1,3 @@
-output "cluster_public_brokers" {
-  depends_on = [ null_resource.enable-msk-public-access ]
-  value = aws_msk_cluster.coralogix-msk-cluster.bootstrap_brokers_public_sasl_iam
-}
-
 output "vpc_id" {
   value = aws_vpc.vpc.id
 }

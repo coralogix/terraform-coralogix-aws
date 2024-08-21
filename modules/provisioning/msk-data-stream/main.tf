@@ -141,7 +141,7 @@ resource "aws_msk_cluster" "coralogix-msk-cluster" {
     ]
     storage_info {
       ebs_storage_info {
-        volume_size = 10
+        volume_size = var.msk_storage_volume_size
       }
     }
     security_groups = [aws_security_group.sg.id]
