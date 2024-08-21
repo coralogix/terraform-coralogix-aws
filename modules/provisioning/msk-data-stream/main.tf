@@ -1,5 +1,5 @@
 locals {
-  coraloigx_role = lookup(var.coraloigx_roles_arn_mapping, var.aws_region)
+  coraloigx_role = var.custom_coralogix_arn == null ? lookup(var.coraloigx_roles_arn_mapping, var.aws_region) : var.custom_coralogix_arn
 }
 
 ### data ###
@@ -8,23 +8,6 @@ data "aws_availability_zones" "azs" {
 }
 
 data "aws_caller_identity" "current" {}
-
-data "aws_ami" "amazon_linux" {
-  most_recent = true
-  filter {
-    name   = "name"
-    values = ["al2023-ami-20*-x86_64"]
-  }
-  filter {
-    name   = "architecture"
-    values = ["x86_64"]
-  }
-  filter {
-    name   = "root-device-type"
-    values = ["ebs"]
-  }
-  owners = ["amazon"]
-}
 
 resource "random_string" "unique" {
   length  = 6
