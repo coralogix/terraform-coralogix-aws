@@ -31,6 +31,12 @@ variable "msk_storage_volume_size" {
   default     = 1000
 }
 
+variable "instance_type" {
+  type        = string
+  description = "The instance type for the MSK brokers"
+  default     = "kafka.m5.large"
+}
+
 variable "coraloigx_roles_arn_mapping" {
   type = map
   default = {

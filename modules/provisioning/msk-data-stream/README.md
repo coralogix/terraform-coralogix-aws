@@ -24,3 +24,4 @@ The module can run only on the following regions eu-west-1,eu-north-1,ap-southea
 | vpc_cidr_block | CIDR for the vpc that the module will create, needs to be in the formate `10.0.0.0/20`. In case that you set this variable you will aslo need to set a value to the `subnet_cidr_blocks` variable | `string` | `193.168.0.0/20` | |
 | subnet_cidr_blocks | CIDR for the vpc subnets that the module will create. In case that you set this variable you will also need to set a value to the `vpc_cidr_block` variable | `list[string]` | `["10.0.0.0/24", "10.0.1.0/24", "10.0.3.0/24"]` | |
 | msk_storage_volume_size | The size of the storage volume for the MSK brokers  | `number` | `1000` | |
+| instance_type | The instance type for the MSK brokers | `string` | `kafka.m5.large` | |

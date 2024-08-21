@@ -133,7 +133,7 @@ resource "aws_msk_cluster" "coralogix-msk-cluster" {
     }
   }
   broker_node_group_info {
-    instance_type = "kafka.m5.large"
+    instance_type = var.instance_type
     client_subnets = [
       aws_subnet.public[0].id,
       aws_subnet.public[1].id,
