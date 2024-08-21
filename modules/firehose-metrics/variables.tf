@@ -164,13 +164,13 @@ variable "exisiting_s3_backup_name" {
   default     = null
 }
 
-variable "firehose_iam_custom_name" {
+variable "firehose_iam_custom_role" {
   description = "Set the name of the IAM role, otherwise variable '{firehose_stream}-firehose-metrics' will be used"
   type        = string
   default     = null
 }
 
-variable "existing_firehose_iam_name" {
+variable "existing_firehose_iam_role" {
   description = "Use an existing IAM role to use as a firehose role"
   type        = string
   default     = null

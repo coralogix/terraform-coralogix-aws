@@ -26,15 +26,20 @@ locals {
   }) : var.user_supplied_tags
 
   # global resource referecing
-  s3_backup_bucket_arn = var.exisiting_s3_backup_name != null ? one(data.aws_s3_bucket.exisiting_s3_backup[*].arn) : one(aws_s3_bucket.new_firehose_bucket[*].arn)
+  s3_backup_bucket_arn          = var.exisiting_s3_backup_name != null ? one(data.aws_s3_bucket.exisiting_s3_bucket[*].arn) : one(aws_s3_bucket.new_s3_bucket[*].arn)
+  firehose_iam_role_arn         = var.existing_firehose_iam_role != null ? one(data.aws_iam_role.existing_firehose_iam[*].arn) : one(aws_iam_role.new_firehose_iam[*].arn)
+  lambda_processor_iam_role_arn = var.existing_lambda_processor_iam_name != null ? one(data.aws_iam_role.existing_lambda_iam[*].arn) : one(aws_iam_role.new_lambda_iam[*].arn)
 
   # default namings
   firehose_stream_name           = "${var.firehose_stream}-${random_string.this.result}"
   cloud_watch_metric_stream_name = var.cloudwatch_metric_stream_custom_name != null ? var.cloudwatch_metric_stream_custom_name : "${var.firehose_stream}-${random_string.this.result}"
-  new_s3_backup_bucket_name      = var.s3_backup_custom_name != null ? var.s3_backup_custom_name : "${var.firehose_stream}-backup-metrics-${random_string.this.result}"
   lambda_processor_name          = var.lambda_processor_custom_name != null ? var.lambda_processor_custom_name : "${var.firehose_stream}-metrics-transform-${random_string.this.result}"
-  lambda_processor_iam_name      = var.existing_lambda_processor_iam_name
-  firehose_iam_name              = var.firehose_iam_custom_name != null ? var.firehose_iam_custom_name : "${var.firehose_stream}-firehose-metrics-${random_string.this.result}"
+
+  #new namings
+  new_s3_backup_bucket_name     = var.s3_backup_custom_name != null ? var.s3_backup_custom_name : "${var.firehose_stream}-backup-metrics-${random_string.this.result}"
+  new_firehose_iam_name         = var.existing_firehose_iam_role != null ? var.existing_firehose_iam_role : "${var.firehose_stream}-firehose-metrics-${random_string.this.result}"
+  new_lambda_processor_iam_name = var.existing_lambda_processor_iam_name
+
 }
 
 data "aws_caller_identity" "current_identity" {}
@@ -66,20 +71,20 @@ resource "aws_cloudwatch_log_stream" "firehose_logstream_backup" {
   log_group_name = aws_cloudwatch_log_group.firehose_loggroup.name
 }
 
-data "aws_s3_bucket" "exisiting_s3_backup" {
+data "aws_s3_bucket" "exisiting_s3_bucket" {
   count  = var.exisiting_s3_backup_name != null ? 1 : 0
   bucket = var.exisiting_s3_backup_name
 }
 
-resource "aws_s3_bucket" "new_firehose_bucket" {
+resource "aws_s3_bucket" "new_s3_bucket" {
   count  = var.exisiting_s3_backup_name != null ? 0 : 1
   tags   = merge(local.tags, { Name = local.new_s3_backup_bucket_name })
   bucket = local.new_s3_backup_bucket_name
 }
 
-resource "aws_s3_bucket_public_access_block" "new_firehose_bucket_access" {
+resource "aws_s3_bucket_public_access_block" "new_s3_bucket" {
   count  = var.exisiting_s3_backup_name != null ? 0 : 1
-  bucket = one(aws_s3_bucket.new_firehose_bucket[*].id)
+  bucket = one(aws_s3_bucket.new_s3_bucket[*].id)
 
   block_public_acls       = true
   block_public_policy     = true
@@ -91,15 +96,15 @@ resource "aws_s3_bucket_public_access_block" "new_firehose_bucket_access" {
 # Firehose Metrics Stream
 ################################################################################
 
-data "aws_iam_role" "existing_firehose_iam_name" {
-  count = var.existing_firehose_iam_name != null ? 1 : 0
-  name  = var.existing_firehose_iam_name
+data "aws_iam_role" "existing_firehose_iam" {
+  count = var.existing_firehose_iam_role != null ? 1 : 0
+  name  = var.existing_firehose_iam_role
 }
 
-resource "aws_iam_role" "firehose_to_coralogix" {
-  count = var.existing_firehose_iam_name != null ? 0 : 1
+resource "aws_iam_role" "new_firehose_iam" {
+  count = var.existing_firehose_iam_role != null ? 0 : 1
   tags  = local.tags
-  name  = local.firehose_iam_name
+  name  = local.new_firehose_iam_name
   assume_role_policy = jsonencode({
     "Version" = "2012-10-17",
     "Statement" = [
@@ -114,9 +119,9 @@ resource "aws_iam_role" "firehose_to_coralogix" {
   })
 }
 
-resource "aws_iam_policy" "firehose_to_coralogix" {
-  count  = var.existing_firehose_iam_name != null ? 0 : 1
-  name   = local.firehose_iam_name
+resource "aws_iam_policy" "new_firehose_iam" {
+  count  = var.existing_firehose_iam_role != null ? 0 : 1
+  name   = local.new_firehose_iam_name
   tags   = local.tags
   policy = <<EOF
 {
@@ -191,13 +196,13 @@ resource "aws_iam_policy" "firehose_to_coralogix" {
 EOF
 }
 
-resource "aws_iam_role_policy_attachment" "firehose_to_coralogix_metric_policy" {
-  count      = var.existing_firehose_iam_name != null ? 0 : 1
-  policy_arn = one(aws_iam_policy.firehose_to_coralogix[*].arn)
-  role       = one(aws_iam_policy.firehose_to_coralogix[*].name)
+resource "aws_iam_role_policy_attachment" "new_firehose_iam" {
+  count      = var.existing_firehose_iam_role != null ? 0 : 1
+  policy_arn = one(aws_iam_policy.new_firehose_iam[*].arn)
+  role       = one(aws_iam_policy.new_firehose_iam[*].name)
 }
 
-data "aws_iam_policy_document" "lambda_assume_role" {
+data "aws_iam_policy_document" "lambda_assume_policy" {
   count = var.lambda_processor_enable == true ? 1 : 0
   statement {
     effect = "Allow"
@@ -211,17 +216,22 @@ data "aws_iam_policy_document" "lambda_assume_role" {
   }
 }
 
-resource "aws_iam_role" "lambda_iam_role" {
+data "aws_iam_role" "existing_lambda_iam" {
+  count = var.lambda_processor_enable == false && var.existing_lambda_processor_iam_name != null ? 1 : 0
+  name  = var.existing_lambda_processor_iam_name
+}
+
+resource "aws_iam_role" "new_lambda_iam" {
   count              = var.lambda_processor_enable == true ? 1 : 0
   name               = local.lambda_processor_name
   tags               = local.tags
-  assume_role_policy = one(data.aws_iam_policy_document.lambda_assume_role[*].json)
+  assume_role_policy = one(data.aws_iam_policy_document.lambda_assume_policy[*].json)
 }
 
-resource "aws_iam_role_policy" "lambda_iam_policy" {
-  count  = var.lambda_processor_enable == true ? 1 : 0
+resource "aws_iam_role_policy" "new_lambda_iam" {
+  count  = var.lambda_processor_enable == true && var.existing_lambda_processor_iam_name == null ? 1 : 0
   name   = local.lambda_processor_name
-  role   = one(aws_iam_role.lambda_iam_role[*].id)
+  role   = one(aws_iam_role.new_lambda_iam[*].id)
   policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -273,7 +283,7 @@ resource "aws_lambda_function" "lambda_processor" {
   s3_bucket     = "cx-cw-metrics-tags-lambda-processor-${data.aws_region.current_region.name}"
   s3_key        = "bootstrap.zip"
   function_name = local.lambda_processor_name
-  role          = one(aws_iam_role.lambda_iam_role[*].arn)
+  role          = local.lambda_processor_iam_role_arn
   handler       = "bootstrap"
   runtime       = "provided.al2"
   timeout       = "60"
@@ -300,11 +310,11 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_metrics" {
     buffering_size     = 1
     buffering_interval = 60
     s3_backup_mode     = "FailedDataOnly"
-    role_arn           = var.existing_firehose_iam_name == null ? one(aws_iam_role.firehose_to_coralogix[*].arn) : one(data.aws_iam_role.existing_firehose_iam_name[*].arn)
+    role_arn           = local.firehose_iam_role_arn
     retry_duration     = 30
 
     s3_configuration {
-      role_arn           = var.existing_firehose_iam_name == null ? one(aws_iam_role.firehose_to_coralogix[*].arn) : one(data.aws_iam_role.existing_firehose_iam_name[*].arn)
+      role_arn           = local.firehose_iam_role_arn
       bucket_arn         = local.s3_backup_bucket_arn
       buffering_size     = 5
       buffering_interval = 300
