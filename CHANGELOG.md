@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.104
+#### **msk-data-stream**
+### 🚀 New module 🚀
+- Add new module `msk-data-stream`, the module will create msk with public access, and a role to allow coralogix to stream data to his topics.
+
 ## v1.0.103
 #### **resource-metadata**
 ### 💡 Enhancements 
