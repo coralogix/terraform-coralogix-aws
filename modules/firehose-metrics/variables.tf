@@ -135,12 +135,12 @@ variable "additional_metric_statistics" {
 }
 
 variable "s3_backup_custom_name" {
-  description = "Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup' will be used"
+  description = "Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup-metrics-{random_string}' will be used"
   type        = string
   default     = null
 }
 
-variable "exisiting_s3_backup" {
+variable "existing_s3_backup" {
   description = "Use an existing S3 bucket to use as a backup bucket"
   type        = string
   default     = null

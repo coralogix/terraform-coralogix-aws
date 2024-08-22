@@ -26,7 +26,7 @@ locals {
   }) : var.user_supplied_tags
 
   # global resource referecing
-  s3_backup_bucket_arn          = var.exisiting_s3_backup != null ? one(data.aws_s3_bucket.exisiting_s3_bucket[*].arn) : one(aws_s3_bucket.new_s3_bucket[*].arn)
+  s3_backup_bucket_arn          = var.existing_s3_backup != null ? one(data.aws_s3_bucket.exisiting_s3_bucket[*].arn) : one(aws_s3_bucket.new_s3_bucket[*].arn)
   firehose_iam_role_arn         = var.existing_firehose_iam != null ? one(data.aws_iam_role.existing_firehose_iam[*].arn) : one(aws_iam_role.new_firehose_iam[*].arn)
   lambda_processor_iam_role_arn = var.existing_lambda_processor_iam != null ? one(data.aws_iam_role.existing_lambda_iam[*].arn) : one(aws_iam_role.new_lambda_iam[*].arn)
   metrics_stream_iam_role_arn   = var.existing_metric_streams_iam != null ? one(data.aws_iam_role.existing_metric_streams_iam[*].arn) : one(aws_iam_role.new_metric_streams_iam[*].arn)
@@ -38,8 +38,9 @@ locals {
 
   #new namings
   new_s3_backup_bucket_name     = var.s3_backup_custom_name != null ? var.s3_backup_custom_name : "${var.firehose_stream}-backup-metrics-${random_string.this.result}"
-  new_firehose_iam_name         = var.firehose_iam_custom_name != null ? var.firehose_iam_custom_name : "${var.firehose_stream}-firehose-metrics-${random_string.this.result}"
-  new_lambda_processor_iam_name = var.lambda_processor_iam_custom_name != null ? var.lambda_processor_iam_custom_name : "${var.firehose_stream}-lambda-processor-${random_string.this.result}"
+  new_firehose_iam_name         = var.firehose_iam_custom_name != null ? var.firehose_iam_custom_name : "${var.firehose_stream}-firehose-metrics-iam-${random_string.this.result}"
+  new_lambda_processor_iam_name = var.lambda_processor_iam_custom_name != null ? var.lambda_processor_iam_custom_name : "${var.firehose_stream}-lambda-processor-iam-${random_string.this.result}"
+  new_metric_stream_iam_name    = var.metric_streams_iam_custom_name != null ? var.metric_streams_iam_custom_name : "${var.firehose_stream}-cw-iam-${random_string.this.result}"
 }
 
 data "aws_caller_identity" "current_identity" {}
@@ -72,18 +73,18 @@ resource "aws_cloudwatch_log_stream" "firehose_logstream_backup" {
 }
 
 data "aws_s3_bucket" "exisiting_s3_bucket" {
-  count  = var.exisiting_s3_backup != null ? 1 : 0
-  bucket = var.exisiting_s3_backup
+  count  = var.existing_s3_backup != null ? 1 : 0
+  bucket = var.existing_s3_backup
 }
 
 resource "aws_s3_bucket" "new_s3_bucket" {
-  count  = var.exisiting_s3_backup != null ? 0 : 1
+  count  = var.existing_s3_backup != null ? 0 : 1
   tags   = merge(local.tags, { Name = local.new_s3_backup_bucket_name })
   bucket = local.new_s3_backup_bucket_name
 }
 
 resource "aws_s3_bucket_public_access_block" "new_s3_bucket" {
-  count  = var.exisiting_s3_backup != null ? 0 : 1
+  count  = var.existing_s3_backup != null ? 0 : 1
   bucket = one(aws_s3_bucket.new_s3_bucket[*].id)
 
   block_public_acls       = true
@@ -396,7 +397,7 @@ data "aws_iam_role" "existing_metric_streams_iam" {
 resource "aws_iam_role" "new_metric_streams_iam" {
   tags               = local.tags
   count              = var.enable_cloudwatch_metricstream && var.existing_metric_streams_iam == null ? 1 : 0
-  name               = local.cloud_watch_metric_stream_name
+  name               = local.new_metric_stream_iam_name
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -415,8 +416,8 @@ EOF
 }
 
 resource "aws_iam_role_policy" "new_metric_streams_iam" {
-  count  = var.enable_cloudwatch_metricstream ? 1 : 0
-  name   = local.cloud_watch_metric_stream_name
+  count  = var.enable_cloudwatch_metricstream && var.existing_metric_streams_iam == null ? 1 : 0
+  name   = local.new_metric_stream_iam_name
   role   = one(aws_iam_role.new_metric_streams_iam[*].id)
   policy = <<EOF
 {
