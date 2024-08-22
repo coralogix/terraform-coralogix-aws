@@ -134,6 +134,18 @@ variable "additional_metric_statistics" {
   ]
 }
 
+variable "s3_backup_custom_name" {
+  description = "Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup' will be used"
+  type        = string
+  default     = null
+}
+
+variable "exisiting_s3_backup" {
+  description = "Use an existing S3 bucket to use as a backup bucket"
+  type        = string
+  default     = null
+}
+
 variable "lambda_processor_enable" {
   description = "Enable lambda processor function, defaults to true"
   type        = bool
@@ -146,32 +158,38 @@ variable "lambda_processor_custom_name" {
   default     = null
 }
 
-variable "existing_lambda_processor_iam_name" {
+variable "lambda_processor_iam_custom_name" {
+  description = "Set the name of the lambda processor IAM role, otherwise variable '{firehose_stream}-lambda-processor-{random_string}' will be used"
+  type        = string
+  default     = null
+}
+
+variable "existing_lambda_processor_iam" {
   description = "Use an existing lambda processor IAM role"
   type        = string
   default     = null
 }
 
-variable "s3_backup_custom_name" {
-  description = "Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup' will be used"
+variable "firehose_iam_custom_name" {
+  description = "Set the name of the IAM role & policy, otherwise variable '{firehose_stream}-firehose-metrics' will be used"
   type        = string
   default     = null
 }
 
-variable "exisiting_s3_backup_name" {
-  description = "Use an existing S3 bucket to use as a backup bucket"
-  type        = string
-  default     = null
-}
-
-variable "firehose_iam_custom_role" {
-  description = "Set the name of the IAM role, otherwise variable '{firehose_stream}-firehose-metrics' will be used"
-  type        = string
-  default     = null
-}
-
-variable "existing_firehose_iam_role" {
+variable "existing_firehose_iam" {
   description = "Use an existing IAM role to use as a firehose role"
+  type        = string
+  default     = null
+}
+
+variable "metric_streams_iam_custom_name" {
+  description = "Set the name of the IAM role & policy for metric streams, otherwise variable '{firehose_stream}-metric-streams' will be used"
+  type        = string
+  default     = null
+}
+
+variable "existing_metric_streams_iam" {
+  description = "Use an existing IAM role to use as a metric streams role"
   type        = string
   default     = null
 }
