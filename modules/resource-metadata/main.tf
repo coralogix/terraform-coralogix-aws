@@ -61,7 +61,7 @@ module "lambda" {
   function_name          = local.function_name
   description            = "Send metadata to Coralogix."
   handler                = "index.handler"
-  runtime                = "nodejs18.x"
+  runtime                = "nodejs20.x"
   architectures          = [var.architecture]
   memory_size            = var.memory_size
   timeout                = var.timeout
@@ -71,7 +71,7 @@ module "lambda" {
     CORALOGIX_METADATA_URL               = lookup(local.coralogix_regions, var.coralogix_region, "Europe")
     private_key                          = var.private_key
     LATEST_VERSIONS_PER_FUNCTION         = var.latest_versions_per_function
-    COLLECT_ALIASES                      = var.collect_aliases
+    COLLECT_ALIASES                      = var.collect_aliases == true ? "True" : "False"
     LAMBDA_FUNCTION_INCLUDE_REGEX_FILTER = var.lambda_function_include_regex_filter
     LAMBDA_FUNCTION_EXCLUDE_REGEX_FILTER = var.lambda_function_exclude_regex_filter
     LAMBDA_FUNCTION_TAG_FILTERS          = var.lambda_function_tag_filters
@@ -127,7 +127,7 @@ module "lambdaSM" {
   layers                 = [var.layer_arn]
   description            = "Send metadata to Coralogix."
   handler                = "index.handler"
-  runtime                = "nodejs18.x"
+  runtime                = "nodejs20.x"
   architectures          = [var.architecture]
   memory_size            = var.memory_size
   timeout                = var.timeout
@@ -136,10 +136,10 @@ module "lambdaSM" {
   environment_variables = {
     CORALOGIX_METADATA_URL               = lookup(local.coralogix_regions, var.coralogix_region, "Europe")
     AWS_LAMBDA_EXEC_WRAPPER              =  "/opt/wrapper.sh"
-    SECRET_NAME                          = var.create_secret == "False" ? var.private_key : ""
+    SECRET_NAME                          = var.create_secret == false ? var.private_key : ""
     LATEST_VERSIONS_PER_FUNCTION         = var.latest_versions_per_function
     RESOURCE_TTL_MINUTES                 = var.resource_ttl_minutes
-    COLLECT_ALIASES                      = var.collect_aliases
+    COLLECT_ALIASES                      = var.collect_aliases == true ? "True" : "False"
     LAMBDA_FUNCTION_INCLUDE_REGEX_FILTER = var.lambda_function_include_regex_filter
     LAMBDA_FUNCTION_EXCLUDE_REGEX_FILTER = var.lambda_function_exclude_regex_filter
     LAMBDA_FUNCTION_TAG_FILTERS          = var.lambda_function_tag_filters
@@ -202,14 +202,14 @@ resource "aws_sns_topic" "this" {
 }
 
 resource "aws_secretsmanager_secret" "private_key_secret" {
-  count       = var.secret_manager_enabled && var.create_secret == "True"  ? 1 : 0
+  count       = var.secret_manager_enabled && var.create_secret ? 1 : 0
   depends_on  = [module.lambdaSM]
   name        = "lambda/coralogix/${data.aws_region.this.name}/${local.function_name}"
   description = "Coralogix Send Your Data key Secret"
 }
 
 resource "aws_secretsmanager_secret_version" "service_user" {
-  count         = var.secret_manager_enabled && var.create_secret == "True"  ? 1 : 0
+  count         = var.secret_manager_enabled && var.create_secret ? 1 : 0
   depends_on    = [aws_secretsmanager_secret.private_key_secret]
   secret_id     = aws_secretsmanager_secret.private_key_secret[count.index].id
   secret_string = var.private_key

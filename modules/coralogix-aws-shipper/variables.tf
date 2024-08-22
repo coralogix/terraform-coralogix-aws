@@ -83,6 +83,24 @@ variable "custom_csv_header" {
   default     = null
 }
 
+variable "integration_info" {
+  description = "Values of s3 integraion in case that you want to deploy more than one integration"
+  type = map(object({
+    s3_key_prefix        = optional(string)
+    s3_key_suffix        = optional(string)
+    application_name     = string
+    subsystem_name       = string
+    integration_type     = string
+    lambda_name          = optional(string)
+    newline_pattern      = optional(string)
+    blocking_pattern     = optional(string)
+    lambda_log_retention = optional(number)
+    api_key              = string
+    store_api_key_in_secrets_manager = optional(bool)
+  }))
+  default = null
+}
+
 # cloudwatch variables
 
 variable "log_groups" {
@@ -95,6 +113,70 @@ variable "log_group_prefix" {
   description = "Prefix of the CloudWatch log groups that will trigger the lambda"
   type        = list(string)
   default     = null
+}
+
+# kinesis variables 
+
+variable "kinesis_stream_name" {
+  description = "The name of Kinesis stream to subscribe to retrieving messages"
+  type        = string
+  default     = null
+}
+
+# MSK variables
+
+variable "msk_cluster_arn" {
+  description = "The ARN of the MSK cluster to subscribe to retrieving messages"
+  type        = string
+  default     = null
+}
+
+variable "msk_topic_name" {
+  description = "List of names of the Kafka topic used to store records in your Kafka cluster ( [\"topic1\", \"topic2\",])"
+  type        = list(any)
+  default     = null
+}
+
+# Kafka variables
+
+variable "kafka_brokers" {
+  description = "Comma Delimited List of Kafka broker to connect to"
+  type        = string
+  default     = null
+}
+
+variable "kafka_topic" {
+  description = "The name of the Kafka topic used to store records in your Kafka cluster"
+  type        = string
+  default     = null
+}
+
+variable "kafka_subnets_ids" {
+  description = "List of Kafka subnets to use when connecting to Kafka"
+  type        = list(string)
+  default     = null
+}
+
+variable "kafka_security_groups" {
+  description = "List of Kafka security groups to use when connecting to Kafka"
+  type        = list(string)
+  default     = null
+}
+
+# sqs variables
+
+variable "sqs_name" {
+  description = "The name of the SQS that you want watch"
+  type        = string
+  default     = null
+}
+
+# sns variables
+
+variable "sns_topic_name" {
+  description = "The name of your SNS topic"
+  type        = string
+  default     = ""
 }
 
 # vpc variables
@@ -115,30 +197,6 @@ variable "create_endpoint" {
   description = "Create a VPC endpoint for the lambda function to allow if access to the secret"
   type        = bool
   default     = false
-}
-
-# Lambda configuration
-
-variable "memory_size" {
-  description = "Lambda function memory limit"
-  type        = number
-  default     = 1024
-}
-
-variable "timeout" {
-  description = "Lambda function timeout limit"
-  type        = number
-  default     = 300
-}
-
-variable "cpu_arch" {
-  description = "Lambda function CPU architecture"
-  type        = string
-  default     = "arm64"
-  validation {
-    condition     = contains(["arm64", "x86_64"], var.cpu_arch)
-    error_message = "The CPU architecture must be one of these values: [arm64, x86_64]."
-  }
 }
 
 # DLQ configuration
@@ -165,6 +223,40 @@ variable "dlq_s3_bucket" {
   description = "The S3 bucket to store the DLQ failed messages after retry limit is reached"
   type        = string
   default     = null
+}
+
+# Lambda configuration
+
+variable "memory_size" {
+  description = "Lambda function memory limit"
+  type        = number
+  default     = 1024
+}
+
+variable "timeout" {
+  description = "Lambda function timeout limit"
+  type        = number
+  default     = 300
+}
+
+variable "runtime" {
+  description = "Lambda function runtime"
+  type        = string
+  default     = "provided.al2023"
+  validation {
+    condition     = contains(["provided.al2023", "provided.al2"], var.runtime)
+    error_message = "The supported runtime are: [provided.al2023, provided.al2]."
+  }
+}
+
+variable "cpu_arch" {
+  description = "Lambda function CPU architecture"
+  type        = string
+  default     = "arm64"
+  validation {
+    condition     = contains(["arm64", "x86_64"], var.cpu_arch)
+    error_message = "The CPU architecture must be one of these values: [arm64, x86_64]."
+  }
 }
 
 # Integration Generic Config (Optional)
@@ -219,28 +311,10 @@ variable "integration_type" {
   default = ""
 }
 
-variable "sns_topic_name" {
-  description = "The name of your SNS topic"
-  type        = string
-  default     = ""
-}
-
 variable "store_api_key_in_secrets_manager" {
   description = "Store the API key in AWS Secrets Manager. ApiKeys are stored in secret manager \nby default. If this option is set to false, the ApiKey will appear in plain text as an \n environment variable in the lambda function console."
   type        = bool
   default     = true
-}
-
-variable "sqs_name" {
-  description = "The name of the SQS that you want watch"
-  type        = string
-  default     = null
-}
-
-variable "kinesis_stream_name" {
-  description = "The name of Kinesis stream to subscribe to retrieving messages"
-  type        = string
-  default     = null
 }
 
 variable "add_metadata" {
@@ -253,62 +327,4 @@ variable "custom_metadata" {
   default     = null
   description = "Add custom metadata to the log message. Expects comma separated values. Options are key1=value1,key2=value2 "
   type        = string
-}
-
-variable "integration_info" {
-  description = "Values of s3 integraion in case that you want to deploy more than one integration"
-  type = map(object({
-    s3_key_prefix        = optional(string)
-    s3_key_suffix        = optional(string)
-    application_name     = string
-    subsystem_name       = string
-    integration_type     = string
-    lambda_name          = optional(string)
-    newline_pattern      = optional(string)
-    blocking_pattern     = optional(string)
-    lambda_log_retention = optional(number)
-    api_key              = string
-    store_api_key_in_secrets_manager = optional(bool)
-  }))
-  default = null
-}
-
-# MSK variables
-
-variable "msk_cluster_arn" {
-  description = "The ARN of the MSK cluster to subscribe to retrieving messages"
-  type        = string
-  default     = null
-}
-
-variable "msk_topic_name" {
-  description = "List of names of the Kafka topic used to store records in your Kafka cluster ( [\"topic1\", \"topic2\",])"
-  type        = list(any)
-  default     = null
-}
-
-# Kafka variables
-
-variable "kafka_brokers" {
-  description = "Comma Delimited List of Kafka broker to connect to"
-  type        = string
-  default     = null
-}
-
-variable "kafka_topic" {
-  description = "The name of the Kafka topic used to store records in your Kafka cluster"
-  type        = string
-  default     = null
-}
-
-variable "kafka_subnets_ids" {
-  description = "List of Kafka subnets to use when connecting to Kafka"
-  type        = list(string)
-  default     = null
-}
-
-variable "kafka_security_groups" {
-  description = "List of Kafka security groups to use when connecting to Kafka"
-  type        = list(string)
-  default     = null
 }

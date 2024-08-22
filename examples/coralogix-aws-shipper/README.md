@@ -1,4 +1,4 @@
-# coralogix-aws-shipper (Beta)
+# coralogix-aws-shipper
 
 Coralogix provides a predefined AWS Lambda function to easily forward your logs to the Coralogix platform.
 

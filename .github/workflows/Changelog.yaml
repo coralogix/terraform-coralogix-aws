@@ -1,7 +1,7 @@
 name: Changelog
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, labeled]
     branches: [master]
     paths:
       - "modules/**"
