@@ -203,7 +203,6 @@ then the CloudWatch metric stream must be configured with the same format, confi
 | <a name="input_s3_backup_custom_name"></a> [s3_backup_custom_name](#input\_s3_backup_custom_name) | Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup-metrics-{random_string}' will be used. | `string` | n/a | no |
 | <a name="input_existing_s3_backup"></a> [existing_s3_backup](#input\_input_existing_s3_backup) | Use an existing S3 bucket to use as a backup bucket. | `string` | n/a | no |
 | <a name="input_lambda_processor_enable"></a> [lambda_processor_enable](#input\_lambda_processor_enable) | Enable the lambda processor function. Set to false to remove the lambda and all associated resources. | `bool` | `true` | no |
-
 | <a name="input_lambda_processor_iam_custom_name"></a> [lambda_processor_iam_custom_name](#input\_lambda_processor_iam_custom_name) | Set the name of the lambda processor IAM role, otherwise variable '{firehose_stream}-lambda-processor-{random_string}' will be used. | `string` | n/a | no |
 | <a name="existing_lambda_processor_iam"></a> [existing_lambda_processor_iam](#input\_existing_lambda_processor_iam) | Use an existing lambda processor IAM role. | `string` | n/a | no |
 | <a name="input_firehose_iam_custom_name"></a> [firehose_iam_custom_name](#input\_firehose_iam_custom_name) | Set the name of the IAM role & policy, otherwise variable '{firehose_stream}-firehose-metrics' will be used. | `string` | n/a | no |
@@ -211,8 +210,6 @@ then the CloudWatch metric stream must be configured with the same format, confi
 
 | <a name="metric_streams_iam_custom_name"></a> [metric_streams_iam_custom_name](#input\_metric_streams_iam_custom_name) | Set the name of the cloudwatch metric streams IAM role & policy, otherwise variable '{firehose_stream}-cw-iam-{random_string}. | `string` | n/a | no |
 | <a name="existing_metric_streams_iam"></a> [existing_metric_streams_iam](#input\_existing_metric_streams_iam) | Use an existing IAM role to use as a metric streams role. | `string` | n/a | no |
-
-
 | <a name="input_output_format"></a> [output\_format](#input\_output\_format) | The output format of the cloudwatch metric stream: 'json' or 'opentelemetry0.7' | `string` | `"opentelemetry0.7"` | no |
 | <a name="input_include_metric_stream_namespaces"></a> [include\_metric\_stream\_namespaces](#input\_include\_metric\_stream\_namespaces) | List of specific namespaces to include in the CloudWatch metric stream, see https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html | `list(string)` | `[]` | no |
 | <a name="input_include_metric_stream_filter"></a> [include\_metric\_stream\_filter](#input\_include\_metric\_stream\_filter) | Guide to view specific metric names of namespaces, see https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/viewing_metrics_with_cloudwatch.html | `list(object({namespace=string, metric_names=list(string)})` | `[]` | no |
