@@ -159,7 +159,7 @@ variable "lambda_processor_custom_name" {
 }
 
 variable "lambda_processor_iam_custom_name" {
-  description = "Set the name of the lambda processor IAM role, otherwise variable '{firehose_stream}-lambda-processor-{random_string}' will be used"
+  description = "Set the name of the lambda processor IAM role & policy, otherwise variable '{firehose_stream}-lambda-processor-{random_string}' will be used"
   type        = string
   default     = null
 }
@@ -171,7 +171,7 @@ variable "existing_lambda_processor_iam" {
 }
 
 variable "firehose_iam_custom_name" {
-  description = "Set the name of the IAM role & policy, otherwise variable '{firehose_stream}-firehose-metrics' will be used"
+  description = "Set the name of the firehose IAM role & policy, otherwise variable '{firehose_stream}-firehose-metrics-iam-{random_string}' will be used"
   type        = string
   default     = null
 }
@@ -183,7 +183,7 @@ variable "existing_firehose_iam" {
 }
 
 variable "metric_streams_iam_custom_name" {
-  description = "Set the name of the IAM role & policy for metric streams, otherwise variable '{firehose_stream}-metric-streams' will be used"
+  description = "Set the name of the cloudwatch metric streams IAM role & policy, otherwise variable '{firehose_stream}-cw-iam-{random_string}' will be used"
   type        = string
   default     = null
 }
