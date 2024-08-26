@@ -31,5 +31,4 @@ output "metric_stream_arn" {
 output "metrics_stream_iam_role_arn" {
   value       = local.metrics_stream_iam_role_arn
   description = "value of the cloudwatch metric stream IAM role ARN used"
-
 }

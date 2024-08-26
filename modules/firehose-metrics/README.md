@@ -11,7 +11,7 @@ Provision a firehose delivery stream with [CloudWatch metric stream](https://doc
 module "cloudwatch_firehose_metrics_coralogix" {
   source           = "coralogix/aws/coralogix//modules/firehose-metrics"
   firehose_stream  = var.coralogix_firehose_stream_name
-  private_key      = var.private_key
+  api_key          = var.api_key
   coralogix_region = var.coralogix_region
 }
 ```
@@ -29,7 +29,7 @@ which are case-sensitive. please see the [AWS namespaces list](https://docs.aws.
 module "cloudwatch_firehose_metrics_coralogix" {
   source                           = "coralogix/aws/coralogix//modules/firehose-metrics"
   firehose_stream                  = var.coralogix_firehose_stream_name
-  private_key                      = var.private_key
+  api_key                          = var.api_key
   include_metric_stream_namespaces = var.include_metric_stream_namespaces
   coralogix_region                 = var.coralogix_region
 }
@@ -49,7 +49,7 @@ Metric namespaces are also case-sensitive, please see the [AWS namespaces list](
 module "cloudwatch_firehose_metrics_coralogix" {
   source                           = "coralogix/aws/coralogix//modules/firehose-metrics"
   firehose_stream                  = var.coralogix_firehose_stream_name
-  private_key                      = var.private_key
+  api_key                          = var.api_key
   
   # If metric names is empty or not specified, the whole metric namespace is included
   include_metric_stream_filter     = [
@@ -126,7 +126,7 @@ module "cloudwatch_firehose_metrics_coralogix" {
   source                           = "coralogix/aws/coralogix//modules/firehose-metrics"
   lambda_processor_enable          = false
   firehose_stream                  = var.coralogix_firehose_stream_name
-  private_key                      = var.private_key
+  api_key                          = var.api_key
   coralogix_region                 = var.coralogix_region
 }
 ```
@@ -192,7 +192,7 @@ then the CloudWatch metric stream must be configured with the same format, confi
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | Coralogix account region: Europe, Europe2, India, Singapore, US, US2 [exact] | `any` | n/a | yes |
-| <a name="input_private_key"></a> [private\_key](#input\_private_key) | Coralogix account logs private key | `any` | n/a | yes |
+| <a name="input_api_key"></a> [api\_key](#input\_api\_key) | Coralogix account logs api key | `string` | n/a | yes |
 | <a name="input_firehose_stream"></a> [firehose\_stream](#input\_firehose\_stream) | AWS Kinesis firehose delivery stream name | `string` | n/a | yes |
 | <a name="input_application_name"></a> [application\_name](#input\_application_name) | The name of your application in Coralogix | `string` | n/a | yes |
 | <a name="input_subsystem_name"></a> [subsystem\_name](#input\_subsystem_name) | The subsystem name of your application in Coralogix | `string` | n/a | yes |
@@ -200,7 +200,7 @@ then the CloudWatch metric stream must be configured with the same format, confi
 | <a name="input_custom_domain"></a> [custom\_domain](#input\_custom_domain) | Custom domain for Coralogix firehose integration endpoint (private.coralogix.net:8443) | `string` | `null` | no |
 | <a name="input_integration_type_metrics"></a> [integration\_type\_metrics](#input\_integration\_type\_metrics) | The integration type of the firehose delivery stream: `CloudWatch_Metrics_OpenTelemetry070` or `CloudWatch_Metrics_OpenTelemetry070_WithAggregations`. For `_WithAggregations` choice, additional aggregations here are `_min`, `_max`, `_avg` recorded as gauges. See https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-metric-streams-formats-opentelemetry-translation.html | `string` | `"CloudWatch_Metrics_OpenTelemetry070_WithAggregations"` | no |
 | <a name="input_output_format"></a> [output\_format](#input\_output\_format) | The output format of the cloudwatch metric stream: 'json' or 'opentelemetry0.7' | `string` | `"opentelemetry0.7"` | no |
-| <a name="input_enable_cloudwatch_metricstream"></a> [enable\_cloudwatch\_metricstream](#input\_enable\_cloudwatch\_metricstream) | Should be true if you want to create a new Cloud Watch metric stream and attach it to Firehose | `bool` | `true` | no |
+| <a name="input_enable_cloudwatch_metricstream"></a> [enable\_cloudwatch\_metricstream](#input\_enable\_cloudwatch\_metricstream) | Should be true if you want to create a new CloudWatch metric stream and attach it to Firehose | `bool` | `true` | no |
 | <a name="input_include_metric_stream_namespaces"></a> [include\_metric\_stream\_namespaces](#input\_include\_metric\_stream\_namespaces) | List of specific namespaces to include in the CloudWatch metric stream, see https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html | `list(string)` | `[]` | no |
 | <a name="input_include_metric_stream_filter"></a> [include\_metric\_stream\_filter](#input\_include\_metric\_stream\_filter) | Guide to view specific metric names of namespaces, see https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/viewing_metrics_with_cloudwatch.html | `list(object({namespace=string, metric_names=list(string)})` | `[]` | no |
 | <a name="input_additional_metric_statistics_enable"></a> [additional\_metric\_statistics\_enable](#input\_additional\_metric\_statistics\_enable) | To enable the inclusion of additional statistics to the streaming metrics | `bool` | `true` | no |

@@ -7,8 +7,8 @@ variable "coralogix_region" {
   }
 }
 
-variable "private_key" {
-  description = "Coralogix account private key"
+variable "api_key" {
+  description = "Coralogix account api key"
   type        = string
   sensitive   = true
 }

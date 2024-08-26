@@ -307,7 +307,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_metrics" {
   http_endpoint_configuration {
     url                = local.endpoint_url
     name               = "Coralogix"
-    access_key         = var.private_key
+    access_key         = var.api_key
     buffering_size     = 1
     buffering_interval = 60
     s3_backup_mode     = "FailedDataOnly"
