@@ -199,24 +199,20 @@ then the CloudWatch metric stream must be configured with the same format, confi
 | <a name="input_cloudwatch_retention_days"></a> [cloudwatch\_retention\_days](#input\_cloudwatch_retention_days) | Days of retention in Cloudwatch retention days | `number` | n/a | no |
 | <a name="input_custom_domain"></a> [custom_domain](#input\_custom_domain) | Custom domain for Coralogix firehose integration endpoint (private.coralogix.net:8443) | `string` | `null` | no |
 | <a name="input_integration_type_metrics"></a> [integration\_type\_metrics](#input\_integration\_type\_metrics) | The integration type of the firehose delivery stream: `CloudWatch_Metrics_OpenTelemetry070` or `CloudWatch_Metrics_OpenTelemetry070_WithAggregations`. For `_WithAggregations` choice, additional aggregations here are `_min`, `_max`, `_avg` recorded as gauges. See https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-metric-streams-formats-opentelemetry-translation.html | `string` | `"CloudWatch_Metrics_OpenTelemetry070_WithAggregations"` | no |
-| <a name="input_enable_cloudwatch_metricstream"></a> [enable\_cloudwatch\_metricstream](#input\_enable\_cloudwatch\_metricstream) | Should be true if you want to create a new Cloud Watch metric stream and attach it to Firehose | `bool` | `true` | no |
-| <a name="input_s3_backup_custom_name"></a> [s3_backup_custom_name](#input\_s3_backup_custom_name) | Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup-metrics-{random_string}' will be used. | `string` | n/a | no |
-| <a name="input_existing_s3_backup"></a> [existing_s3_backup](#input\_input_existing_s3_backup) | Use an existing S3 bucket to use as a backup bucket. | `string` | n/a | no |
-| <a name="input_lambda_processor_enable"></a> [lambda_processor_enable](#input\_lambda_processor_enable) | Enable the lambda processor function. Set to false to remove the lambda and all associated resources. | `bool` | `true` | no |
-| <a name="input_lambda_processor_iam_custom_name"></a> [lambda_processor_iam_custom_name](#input\_lambda_processor_iam_custom_name) | Set the name of the lambda processor IAM role, otherwise variable '{firehose_stream}-lambda-processor-{random_string}' will be used. | `string` | n/a | no |
-| <a name="existing_lambda_processor_iam"></a> [existing_lambda_processor_iam](#input\_existing_lambda_processor_iam) | Use an existing lambda processor IAM role. | `string` | n/a | no |
-| <a name="input_firehose_iam_custom_name"></a> [firehose_iam_custom_name](#input\_firehose_iam_custom_name) | Set the name of the IAM role & policy, otherwise variable '{firehose_stream}-firehose-metrics' will be used. | `string` | n/a | no |
-| <a name="existing_firehose_iam"></a> [existing_firehose_iam](#input\_existing_firehose_iam) | Use an existing IAM role to use as a firehose role. | `string` | n/a | no |
-
-| <a name="metric_streams_iam_custom_name"></a> [metric_streams_iam_custom_name](#input\_metric_streams_iam_custom_name) | Set the name of the cloudwatch metric streams IAM role & policy, otherwise variable '{firehose_stream}-cw-iam-{random_string}. | `string` | n/a | no |
-| <a name="existing_metric_streams_iam"></a> [existing_metric_streams_iam](#input\_existing_metric_streams_iam) | Use an existing IAM role to use as a metric streams role. | `string` | n/a | no |
 | <a name="input_output_format"></a> [output\_format](#input\_output\_format) | The output format of the cloudwatch metric stream: 'json' or 'opentelemetry0.7' | `string` | `"opentelemetry0.7"` | no |
+| <a name="input_enable_cloudwatch_metricstream"></a> [enable\_cloudwatch\_metricstream](#input\_enable\_cloudwatch\_metricstream) | Should be true if you want to create a new Cloud Watch metric stream and attach it to Firehose | `bool` | `true` | no |
 | <a name="input_include_metric_stream_namespaces"></a> [include\_metric\_stream\_namespaces](#input\_include\_metric\_stream\_namespaces) | List of specific namespaces to include in the CloudWatch metric stream, see https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html | `list(string)` | `[]` | no |
 | <a name="input_include_metric_stream_filter"></a> [include\_metric\_stream\_filter](#input\_include\_metric\_stream\_filter) | Guide to view specific metric names of namespaces, see https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/viewing_metrics_with_cloudwatch.html | `list(object({namespace=string, metric_names=list(string)})` | `[]` | no |
 | <a name="input_additional_metric_statistics_enable"></a> [input\_additional\_metric\_statistics\_enable](#input\_additional\_metric\_statistics\_enable) | To enable the inclusion of additional statistics to the streaming metrics | `bool` | `true` | no |
 | <a name="input_additional_metric_statistics"></a> [input\_additional\_metric\_statistics](#input\_additional\_metric\_statistics) | For each entry, specify one or more metrics (metric_name and namespace) and the list of additional statistics to stream for those metrics. Each configuration of metric name and namespace can have a list of additional_statistics included into the AWS CloudWatch Metric Stream. | `list(object({additional_statistics=list(string), metric_name=string, namespace=string}))` | See variables.tf | no |
-| <a name="input_user_supplied_tags"></a> [user_supplied_tags](#input\_user_supplied_tags) | Tags supplied by the user to populate to all generated resources | `map(string)` | n/a | no |
-| <a name="input_override_default_tags"></a> [override_default_tags](#input\_override_default_tags) | Override and remove the default tags by setting to true | `bool` | `false` | no |
+| <a name="input_existing_s3_backup"></a> [input_existing_s3_backup](#input\_input_existing_s3_backup) | Use an existing S3 bucket to use as a backup bucket. | `string` | n/a | no |
+| <a name="input_lambda_processor_enable"></a> [input_lambda_processor_enable](#input\_lambda_processor_enable) | Enable the lambda processor function. Set to false to remove the lambda and all associated resources. | `bool` | `true` | no |
+no |
+| <a name="existing_lambda_processor_iam"></a> [input_existing_lambda_processor_iam](#input\_existing_lambda_processor_iam) | Use an existing lambda processor IAM role. | `string` | n/a | no |
+| <a name="existing_firehose_iam"></a> [input_existing_firehose_iam](#input\_existing_firehose_iam) | Use an existing IAM role to use as a firehose role. | `string` | n/a | no |
+| <a name="existing_metric_streams_iam"></a> [input_existing_metric_streams_iam](#input\_existing_metric_streams_iam) | Use an existing IAM role to use as a metric streams role. | `string` | n/a | no |
+| <a name="input_user_supplied_tags"></a> [input_user_supplied_tags](#input\_user_supplied_tags) | Tags supplied by the user to populate to all generated resources | `map(string)` | n/a | no |
+| <a name="input_override_default_tags"></a> [input_override_default_tags](#input\_override_default_tags) | Override and remove the default tags by setting to true | `bool` | `false` | no |
 
 
 ## Inputs - Custom Resource Naming
@@ -224,10 +220,12 @@ If there are conflicts with existing resources, the following variables can be u
  
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_cloudwatch_metric_stream_custom_name"></a> [cloudwatch_metric_stream_custom_name](#input\_cloudwatch_metric_stream_custom_name) | Set the name of the CloudWatch metric stream, otherwise variable 'firehose_stream' will be used | `string` | `null` | no |
-| <a name="input_s3_backup_custom_name"></a> [s3_backup_custom_name](#input\_s3_backup_custom_name) | Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup-metrics' will be used | `string` | `null` | no |
+| <a name="input_firehose_iam_custom_name"></a> [input_firehose_iam_custom_name](#input\_firehose_iam_custom_name) | Set the name of the IAM role & policy, otherwise variable '{firehose_stream}-firehose-metrics' will be used. | `string` | n/a | no |
+| <a name="input_s3_backup_custom_name"></a> [s3_backup_custom_name](#input\_s3_backup_custom_name) | Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup-metrics-{random_string}' will be used. | `string` | n/a | no |
 | <a name="input_lambda_processor_custom_name"></a> [lambda_processor_custom_name](#input\_lambda_processor_custom_name) | Set the name of the lambda processor function, otherwise variable '{firehose_stream}-metrics-tags-processor' will be used | `string` | `null` | no |
-
+| <a name="input_lambda_processor_iam_custom_name"></a> [lambda_processor_iam_custom_name](#input\_lambda_processor_iam_custom_name) | Set the name of the lambda processor IAM role, otherwise variable '{firehose_stream}-lambda-processor-{random_string}' will be used. | `string` | n/a |
+| <a name="input_cloudwatch_metric_stream_custom_name"></a> [cloudwatch_metric_stream_custom_name](#input\_cloudwatch_metric_stream_custom_name) | Set the name of the CloudWatch Metric Stream resource, otherwise variable '{firehose_stream}-cw-{random_string}' will be used | `string` | `null` | no |
+| <a name="metric_streams_iam_custom_name"></a> [metric_streams_iam_custom_name](#input\_metric_streams_iam_custom_name) | Set the name of the cloudwatch metric streams IAM role & policy, otherwise variable '{firehose_stream}-cw-iam-{random_string}. | `string` | n/a | no |
 ## Coralgoix regions
 
 | Coralogix region | AWS Region | Coralogix Domain |
