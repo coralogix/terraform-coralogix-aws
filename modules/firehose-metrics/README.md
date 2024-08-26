@@ -219,12 +219,12 @@ If there are conflicts with existing resources, the following variables can be u
  
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_cloudwatch_metric_stream_custom_name"></a> [cloudwatch_metric_stream_custom_name](#input\_cloudwatch\_metric\_stream\_custom\_name) | Set the name of the CloudWatch Metric Stream resource, otherwise variable '{firehose_stream}-cw-{random_string}' will be used | `string` | `null` | no |
-| <a name="input_s3_backup_custom_name"></a> [s3_backup_custom_name](#input\_s3\_backup\_custom\_name) | Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup-metrics-{random_string}' will be used. | `string` | n/a | no |
-| <a name="input_lambda_processor_custom_name"></a> [lambda_processor_custom_name](#input\_lambda\_processor\_custom\_name) | Set the name of the lambda processor function, otherwise variable '{firehose_stream}-metrics-transform-{random_string}' will be used | `string` | `null` | no |
-| <a name="input_lambda_processor_iam_custom_name"></a> [lambda_processor_iam_custom_name](#input\_lambda\_processor\_iam\_custom\_name) | Set the name of the lambda processor IAM role, otherwise variable '{firehose_stream}-lambda-processor-{random_string}' will be used. | `string` | n/a |
-| <a name="input_firehose_iam_custom_name"></a> [firehose_iam_custom_name](#input\_firehose\_iam\_custom\_name) | Set the name of the IAM role & policy, otherwise variable '{firehose_stream}-firehose-metrics-iam-{random_string}' will be used. | `string` | n/a | no |
-| <a name="input_metric_streams_iam_custom_name"></a> [metric_streams_iam_custom_name](#input\_metric\_streams\_iam\_custom\_name) | Set the name of the cloudwatch metric streams IAM role & policy, otherwise variable '{firehose_stream}-cw-iam-{random_string}. | `string` | n/a | no |
+| <a name="input_cloudwatch_metric_stream_custom_name"></a> [cloudwatch\_metric\_stream\_custom\_name](#input\_cloudwatch\_metric\_stream\_custom\_name) | Set the name of the CloudWatch Metric Stream resource, otherwise variable '{firehose_stream}-cw-{random_string}' will be used | `string` | `null` | no |
+| <a name="input_s3_backup_custom_name"></a> [s3\_backup\_custom\_name](#input\_s3\_backup\_custom\_name) | Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup-metrics-{random_string}' will be used. | `string` | n/a | no |
+| <a name="input_lambda_processor_custom_name"></a> [lambda\_processor\_custom\_name](#input\_lambda\_processor\_custom\_name) | Set the name of the lambda processor function, otherwise variable '{firehose_stream}-metrics-transform-{random_string}' will be used | `string` | `null` | no |
+| <a name="input_lambda_processor_iam_custom_name"></a> [lambda\_processor\_iam\_custom\_name](#input\_lambda\_processor\_iam\_custom\_name) | Set the name of the lambda processor IAM role, otherwise variable '{firehose_stream}-lambda-processor-{random_string}' will be used. | `string` | n/a |
+| <a name="input_firehose_iam_custom_name"></a> [firehose\_iam\_custom\_name](#input\_firehose\_iam\_custom\_name) | Set the name of the IAM role & policy, otherwise variable '{firehose_stream}-firehose-metrics-iam-{random_string}' will be used. | `string` | n/a | no |
+| <a name="input_metric_streams_iam_custom_name"></a> [metric\_streams\_iam\_custom\_name](#input\_metric\_streams\_iam\_custom\_name) | Set the name of the cloudwatch metric streams IAM role & policy, otherwise variable '{firehose_stream}-cw-iam-{random_string}. | `string` | n/a | no |
 ## Coralgoix regions
 
 | Coralogix region | AWS Region | Coralogix Domain |
