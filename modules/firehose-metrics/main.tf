@@ -32,15 +32,15 @@ locals {
   metrics_stream_iam_role_arn   = var.existing_metric_streams_iam != null ? one(data.aws_iam_role.existing_metric_streams_iam[*].arn) : one(aws_iam_role.new_metric_streams_iam[*].arn)
 
   # default resource namings
-  lambda_processor_name          = var.lambda_processor_custom_name != null ? var.lambda_processor_custom_name : "${var.firehose_stream}-metrics-transform-${random_string.this.result}"
-  firehose_stream_name           = "${var.firehose_stream}-metrics-${random_string.this.result}"
-  cloud_watch_metric_stream_name = var.cloudwatch_metric_stream_custom_name != null ? var.cloudwatch_metric_stream_custom_name : "${var.firehose_stream}-cw-${random_string.this.result}"
+  lambda_processor_name          = var.lambda_processor_custom_name != null ? var.lambda_processor_custom_name : "${var.firehose_stream}-metrics-transform"
+  firehose_stream_name           = var.firehose_stream
+  cloud_watch_metric_stream_name = var.cloudwatch_metric_stream_custom_name != null ? var.cloudwatch_metric_stream_custom_name : "${var.firehose_stream}-cw"
 
   #new global resource namings
-  new_s3_backup_bucket_name     = var.s3_backup_custom_name != null ? var.s3_backup_custom_name : "${var.firehose_stream}-backup-metrics-${random_string.this.result}"
-  new_lambda_processor_iam_name = var.lambda_processor_iam_custom_name != null ? var.lambda_processor_iam_custom_name : "${var.firehose_stream}-lambda-processor-iam-${random_string.this.result}"
-  new_firehose_iam_name         = var.firehose_iam_custom_name != null ? var.firehose_iam_custom_name : "${var.firehose_stream}-firehose-metrics-iam-${random_string.this.result}"
-  new_metric_stream_iam_name    = var.metric_streams_iam_custom_name != null ? var.metric_streams_iam_custom_name : "${var.firehose_stream}-cw-iam-${random_string.this.result}"
+  new_s3_backup_bucket_name     = var.s3_backup_custom_name != null ? var.s3_backup_custom_name : "${var.firehose_stream}-backup-metrics"
+  new_lambda_processor_iam_name = var.lambda_processor_iam_custom_name != null ? var.lambda_processor_iam_custom_name : "${var.firehose_stream}-lambda-processor-iam"
+  new_firehose_iam_name         = var.firehose_iam_custom_name != null ? var.firehose_iam_custom_name : "${var.firehose_stream}-firehose-metrics-iam"
+  new_metric_stream_iam_name    = var.metric_streams_iam_custom_name != null ? var.metric_streams_iam_custom_name : "${var.firehose_stream}-cw-iam"
 }
 
 data "aws_caller_identity" "current_identity" {}
