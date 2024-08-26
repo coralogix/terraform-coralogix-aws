@@ -18,7 +18,18 @@ output "lambda_processor_arn" {
   description = "value of the firehose lambda processor ARN used"
 }
 
-output "aws_cloudwatch_metric_stream_arn" {
+output "lambda_processor_iam_arn" {
+  value       = local.lambda_processor_iam_role_arn
+  description = "value of the firehose lambda processor IAM role ARN used"
+}
+
+output "metric_stream_arn" {
   value       = one(aws_cloudwatch_metric_stream.cloudwatch_metric_stream[*].arn)
   description = "value of the cloudwatch metric stream ARN"
+}
+
+output "metrics_stream_iam_role_arn" {
+  value       = local.metrics_stream_iam_role_arn
+  description = "value of the cloudwatch metric stream IAM role ARN used"
+
 }
