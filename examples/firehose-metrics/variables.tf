@@ -9,7 +9,7 @@ variable "coralogix_region" {
   description = "The region of the Coralogix account"
 }
 
-variable "private_key" {
+variable "api_key" {
   type        = string
   description = "Coralogix account logs private key"
   sensitive   = true

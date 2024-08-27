@@ -7,8 +7,8 @@ variable "coralogix_region" {
   }
 }
 
-variable "private_key" {
-  description = "Coralogix account private key"
+variable "api_key" {
+  description = "Coralogix account api key"
   type        = string
   sensitive   = true
 }
@@ -61,7 +61,7 @@ variable "enable_cloudwatch_metricstream" {
 }
 
 variable "cloudwatch_metric_stream_custom_name" {
-  description = "Set the name of the CloudWatch metric stream, otherwise variable 'firehose_stream' will be used"
+  description = "Set the name of the CloudWatch metric stream, otherwise variable '{firehose_stream}-cw' will be used"
   type        = string
   default     = null
 }
@@ -134,6 +134,18 @@ variable "additional_metric_statistics" {
   ]
 }
 
+variable "s3_backup_custom_name" {
+  description = "Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup-metrics' will be used"
+  type        = string
+  default     = null
+}
+
+variable "existing_s3_backup" {
+  description = "Use an existing S3 bucket to use as a backup bucket"
+  type        = string
+  default     = null
+}
+
 variable "lambda_processor_enable" {
   description = "Enable lambda processor function, defaults to true"
   type        = bool
@@ -141,7 +153,43 @@ variable "lambda_processor_enable" {
 }
 
 variable "lambda_processor_custom_name" {
-  description = "Set the name of the lambda processor function, otherwise variable '{firehose_stream}-metrics-tags-processor' will be used"
+  description = "Set the name of the lambda processor function, otherwise variable '{firehose_stream}-metrics-transform' will be used"
+  type        = string
+  default     = null
+}
+
+variable "lambda_processor_iam_custom_name" {
+  description = "Set the name of the lambda processor IAM role & policy, otherwise variable '{firehose_stream}-lambda-processor-iam' will be used"
+  type        = string
+  default     = null
+}
+
+variable "existing_lambda_processor_iam" {
+  description = "Use an existing lambda processor IAM role"
+  type        = string
+  default     = null
+}
+
+variable "firehose_iam_custom_name" {
+  description = "Set the name of the firehose IAM role & policy, otherwise variable '{firehose_stream}-firehose-metrics-iam' will be used"
+  type        = string
+  default     = null
+}
+
+variable "existing_firehose_iam" {
+  description = "Use an existing IAM role to use as a firehose role"
+  type        = string
+  default     = null
+}
+
+variable "metric_streams_iam_custom_name" {
+  description = "Set the name of the cloudwatch metric streams IAM role & policy, otherwise variable '{firehose_stream}-cw-iam' will be used"
+  type        = string
+  default     = null
+}
+
+variable "existing_metric_streams_iam" {
+  description = "Use an existing IAM role to use as a metric streams role"
   type        = string
   default     = null
 }
@@ -158,8 +206,3 @@ variable "override_default_tags" {
   default     = false
 }
 
-variable "s3_backup_custom_name" {
-  description = "Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup' will be used"
-  type        = string
-  default     = null
-}

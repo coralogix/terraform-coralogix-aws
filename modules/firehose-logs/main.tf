@@ -71,6 +71,10 @@ resource "aws_s3_bucket_public_access_block" "firehose_bucket_bucket_access" {
   restrict_public_buckets = true
 }
 
+################################################################################
+# Firehose Logs Stream
+################################################################################
+
 resource "aws_iam_role" "firehose_to_coralogix" {
   tags = local.tags
   name = "${var.firehose_stream}-firehose-logs"
@@ -129,10 +133,6 @@ resource "aws_iam_role" "firehose_to_coralogix" {
     })
   }
 }
-
-################################################################################
-# Firehose Logs Stream
-################################################################################
 
 resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs" {
   tags        = local.tags

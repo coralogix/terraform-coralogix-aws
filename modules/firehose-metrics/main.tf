@@ -10,7 +10,7 @@ terraform {
 module "locals" {
   source = "../locals_variables"
 
-  integration_type = "firehose-logs"
+  integration_type = "firehose-metrics"
   random_string    = random_string.this.result
 }
 
@@ -25,10 +25,22 @@ locals {
     custom_endpoint          = local.endpoint_url
   }) : var.user_supplied_tags
 
-  # default namings
-  cloud_watch_metric_stream_name = var.cloudwatch_metric_stream_custom_name != null ? var.cloudwatch_metric_stream_custom_name : var.firehose_stream
-  s3_backup_bucket_name          = var.s3_backup_custom_name != null ? var.s3_backup_custom_name : "${var.firehose_stream}-backup-metrics"
+  # global resource referecing
+  s3_backup_bucket_arn          = var.existing_s3_backup != null ? one(data.aws_s3_bucket.exisiting_s3_bucket[*].arn) : one(aws_s3_bucket.new_s3_bucket[*].arn)
+  lambda_processor_iam_role_arn = var.existing_lambda_processor_iam != null ? one(data.aws_iam_role.existing_lambda_iam[*].arn) : one(aws_iam_role.new_lambda_iam[*].arn)
+  firehose_iam_role_arn         = var.existing_firehose_iam != null ? one(data.aws_iam_role.existing_firehose_iam[*].arn) : one(aws_iam_role.new_firehose_iam[*].arn)
+  metrics_stream_iam_role_arn   = var.existing_metric_streams_iam != null ? one(data.aws_iam_role.existing_metric_streams_iam[*].arn) : one(aws_iam_role.new_metric_streams_iam[*].arn)
+
+  # default resource namings
   lambda_processor_name          = var.lambda_processor_custom_name != null ? var.lambda_processor_custom_name : "${var.firehose_stream}-metrics-transform"
+  firehose_stream_name           = var.firehose_stream
+  cloud_watch_metric_stream_name = var.cloudwatch_metric_stream_custom_name != null ? var.cloudwatch_metric_stream_custom_name : "${var.firehose_stream}-cw"
+
+  #new global resource namings
+  new_s3_backup_bucket_name     = var.s3_backup_custom_name != null ? var.s3_backup_custom_name : "${var.firehose_stream}-backup-metrics"
+  new_lambda_processor_iam_name = var.lambda_processor_iam_custom_name != null ? var.lambda_processor_iam_custom_name : "${var.firehose_stream}-lambda-processor-iam"
+  new_firehose_iam_name         = var.firehose_iam_custom_name != null ? var.firehose_iam_custom_name : "${var.firehose_stream}-firehose-metrics-iam"
+  new_metric_stream_iam_name    = var.metric_streams_iam_custom_name != null ? var.metric_streams_iam_custom_name : "${var.firehose_stream}-cw-iam"
 }
 
 data "aws_caller_identity" "current_identity" {}
@@ -37,6 +49,7 @@ data "aws_region" "current_region" {}
 resource "random_string" "this" {
   length  = 6
   special = false
+  upper   = false
 }
 
 ################################################################################
@@ -45,7 +58,7 @@ resource "random_string" "this" {
 
 resource "aws_cloudwatch_log_group" "firehose_loggroup" {
   tags              = local.tags
-  name              = "/aws/kinesisfirehosemetrics/${var.firehose_stream}"
+  name              = "/aws/kinesisfirehosemetrics/${local.firehose_stream_name}"
   retention_in_days = var.cloudwatch_retention_days
 }
 
@@ -59,13 +72,20 @@ resource "aws_cloudwatch_log_stream" "firehose_logstream_backup" {
   log_group_name = aws_cloudwatch_log_group.firehose_loggroup.name
 }
 
-resource "aws_s3_bucket" "firehose_bucket" {
-  tags   = merge(local.tags, { Name = local.s3_backup_bucket_name })
-  bucket = local.s3_backup_bucket_name
+data "aws_s3_bucket" "exisiting_s3_bucket" {
+  count  = var.existing_s3_backup != null ? 1 : 0
+  bucket = var.existing_s3_backup
 }
 
-resource "aws_s3_bucket_public_access_block" "firehose_bucket_bucket_access" {
-  bucket = aws_s3_bucket.firehose_bucket.id
+resource "aws_s3_bucket" "new_s3_bucket" {
+  count  = var.existing_s3_backup != null ? 0 : 1
+  tags   = merge(local.tags, { Name = local.new_s3_backup_bucket_name })
+  bucket = local.new_s3_backup_bucket_name
+}
+
+resource "aws_s3_bucket_public_access_block" "new_s3_bucket" {
+  count  = var.existing_s3_backup != null ? 0 : 1
+  bucket = one(aws_s3_bucket.new_s3_bucket[*].id)
 
   block_public_acls       = true
   block_public_policy     = true
@@ -73,9 +93,19 @@ resource "aws_s3_bucket_public_access_block" "firehose_bucket_bucket_access" {
   restrict_public_buckets = true
 }
 
-resource "aws_iam_role" "firehose_to_coralogix" {
-  tags = local.tags
-  name = "${var.firehose_stream}-firehose-metrics"
+################################################################################
+# Firehose Metrics Stream
+################################################################################
+
+data "aws_iam_role" "existing_firehose_iam" {
+  count = var.existing_firehose_iam != null ? 1 : 0
+  name  = var.existing_firehose_iam
+}
+
+resource "aws_iam_role" "new_firehose_iam" {
+  count = var.existing_firehose_iam != null ? 0 : 1
+  tags  = local.tags
+  name  = local.new_firehose_iam_name
   assume_role_policy = jsonencode({
     "Version" = "2012-10-17",
     "Statement" = [
@@ -88,56 +118,11 @@ resource "aws_iam_role" "firehose_to_coralogix" {
       }
     ]
   })
-  inline_policy {
-    name = "${var.firehose_stream}-firehose"
-    policy = jsonencode({
-      "Version" = "2012-10-17",
-      "Statement" = [
-        {
-          "Effect" = "Allow",
-          "Action" = [
-            "s3:AbortMultipartUpload",
-            "s3:GetBucketLocation",
-            "s3:GetObject",
-            "s3:ListBucket",
-            "s3:ListBucketMultipartUploads",
-            "s3:PutObject"
-          ],
-          "Resource" = [
-            aws_s3_bucket.firehose_bucket.arn,
-            "${aws_s3_bucket.firehose_bucket.arn}/*"
-          ]
-        },
-        {
-          "Effect" = "Allow",
-          "Action" = [
-            "kinesis:DescribeStream",
-            "kinesis:GetShardIterator",
-            "kinesis:GetRecords",
-            "kinesis:ListShards"
-          ],
-          "Resource" = "arn:aws:kinesis:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_identity.account_id}:stream/*"
-        },
-        {
-          "Effect" = "Allow",
-          "Action" = [
-            "*"
-          ],
-          "Resource" = [
-            aws_cloudwatch_log_group.firehose_loggroup.arn
-          ]
-        }
-      ]
-    })
-  }
 }
 
-################################################################################
-# Firehose Metrics Stream
-################################################################################
-
-resource "aws_iam_policy" "firehose_to_coralogix_metric_policy" {
-  name   = "${var.firehose_stream}-metrics-policy"
+resource "aws_iam_policy" "new_firehose_iam" {
+  count  = var.existing_firehose_iam != null ? 0 : 1
+  name   = local.new_firehose_iam_name
   tags   = local.tags
   policy = <<EOF
 {
@@ -155,8 +140,8 @@ resource "aws_iam_policy" "firehose_to_coralogix_metric_policy" {
                 "s3:PutObject"
             ],
             "Resource": [
-                "${aws_s3_bucket.firehose_bucket.arn}",
-                "${aws_s3_bucket.firehose_bucket.arn}/*"
+                "${local.s3_backup_bucket_arn}",
+                "${local.s3_backup_bucket_arn}/*"
             ]
         },
         {
@@ -173,7 +158,7 @@ resource "aws_iam_policy" "firehose_to_coralogix_metric_policy" {
                    "kms:ViaService": "s3.${data.aws_region.current_region.name}.amazonaws.com"
                },
                "StringLike": {
-                   "kms:EncryptionContext:aws:s3:arn": "${aws_s3_bucket.firehose_bucket.arn}/prefix*"
+                   "kms:EncryptionContext:aws:s3:arn": "${local.s3_backup_bucket_arn}/prefix*"
                }
            }
         },
@@ -212,12 +197,13 @@ resource "aws_iam_policy" "firehose_to_coralogix_metric_policy" {
 EOF
 }
 
-resource "aws_iam_role_policy_attachment" "firehose_to_coralogix_metric_policy" {
-  policy_arn = aws_iam_policy.firehose_to_coralogix_metric_policy.arn
-  role       = aws_iam_role.firehose_to_coralogix.name
+resource "aws_iam_role_policy_attachment" "new_firehose_iam" {
+  count      = var.existing_firehose_iam != null ? 0 : 1
+  policy_arn = one(aws_iam_policy.new_firehose_iam[*].arn)
+  role       = one(aws_iam_policy.new_firehose_iam[*].name)
 }
 
-data "aws_iam_policy_document" "lambda_assume_role" {
+data "aws_iam_policy_document" "lambda_assume_policy" {
   count = var.lambda_processor_enable == true ? 1 : 0
   statement {
     effect = "Allow"
@@ -231,17 +217,22 @@ data "aws_iam_policy_document" "lambda_assume_role" {
   }
 }
 
-resource "aws_iam_role" "lambda_iam_role" {
-  count              = var.lambda_processor_enable == true ? 1 : 0
-  name               = "${local.lambda_processor_name}-lambda"
-  tags               = local.tags
-  assume_role_policy = data.aws_iam_policy_document.lambda_assume_role[count.index].json
+data "aws_iam_role" "existing_lambda_iam" {
+  count = var.lambda_processor_enable && var.existing_lambda_processor_iam != null ? 1 : 0
+  name  = var.existing_lambda_processor_iam
 }
 
-resource "aws_iam_role_policy" "lambda_iam_policy" {
-  count  = var.lambda_processor_enable == true ? 1 : 0
-  name   = "${local.lambda_processor_name}-lambda"
-  role   = aws_iam_role.lambda_iam_role[count.index].id
+resource "aws_iam_role" "new_lambda_iam" {
+  count              = var.lambda_processor_enable && var.existing_lambda_processor_iam == null ? 1 : 0
+  name               = local.new_lambda_processor_iam_name
+  tags               = local.tags
+  assume_role_policy = one(data.aws_iam_policy_document.lambda_assume_policy[*].json)
+}
+
+resource "aws_iam_role_policy" "new_lambda_iam" {
+  count  = var.lambda_processor_enable && var.existing_lambda_processor_iam == null ? 1 : 0
+  name   = local.new_lambda_processor_iam_name
+  role   = one(aws_iam_role.new_lambda_iam[*].id)
   policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -282,8 +273,8 @@ EOF
 }
 
 resource "aws_cloudwatch_log_group" "loggroup" {
-  count             = var.lambda_processor_enable == true ? 1 : 0
-  name              = "/aws/lambda/${aws_lambda_function.lambda_processor[count.index].function_name}"
+  count             = var.lambda_processor_enable ? 1 : 0
+  name              = "/aws/lambda/${one(aws_lambda_function.lambda_processor[*].function_name)}"
   retention_in_days = var.cloudwatch_retention_days
   tags              = local.tags
 }
@@ -293,7 +284,7 @@ resource "aws_lambda_function" "lambda_processor" {
   s3_bucket     = "cx-cw-metrics-tags-lambda-processor-${data.aws_region.current_region.name}"
   s3_key        = "bootstrap.zip"
   function_name = local.lambda_processor_name
-  role          = aws_iam_role.lambda_iam_role[count.index].arn
+  role          = local.lambda_processor_iam_role_arn
   handler       = "bootstrap"
   runtime       = "provided.al2"
   timeout       = "60"
@@ -310,22 +301,22 @@ resource "aws_lambda_function" "lambda_processor" {
 
 resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_metrics" {
   tags        = local.tags
-  name        = "${var.firehose_stream}-metrics"
+  name        = local.firehose_stream_name
   destination = "http_endpoint"
 
   http_endpoint_configuration {
     url                = local.endpoint_url
     name               = "Coralogix"
-    access_key         = var.private_key
+    access_key         = var.api_key
     buffering_size     = 1
     buffering_interval = 60
     s3_backup_mode     = "FailedDataOnly"
-    role_arn           = aws_iam_role.firehose_to_coralogix.arn
+    role_arn           = local.firehose_iam_role_arn
     retry_duration     = 30
 
     s3_configuration {
-      role_arn           = aws_iam_role.firehose_to_coralogix.arn
-      bucket_arn         = aws_s3_bucket.firehose_bucket.arn
+      role_arn           = local.firehose_iam_role_arn
+      bucket_arn         = local.s3_backup_bucket_arn
       buffering_size     = 5
       buffering_interval = 300
       compression_format = "GZIP"
@@ -375,7 +366,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_metrics" {
 
           parameters {
             parameter_name  = "LambdaArn"
-            parameter_value = "${aws_lambda_function.lambda_processor[0].arn}:$LATEST"
+            parameter_value = "${one(aws_lambda_function.lambda_processor[*].arn)}:$LATEST"
           }
 
           parameters {
@@ -398,10 +389,15 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_metrics" {
 # CloudWatch Metrics Stream
 ################################################################################
 
-resource "aws_iam_role" "metric_streams_to_firehose_role" {
+data "aws_iam_role" "existing_metric_streams_iam" {
+  count = var.existing_metric_streams_iam != null ? 1 : 0
+  name  = var.existing_metric_streams_iam
+}
+
+resource "aws_iam_role" "new_metric_streams_iam" {
   tags               = local.tags
-  count              = var.enable_cloudwatch_metricstream ? 1 : 0
-  name               = "${local.cloud_watch_metric_stream_name}-cw"
+  count              = var.enable_cloudwatch_metricstream && var.existing_metric_streams_iam == null ? 1 : 0
+  name               = local.new_metric_stream_iam_name
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -419,10 +415,10 @@ resource "aws_iam_role" "metric_streams_to_firehose_role" {
 EOF
 }
 
-resource "aws_iam_role_policy" "metric_streams_to_firehose_policy" {
-  count  = var.enable_cloudwatch_metricstream ? 1 : 0
-  name   = "${local.cloud_watch_metric_stream_name}-cw"
-  role   = aws_iam_role.metric_streams_to_firehose_role[count.index].id
+resource "aws_iam_role_policy" "new_metric_streams_iam" {
+  count  = var.enable_cloudwatch_metricstream && var.existing_metric_streams_iam == null ? 1 : 0
+  name   = local.new_metric_stream_iam_name
+  role   = one(aws_iam_role.new_metric_streams_iam[*].id)
   policy = <<EOF
 {
     "Version": "2012-10-17",
@@ -446,7 +442,7 @@ resource "aws_cloudwatch_metric_stream" "cloudwatch_metric_stream" {
   tags          = local.tags
   count         = var.enable_cloudwatch_metricstream ? 1 : 0
   name          = local.cloud_watch_metric_stream_name
-  role_arn      = aws_iam_role.metric_streams_to_firehose_role[count.index].arn
+  role_arn      = local.metrics_stream_iam_role_arn
   firehose_arn  = aws_kinesis_firehose_delivery_stream.coralogix_stream_metrics.arn
   output_format = var.output_format
 
