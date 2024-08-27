@@ -1,12 +1,17 @@
 # Changelog
 
-## v1.0.104
+## v1.0.105
 #### **firehose-metrics**
 ### 💡 Enhancements 
 - Added custom naming for global resources
 - Added ability to import global resources (s3 & iam)
 ### 🛑 Breaking changes 🛑
 - Update variables: `private_key` renamed to `api_key` with type `string` instead of `any`.
+
+## v1.0.104
+#### **msk-data-stream**
+### 🚀 New module 🚀
+- Add new module `msk-data-stream`, the module will create msk with public access, and a role to allow coralogix to stream data to his topics.
 
 ## v1.0.103
 #### **resource-metadata**
