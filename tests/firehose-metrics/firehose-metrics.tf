@@ -16,6 +16,6 @@ module "firehose-metrics" {
   source = "../../modules/firehose-metrics"
 
   coralogix_region = "Europe"
-  aapi_key         = "{{ secrets.TESTING_PRIVATE_KEY }}"
+  api_key          = "{{ secrets.TESTING_PRIVATE_KEY }}"
   firehose_stream  = "test-stream"
 }

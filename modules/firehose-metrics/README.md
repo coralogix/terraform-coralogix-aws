@@ -191,13 +191,13 @@ then the CloudWatch metric stream must be configured with the same format, confi
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | Coralogix account region: Europe, Europe2, India, Singapore, US, US2 [exact] | `any` | n/a | yes |
-| <a name="input_api_key"></a> [api\_key](#input\_api\_key) | Coralogix account logs api key | `string` | n/a | yes |
-| <a name="input_firehose_stream"></a> [firehose\_stream](#input\_firehose\_stream) | AWS Kinesis firehose delivery stream name | `string` | n/a | yes |
-| <a name="input_application_name"></a> [application\_name](#input\_application_name) | The name of your application in Coralogix | `string` | n/a | yes |
-| <a name="input_subsystem_name"></a> [subsystem\_name](#input\_subsystem_name) | The subsystem name of your application in Coralogix | `string` | n/a | yes |
-| <a name="input_cloudwatch_retention_days"></a> [cloudwatch\_retention\_days](#input\_cloudwatch_retention_days) | Days of retention in Cloudwatch retention days | `number` | n/a | no |
-| <a name="input_custom_domain"></a> [custom\_domain](#input\_custom_domain) | Custom domain for Coralogix firehose integration endpoint (private.coralogix.net:8443) | `string` | `null` | no |
+| <a name="input_coralogix_region"></a> [coralogix\_region](variables.tf#L1) | Coralogix account region: Europe, Europe2, India, Singapore, US, US2 [exact] | `any` | n/a | yes |
+| <a name="input_api_key"></a> [api\_key](variables.tf#L10) | Coralogix account logs api key | `string` | n/a | yes |
+| <a name="input_firehose_stream"></a> [firehose\_stream](variables.tf#L16) | AWS Kinesis firehose delivery stream name | `string` | n/a | yes |
+| <a name="input_application_name"></a> [application\_name](variables.tf#L21) | The name of your application in Coralogix | `string` | n/a | yes |
+| <a name="input_subsystem_name"></a> [subsystem\_name](#variables.tf#L27) | The subsystem name of your application in Coralogix | `string` | n/a | yes |
+| <a name="input_cloudwatch_retention_days"></a> [cloudwatch\_retention\_days](variables.tf#L33) | Days of retention in Cloudwatch retention days | `number` | n/a | no |
+| <a name="input_custom_domain"></a> [custom\_domain](variables.tf#L39) | Custom domain for Coralogix firehose integration endpoint (private.coralogix.net:8443) | `string` | `null` | no |
 | <a name="input_integration_type_metrics"></a> [integration\_type\_metrics](#input\_integration\_type\_metrics) | The integration type of the firehose delivery stream: `CloudWatch_Metrics_OpenTelemetry070` or `CloudWatch_Metrics_OpenTelemetry070_WithAggregations`. For `_WithAggregations` choice, additional aggregations here are `_min`, `_max`, `_avg` recorded as gauges. See https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-metric-streams-formats-opentelemetry-translation.html | `string` | `"CloudWatch_Metrics_OpenTelemetry070_WithAggregations"` | no |
 | <a name="input_output_format"></a> [output\_format](#input\_output\_format) | The output format of the cloudwatch metric stream: 'json' or 'opentelemetry0.7' | `string` | `"opentelemetry0.7"` | no |
 | <a name="input_enable_cloudwatch_metricstream"></a> [enable\_cloudwatch\_metricstream](#input\_enable\_cloudwatch\_metricstream) | Should be true if you want to create a new CloudWatch metric stream and attach it to Firehose | `bool` | `true` | no |

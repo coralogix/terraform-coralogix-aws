@@ -1,7 +1,7 @@
 module "cloudwatch_firehose_metrics_coralogix" {
   source                              = "coralogix/aws/coralogix//modules/firehose-metrics"
   firehose_stream                     = var.firehose_stream
-  private_key                         = var.private_key
+  api_key                             = var.api_key
   enable_cloudwatch_metricstream      = var.enable_cloudwatch_metricstream
   integration_type_metrics            = var.integration_type_metrics
   include_metric_stream_namespaces    = var.include_metric_stream_namespaces
