@@ -16,7 +16,7 @@ module "locals" {
 
 locals {
   endpoint_domain = var.custom_domain != null ? var.custom_domain : module.locals.coralogix_domains[var.coralogix_region]
-  endpoint_url    = "https://firehose-ingress.${local.endpoint_domain}/firehose"
+  endpoint_url    = "https://ingress.${local.endpoint_domain}/aws/firehose"
 
   tags = var.override_default_tags == false ? merge(var.user_supplied_tags, {
     terraform-module         = "kinesis-firehose-to-coralogix"
