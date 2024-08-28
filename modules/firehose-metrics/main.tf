@@ -57,7 +57,7 @@ resource "random_string" "this" {
 
 resource "aws_cloudwatch_log_group" "firehose_loggroup" {
   tags              = local.tags
-  name              = "/aws/kinesisfirehosemetrics/${local.firehose_stream_name}"
+  name              = "/aws/kinesisfirehosemetrics/${var.firehose_stream}"
   retention_in_days = var.cloudwatch_retention_days
 }
 
