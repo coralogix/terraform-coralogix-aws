@@ -1,13 +1,9 @@
 # Changelog
 
-## v1.0.106
-#### **firehose-metrics**
-### 💡 Enhancements 
-- Add AP3 region to the list of regions
-
 ## v1.0.105
 #### **firehose-metrics**
 ### 💡 Enhancements 
+- Add AP3 region to the list of regions
 - Added custom naming for global resources
 - Added ability to import global resources (s3 & iam)
 ### 🛑 Breaking changes 🛑
