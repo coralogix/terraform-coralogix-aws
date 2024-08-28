@@ -3,11 +3,7 @@
 ## v1.0.106
 #### **firehose-metrics**
 ### 💡 Enhancements 
-- Added custom naming for global resources
-- Added ability to import global resources (s3 & iam)
-### 🛑 Breaking changes 🛑
-- Update variables: `private_key` renamed to `api_key` with type `string` instead of `any`.
-
+- Add AP3 region to the list of regions
 
 ## v1.0.105
 #### **firehose-metrics**
