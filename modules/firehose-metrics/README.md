@@ -228,6 +228,7 @@ then the CloudWatch metric stream must be configured with the same format, confi
 | `Europe2` | `eu-north-1` | eu2.coralogix.com |
 | `India` | `ap-south-1` | coralogix.in |
 | `Singapore` | `ap-southeast-1` | coralogixsg.com |
+| `AP3` | `ap-southeast-3` | ap3.coralogix.com |
 | `US` | `us-east-2` | coralogix.us |
 | `US2` | `us-west-2` | cx498.coralogix.com |
 
