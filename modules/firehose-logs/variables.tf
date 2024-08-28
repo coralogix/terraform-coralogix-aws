@@ -7,8 +7,8 @@ variable "coralogix_region" {
   }
 }
 
-variable "private_key" {
-  description = "Coralogix account private key"
+variable "api_key" {
+  description = "Coralogix account api key"
   type        = string
   sensitive   = true
 }
@@ -60,6 +60,30 @@ variable "integration_type_logs" {
   default     = null
 }
 
+variable "s3_backup_custom_name" {
+  description = "Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup-logs' will be used"
+  type        = string
+  default     = null
+}
+
+variable "existing_s3_backup" {
+  description = "Use an existing S3 bucket to use as a backup bucket"
+  type        = string
+  default     = null
+}
+
+variable "firehose_iam_custom_name" {
+  description = "Set the name of the firehose IAM role & policy, otherwise variable '{firehose_stream}-firehose-logs-iam' will be used"
+  type        = string
+  default     = null
+}
+
+variable "existing_firehose_iam" {
+  description = "Use an existing IAM role to use as a firehose role"
+  type        = string
+  default     = null
+}
+
 variable "user_supplied_tags" {
   description = "Tags supplied by the user to populate to all generated resources"
   type        = map(string)
@@ -70,10 +94,4 @@ variable "override_default_tags" {
   description = "Override and remove the default tags by setting to true"
   type        = bool
   default     = false
-}
-
-variable "s3_backup_custom_name" {
-  description = "Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup-logs' will be used"
-  type        = string
-  default     = null
 }
