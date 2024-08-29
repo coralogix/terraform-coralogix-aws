@@ -263,7 +263,7 @@ resource "aws_iam_role_policy" "new_lambda_iam" {
               "logs:CreateLogStream",
               "logs:CreateLogGroup"
           ],
-          "Effect": "Allow",
+          "Effect": "Deny",
           "Resource": "arn:aws:logs:*:*:*",
           "Sid": ""
       }
