@@ -3,8 +3,8 @@ variable "aws_region" {
   description = "The AWS region that you want to create the S3 bucket, Must be the same as the AWS region where your coralogix account is set"
   default     = ""
   validation {
-    condition     = contains(["eu-west-1", "eu-north-1", "ap-southeast-1", "ap-south-1", "us-east-2", "us-west-2", ""], var.aws_region)
-    error_message = "The aws region must be one of these values: [eu-west-1, eu-north-1, ap-southeast-1, ap-south-1, us-east-2, us-west-2]."
+    condition     = contains(["eu-west-1", "eu-north-1", "ap-southeast-1", "ap-southeast-3", "ap-south-1", "us-east-2", "us-west-2", ""], var.aws_region)
+    error_message = "The aws region must be one of these values: [eu-west-1, eu-north-1, ap-southeast-1, ap-southeast-3, ap-south-1, us-east-2, us-west-2]."
   }
 }
 

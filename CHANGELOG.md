@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.0.106
+#### **msk-data-stream**
+### 💡 Enhancements 
+- Update coralogix role from `arn:aws:iam::<account-id>:role/msk-access-<region>` to  `arn:aws:iam::<account-id>:role/coralogix-archive-<region>`
+- allow the module to run in AP3 region
+
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 
+- Allow the module to be deployed in AP3
+
+#### **S3-archive**
+### 💡 Enhancements 
+- Allow the module to be deployed in ap-southeast-3 region
+
+
 ## v1.0.105
 #### **firehose-metrics**
 ### 💡 Enhancements 
