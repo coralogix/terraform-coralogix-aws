@@ -198,4 +198,7 @@ resource "null_resource" "enable-msk-public-access" {
   }
 }
 
-
+data "aws_msk_cluster" "msk_public_brokers" {
+  depends_on = [ null_resource.enable-msk-public-access ]
+  cluster_name = var.cluster_name == "coralogix-msk-cluster" ? "coralogix-msk-cluster-${random_string.unique.result}" : var.cluster_name
+}

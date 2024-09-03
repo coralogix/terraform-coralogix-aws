@@ -8,6 +8,7 @@ locals {
     Singapore = "ingress.coralogixsg.com"
     US        = "ingress.coralogix.us"
     US2       = "ingress.cx498.coralogix.com"
+    AP3       = "ap3.coralogix.com"
   }
 
   coralogix_domains = {
@@ -22,6 +23,7 @@ locals {
     US        = "coralogix.us"
     US1       = "coralogix.us"
     US2       = "cx498.coralogix.com"
+    AP3       = "ap3.coralogix.com"
   }
 
   coralogix_url_seffix = "/api/v1/logs"
