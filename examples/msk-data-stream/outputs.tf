@@ -9,3 +9,7 @@ output "security_group_id" {
 output "cluster_arn" {
   value = aws_msk_cluster.coralogix-msk-cluster.arn
 }
+
+output "msk_public_brokesrs" {
+  value = data.aws_msk_cluster.msk_public_brokers.bootstrap_brokers_public_sasl_iam
+}
