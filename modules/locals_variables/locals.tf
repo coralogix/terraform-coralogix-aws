@@ -8,6 +8,7 @@ locals {
     Singapore = "ingress.coralogixsg.com"
     US        = "ingress.coralogix.us"
     US2       = "ingress.cx498.coralogix.com"
+    AP3       = "ap3.coralogix.com"
   }
 
   coralogix_domains = {
