@@ -154,17 +154,20 @@ resource "aws_iam_role" "new_firehose_iam" {
 
 # Add additional policies to the firehose IAM role
 resource "aws_iam_role_policy_attachment" "policy_attachment_firehose" {
-  role       = one(aws_iam_role.new_firehose_iam[*].arn)
+  count      = var.existing_firehose_iam != null ? 0 : 1
+  role       = one(aws_iam_role.new_firehose_iam[*].name)
   policy_arn = "arn:aws:iam::aws:policy/AmazonKinesisFirehoseFullAccess"
 }
 
 resource "aws_iam_role_policy_attachment" "policy_attachment_kinesis" {
-  role       = one(aws_iam_role.new_firehose_iam[*].arn)
+  count      = var.existing_firehose_iam != null ? 0 : 1
+  role       = one(aws_iam_role.new_firehose_iam[*].name)
   policy_arn = "arn:aws:iam::aws:policy/AmazonKinesisReadOnlyAccess"
 }
 
 resource "aws_iam_role_policy_attachment" "policy_attachment_cloudwatch" {
-  role       = one(aws_iam_role.new_firehose_iam[*].arn)
+  count      = var.existing_firehose_iam != null ? 0 : 1
+  role       = one(aws_iam_role.new_firehose_iam[*].name)
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
 }
 
@@ -193,7 +196,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs" {
 
     s3_configuration {
       role_arn           = local.firehose_iam_role_arn
-      bucket_arn         = aws_s3_bucket.firehose_bucket.arn
+      bucket_arn         = local.s3_backup_bucket_arn
       buffering_size     = 5
       buffering_interval = 300
       compression_format = "GZIP"
