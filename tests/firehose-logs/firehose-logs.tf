@@ -16,6 +16,6 @@ module "firehose-logs" {
   source = "../../modules/firehose-logs"
 
   coralogix_region = "EU1"
-  private_key      = "{{ secrets.TESTING_PRIVATE_KEY }}"
+  api_key      = "{{ secrets.TESTING_PRIVATE_KEY }}"
   firehose_stream  = "test-stream"
 }
