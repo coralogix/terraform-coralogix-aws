@@ -42,6 +42,12 @@ variable "custom_domain" {
   default     = null
 }
 
+variable "enable_private_link" {
+  description = "Enable private link for Coralogix firehose integration endpoint"
+  type        = bool
+  default     = false
+}
+
 variable "integration_type_metrics" {
   description = "The integration type of the firehose delivery stream: 'CloudWatch_Metrics_OpenTelemetry070' or 'CloudWatch_Metrics_OpenTelemetry070_WithAggregations'"
   type        = string

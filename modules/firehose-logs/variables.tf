@@ -42,6 +42,12 @@ variable "custom_domain" {
   default     = null
 }
 
+variable "enable_private_link" {
+  description = "Enable private link for Coralogix firehose integration endpoint"
+  type        = bool
+  default     = false
+}
+
 variable "source_type_logs" {
   description = "The source_type of kinesis firehose: KinesisStreamAsSource or DirectPut"
   type        = string
