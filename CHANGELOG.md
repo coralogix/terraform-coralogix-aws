@@ -3,11 +3,11 @@
 ## v1.0.107
 #### **firehose-logs**
 ### 💡 Enhancements 
-- Add AO3 region to the list of regions
+- Add AP3 region to the list of regions
 - Added custom naming for global resources
 - Added ability to import global resources (s3 & iam)
 ### 🛑 Breaking changes 🛑
-- For firehose-logs & firehose-metrics, Update variables: `private_key` values regions from [Europe, Europe2, India, Singapore, US, US2] to [EU1, EU2, AP1, AP2, AP3, US1, US2]
+- For firehose-logs & firehose-metrics, Update variables: `coralogix_region` values regions from [Europe, Europe2, India, Singapore, US, US2] to [EU1, EU2, AP1, AP2, AP3, US1, US2]
 
 ## v1.0.106
 #### **msk-data-stream**

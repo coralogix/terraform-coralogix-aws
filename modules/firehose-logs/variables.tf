@@ -37,7 +37,7 @@ variable "cloudwatch_retention_days" {
 }
 
 variable "custom_domain" {
-  description = "Custom domain for Coralogix firehose integration endpoint (e.g. private.coralogix.net:8443 for https://ingress.private.coralogix.net:8443/aws/firehose)"
+  description = "Custom domain for Coralogix firehose integration endpoints, does not work for privatelink (e.g. cust.coralogix-123.net:8443 for https://ingress.cust.coralogix-123.net:8443/aws/firehose)"
   type        = string
   default     = null
 }
