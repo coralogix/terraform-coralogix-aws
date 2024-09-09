@@ -146,23 +146,24 @@ The application name and subsystem name by default is the firehose delivery stre
 
 # Coralogix account region
 The coralogix region variable accepts one of the following regions:
-* Europe
-* Europe2
-* India
-* Singapore
-* US
+* EU1
+* EU2
+* AP1
+* AP2
+* AP3
+* US1
 * US2
 
 ### Coralogix Regions & Description. 
 
 | Region    | Domain                 |  Endpoint                                          |
 |-----------|------------------------|----------------------------------------------------|
-| Europe    | `coralogix.com`        | `https://ingress.coralogix.com/aws/firehose`       |
-| Europe2   | `eu2.coralogix.com`    | `https://ingress.eu2.coralogix.com/aws/firehose`   |
-| India     | `coralogix.in`         | `https://ingress.app.coralogix.in/aws/firehose`    |
-| Singapore | `coralogixsg.com`      | `https://ingress.coralogixsg.com/aws/firehose`     |
+| EU1       | `coralogix.com`        | `https://ingress.coralogix.com/aws/firehose`       |
+| EU2       | `eu2.coralogix.com`    | `https://ingress.eu2.coralogix.com/aws/firehose`   |
+| AP1       | `coralogix.in`         | `https://ingress.app.coralogix.in/aws/firehose`    |
+| AP2       | `coralogixsg.com`      | `https://ingress.coralogixsg.com/aws/firehose`     |
 | AP3       | `ap3.coralogix.com`    | `https://ingress.ap3.coralogix.com/aws/firehose`   |
-| US        | `coralogix.us`         | `https://ingress.coralogix.us/aws/firehose`        |
+| US1       | `coralogix.us`         | `https://ingress.coralogix.us/aws/firehose`        |
 | US2       | `cx498.coralogix.com`  | `https://ingress.cx498.coralogix.com/aws/firehose` |
 
 ### Custom endpoints
@@ -192,7 +193,7 @@ then the CloudWatch metric stream must be configured with the same format, confi
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_coralogix_region"></a> [coralogix\_region](variables.tf#L1) | Coralogix account region: Europe, Europe2, India, Singapore, AP3, US, US2 [exact] | `any` | n/a | yes |
+| <a name="input_coralogix_region"></a> [coralogix\_region](variables.tf#L1) | Coralogix account region: EU1, EU2, AP1, AP2, AP3, US1, US2 [exact] | `any` | n/a | yes |
 | <a name="input_api_key"></a> [api\_key](variables.tf#L10) | Coralogix account logs api key | `string` | n/a | yes |
 | <a name="input_firehose_stream"></a> [firehose\_stream](variables.tf#L16) | AWS Kinesis firehose delivery stream name | `string` | n/a | yes |
 | <a name="input_application_name"></a> [application\_name](variables.tf#L21) | The name of your application in Coralogix | `string` | n/a | yes |
