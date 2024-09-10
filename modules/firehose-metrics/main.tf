@@ -33,7 +33,6 @@ locals {
 
   # default resource namings
   lambda_processor_name          = var.lambda_processor_custom_name != null ? var.lambda_processor_custom_name : "${var.firehose_stream}-metrics-transform"
-  firehose_stream_name           = var.firehose_stream
   cloud_watch_metric_stream_name = var.cloudwatch_metric_stream_custom_name != null ? var.cloudwatch_metric_stream_custom_name : "${var.firehose_stream}-cw"
 
   #new global resource namings
@@ -58,7 +57,7 @@ resource "random_string" "this" {
 
 resource "aws_cloudwatch_log_group" "firehose_loggroup" {
   tags              = local.tags
-  name              = "/aws/kinesisfirehosemetrics/${local.firehose_stream_name}"
+  name              = "/aws/kinesisfirehosemetrics/${var.firehose_stream}"
   retention_in_days = var.cloudwatch_retention_days
 }
 
@@ -301,7 +300,7 @@ resource "aws_lambda_function" "lambda_processor" {
 
 resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_metrics" {
   tags        = local.tags
-  name        = local.firehose_stream_name
+  name        = var.firehose_stream
   destination = "http_endpoint"
 
   http_endpoint_configuration {

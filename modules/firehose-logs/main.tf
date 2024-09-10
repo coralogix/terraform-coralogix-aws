@@ -25,8 +25,13 @@ locals {
     custom_endpoint          = local.endpoint_url
   }) : var.user_supplied_tags
 
-  # default namings
-  s3_logs_backup_bucket_name = var.s3_backup_custom_name != null ? var.s3_backup_custom_name : "${var.firehose_stream}-backup-logs"
+  # global resource referecing
+  s3_backup_bucket_arn  = var.existing_s3_backup != null ? one(data.aws_s3_bucket.exisiting_s3_bucket[*].arn) : one(aws_s3_bucket.new_s3_bucket[*].arn)
+  firehose_iam_role_arn = var.existing_firehose_iam != null ? one(data.aws_iam_role.existing_firehose_iam[*].arn) : one(aws_iam_role.new_firehose_iam[*].arn)
+
+  #new global resource namings
+  new_s3_backup_bucket_name = var.s3_backup_custom_name != null ? var.s3_backup_custom_name : "${var.firehose_stream}-backup-logs"
+  new_firehose_iam_name     = var.firehose_iam_custom_name != null ? var.firehose_iam_custom_name : "${var.firehose_stream}-firehose-logs-iam"
 }
 
 data "aws_caller_identity" "current_identity" {}
@@ -57,13 +62,20 @@ resource "aws_cloudwatch_log_stream" "firehose_logstream_backup" {
   log_group_name = aws_cloudwatch_log_group.firehose_loggroup.name
 }
 
-resource "aws_s3_bucket" "firehose_bucket" {
-  tags   = merge(local.tags, { Name = local.s3_logs_backup_bucket_name })
-  bucket = local.s3_logs_backup_bucket_name
+data "aws_s3_bucket" "exisiting_s3_bucket" {
+  count  = var.existing_s3_backup != null ? 1 : 0
+  bucket = var.existing_s3_backup
+}
+
+resource "aws_s3_bucket" "new_s3_bucket" {
+  count  = var.existing_s3_backup != null ? 0 : 1
+  tags   = merge(local.tags, { Name = local.new_s3_backup_bucket_name })
+  bucket = local.new_s3_backup_bucket_name
 }
 
 resource "aws_s3_bucket_public_access_block" "firehose_bucket_bucket_access" {
-  bucket = aws_s3_bucket.firehose_bucket.id
+  count  = var.existing_s3_backup != null ? 0 : 1
+  bucket = one(aws_s3_bucket.new_s3_bucket[*].id)
 
   block_public_acls       = true
   block_public_policy     = true
@@ -75,9 +87,15 @@ resource "aws_s3_bucket_public_access_block" "firehose_bucket_bucket_access" {
 # Firehose Logs Stream
 ################################################################################
 
-resource "aws_iam_role" "firehose_to_coralogix" {
-  tags = local.tags
-  name = "${var.firehose_stream}-firehose-logs"
+data "aws_iam_role" "existing_firehose_iam" {
+  count = var.existing_firehose_iam != null ? 1 : 0
+  name  = var.existing_firehose_iam
+}
+
+resource "aws_iam_role" "new_firehose_iam" {
+  count = var.existing_firehose_iam != null ? 0 : 1
+  tags  = local.tags
+  name  = local.new_firehose_iam_name
   assume_role_policy = jsonencode({
     "Version" = "2012-10-17",
     "Statement" = [
@@ -91,7 +109,7 @@ resource "aws_iam_role" "firehose_to_coralogix" {
     ]
   })
   inline_policy {
-    name = "${var.firehose_stream}-firehose"
+    name = local.new_firehose_iam_name
     policy = jsonencode({
       "Version" = "2012-10-17",
       "Statement" = [
@@ -106,8 +124,8 @@ resource "aws_iam_role" "firehose_to_coralogix" {
             "s3:PutObject"
           ],
           "Resource" = [
-            aws_s3_bucket.firehose_bucket.arn,
-            "${aws_s3_bucket.firehose_bucket.arn}/*"
+            "${local.s3_backup_bucket_arn}",
+            "${local.s3_backup_bucket_arn}/*"
           ]
         },
         {
@@ -121,12 +139,12 @@ resource "aws_iam_role" "firehose_to_coralogix" {
           "Resource" = "arn:aws:kinesis:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_identity.account_id}:stream/*"
         },
         {
-          "Effect" = "Allow",
-          "Action" = [
-            "*"
+          "Effect" : "Allow",
+          "Action" : [
+            "logs:PutLogEvents"
           ],
-          "Resource" = [
-            aws_cloudwatch_log_group.firehose_loggroup.arn
+          "Resource" : [
+            "${aws_cloudwatch_log_group.firehose_loggroup.arn}"
           ]
         }
       ]
@@ -134,32 +152,51 @@ resource "aws_iam_role" "firehose_to_coralogix" {
   }
 }
 
+# Add additional policies to the firehose IAM role
+resource "aws_iam_role_policy_attachment" "policy_attachment_firehose" {
+  count      = var.existing_firehose_iam != null ? 0 : 1
+  role       = one(aws_iam_role.new_firehose_iam[*].name)
+  policy_arn = "arn:aws:iam::aws:policy/AmazonKinesisFirehoseFullAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "policy_attachment_kinesis" {
+  count      = var.existing_firehose_iam != null ? 0 : 1
+  role       = one(aws_iam_role.new_firehose_iam[*].name)
+  policy_arn = "arn:aws:iam::aws:policy/AmazonKinesisReadOnlyAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "policy_attachment_cloudwatch" {
+  count      = var.existing_firehose_iam != null ? 0 : 1
+  role       = one(aws_iam_role.new_firehose_iam[*].name)
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
+}
+
 resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs" {
   tags        = local.tags
-  name        = "${var.firehose_stream}-logs"
+  name        = var.firehose_stream
   destination = "http_endpoint"
 
   dynamic "kinesis_source_configuration" {
     for_each = var.source_type_logs == "KinesisStreamAsSource" && var.kinesis_stream_arn != null ? [1] : []
     content {
       kinesis_stream_arn = var.kinesis_stream_arn
-      role_arn           = aws_iam_role.firehose_to_coralogix.arn
+      role_arn           = local.firehose_iam_role_arn
     }
   }
 
   http_endpoint_configuration {
     url                = local.endpoint_url
     name               = "Coralogix"
-    access_key         = var.private_key
+    access_key         = var.api_key
     buffering_size     = 6
     buffering_interval = 60
     s3_backup_mode     = "FailedDataOnly"
-    role_arn           = aws_iam_role.firehose_to_coralogix.arn
+    role_arn           = local.firehose_iam_role_arn
     retry_duration     = 300
 
     s3_configuration {
-      role_arn           = aws_iam_role.firehose_to_coralogix.arn
-      bucket_arn         = aws_s3_bucket.firehose_bucket.arn
+      role_arn           = local.firehose_iam_role_arn
+      bucket_arn         = local.s3_backup_bucket_arn
       buffering_size     = 5
       buffering_interval = 300
       compression_format = "GZIP"
@@ -199,19 +236,4 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs" {
       }
     }
   }
-}
-
-resource "aws_iam_role_policy_attachment" "example_policy_attachment" {
-  role       = aws_iam_role.firehose_to_coralogix.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonKinesisFirehoseFullAccess"
-}
-
-resource "aws_iam_role_policy_attachment" "additional_policy_attachment_1" {
-  role       = aws_iam_role.firehose_to_coralogix.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonKinesisReadOnlyAccess"
-}
-
-resource "aws_iam_role_policy_attachment" "additional_policy_attachment_2" {
-  role       = aws_iam_role.firehose_to_coralogix.name
-  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
 }

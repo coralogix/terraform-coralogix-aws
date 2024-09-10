@@ -1,14 +1,14 @@
 variable "coralogix_region" {
-  description = "Coralogix account region: Europe, Europe2, India, Singapore, US, US2"
+  description = "Coralogix account region: EU1, EU2, AP1, AP2, AP3, US1, US2"
   type        = string
   validation {
-    condition     = contains(["Europe", "Europe2", "India", "Singapore", "US", "US2", "AP3"], var.coralogix_region)
-    error_message = "The coralogix region must be one of these values: [Europe, Europe2, India, Singapore, US, US2, AP3]."
+    condition     = contains(["EU1", "EU2", "AP1", "AP2", "AP3", "US1", "US2"], var.coralogix_region)
+    error_message = "The coralogix region must be one of these values: [EU1, EU2, AP1, AP2, AP3, US1, US2]."
   }
 }
 
-variable "private_key" {
-  description = "Coralogix account private key"
+variable "api_key" {
+  description = "Coralogix account api key"
   type        = string
   sensitive   = true
 }
@@ -37,7 +37,7 @@ variable "cloudwatch_retention_days" {
 }
 
 variable "custom_domain" {
-  description = "Custom domain for Coralogix firehose integration endpoint (e.g. private.coralogix.net:8443 for https://firehose-ingress.private.coralogix.net:8443/firehose)"
+  description = "Custom domain for Coralogix firehose integration endpoints, does not work for privatelink (e.g. cust.coralogix-123.net:8443 for https://ingress.cust.coralogix-123.net:8443/aws/firehose)"
   type        = string
   default     = null
 }
@@ -60,6 +60,30 @@ variable "integration_type_logs" {
   default     = null
 }
 
+variable "s3_backup_custom_name" {
+  description = "Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup-logs' will be used"
+  type        = string
+  default     = null
+}
+
+variable "existing_s3_backup" {
+  description = "Use an existing S3 bucket to use as a backup bucket"
+  type        = string
+  default     = null
+}
+
+variable "firehose_iam_custom_name" {
+  description = "Set the name of the firehose IAM role & policy, otherwise variable '{firehose_stream}-firehose-logs-iam' will be used"
+  type        = string
+  default     = null
+}
+
+variable "existing_firehose_iam" {
+  description = "Use an existing IAM role to use as a firehose role"
+  type        = string
+  default     = null
+}
+
 variable "user_supplied_tags" {
   description = "Tags supplied by the user to populate to all generated resources"
   type        = map(string)
@@ -70,10 +94,4 @@ variable "override_default_tags" {
   description = "Override and remove the default tags by setting to true"
   type        = bool
   default     = false
-}
-
-variable "s3_backup_custom_name" {
-  description = "Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup-logs' will be used"
-  type        = string
-  default     = null
 }
