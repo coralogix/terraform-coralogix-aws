@@ -15,7 +15,7 @@ provider "aws" {
 module "firehose-metrics" {
   source = "../../modules/firehose-metrics"
 
-  coralogix_region = "Europe"
+  coralogix_region = "EU1"
   api_key          = "{{ secrets.TESTING_PRIVATE_KEY }}"
   firehose_stream  = "test-stream"
 }
