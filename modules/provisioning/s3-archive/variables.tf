@@ -58,6 +58,18 @@ variable "metrics_kms_arn" {
   default     = ""
 }
 
+variable "logs_bucket_force_destroy" {
+  type        = bool
+  description = "force the metrics bucket to destroyed, even if there is data in it"
+  default     = false
+}
+
+variable "metrics_bucket_force_destroy" {
+  type        = bool
+  description = "force the metrics bucket to destroyed, even if there is data in it"
+  default     = false
+}
+
 variable "aws_role_region"  {
   type = map
   default = {
