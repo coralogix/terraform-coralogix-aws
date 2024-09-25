@@ -439,12 +439,13 @@ EOF
 }
 
 resource "aws_cloudwatch_metric_stream" "cloudwatch_metric_stream" {
-  tags          = local.tags
-  count         = var.enable_cloudwatch_metricstream ? 1 : 0
-  name          = local.cloud_watch_metric_stream_name
-  role_arn      = local.metrics_stream_iam_role_arn
-  firehose_arn  = aws_kinesis_firehose_delivery_stream.coralogix_stream_metrics.arn
-  output_format = var.output_format
+  tags                            = local.tags
+  count                           = var.enable_cloudwatch_metricstream ? 1 : 0
+  name                            = local.cloud_watch_metric_stream_name
+  role_arn                        = local.metrics_stream_iam_role_arn
+  firehose_arn                    = aws_kinesis_firehose_delivery_stream.coralogix_stream_metrics.arn
+  include_linked_accounts_metrics = var.include_linked_accounts_metrics
+  output_format                   = var.output_format
 
   dynamic "include_filter" {
     for_each = var.include_metric_stream_namespaces
