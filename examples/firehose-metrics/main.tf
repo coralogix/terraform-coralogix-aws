@@ -6,6 +6,7 @@ module "cloudwatch_firehose_metrics_coralogix" {
   integration_type_metrics            = var.integration_type_metrics
   include_metric_stream_namespaces    = var.include_metric_stream_namespaces
   include_metric_stream_filter        = var.include_metric_stream_filter
+  include_linked_accounts_metrics       = var.include_linked_accounts_metrics 
   additional_metric_statistics_enable = var.additional_metric_statistics_enable
   additional_metric_statistics        = var.additional_metric_statistics
   output_format                       = var.output_format
