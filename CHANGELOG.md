@@ -1,5 +1,30 @@
 # Changelog
 
+## v1.0.107
+#### **firehose-logs & firehose-metrics**
+### 💡 Enhancements 
+- Add AP3 region to the list of regions
+- Added custom naming for global resources
+- Added ability to import global resources (s3 & iam)
+### 🛑 Breaking changes 🛑
+- For firehose-logs & firehose-metrics, Update variables: `coralogix_region` values regions from [Europe, Europe2, India, Singapore, US, US2] to [EU1, EU2, AP1, AP2, AP3, US1, US2]
+- Update variables: `private_key` renamed to `api_key` with type `string` instead of `any`.
+
+## v1.0.106
+#### **msk-data-stream**
+### 💡 Enhancements 
+- Update coralogix role from `arn:aws:iam::<account-id>:role/msk-access-<region>` to  `arn:aws:iam::<account-id>:role/coralogix-archive-<region>`
+- allow the module to run in AP3 region
+
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 
+- Allow the module to be deployed in AP3
+
+#### **S3-archive**
+### 💡 Enhancements 
+- Allow the module to be deployed in ap-southeast-3 region
+
+
 ## v1.0.105
 #### **firehose-metrics**
 ### 💡 Enhancements 

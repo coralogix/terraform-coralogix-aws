@@ -2,8 +2,8 @@ variable "aws_region" {
   type        = string
   description = "The AWS region that you want to create the MSK in, Must be the same as the AWS region where your coralogix account is set"
   validation {
-    condition     = contains(["eu-west-1", "eu-north-1", "ap-southeast-1", "ap-south-1", "us-east-2", "us-west-2", "custom"], var.aws_region)
-    error_message = "The aws region must be one of these values: [eu-west-1, eu-north-1, ap-southeast-1, ap-south-1, us-east-2, us-west-2, custom]."
+    condition     = contains(["eu-west-1", "eu-north-1", "ap-southeast-1", "ap-southeast-3", "ap-south-1", "us-east-2", "us-west-2", "custom"], var.aws_region)
+    error_message = "The aws region must be one of these values: [eu-west-1, eu-north-1, ap-southeast-1, ap-southeast-3, ap-south-1, us-east-2, us-west-2, custom]."
   }
 }
 
@@ -42,17 +42,4 @@ variable "custom_coralogix_arn" {
   description = "The custom arn for the coralogix role"
   default     = null
   
-}
-
-variable "coraloigx_roles_arn_mapping" {
-  type = map
-  default = {
-      "eu-west-1"      = "arn:aws:iam::625240141681:role/msk-access-eu1"
-      "eu-north-1"     = "arn:aws:iam::625240141681:role/msk-access-eu2"
-      "ap-southeast-1" = "arn:aws:iam::625240141681:role/msk-access-ap2"
-      "ap-south-1"     = "arn:aws:iam::625240141681:role/msk-access-ap1"
-      "us-east-2"      = "arn:aws:iam::625240141681:role/msk-access-us1"
-      "us-west-2"      = "arn:aws:iam::739076534691:role/msk-access-us2"
-      "custom"         = ""
-  }
 }

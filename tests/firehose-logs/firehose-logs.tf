@@ -15,7 +15,7 @@ provider "aws" {
 module "firehose-logs" {
   source = "../../modules/firehose-logs"
 
-  coralogix_region = "Europe"
-  private_key      = "{{ secrets.TESTING_PRIVATE_KEY }}"
+  coralogix_region = "EU1"
+  api_key      = "{{ secrets.TESTING_PRIVATE_KEY }}"
   firehose_stream  = "test-stream"
 }
