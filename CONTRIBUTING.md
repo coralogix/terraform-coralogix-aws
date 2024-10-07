@@ -17,5 +17,5 @@ When you submit a change you will need to make sure that you made all of the nec
 - Update the CHANGELOG.md file
 - In case you add a variable make sure that you also add him to the example/<module name>/variable.tf and README files
 
-## commits formate
-When you commit your change than the commit need to be in the folowing formate: `release type: commit mesage`. Possible release types are: `fix` --> fixing a bug, `feat` --> adding a new feature, `BREAKING CHANGE` --> apply changes to a module that will cause breaking change for example change variable name.
+## release formate
+In order to release a new version the PR title and the commits needs to be in the following format : `release type: message`. Possible release types are: `fix` --> fixing a bug, `feat` --> adding a new feature, `major` --> apply major changes to a module for example breaking change.
