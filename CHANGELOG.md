@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.0.0
+### 🛑 Breaking changes 🛑
+- Remove deprecated modules: cloudwatch-logs, S3 and kinesis
+
 ## v1.0.107
 #### **firehose-logs & firehose-metrics**
 ### 💡 Enhancements 

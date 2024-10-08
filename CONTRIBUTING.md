@@ -16,3 +16,6 @@ We require all of our commits to be signed, please make sure they are signed by 
 When you submit a change you will need to make sure that you made all of the necessary changes:
 - Update the CHANGELOG.md file
 - In case you add a variable make sure that you also add him to the example/<module name>/variable.tf and README files
+
+## release formate
+In order to release a new version the PR title and the commits needs to be in the following format : `release type: message`. Possible release types are: `fix` --> fixing a bug, `feat` --> adding a new feature, `major` --> apply major changes to a module for example breaking change.
