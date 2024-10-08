@@ -96,15 +96,17 @@ exporters:
     - "aws.ecs.docker.name"
     - "docker.name"
     timeout: 30s
-  logging:
+  debug:
     verbosity: detailed
 
 extensions:
   health_check:
+  pprof:
 
 service:
   extensions:
     - health_check
+    - pprof
   telemetry:
     logs:
       level: warn
