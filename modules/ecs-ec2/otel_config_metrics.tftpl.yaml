@@ -83,7 +83,8 @@ processors:
     override: false
 
 exporters:
-  logging:
+  debug:
+    verbosity: detailed
   coralogix:
     domain: "$CORALOGIX_DOMAIN"
     private_key: "$PRIVATE_KEY"
@@ -101,10 +102,12 @@ exporters:
 
 extensions:
   health_check:
+  pprof:
 
 service:
   extensions:
     - health_check
+    - pprof
   telemetry:
     logs:
       level: warn

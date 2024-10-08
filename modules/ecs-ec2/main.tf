@@ -105,6 +105,7 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
         value : local.otel_config
       }
     ],
+    command: ["--config", "env:OTEL_CONFIG"],
     healthCheck : {
       command : ["CMD-SHELL", "nc -vz localhost 13133 || exit 1"]
       startPeriod : 30
