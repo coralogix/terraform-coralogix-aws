@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.0.1
+### 🧰 Bug fixes 🧰
+- Fixed ecs-ec2 module, adjusted cdot image command to `--config env:OTEL_CONFIG`
+- Removed latest flag from ecs-ec2 module example.
+- Removed deprecated logging exporter from ecs-ec2 module otel configs.
+
+### 💡 Enhancements 
+- Added pprof extension to default ecs-ec2 otel configurations.
+
+
 ## v2.0.0
 ### 🛑 Breaking changes 🛑
 - Remove deprecated modules: cloudwatch-logs, S3 and kinesis
