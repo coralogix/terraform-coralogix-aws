@@ -33,6 +33,12 @@ variable "include_metric_stream_namespaces" {
   default     = ["AWS/EC2", "AWS/DynamoDB"]
 }
 
+variable "include_linked_accounts_metrics" {
+  description = "include_linked_accounts_metrics (Optional) If you are creating a metric stream in a monitoring account, specify true to include metrics from source accounts that are linked to this monitoring account, in the metric stream. The default is false."
+  type        = bool
+  default     = false
+}
+
 variable "include_metric_stream_filter" {
   description = "List of inclusive metric filters for namespace and metric_names. Specify this parameter, the stream sends only the conditional metric names from the metric namespaces that you specify here. If metric names is empty or not specified, the whole metric namespace is included"
   type = list(object({
