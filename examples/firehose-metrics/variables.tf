@@ -52,6 +52,12 @@ variable "include_metric_stream_filter" {
   ]
 }
 
+variable "include_linked_accounts_metrics" {
+  description = "include_linked_accounts_metrics (Optional) If you are creating a metric stream in a monitoring account, specify true to include metrics from source accounts that are linked to this monitoring account, in the metric stream. The default is false."
+  type        = bool
+  default     = false
+}
+
 variable "additional_metric_statistics_enable" {
   description = "To enable the inclusion of additional statistics to the streaming metrics"
   type        = bool
