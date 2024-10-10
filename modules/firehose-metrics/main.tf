@@ -443,6 +443,7 @@ resource "aws_cloudwatch_metric_stream" "cloudwatch_metric_stream" {
   name          = local.cloud_watch_metric_stream_name
   role_arn      = local.metrics_stream_iam_role_arn
   firehose_arn  = aws_kinesis_firehose_delivery_stream.coralogix_stream_metrics.arn
+  include_linked_accounts_metrics = var.include_linked_accounts_metrics
   output_format = var.output_format
 
   dynamic "include_filter" {
