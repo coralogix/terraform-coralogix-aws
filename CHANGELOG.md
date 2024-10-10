@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.0.2
+### ✨ Enhancements ✨
+- Added an option to include metrics from source accounts linked to the monitoring account in the Firehose CloudWatch metric stream.
+- Introduced the `include_linked_accounts_metrics` variable to control the inclusion of linked account metrics for Firehose.
+- Updated example configurations to demonstrate usage of the `include_linked_accounts_metrics` variable in Firehose metric streams.
+
 ## v2.0.1
 ### 🧰 Bug fixes 🧰
 - Fixed ecs-ec2 module, adjusted cdot image command to `--config env:OTEL_CONFIG`
