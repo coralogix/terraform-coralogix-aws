@@ -1,12 +1,19 @@
 # Changelog
 
+## v2.1.1
+#### **S3-archive**
+### 🧰 Bug fixes 🧰 
+- Add `logs_bucket_force_destroy` and `metrics_bucket_force_destroy` variables to allow force destroy the bucekts.
+
 ## v2.1.0
+#### **firehose-metrics**
 ### 💡 Enhancements 
 - Added an option to include metrics from source accounts linked to the monitoring account in the Firehose CloudWatch metric stream.
 - Introduced the `include_linked_accounts_metrics` variable to control the inclusion of linked account metrics for Firehose.
 - Updated example configurations to demonstrate usage of the `include_linked_accounts_metrics` variable in Firehose metric streams.
 
 ## v2.0.1
+#### **ecs-ec2**
 ### 🧰 Bug fixes 🧰
 - Fixed ecs-ec2 module, adjusted cdot image command to `--config env:OTEL_CONFIG`
 - Removed latest flag from ecs-ec2 module example.
@@ -14,7 +21,6 @@
 
 ### 💡 Enhancements 
 - Added pprof extension to default ecs-ec2 otel configurations.
-
 
 ## v2.0.0
 ### 🛑 Breaking changes 🛑

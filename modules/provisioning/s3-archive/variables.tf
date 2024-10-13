@@ -37,13 +37,13 @@ variable "coralogix_arn_mapping" {
 variable "logs_bucket_name" {
   type        = string
   description = "The name of the S3 bucket to create for the logs archive (Leave empty if not needed)"
-  default     = ""
+  default     = null
 }
 
 variable "metrics_bucket_name" {
   type        = string
   description = "The name of the S3 bucket to create for the metrics archive (Leave empty if not needed)"
-  default     = ""
+  default     = null
 }
 
 variable "logs_kms_arn" {
@@ -56,6 +56,18 @@ variable "metrics_kms_arn" {
   type        = string
   description = "The arn for the metrics bucket KMS"
   default     = ""
+}
+
+variable "logs_bucket_force_destroy" {
+  type        = bool
+  description = "force the metrics bucket to destroyed, even if there is data in it"
+  default     = false
+}
+
+variable "metrics_bucket_force_destroy" {
+  type        = bool
+  description = "force the metrics bucket to destroyed, even if there is data in it"
+  default     = false
 }
 
 variable "aws_role_region"  {

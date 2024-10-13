@@ -1,7 +1,3 @@
-output "bucket_name_same" {
-  value = local.is_same_bucket_name ? "Logs and Metrics bucket name should not be the same" : ""
-}
-
 output "wrong_region" {
   value = local.is_valid_region ? "" : "You tried to configure the bucket in a region that is not supported, or you are not in the region that you specified. Allow regions: eu-west-1, eu-north-1, ap-southeast-1, ap-south-1, us-east-2, us-west-2"
 }

@@ -1,6 +1,6 @@
 locals {
-  is_logs_bucket_name_empty    = var.logs_bucket_name != ""
-  is_metrics_bucket_name_empty = var.metrics_bucket_name != ""
+  is_logs_bucket_name_empty    = var.logs_bucket_name != null
+  is_metrics_bucket_name_empty = var.metrics_bucket_name != null
   is_same_bucket_name          = var.logs_bucket_name == var.metrics_bucket_name
   is_valid_region              = data.aws_region.current.name == var.aws_region
   coralogix_role_region        = lookup(var.aws_role_region, var.aws_region)
@@ -18,17 +18,13 @@ data "aws_region" "current" {}
 resource "aws_s3_bucket" "logs_bucket_name" {
   count  = local.logs_validations ? 1 : 0
   bucket = var.logs_bucket_name
-  lifecycle {
-    prevent_destroy = true
-  }
+  force_destroy = var.logs_bucket_force_destroy
 }
 
 resource "aws_s3_bucket" "metrics_bucket_name" {
   count  = local.metrics_validations ? 1 : 0
   bucket = var.metrics_bucket_name
-  lifecycle {
-    prevent_destroy = true
-  }
+  force_destroy = var.metrics_bucket_force_destroy
 }
 
 resource "aws_s3_bucket_policy" "logs_bucket_policy" {
