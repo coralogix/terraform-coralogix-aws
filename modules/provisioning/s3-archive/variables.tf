@@ -37,13 +37,13 @@ variable "coralogix_arn_mapping" {
 variable "logs_bucket_name" {
   type        = string
   description = "The name of the S3 bucket to create for the logs archive (Leave empty if not needed)"
-  default     = ""
+  default     = null
 }
 
 variable "metrics_bucket_name" {
   type        = string
   description = "The name of the S3 bucket to create for the metrics archive (Leave empty if not needed)"
-  default     = ""
+  default     = null
 }
 
 variable "logs_kms_arn" {
