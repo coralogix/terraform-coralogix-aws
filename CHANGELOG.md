@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.1.2
+#### **coralogix-aws-shipper**
+### 🧰 Bug fixes 🧰 
+- Add new variable `govcloud_deployment`, when set to true the arn of resource that are being used by the module will start with `arn:aws-us-gov` instead of `arn:aws`
+- Add a condition to the `aws_iam_policy.AWSLambdaMSKExecutionRole` block so it will only create it when MSK is enabled
+
 ## v2.1.1
 #### **S3-archive**
 ### 🧰 Bug fixes 🧰 
