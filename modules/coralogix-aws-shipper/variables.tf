@@ -279,6 +279,12 @@ variable "custom_s3_bucket" {
   default     = ""
 }
 
+variable "govcloud_deployment" {
+  description = "Enable if you deploy the integration in govcloud"
+  type        = bool
+  default     = false
+}
+
 variable "lambda_name" {
   type        = string
   description = "The name of the lambda function"

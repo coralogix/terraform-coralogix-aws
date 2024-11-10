@@ -328,3 +328,9 @@ variable "custom_metadata" {
   description = "Add custom metadata to the log message. Expects comma separated values. Options are key1=value1,key2=value2 "
   type        = string
 }
+
+variable "govcloud_deployment" {
+  description = "Enable if you deploy the integration in govcloud"
+  type        = bool
+  default     = false
+}

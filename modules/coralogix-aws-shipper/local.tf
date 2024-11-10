@@ -39,4 +39,5 @@ locals {
   is_sns_integration = local.sns_enable && (var.integration_type == "S3" || var.integration_type == "Sns" || var.integration_type == "CloudTrail") ? true : false
   is_sqs_integration = var.sqs_name != null && (var.integration_type == "S3" || var.integration_type == "CloudTrail" || var.integration_type == "Sqs") ? true : false
 
+  arn_prefix = var.govcloud_deployment ? "arn:aws-us-gov" : "arn:aws"
 }

@@ -57,7 +57,7 @@ resource "aws_iam_role_policy" "destination_policy" {
 resource "aws_iam_role_policy_attachment" "msk-role-policy-attach" {
   count      = var.msk_cluster_arn != null ? 1 : 0
   role       = aws_iam_role.role_for_msk[0].name
-  policy_arn = data.aws_iam_policy.AWSLambdaMSKExecutionRole.arn
+  policy_arn = data.aws_iam_policy.AWSLambdaMSKExecutionRole[0].arn
 }
 
 resource "aws_lambda_event_source_mapping" "msk_event_mapping" {
