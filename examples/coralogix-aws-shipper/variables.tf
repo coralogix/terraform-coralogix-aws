@@ -328,3 +328,21 @@ variable "custom_metadata" {
   description = "Add custom metadata to the log message. Expects comma separated values. Options are key1=value1,key2=value2 "
   type        = string
 }
+
+variable "lambda_assume_role_arn" {
+  default     = null
+  description = "The ARN of the role that the lambda function will assume. "
+  type        = string
+}
+
+variable "execution_role_arn" {
+  default     = null
+  description = "The arn of a user defined role that will be used as the execution role for the lambda function. "
+  type        = string
+}
+
+variable "reserved_concurrent_executions" {
+  default     = 0
+  description = "The number of concurrent executions that are reserved for this function, leave as default to use unreserved account concurrency"
+  type        = number
+}

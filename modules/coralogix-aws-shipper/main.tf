@@ -13,6 +13,13 @@ resource "random_string" "this" {
   special = false
 }
 
+resource "random_string" "lambda_role" {
+  count   = var.execution_role_name == null ? 1 : 0
+
+  length  = 6
+  special = false
+}
+
 resource "null_resource" "s3_bucket_copy" {
   count = var.custom_s3_bucket == "" ? 0 : 1
 
@@ -31,6 +38,99 @@ resource "null_resource" "s3_bucket_copy" {
   }
 }
 
+resource "aws_iam_policy" "lambda_policy" {
+  for_each = var.integration_info != null ? var.integration_info : local.integration_info
+
+  name        = "policy-for-coralogix-lambda"
+  description = "Policy for Lambda function ${each.value.lambda_name == null ? module.locals[each.key].function_name : each.value.lambda_name}"
+  policy      = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      # DLQ SQS Permissions
+      {
+        Effect   = "Allow",
+        Action   = var.enable_dlq ? ["sqs:SendMessage", "sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+        Resource = var.enable_dlq ? [aws_sqs_queue.DLQ[0].arn] : ["*"]
+      },
+
+      # DLQ S3 Permissions
+      {
+        Effect   = "Allow",
+        Action   = var.enable_dlq ? ["s3:PutObject", "s3:PutObjectAcl", "s3:AbortMultipartUpload", "s3:DeleteObject", "s3:PutObjectTagging", "s3:PutObjectVersionTagging"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+        Resource = var.enable_dlq ? ["${data.aws_s3_bucket.dlq_bucket[0].arn}/*", data.aws_s3_bucket.dlq_bucket[0].arn] : ["*"]
+      },
+
+      # Secrets Access Policy
+      {
+        Effect   = each.value.store_api_key_in_secrets_manager == null || each.value.store_api_key_in_secrets_manager == true || local.api_key_is_arn ? "Allow" : "Deny",
+        Action   = ["secretsmanager:GetSecretValue"],
+        Resource = local.api_key_is_arn ? [var.api_key] : [aws_secretsmanager_secret.coralogix_secret[each.key].arn]
+      },
+
+      # Destination on Failure Policy
+      {
+        Effect   = "Allow",
+        Action   = var.notification_email != null ? ["sns:Publish"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+        Resource = var.notification_email != null ? [aws_sns_topic.this[each.key].arn] : ["*"]
+      },
+
+      # Private Link Policy
+      {
+        Effect   = "Allow",
+        Action   = var.subnet_ids != null ? ["ec2:CreateNetworkInterface", "ec2:DescribeNetworkInterfaces", "ec2:DeleteNetworkInterface"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+        Resource = ["*"]
+      },
+
+      # SQS S3 Integration Policy
+      {
+        Effect   = "Allow",
+        Action   = var.sqs_name != null && var.s3_bucket_name != null ? ["s3:GetObject", "s3:ListBucket", "s3:GetBucketLocation", "s3:GetObjectVersion", "s3:GetLifecycleConfiguration"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+        Resource = var.sqs_name != null && var.s3_bucket_name != null ? ["${data.aws_s3_bucket.this[0].arn}/*", data.aws_s3_bucket.this[0].arn] : ["*"]
+      },
+
+      # Additional Integration Policies
+      {
+        Effect   = "Allow",
+        Action   = var.integration_type == "EcrScan" ? ["ecr:DescribeImageScanFindings"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+        Resource = ["*"]
+      }, 
+
+      # CloudWatch Logs Policy
+      {
+        Effect   = "Allow"
+        Action   = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"]
+        Resource = ["*"]
+      }
+
+    ]
+  })
+}
+
+resource "aws_iam_role" "lambda_role" {
+  count              = var.execution_role_name == null ? 1 : 0
+  name               = "Coralogix-lambda-role-${random_string.lambda_role[0].result}"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+# Attach the policy to the existing role
+resource "aws_iam_role_policy_attachment" "attach_to_existing_role" {
+  for_each = var.integration_info != null ? var.integration_info : local.integration_info
+
+  role       = var.execution_role_name != null ? var.execution_role_name : aws_iam_role.lambda_role[0].name
+  policy_arn = aws_iam_policy.lambda_policy[each.key].arn
+}
+
 module "lambda" {
   for_each = var.integration_info != null ? var.integration_info : local.integration_info
 
@@ -44,12 +144,12 @@ module "lambda" {
   architectures          = [var.cpu_arch]
   memory_size            = var.memory_size
   timeout                = var.timeout
+  reserved_concurrent_executions = var.reserved_concurrent_executions
   create_package         = false
   destination_on_failure = var.notification_email != null ? aws_sns_topic.this[each.key].arn : null
   vpc_subnet_ids         = var.subnet_ids
   vpc_security_group_ids = var.security_group_ids
-  dead_letter_target_arn    = var.enable_dlq ? aws_sqs_queue.DLQ[0].arn : null
-  # attach_dead_letter_policy = var.enable_dlq
+  dead_letter_target_arn = var.enable_dlq ? aws_sqs_queue.DLQ[0].arn : null
   environment_variables = {
     CORALOGIX_ENDPOINT = var.custom_domain != "" ? "https://ingress.${var.custom_domain}" : var.subnet_ids == null ? "https://ingress.${lookup(module.locals[each.key].coralogix_domains, var.coralogix_region, "EU1")}" : "https://ingress.private.${lookup(module.locals[each.key].coralogix_domains, var.coralogix_region, "EU1")}"
     INTEGRATION_TYPE   = each.value.integration_type
@@ -67,127 +167,21 @@ module "lambda" {
     DLQ_RETRY_LIMIT    = var.enable_dlq ? var.dlq_retry_limit : null
     DLQ_S3_BUCKET      = var.enable_dlq ? var.dlq_s3_bucket : null
     DLQ_URL            = var.enable_dlq ? aws_sqs_queue.DLQ[0].url : null
+    ASSUME_ROLE_ARN    = var.lambda_assume_role_arn
   }
   s3_existing_package = {
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
     key    = var.cpu_arch == "arm64" ? "coralogix-aws-shipper.zip" : "coralogix-aws-shipper-x86-64.zip"
   }
-  policy_path                             = "/coralogix/"
-  role_path                               = "/coralogix/"
-  role_name                               = each.value.lambda_name == null ? "${module.locals[each.key].function_name}-Role" : "${each.value.lambda_name}-Role"
-  role_description                        = each.value.lambda_name == null ? "Role for ${module.locals[each.key].function_name} Lambda Function." : "Role for ${each.value.lambda_name} Lambda Function."
+  # policy_path                             = "/coralogix/"
+  # role_path                               = "/coralogix/"
+  # role_name                               = each.value.lambda_name == null ? "${module.locals[each.key].function_name}-Role" : "${each.value.lambda_name}-Role"
+  # role_description                        = each.value.lambda_name == null ? "Role for ${module.locals[each.key].function_name} Lambda Function." : "Role for ${each.value.lambda_name} Lambda Function."
   cloudwatch_logs_retention_in_days       = each.value.lambda_log_retention
   create_current_version_allowed_triggers = false
-  attach_policy_statements                = true
-  create_role                             = var.msk_cluster_arn != null ? false : true
-  lambda_role                             = var.msk_cluster_arn != null ? aws_iam_role.role_for_msk[0].arn : ""
-  policy_statements = {
-    dlq_sqs_permissions = var.enable_dlq ? {
-      effect    = "Allow"
-      actions   = ["sqs:SendMessage","sqs:ReceiveMessage","sqs:DeleteMessage","sqs:GetQueueAttributes"]
-      resources = [aws_sqs_queue.DLQ[0].arn]
-    } : {
-      effect    = "Deny"
-      actions   = ["rds:DescribeAccountAttributes"]
-      resources = ["*"]
-    }
-    dlq_s3_permissions = var.enable_dlq ? {
-      effect    = "Allow"
-      actions   = ["s3:PutObject","s3:PutObjectAcl","s3:AbortMultipartUpload","s3:DeleteObject","s3:PutObjectTagging","s3:PutObjectVersionTagging"]
-      resources = ["${data.aws_s3_bucket.dlq_bucket[0].arn}/*", data.aws_s3_bucket.dlq_bucket[0].arn]
-    } : {
-      effect    = "Deny"
-      actions   = ["rds:DescribeAccountAttributes"]
-      resources = ["*"]
-    }
-    secret_access_policy = each.value.store_api_key_in_secrets_manager == null || each.value.store_api_key_in_secrets_manager == true || local.api_key_is_arn ? {
-      effect    = "Allow"
-      actions   = ["secretsmanager:GetSecretValue"]
-      resources = local.api_key_is_arn ? [var.api_key] : [aws_secretsmanager_secret.coralogix_secret[each.key].arn]
-      } : {
-      effect    = "Deny"
-      actions   = ["secretsmanager:GetSecretValue"]
-      resources = ["*"]
-    }
-    destination_on_failure_policy = var.notification_email != null ? {
-      effect    = "Allow"
-      actions   = ["sns:publish"]
-      resources = [aws_sns_topic.this[each.key].arn]
-    } : {
-      effect    = "Deny"
-      actions   = ["rds:DescribeAccountAttributes"]
-      resources = ["*"]
-    }
-    private_link_policy = var.subnet_ids != null ? {
-      effect    = "Allow"
-      actions   = ["ec2:CreateNetworkInterface", "ec2:DescribeNetworkInterfaces", "ec2:DeleteNetworkInterface"]
-      resources = ["*"]
-      } : {
-      effect    = "Deny"
-      actions   = ["rds:DescribeAccountAttributes"]
-      resources = ["*"]
-    }
-    sqs_s3_integration_policy = var.sqs_name != null && var.s3_bucket_name != null ? {
-      effect = "Allow"
-      actions = [
-        "s3:GetObject",
-        "s3:ListBucket",
-        "s3:GetBucketLocation",
-        "s3:GetObjectVersion",
-        "s3:GetLifecycleConfiguration"
-      ]
-      resources = ["${data.aws_s3_bucket.this[0].arn}/*", data.aws_s3_bucket.this[0].arn]
-      } : {
-      effect    = "Deny"
-      actions   = ["rds:DescribeAccountAttributes"]
-      resources = ["*"]
-    }
-    integrations_policy = var.s3_bucket_name != null && var.sqs_name == null ? {
-      effect    = "Allow"
-      actions   = ["s3:GetObject"]
-      resources = ["${data.aws_s3_bucket.this[0].arn}/*"]
-      } : var.sqs_name != null ? {
-      effect = "Allow"
-      actions = [
-        "sqs:ReceiveMessage",
-        "sqs:DeleteMessage",
-        "sqs:GetQueueAttributes"
-      ]
-      resources = [data.aws_sqs_queue.name[0].arn]
-      } : var.kinesis_stream_name != null ? {
-      effect = "Allow"
-      actions = [
-        "kinesis:GetRecords",
-        "kinesis:GetShardIterator",
-        "kinesis:DescribeStream",
-        "kinesis:ListStreams",
-        "kinesis:ListShards",
-        "kinesis:DescribeStreamSummary",
-        "kinesis:SubscribeToShard"
-      ]
-      resources = [data.aws_kinesis_stream.kinesis_stream[0].arn]
-      } : var.kafka_brokers != null ? {
-      effect = "Allow"
-      actions = [
-        "ec2:CreateNetworkInterface",
-        "ec2:DescribeNetworkInterfaces",
-        "ec2:DescribeVpcs",
-        "ec2:DeleteNetworkInterface",
-        "ec2:DescribeSubnets",
-        "ec2:DescribeSecurityGroups"
-      ]
-      resources = ["*"]
-      } : var.integration_type == "EcrScan" ? {
-      effect    = "Allow"
-      actions   = ["ecr:DescribeImageScanFindings"]
-      resources = ["*"]
-      } : {
-      effect    = "Deny"
-      actions   = ["ecr:DescribeImageScanFindings"]
-      resources = ["*"]
-    }
-  }
-
+  attach_policy_statements                = false
+  create_role                             = false
+  lambda_role                             = var.execution_role_name != null ? data.aws_iam_role.LambdaExecutionRole[0].arn : aws_iam_role.lambda_role[0].arn
   allowed_triggers = var.s3_bucket_name != null && local.sns_enable != true ? {
     AllowExecutionFromS3 = {
       principal  = "s3.amazonaws.com"
