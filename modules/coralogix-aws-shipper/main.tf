@@ -94,6 +94,26 @@ resource "aws_iam_policy" "lambda_policy" {
         Action   = var.integration_type == "EcrScan" ? ["ecr:DescribeImageScanFindings"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
         Resource = ["*"]
       }, 
+      {
+        Effect   = "Allow",
+        Action   = var.s3_bucket_name != null && var.sqs_name == null ? ["s3:GetObject"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+        Resource = ["${data.aws_s3_bucket.this[0].arn}/*"]
+      },
+      {
+        Effect   = "Allow",
+        Action   = var.s3_bucket_name != null && var.sqs_name != null ? ["sqs:ReceiveMessage","sqs:DeleteMessage","sqs:GetQueueAttributes"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+        Resource = [data.aws_sqs_queue.name[0].arn]
+      }, 
+      {
+        Effect   = "Allow",
+        Action   = var.kinesis_stream_name != null ? ["kinesis:GetRecords","kinesis:GetShardIterator","kinesis:DescribeStream","kinesis:ListStreams","kinesis:ListShards","kinesis:DescribeStreamSummary","kinesis:SubscribeToShard"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+        Resource = [data.aws_kinesis_stream.kinesis_stream[0].arn]
+      }, 
+      {
+        Effect   = "Allow",
+        Action   = var.kafka_brokers != null ? ["ec2:CreateNetworkInterface","ec2:DescribeNetworkInterfaces","ec2:DescribeVpcs","ec2:DeleteNetworkInterface","ec2:DescribeSubnets","ec2:DescribeSecurityGroups"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+        Resource = ["*"]
+      }, 
 
       # CloudWatch Logs Policy
       {
@@ -101,7 +121,6 @@ resource "aws_iam_policy" "lambda_policy" {
         Action   = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"]
         Resource = ["*"]
       }
-
     ]
   })
 }
