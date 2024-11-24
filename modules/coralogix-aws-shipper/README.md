@@ -146,6 +146,9 @@ When using this variable you will need to create an S3 bucket in the region wher
 | <a name="log_level"></a> [log_level](#input\_log\_level) | Specify the log level for the Lambda function, choosing from the following options: INFO, WARN, ERROR, DEBUG. | `string` | INFO | no |
 | <a name="cpu_arch"></a> [cpu_arch](#input\_cpu\_arch) | Lambda function CPU architecture could be: arm64 or x86_64 | `string` | arm64 | no |
 | <a name="runtime"></a> [runtime](#input\_runtime) | Lambda function runtime. E.g.: 'provided.al2023', 'provided.al2' | `string` | provided.al2023 | no |
+| <a name="reserved_concurrent_executions"></a> [reserved_concurrent_executions](#input\_reserved_concurrent_executions) | The number of concurrent executions that are reserved for the function, leave empty so the lambda will use unreserved account concurrency.	 | `number` | n/a | no |
+| <a name="execution_role_name"></a> [execution_role_name](#input\_execution_role_name) | The arn of a user defined role that will be used as the execution role for the lambda function | `string` | n/a | no |
+| <a name="lambda_assume_role_arn"></a> [lambda_assume_role_arn](#input\_lambda_assume_role_arn) | A role that the lambda will assume, leave empty to use the default permissions. Note that if this Parameter is used, all S3 and ECR API calls from the lambda will be made with the permissions of the Assumed Role. | `string` | n/a | no |
 
 ### VPC Configuration (Optional)
 

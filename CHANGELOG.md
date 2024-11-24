@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.1.1
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 
+- Add `reserved_concurrent_executions` variable to allow user to define lambda Function concurrency.
+- Add `execution_role_name` variable, when deffined the lambda will use this role as execution role. The module will add to this variable the necessary permissions to run the lambda.
+- Add `lambda_assume_role_arn` variable, when set the lambda will assume this role in the code level.
+
 ## v2.0.1
 ### 🧰 Bug fixes 🧰
 - Fixed ecs-ec2 module, adjusted cdot image command to `--config env:OTEL_CONFIG`

@@ -335,7 +335,7 @@ variable "lambda_assume_role_arn" {
   type        = string
 }
 
-variable "execution_role_arn" {
+variable "execution_role_name" {
   default     = null
   description = "The arn of a user defined role that will be used as the execution role for the lambda function. "
   type        = string

@@ -46,6 +46,8 @@ resource "aws_iam_policy" "lambda_policy" {
   policy      = jsonencode({
     Version = "2012-10-17",
     Statement = [
+      # because its not possible to leave a condition empty than  we need the add the condition for cloudwatch
+
       # DLQ SQS Permissions
       {
         Effect   = "Allow",
@@ -88,27 +90,35 @@ resource "aws_iam_policy" "lambda_policy" {
         Resource = var.sqs_name != null && var.s3_bucket_name != null ? ["${data.aws_s3_bucket.this[0].arn}/*", data.aws_s3_bucket.this[0].arn] : ["*"]
       },
 
-      # Additional Integration Policies
+      # EcrScan Integration Policy
       {
         Effect   = "Allow",
         Action   = var.integration_type == "EcrScan" ? ["ecr:DescribeImageScanFindings"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
         Resource = ["*"]
       }, 
+
+      # S3 Integration Policy
       {
         Effect   = "Allow",
         Action   = var.s3_bucket_name != null && var.sqs_name == null ? ["s3:GetObject"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
         Resource = var.s3_bucket_name != null && var.sqs_name == null ? ["${data.aws_s3_bucket.this[0].arn}/*"] : ["*"]
       },
+
+      #S3 with SQS Integration Policy
       {
         Effect   = "Allow",
         Action   = var.s3_bucket_name != null && var.sqs_name != null ? ["sqs:ReceiveMessage","sqs:DeleteMessage","sqs:GetQueueAttributes"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
         Resource = var.s3_bucket_name != null && var.sqs_name != null ? [data.aws_sqs_queue.name[0].arn] : ["*"]
       }, 
+
+      # Kinesis Integration policy
       {
         Effect   = "Allow",
         Action   = var.kinesis_stream_name != null ? ["kinesis:GetRecords","kinesis:GetShardIterator","kinesis:DescribeStream","kinesis:ListStreams","kinesis:ListShards","kinesis:DescribeStreamSummary","kinesis:SubscribeToShard"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
         Resource = var.kinesis_stream_name != null ? [data.aws_kinesis_stream.kinesis_stream[0].arn] : ["*"]
       }, 
+
+      # Kafka Integration Policy
       {
         Effect   = "Allow",
         Action   = var.kafka_brokers != null ? ["ec2:CreateNetworkInterface","ec2:DescribeNetworkInterfaces","ec2:DescribeVpcs","ec2:DeleteNetworkInterface","ec2:DescribeSubnets","ec2:DescribeSecurityGroups"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
@@ -192,10 +202,6 @@ module "lambda" {
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
     key    = var.cpu_arch == "arm64" ? "coralogix-aws-shipper.zip" : "coralogix-aws-shipper-x86-64.zip"
   }
-  # policy_path                             = "/coralogix/"
-  # role_path                               = "/coralogix/"
-  # role_name                               = each.value.lambda_name == null ? "${module.locals[each.key].function_name}-Role" : "${each.value.lambda_name}-Role"
-  # role_description                        = each.value.lambda_name == null ? "Role for ${module.locals[each.key].function_name} Lambda Function." : "Role for ${each.value.lambda_name} Lambda Function."
   cloudwatch_logs_retention_in_days       = each.value.lambda_log_retention
   create_current_version_allowed_triggers = false
   attach_policy_statements                = false
@@ -265,7 +271,6 @@ resource "aws_sns_topic_policy" "test" {
 
 
 resource "aws_secretsmanager_secret" "coralogix_secret" {
-  # count       = var.store_api_key_in_secrets_manager && !local.api_key_is_arn ? 1 : 0
   for_each = {
     for key, integration_info in var.integration_info != null ? var.integration_info : local.integration_info : key => integration_info
     if !local.api_key_is_arn && (integration_info.store_api_key_in_secrets_manager == null || integration_info.store_api_key_in_secrets_manager == true) 
@@ -279,7 +284,6 @@ resource "aws_secretsmanager_secret" "coralogix_secret" {
 }
 
 resource "aws_secretsmanager_secret_version" "service_user" {
-  # count         = var.store_api_key_in_secrets_manager && !local.api_key_is_arn ? 1 : 0
   for_each = {
     for key, integration_info in var.integration_info != null ? var.integration_info : local.integration_info : key => integration_info
     if !local.api_key_is_arn && (integration_info.store_api_key_in_secrets_manager == null || integration_info.store_api_key_in_secrets_manager == true)
