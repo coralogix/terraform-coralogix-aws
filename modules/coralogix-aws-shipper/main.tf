@@ -160,6 +160,13 @@ resource "aws_iam_role_policy_attachment" "attach_to_existing_role" {
   policy_arn = aws_iam_policy.lambda_policy[each.key].arn
 }
 
+resource "aws_iam_role_policy_attachment" "attach_msk_policy" {
+  for_each = var.integration_info != null ? var.integration_info : local.integration_info
+
+  role       = var.execution_role_name != null ? var.execution_role_name : aws_iam_role.lambda_role[0].name
+  policy_arn = data.aws_iam_policy.AWSLambdaMSKExecutionRole.arn
+}
+
 module "lambda" {
   for_each = var.integration_info != null ? var.integration_info : local.integration_info
 
