@@ -345,4 +345,9 @@ variable "reserved_concurrent_executions" {
   default     = 0
   description = "The number of concurrent executions that are reserved for this function, leave as default to use unreserved account concurrency"
   type        = number
+
+variable "govcloud_deployment" {
+  description = "Enable if you deploy the integration in govcloud"
+  type        = bool
+  default     = false
 }

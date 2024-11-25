@@ -1,13 +1,32 @@
 # Changelog
 
-## v2.1.1
+## v2.2.2
 #### **coralogix-aws-shipper**
 ### 💡 Enhancements 
 - Add `reserved_concurrent_executions` variable to allow user to define lambda Function concurrency.
 - Add `execution_role_name` variable, when deffined the lambda will use this role as execution role. The module will add to this variable the necessary permissions to run the lambda.
 - Add `lambda_assume_role_arn` variable, when set the lambda will assume this role in the code level.
 
+## v2.1.2
+#### **coralogix-aws-shipper**
+### 🧰 Bug fixes 🧰 
+- Add new variable `govcloud_deployment`, when set to true the arn of resource that are being used by the module will start with `arn:aws-us-gov` instead of `arn:aws`
+- Add a condition to the `aws_iam_policy.AWSLambdaMSKExecutionRole` block so it will only create it when MSK is enabled
+
+## v2.1.1
+#### **S3-archive**
+### 🧰 Bug fixes 🧰 
+- Add `logs_bucket_force_destroy` and `metrics_bucket_force_destroy` variables to allow force destroy the bucekts.
+
+## v2.1.0
+#### **firehose-metrics**
+### 💡 Enhancements 
+- Added an option to include metrics from source accounts linked to the monitoring account in the Firehose CloudWatch metric stream.
+- Introduced the `include_linked_accounts_metrics` variable to control the inclusion of linked account metrics for Firehose.
+- Updated example configurations to demonstrate usage of the `include_linked_accounts_metrics` variable in Firehose metric streams.
+
 ## v2.0.1
+#### **ecs-ec2**
 ### 🧰 Bug fixes 🧰
 - Fixed ecs-ec2 module, adjusted cdot image command to `--config env:OTEL_CONFIG`
 - Removed latest flag from ecs-ec2 module example.
@@ -15,7 +34,6 @@
 
 ### 💡 Enhancements 
 - Added pprof extension to default ecs-ec2 otel configurations.
-
 
 ## v2.0.0
 ### 🛑 Breaking changes 🛑

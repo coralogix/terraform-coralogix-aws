@@ -48,7 +48,7 @@ data "aws_iam_policy_document" "topic" {
     }
 
     actions   = local.sns_enable ? ["SNS:Publish"] : ["SQS:SendMessage"]
-    resources = local.sns_enable ? ["arn:aws:sns:*:*:${data.aws_sns_topic.sns_topic[count.index].name}"] : ["arn:aws:sqs:*:*:${data.aws_sqs_queue.name[count.index].name}"]
+    resources = local.sns_enable ? ["${local.arn_prefix}:sns:*:*:${data.aws_sns_topic.sns_topic[count.index].name}"] : ["${local.arn_prefix}:sqs:*:*:${data.aws_sqs_queue.name[count.index].name}"]
 
     condition {
       test     = "ArnLike"
@@ -59,7 +59,8 @@ data "aws_iam_policy_document" "topic" {
 }
 
 data "aws_iam_policy" "AWSLambdaMSKExecutionRole" {
-  arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaMSKExecutionRole"
+  count = var.msk_cluster_arn != null ? 1 : 0
+  arn   = "${local.arn_prefix}:iam::aws:policy/service-role/AWSLambdaMSKExecutionRole"
 }
 
 data "aws_iam_role" "LambdaExecutionRole" {

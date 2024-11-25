@@ -128,6 +128,7 @@ If you want to avoid this issue, you can deploy in other ways:
 | <a name="input_sampling_rate"></a> [sampling\_rate](#input\_sampling\_rate) | Send messages at a specific rate, such as 1 out of every N logs. For example, if your value is 10, a message will be sent for every 10th log. | `number` | `1` | no |
 | <a name="input_notification_email"></a> [notification_email](#input\_notification\_email) | A failure notification will be sent to this email address. | `string` |  n/a | no |
 | <a name="input_custom_s3_bucket"></a> [custom\_s3\_bucket](#input\_custom\_s3\_bucket) | The name of an existing s3 bucket in your region, in which the lambda zip code will be uploaded to. | `string` | n/a | no |
+| <a name="input_govcloud_deployment"></a> [govcloud\_deployment](#input\_govcloud\_deployment) | Enable if you deploy the integration in govcloud | `bool` | false | no |
 
 **Custom S3 Bucket**
 
