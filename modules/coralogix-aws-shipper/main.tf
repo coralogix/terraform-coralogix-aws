@@ -41,7 +41,7 @@ resource "null_resource" "s3_bucket_copy" {
 resource "aws_iam_policy" "lambda_policy" {
   for_each = var.integration_info != null ? var.integration_info : local.integration_info
 
-  name        = "policy-for-coralogix-lambda"
+  name        = "policy-for-coralogix-lambda-${random_string.this[each.key].result}"
   description = "Policy for Lambda function ${each.value.lambda_name == null ? module.locals[each.key].function_name : each.value.lambda_name}"
   policy      = jsonencode({
     Version = "2012-10-17",
@@ -161,10 +161,13 @@ resource "aws_iam_role_policy_attachment" "attach_to_existing_role" {
 }
 
 resource "aws_iam_role_policy_attachment" "attach_msk_policy" {
-  for_each = var.integration_info != null ? var.integration_info : local.integration_info
-
+  # for_each = {
+  #   for key, integration_info in var.integration_info != null ? var.integration_info : local.integration_info : key => integration_info
+  #   if var.msk_cluster_arn != null
+  # }
+  count = var.msk_cluster_arn != null ? 1 : 0
   role       = var.execution_role_name != null ? var.execution_role_name : aws_iam_role.lambda_role[0].name
-  policy_arn = data.aws_iam_policy.AWSLambdaMSKExecutionRole.arn
+  policy_arn = data.aws_iam_policy.AWSLambdaMSKExecutionRole[0].arn
 }
 
 module "lambda" {
