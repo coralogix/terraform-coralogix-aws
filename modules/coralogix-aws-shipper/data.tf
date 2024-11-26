@@ -62,3 +62,8 @@ data "aws_iam_policy" "AWSLambdaMSKExecutionRole" {
   count = var.msk_cluster_arn != null ? 1 : 0
   arn   = "${local.arn_prefix}:iam::aws:policy/service-role/AWSLambdaMSKExecutionRole"
 }
+
+data "aws_iam_role" "LambdaExecutionRole" {
+  count = var.execution_role_name != null ? 1 : 0
+  name = var.execution_role_name
+}
