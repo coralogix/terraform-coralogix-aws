@@ -46,7 +46,7 @@ resource "aws_iam_policy" "lambda_policy" {
   policy      = jsonencode({
     Version = "2012-10-17",
     Statement = [
-      # because its not possible to leave a condition empty than  we need the add the condition for cloudwatch
+      # because its not possible to leave a condition empty than we need the add the condition for cloudwatch
 
       # DLQ SQS Permissions
       {
@@ -64,9 +64,9 @@ resource "aws_iam_policy" "lambda_policy" {
 
       # Secrets Access Policy
       {
-        Effect   = each.value.store_api_key_in_secrets_manager == null || each.value.store_api_key_in_secrets_manager == true || local.api_key_is_arn ? "Allow" : "Deny",
-        Action   = ["secretsmanager:GetSecretValue"],
-        Resource = local.api_key_is_arn ? [var.api_key] : [aws_secretsmanager_secret.coralogix_secret[each.key].arn]
+        Effect   = "Allow",
+        Action   = each.value.store_api_key_in_secrets_manager == null || each.value.store_api_key_in_secrets_manager == true || local.api_key_is_arn ? ["secretsmanager:GetSecretValue"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+        Resource = local.api_key_is_arn ? [var.api_key] : each.value.store_api_key_in_secrets_manager == null || each.value.store_api_key_in_secrets_manager == true ? [aws_secretsmanager_secret.coralogix_secret[each.key].arn] : ["*"]
       },
 
       # Destination on Failure Policy
@@ -315,7 +315,7 @@ resource "aws_vpc_endpoint" "secretsmanager" {
 
 resource "aws_sqs_queue" "DLQ" {
   count = var.enable_dlq ? 1 : 0
-  name                       = "coralogix-aws-shipper-dlq-${random_string.this[0].result}"
+  name                       = "coralogix-aws-shipper-dlq-${random_string.lambda_role[0].result}"
   message_retention_seconds  = 1209600
   delay_seconds              = var.dlq_retry_delay
   visibility_timeout_seconds = var.timeout
