@@ -259,6 +259,12 @@ variable "cpu_arch" {
   }
 }
 
+variable "source_code_version" {
+  description = "The source code for the shipper lambda version, the varible need to be in the formate of x.x.x and is only suppordet since version 1.0.8"
+  type        = string
+  default     = ""
+}
+
 # Integration Generic Config (Optional)
 
 variable "notification_email" {

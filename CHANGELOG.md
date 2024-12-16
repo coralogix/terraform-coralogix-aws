@@ -1,5 +1,21 @@
 # Changelog
 
+## v2.3.0
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 
+- Add new variable `source_code_version`, to allow user to specify the source lambda code version
+### 🛑 Breaking changes In the source code 🛑
+- updated support for dynamic value allocation of Application and Subsystem names based on internal metadata
+- updated how metadata is recorded and propagated throughout the function, including adding more metadata fields and updating the names of others.
+    - stream_name --> cw.log.stream
+    - bucket_name --> s3.bucket
+    - key_name --> s3.object.key
+    - topic_name --> kafka.topic
+    - log_group_name --> cw.log.group
+- Added new syntax for evaluating dynamic allocation fields. `{{ metadata | r'regex' }}`
+- Removed dynamic application and sybsustem
+- It is still possible to use the old version of the source code by using the new variable: `source_code_version` and spacify version that is older then `1.1.0`
+
 ## v2.2.3
 #### **firehose-metrics**
 #### **firehose-logs**
