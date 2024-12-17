@@ -96,14 +96,13 @@ It is possible to pass a custom coralogix domain by using the `custom_domain` va
 | <a name="input_source_type_logs"></a> [source_type_logs](#input\_source_type_logs) | The source_type of kinesis firehose: KinesisStreamAsSource or DirectPut | `string` | `DirectPut` | no |
 | <a name="input_kinesis_stream_arn"></a> [kinesis_stream_arn](#input\_kinesis_stream_arn) | If 'KinesisStreamAsSource' set as source_type_logs. Set the kinesis stream's ARN as the source of the firehose log stream | `string` | `""` | no |
 | <a name="input_integration_type_logs"></a> [integration_type_logs](#input\_integration_type_logs) | The integration type of the firehose delivery stream: 'CloudWatch_JSON', 'WAF', 'CloudWatch_CloudTrail', 'EksFargate', 'Default', 'RawText' | `string` | `Default` | no |
+| <a name="input_s3_backup_custom_name"></a> [s3_backup_custom_name](#input\_s3_backup_custom_name) | Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup-logs' will be used | `string` | `null` | no |
+| <a name="input_existing_s3_backup"></a> [existing\_s3\_backup](variables.tf#L149) | Use an existing S3 bucket to use as a backup bucket. | `string` | n/a | no |
+| <a name="input_govcloud_deployment"></a> [govcloud\_deployment](#input\_govcloud\_deployment) | Enable if you deploy the integration in govcloud | `bool` | false | no |
+| <a name="input_firehose_iam_custom_name"></a> [firehose\_iam\_custom\_name](variables.tf#L179) | Set the name of the IAM role & policy, otherwise variable '{firehose_stream}-firehose-metrics-iam' will be used. | `string` | n/a | no |
+| <a name="input_existing_firehose_iam"></a> [existing\_firehose\_iam](variables.tf#L185) | Use an existing IAM role to use as a firehose role. | `string` | n/a | no |
 | <a name="input_user_supplied_tags"></a> [user_supplied_tags](#input\_user_supplied_tags) | Tags supplied by the user to populate to all generated resources | `map(string)` | n/a | no |
 | <a name="input_override_default_tags"></a> [override_default_tags](#input\_override_default_tags) | Override and remove the default tags by setting to true | `bool` | `false` | no |
-
-## Inputs - Custom Resource Naming
-| Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
-| <a name="input_s3_backup_custom_name"></a> [s3_backup_custom_name](#input\_s3_backup_custom_name) | Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup-logs' will be used | `string` | `null` | no |
-
 
 ## Coralgoix regions
 
