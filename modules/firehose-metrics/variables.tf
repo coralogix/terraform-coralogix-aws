@@ -82,7 +82,7 @@ variable "include_metric_stream_filter" {
   default = []
 }
 
-  variable "include_linked_accounts_metrics" {
+variable "include_linked_accounts_metrics" {
   description = "include_linked_accounts_metrics (Optional) If you are creating a metric stream in a monitoring account, specify true to include metrics from source accounts that are linked to this monitoring account, in the metric stream. The default is false."
   type        = bool
   default     = false
@@ -150,6 +150,12 @@ variable "existing_s3_backup" {
   description = "Use an existing S3 bucket to use as a backup bucket"
   type        = string
   default     = null
+}
+
+variable "govcloud_deployment" {
+  description = "Enable if you deploy the integration in govcloud"
+  type        = bool
+  default     = false
 }
 
 variable "lambda_processor_enable" {

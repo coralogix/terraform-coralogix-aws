@@ -56,3 +56,9 @@ variable "cloudwatch_retention_days" {
   type        = number
   default     = 1
 }
+
+variable "govcloud_deployment" {
+  description = "Enable if you deploy the integration in govcloud"
+  type        = bool
+  default     = false
+}

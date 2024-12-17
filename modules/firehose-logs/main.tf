@@ -32,6 +32,8 @@ locals {
   #new global resource namings
   new_s3_backup_bucket_name = var.s3_backup_custom_name != null ? var.s3_backup_custom_name : "${var.firehose_stream}-backup-logs"
   new_firehose_iam_name     = var.firehose_iam_custom_name != null ? var.firehose_iam_custom_name : "${var.firehose_stream}-firehose-logs-iam"
+
+  arn_prefix = var.govcloud_deployment ? "arn:aws-us-gov" : "arn:aws"
 }
 
 data "aws_caller_identity" "current_identity" {}
@@ -136,7 +138,7 @@ resource "aws_iam_role" "new_firehose_iam" {
             "kinesis:GetRecords",
             "kinesis:ListShards"
           ],
-          "Resource" = "arn:aws:kinesis:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_identity.account_id}:stream/*"
+          "Resource" = "${local.arn_prefix}:kinesis:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_identity.account_id}:stream/*"
         },
         {
           "Effect" : "Allow",
@@ -156,19 +158,19 @@ resource "aws_iam_role" "new_firehose_iam" {
 resource "aws_iam_role_policy_attachment" "policy_attachment_firehose" {
   count      = var.existing_firehose_iam != null ? 0 : 1
   role       = one(aws_iam_role.new_firehose_iam[*].name)
-  policy_arn = "arn:aws:iam::aws:policy/AmazonKinesisFirehoseFullAccess"
+  policy_arn = "${local.arn_prefix}:iam::aws:policy/AmazonKinesisFirehoseFullAccess"
 }
 
 resource "aws_iam_role_policy_attachment" "policy_attachment_kinesis" {
   count      = var.existing_firehose_iam != null ? 0 : 1
   role       = one(aws_iam_role.new_firehose_iam[*].name)
-  policy_arn = "arn:aws:iam::aws:policy/AmazonKinesisReadOnlyAccess"
+  policy_arn = "${local.arn_prefix}:iam::aws:policy/AmazonKinesisReadOnlyAccess"
 }
 
 resource "aws_iam_role_policy_attachment" "policy_attachment_cloudwatch" {
   count      = var.existing_firehose_iam != null ? 0 : 1
   role       = one(aws_iam_role.new_firehose_iam[*].name)
-  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
+  policy_arn = "${local.arn_prefix}:iam::aws:policy/CloudWatchLogsFullAccess"
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs" {
