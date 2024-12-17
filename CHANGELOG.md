@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.2.3
+#### **firehose-metrics**
+#### **firehose-logs**
+### 🧰 Bug fixes 🧰 
+- Add new variable `govcloud_deployment`, when set to true the arn of resource that are being used by the module will start with `arn:aws-us-gov` instead of `arn:aws`
+
 ## v2.2.2
 #### **coralogix-aws-shipper**
 ### 💡 Enhancements 
