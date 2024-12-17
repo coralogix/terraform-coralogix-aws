@@ -72,6 +72,12 @@ variable "existing_s3_backup" {
   default     = null
 }
 
+variable "govcloud_deployment" {
+  description = "Enable if you deploy the integration in govcloud"
+  type        = bool
+  default     = false
+}
+
 variable "firehose_iam_custom_name" {
   description = "Set the name of the firehose IAM role & policy, otherwise variable '{firehose_stream}-firehose-logs-iam' will be used"
   type        = string

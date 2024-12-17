@@ -40,6 +40,8 @@ locals {
   new_lambda_processor_iam_name = var.lambda_processor_iam_custom_name != null ? var.lambda_processor_iam_custom_name : "${var.firehose_stream}-lambda-processor-iam"
   new_firehose_iam_name         = var.firehose_iam_custom_name != null ? var.firehose_iam_custom_name : "${var.firehose_stream}-firehose-metrics-iam"
   new_metric_stream_iam_name    = var.metric_streams_iam_custom_name != null ? var.metric_streams_iam_custom_name : "${var.firehose_stream}-cw-iam"
+
+  arn_prefix = var.govcloud_deployment ? "arn:aws-us-gov" : "arn:aws"
 }
 
 data "aws_caller_identity" "current_identity" {}
@@ -150,7 +152,7 @@ resource "aws_iam_policy" "new_firehose_iam" {
                "kms:GenerateDataKey"
            ],
            "Resource": [
-               "arn:aws:kms:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_identity.account_id}:key/key-id"
+               "${local.arn_prefix}:kms:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_identity.account_id}:key/key-id"
            ],
            "Condition": {
                "StringEquals": {
@@ -169,7 +171,7 @@ resource "aws_iam_policy" "new_firehose_iam" {
                "kinesis:GetRecords",
                "kinesis:ListShards"
            ],
-           "Resource": "arn:aws:kinesis:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_identity.account_id}:stream/*"
+           "Resource": "${local.arn_prefix}:kinesis:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_identity.account_id}:stream/*"
         },
         {
            "Effect": "Allow",
@@ -263,7 +265,7 @@ resource "aws_iam_role_policy" "new_lambda_iam" {
               "logs:CreateLogGroup"
           ],
           "Effect": "Allow",
-          "Resource": "arn:aws:logs:*:*:*",
+          "Resource": "${local.arn_prefix}:logs:*:*:*",
           "Sid": ""
       }
   ]
@@ -438,13 +440,13 @@ EOF
 }
 
 resource "aws_cloudwatch_metric_stream" "cloudwatch_metric_stream" {
-  tags          = local.tags
-  count         = var.enable_cloudwatch_metricstream ? 1 : 0
-  name          = local.cloud_watch_metric_stream_name
-  role_arn      = local.metrics_stream_iam_role_arn
-  firehose_arn  = aws_kinesis_firehose_delivery_stream.coralogix_stream_metrics.arn
+  tags                            = local.tags
+  count                           = var.enable_cloudwatch_metricstream ? 1 : 0
+  name                            = local.cloud_watch_metric_stream_name
+  role_arn                        = local.metrics_stream_iam_role_arn
+  firehose_arn                    = aws_kinesis_firehose_delivery_stream.coralogix_stream_metrics.arn
   include_linked_accounts_metrics = var.include_linked_accounts_metrics
-  output_format = var.output_format
+  output_format                   = var.output_format
 
   dynamic "include_filter" {
     for_each = var.include_metric_stream_namespaces
