@@ -1,6 +1,6 @@
 # Coralogix configuration
 variable "coralogix_region" {
-  description = "The Coralogix location region, possible options are [EU1, EU2, AP1, AP2, US1, US2]"
+  description = "The Coralogix location region, possible options are [EU1, EU2, AP1, AP2, AP3, US1, US2]"
   type        = string
   validation {
     condition     = contains(["EU1", "EU2", "AP1", "AP2", "AP3", "US1", "US2", "Custom"], var.coralogix_region)
@@ -345,6 +345,7 @@ variable "reserved_concurrent_executions" {
   default     = 0
   description = "The number of concurrent executions that are reserved for this function, leave as default to use unreserved account concurrency"
   type        = number
+}
 
 variable "govcloud_deployment" {
   description = "Enable if you deploy the integration in govcloud"

@@ -161,10 +161,6 @@ resource "aws_iam_role_policy_attachment" "attach_to_existing_role" {
 }
 
 resource "aws_iam_role_policy_attachment" "attach_msk_policy" {
-  # for_each = {
-  #   for key, integration_info in var.integration_info != null ? var.integration_info : local.integration_info : key => integration_info
-  #   if var.msk_cluster_arn != null
-  # }
   count = var.msk_cluster_arn != null ? 1 : 0
   role       = var.execution_role_name != null ? var.execution_role_name : aws_iam_role.lambda_role[0].name
   policy_arn = data.aws_iam_policy.AWSLambdaMSKExecutionRole[0].arn
@@ -207,11 +203,11 @@ module "lambda" {
     DLQ_S3_BUCKET      = var.enable_dlq ? var.dlq_s3_bucket : null
     DLQ_URL            = var.enable_dlq ? aws_sqs_queue.DLQ[0].url : null
     ASSUME_ROLE_ARN    = var.lambda_assume_role_arn
-  }
+  } 
   s3_existing_package = {
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
-    key    = var.cpu_arch == "arm64" ? "coralogix-aws-shipper.zip" : "coralogix-aws-shipper-x86-64.zip"
-  }
+    key = var.cpu_arch == "arm64" ?  "coralogix-aws-shipper${var.source_code_version != "" ? "-${var.cpu_arch}-${var.source_code_version}" : ""}.zip" : "coralogix-aws-shipper-x86-64${var.source_code_version != "" ? "-${var.cpu_arch}-${var.source_code_version}" : ""}.zip"
+}
   cloudwatch_logs_retention_in_days       = each.value.lambda_log_retention
   create_current_version_allowed_triggers = false
   attach_policy_statements                = false

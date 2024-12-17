@@ -1,6 +1,6 @@
 # Coralogix configuration
 variable "coralogix_region" {
-  description = "The Coralogix location region, possible options are [EU1, EU2, AP1, AP2, US1, US2]"
+  description = "The Coralogix location region, possible options are [EU1, EU2, AP1, AP2, AP3, US1, US2]"
   type        = string
   validation {
     condition     = contains(["EU1", "EU2", "AP1", "AP2", "AP3", "US1", "US2", "Custom"], var.coralogix_region)
@@ -257,6 +257,12 @@ variable "cpu_arch" {
     condition     = contains(["arm64", "x86_64"], var.cpu_arch)
     error_message = "The CPU architecture must be one of these values: [arm64, x86_64]."
   }
+}
+
+variable "source_code_version" {
+  description = "The source code for the shipper lambda version, the varible need to be in the formate of x.x.x and is only suppordet since version 1.0.8"
+  type        = string
+  default     = ""
 }
 
 # Integration Generic Config (Optional)
