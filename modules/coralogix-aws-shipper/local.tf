@@ -17,7 +17,7 @@ locals {
     group
   } : {}
 
-  api_key_is_arn = nonsensitive(replace(var.api_key, ":", "") != var.api_key ? true : false)
+  api_key_is_arn = replace(nonsensitive(var.api_key), ":", "") != nonsensitive(var.api_key) ? true : false
 
   integration_info = var.integration_info == null ? {
     integration = {
