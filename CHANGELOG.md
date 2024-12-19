@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.3.1
+#### **coralogix-aws-shipper**
+### 🧰 Bug fixes 🧰 
+- Fix issue with local variable `api_key_is_arn` being nonsensitive, for terraform version lower than `1.10.0`
+
 ## v2.3.0
 #### **coralogix-aws-shipper**
 ### 💡 Enhancements 
