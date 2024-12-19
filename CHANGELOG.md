@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.3.1
+#### **ecs-ec2**
+### 🧰 Bug fixes 🧰
+- Removed `default` key from `json_parser` operator, because the operator doesn't have this key, and the opentelemetry config failed because of it
+
 ## v2.3.0
 #### **coralogix-aws-shipper**
 ### 💡 Enhancements 
