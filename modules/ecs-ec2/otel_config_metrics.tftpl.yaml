@@ -35,7 +35,6 @@ receivers:
         timestamp:
           parse_from: body.time
           layout: '%Y-%m-%dT%H:%M:%S.%fZ'
-        default: move_log_file_path
 
       # handle logs split by docker
       - type: recombine
