@@ -12,7 +12,7 @@ Provision a firehose delivery stream for streaming logs to [Coralogix](https://c
 module "cloudwatch_firehose_logs_coralogix" {
   source                         = "coralogix/aws/coralogix//modules/firehose-logs"
   firehose_stream                = var.coralogix_firehose_stream_name
-  private_key                    = var.private_key
+  api_key                        = var.api_key
   coralogix_region               = var.coralogix_region
   integration_type_logs          = "Default"
   source_type_logs               = "DirectPut"
@@ -87,7 +87,7 @@ It is possible to pass a custom coralogix domain by using the `custom_domain` va
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | Coralogix account region: EU1, EU2, AP1, AP2, AP3, US1, US2 [exact] | `any` | n/a | yes |
-| <a name="input_private_key"></a> [private_key](#input\_private_key) | Coralogix account logs private key | `any` | n/a | yes |
+| <a name="input_api_key"></a> [api_key](#input\_api_key) | Coralogix account logs API key | `any` | n/a | yes |
 | <a name="input_firehose_stream"></a> [firehose\_stream](#input\_firehose\_stream) | AWS Kinesis firehose delivery stream name | `string` | n/a | yes |
 | <a name="input_application_name"></a> [application_name](#input\_application_name) | The name of your application in Coralogix | `string` | n/a | yes |
 | <a name="input_subsystem_name"></a> [subsystem_name](#input\_subsystem_name) | The subsystem name of your application in Coralogix | `string` | n/a | yes |
