@@ -95,63 +95,71 @@ data "aws_iam_role" "existing_firehose_iam" {
 }
 
 resource "aws_iam_role" "new_firehose_iam" {
-  count = var.existing_firehose_iam != null ? 0 : 1
-  tags  = local.tags
-  name  = local.new_firehose_iam_name
-  assume_role_policy = jsonencode({
-    "Version" = "2012-10-17",
-    "Statement" = [
-      {
-        "Action" = "sts:AssumeRole",
-        "Principal" = {
-          "Service" = "firehose.amazonaws.com"
-        },
-        "Effect" = "Allow"
-      }
-    ]
-  })
-  inline_policy {
-    name = local.new_firehose_iam_name
-    policy = jsonencode({
-      "Version" = "2012-10-17",
-      "Statement" = [
-        {
-          "Effect" = "Allow",
-          "Action" = [
-            "s3:AbortMultipartUpload",
-            "s3:GetBucketLocation",
-            "s3:GetObject",
-            "s3:ListBucket",
-            "s3:ListBucketMultipartUploads",
-            "s3:PutObject"
-          ],
-          "Resource" = [
-            "${local.s3_backup_bucket_arn}",
-            "${local.s3_backup_bucket_arn}/*"
-          ]
-        },
-        {
-          "Effect" = "Allow",
-          "Action" = [
-            "kinesis:DescribeStream",
-            "kinesis:GetShardIterator",
-            "kinesis:GetRecords",
-            "kinesis:ListShards"
-          ],
-          "Resource" = "${local.arn_prefix}:kinesis:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_identity.account_id}:stream/*"
-        },
-        {
-          "Effect" : "Allow",
-          "Action" : [
-            "logs:PutLogEvents"
-          ],
-          "Resource" : [
-            "${aws_cloudwatch_log_group.firehose_loggroup.arn}"
-          ]
-        }
-      ]
-    })
+  count              = var.existing_firehose_iam != null ? 0 : 1
+  tags               = local.tags
+  name               = local.new_firehose_iam_name
+  assume_role_policy = data.aws_iam_policy_document.assume_new_firehose_iam.json
+}
+
+data "aws_iam_policy_document" "assume_new_firehose_iam" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["firehose.amazonaws.com"]
+    }
+
+    effect = "Allow"
   }
+}
+
+data "aws_iam_policy_document" "new_firehose_policy" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:AbortMultipartUpload",
+      "s3:GetBucketLocation",
+      "s3:GetObject",
+      "s3:ListBucket",
+      "s3:ListBucketMultipartUploads",
+      "s3:PutObject",
+    ]
+    resources = [
+      local.s3_backup_bucket_arn,
+      "${local.s3_backup_bucket_arn}/*",
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "kinesis:DescribeStream",
+      "kinesis:GetShardIterator",
+      "kinesis:GetRecords",
+      "kinesis:ListShards",
+    ]
+    resources = [
+      "${local.arn_prefix}:kinesis:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_identity.account_id}:stream/*",
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "logs:PutLogEvents",
+    ]
+    resources = [
+      aws_cloudwatch_log_group.firehose_loggroup.arn,
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "new_firehose_policy" {
+  count  = var.existing_firehose_iam != null ? 0 : 1
+  name   = local.new_firehose_iam_name
+  role   = aws_iam_role.new_firehose_iam[0].name
+  policy = data.aws_iam_policy_document.new_firehose_policy.json
 }
 
 # Add additional policies to the firehose IAM role
