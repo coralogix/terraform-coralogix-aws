@@ -104,21 +104,23 @@ data "aws_iam_role" "existing_firehose_iam" {
 }
 
 resource "aws_iam_role" "new_firehose_iam" {
-  count = var.existing_firehose_iam != null ? 0 : 1
-  tags  = local.tags
-  name  = local.new_firehose_iam_name
-  assume_role_policy = jsonencode({
-    "Version" = "2012-10-17",
-    "Statement" = [
-      {
-        "Action" = "sts:AssumeRole",
-        "Principal" = {
-          "Service" = "firehose.amazonaws.com"
-        },
-        "Effect" = "Allow"
-      }
-    ]
-  })
+  count              = var.existing_firehose_iam != null ? 0 : 1
+  tags               = local.tags
+  name               = local.new_firehose_iam_name
+  assume_role_policy = data.aws_iam_policy_document.assume_new_firehose_iam.json
+}
+
+data "aws_iam_policy_document" "assume_new_firehose_iam" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["firehose.amazonaws.com"]
+    }
+
+    effect = "Allow"
+  }
 }
 
 resource "aws_iam_policy" "new_firehose_iam" {

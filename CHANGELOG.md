@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.3.3
+#### **firehose-metrics**
+#### **firehose-logs**
+### 🧰 Bug fixes 🧰
+- Decouple IAM policy documents from IAM role resource
+
 ## v2.3.2
 #### **ecs-ec2**
 ### 🧰 Bug fixes 🧰
