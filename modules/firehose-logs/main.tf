@@ -157,7 +157,7 @@ data "aws_iam_policy_document" "new_firehose_policy" {
 
 resource "aws_iam_role_policy" "new_firehose_policy" {
   count  = var.existing_firehose_iam != null ? 0 : 1
-  name   = "${local.new_firehose_iam_name}-policy"
+  name   = local.new_firehose_iam_name
   role   = aws_iam_role.new_firehose_iam[0].name
   policy = data.aws_iam_policy_document.new_firehose_policy.json
 }
