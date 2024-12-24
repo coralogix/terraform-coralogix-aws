@@ -182,7 +182,7 @@ resource "aws_iam_role_policy_attachment" "policy_attachment_cloudwatch" {
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs" {
-  tags        = local.tags
+  tags        = merge(local.tags, { LogDeliveryEnabled = "true" })
   name        = var.firehose_stream
   destination = "http_endpoint"
 

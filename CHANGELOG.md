@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.3.4
+#### **firehose-logs**
+### 🧰 Bug fixes 🧰
+- Tag missing for `aws_kinesis_firehose_delivery_stream` resource
+
 ## v2.3.3
 #### **firehose-metrics**
 #### **firehose-logs**
