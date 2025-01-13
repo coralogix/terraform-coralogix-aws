@@ -85,6 +85,28 @@ resource "aws_s3_bucket_public_access_block" "firehose_bucket_bucket_access" {
   restrict_public_buckets = true
 }
 
+data "aws_iam_policy_document" "bucket_policy_doc" {
+  statement {
+    sid    = "AllowSSLRequestsOnly"
+    effect = "Deny"
+    principals {
+      type        = "*"
+      identifiers = ["*"]
+    }
+    actions = [
+      "s3:*"
+    ]
+    resources = [
+      "${aws_s3_bucket.new_s3_bucket.arn}/*",
+      aws_s3_bucket.new_s3_bucket.arn
+    ]
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values   = ["false"]
+    }
+  }
+}
 ################################################################################
 # Firehose Logs Stream
 ################################################################################
