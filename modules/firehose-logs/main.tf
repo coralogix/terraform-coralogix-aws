@@ -98,8 +98,8 @@ data "aws_iam_policy_document" "bucket_policy_doc" {
       "s3:*"
     ]
     resources = [
-      "${aws_s3_bucket.new_s3_bucket.arn}/*",
-      aws_s3_bucket.new_s3_bucket.arn
+      "${one(aws_s3_bucket.new_s3_bucket[*].arn)}/*",
+      one(aws_s3_bucket.new_s3_bucket[*].arn)
     ]
     condition {
       test     = "Bool"
@@ -111,8 +111,8 @@ data "aws_iam_policy_document" "bucket_policy_doc" {
 
 resource "aws_s3_bucket_policy" "bucket_name_policy" {
   count  = var.existing_s3_backup != null ? 0 : 1
-  bucket = aws_s3_bucket.new_s3_bucket.id
-  policy = data.aws_iam_policy_document.bucket_policy_doc.json
+  bucket = one(aws_s3_bucket.new_s3_bucket[*].id)
+  policy = one(data.aws_iam_policy_document.bucket_policy_doc[*].json)
 }
 
 ################################################################################
