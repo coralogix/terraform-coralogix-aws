@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.3.5
+#### **firehose-logs**
+### 💡 Enhancements 💡
+- Added Amazon S3 bucket policies to require encryption during data transit.
+  
 ## v2.3.4
 #### **firehose-logs**
 ### 🧰 Bug fixes 🧰
