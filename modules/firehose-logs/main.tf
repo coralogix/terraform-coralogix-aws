@@ -86,6 +86,7 @@ resource "aws_s3_bucket_public_access_block" "firehose_bucket_bucket_access" {
 }
 
 data "aws_iam_policy_document" "bucket_policy_doc" {
+  count  = var.existing_s3_backup != null ? 0 : 1
   statement {
     sid    = "AllowSSLRequestsOnly"
     effect = "Deny"
@@ -106,6 +107,12 @@ data "aws_iam_policy_document" "bucket_policy_doc" {
       values   = ["false"]
     }
   }
+}
+
+resource "aws_s3_bucket_policy" "bucket_name_policy" {
+  count  = var.existing_s3_backup != null ? 0 : 1
+  bucket = aws_s3_bucket.new_s3_bucket.id
+  policy = data.aws_iam_policy_document.bucket_policy_doc.json
 }
 ################################################################################
 # Firehose Logs Stream
