@@ -103,6 +103,7 @@ It is possible to pass a custom coralogix domain by using the `custom_domain` va
 | <a name="input_existing_firehose_iam"></a> [existing\_firehose\_iam](variables.tf#L185) | Use an existing IAM role to use as a firehose role. | `string` | n/a | no |
 | <a name="input_user_supplied_tags"></a> [user_supplied_tags](#input\_user_supplied_tags) | Tags supplied by the user to populate to all generated resources | `map(string)` | n/a | no |
 | <a name="input_override_default_tags"></a> [override_default_tags](#input\_override_default_tags) | Override and remove the default tags by setting to true | `bool` | `false` | no |
+| <a name="s3_enable_secure_transport"></a> [s3\_enable\_secure\_transport](variables.tf#L105) | Disable if you dont want bucket policy that complies with s3-bucket-ssl-requests-only rule | `bool` | `true` | no |
 
 ## Coralgoix regions
 

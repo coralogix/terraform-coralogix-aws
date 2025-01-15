@@ -101,3 +101,9 @@ variable "override_default_tags" {
   type        = bool
   default     = false
 }
+
+variable "s3_enable_secure_transport" {
+  description = "Disable if you dont want bucket policy that complies with s3-bucket-ssl-requests-only rule"
+  type        = bool
+  default     = true
+}
