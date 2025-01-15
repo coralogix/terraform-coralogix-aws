@@ -86,7 +86,7 @@ resource "aws_s3_bucket_public_access_block" "firehose_bucket_bucket_access" {
 }
 
 data "aws_iam_policy_document" "bucket_policy_doc" {
-  count  = var.existing_s3_backup != null ? 0 : 1
+  count  = var.existing_s3_backup != null ? 0 : var.s3_enable_secure_transport ? 1 : 0
   statement {
     sid    = "AllowSSLRequestsOnly"
     effect = "Deny"
@@ -110,7 +110,7 @@ data "aws_iam_policy_document" "bucket_policy_doc" {
 }
 
 resource "aws_s3_bucket_policy" "bucket_name_policy" {
-  count  = var.existing_s3_backup != null ? 0 : 1
+  count  = var.existing_s3_backup != null ? 0 : var.s3_enable_secure_transport ? 1 : 0
   bucket = one(aws_s3_bucket.new_s3_bucket[*].id)
   policy = one(data.aws_iam_policy_document.bucket_policy_doc[*].json)
 }
