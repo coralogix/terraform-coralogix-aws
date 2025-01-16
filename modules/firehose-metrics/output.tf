@@ -1,3 +1,8 @@
+output "firehose_stream_arn" {
+  value       = aws_kinesis_firehose_delivery_stream.coralogix_stream_metrics.arn
+  description = "value of the firehose stream ARN"
+}
+
 output "firehose_stream_name" {
   value       = aws_kinesis_firehose_delivery_stream.coralogix_stream_metrics.name
   description = "value of the firehose stream name"

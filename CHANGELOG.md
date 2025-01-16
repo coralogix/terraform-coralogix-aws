@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.4.1
+#### **firehose-logs**
+### 💡 Enhancements 💡
+- Added module outputs
+#### **firehose-metrics**
+### 💡 Enhancements 💡
+- Added module output `firehose_stream_arn`
+### 🧰 Bug fixes 🧰
+– Added missing docs on module outputs
+
 ## v2.4.0
 #### **firehose-logs**
 ### 💡 Enhancements 💡

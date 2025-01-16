@@ -119,5 +119,11 @@ It is possible to pass a custom coralogix domain by using the `custom_domain` va
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_firehose_stream_arn"></a> [firehose\_stream\_arn](#output\_firehose\_stream\_arn) | ARN of the Firehose Delivery Stream |
+| <a name="output_firehose_stream_name"></a> [firehose\_stream\_name](#output\_firehose\_stream\_name) | Name of the Firehose Delivery Stream |
+| <a name="output_firehose_iam_role_arn"></a> [firehose\_iam_role\_arn](#output\_firehose\_iam_role\_arn) | ARN of the Firehose IAM role |
+| <a name="output_s3_backup_bucket_arn"></a> [s3\_backup\_bucket\_arn](#output\_s3\_backup\_bucket\_arn) | ARN of the Firehose S3 Backup Bucket |
+
 <!-- END_TF_DOCS -->

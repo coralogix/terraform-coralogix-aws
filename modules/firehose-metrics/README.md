@@ -237,5 +237,15 @@ then the CloudWatch metric stream must be configured with the same format, confi
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_firehose_stream_arn"></a> [firehose\_stream\_arn](#output\_firehose\_stream\_arn) | ARN of the Firehose Delivery Stream |
+| <a name="output_firehose_stream_name"></a> [firehose\_stream\_name](#output\_firehose\_stream\_name) | Name of the Firehose Delivery Stream |
+| <a name="output_firehose_iam_role_arn"></a> [firehose\_iam_role\_arn](#output\_firehose\_iam_role\_arn) | ARN of the Firehose IAM role |
+| <a name="output_s3_backup_bucket_arn"></a> [s3\_backup\_bucket\_arn](#output\_s3\_backup\_bucket\_arn) | ARN of the Firehose S3 Backup Bucket |
+| <a name="output_lambda_processor_arn"></a> [lambda\_processor\_arn](#output\_lambda\_processor\_arn) | ARN of the Lambda Processor |
+| <a name="output_lambda_processor_iam_arn"></a> [lambda\_processor\_iam\_arn](#output\_lambda\_processor\_iam\_arn) | ARN of the Lambda Processor IAM role |
+| <a name="output_metric_stream_arn"></a> [metric\_stream\_arn](#output\_metric\_stream\_arn) | ARN of the CloudWatch Metric Stream |
+| <a name="output_metric_stream_iam_role_arn"></a> [metric\_stream\_iam\_role\_arn](#output\_metric\_stream\_iam\_role\_arn) | ARN of the CloudWatch Metric Stream IAM role |
+
 <!-- END_TF_DOCS -->
