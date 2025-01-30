@@ -297,7 +297,7 @@ resource "aws_cloudwatch_log_group" "loggroup" {
 resource "aws_lambda_function" "lambda_processor" {
   depends_on    = [null_resource.s3_bucket_copy]
   count         = var.lambda_processor_enable ? 1 : 0
-  s3_bucket     = var.custom_s3_bucket != null ? var.custom_s3_bucket : "cx-cw-metrics-tags-lambda-processor-${data.aws_region.current_region.name}"
+  s3_bucket     = coalesce(var.custom_s3_bucket, "cx-cw-metrics-tags-lambda-processor-${data.aws_region.current_region.name}")
   s3_key        = "bootstrap.zip"
   function_name = local.lambda_processor_name
   role          = local.lambda_processor_iam_role_arn
