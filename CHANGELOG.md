@@ -9,6 +9,7 @@
 - Added module output `firehose_stream_arn`
 ### 🧰 Bug fixes 🧰
 – Added missing docs on module outputs
+– Add a new variable `custom_s3_bucket` to allow users to deploy the integration in govcloud. specify a custom s3 bucket to save the lambda zip code in
 
 ## v2.4.0
 #### **firehose-logs**

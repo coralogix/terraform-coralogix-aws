@@ -53,6 +53,19 @@ resource "random_string" "this" {
   upper   = false
 }
 
+resource "null_resource" "s3_bucket_copy" {
+  count = var.custom_s3_bucket != null ? 1 : 0
+
+  provisioner "local-exec" {
+    command = <<-EOF
+      file_name="bootstrap.zip"
+      curl -o $file_name https://cx-cw-metrics-tags-lambda-processor-eu-west-1.s3.eu-west-1.amazonaws.com/bootstrap.zip
+      aws s3 cp --region ${data.aws_region.current_region.name} ./bootstrap.zip s3://${var.custom_s3_bucket}
+      rm ./$file_name
+    EOF
+  }
+}
+
 ################################################################################
 # Firehose Delivery Stream
 ################################################################################
@@ -283,8 +296,9 @@ resource "aws_cloudwatch_log_group" "loggroup" {
 }
 
 resource "aws_lambda_function" "lambda_processor" {
+  # depends_on = [null_resource.s3_bucket_copy]
   count         = var.lambda_processor_enable ? 1 : 0
-  s3_bucket     = "cx-cw-metrics-tags-lambda-processor-${data.aws_region.current_region.name}"
+  s3_bucket     = var.custom_s3_bucket != null ? var.custom_s3_bucket : "cx-cw-metrics-tags-lambda-processor-${data.aws_region.current_region.name}"
   s3_key        = "bootstrap.zip"
   function_name = local.lambda_processor_name
   role          = local.lambda_processor_iam_role_arn
