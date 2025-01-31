@@ -1,6 +1,6 @@
 provider "aws" {}
 
-module "resource-metadata" {
+module "resource-metadata-sqs" {
   source = "coralogix/aws/coralogix//modules/resource-metadata-sqs"
 
   coralogix_region = "EU2"
