@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.5.0
+#### **resource-metadata-sqs**
+### 🚀 New components 🚀
+- Created [resource-metadata-sqs](./modules/resource-metadata-sqs) module – extended version of the [resource-metadata](./modules/resource-metadata) module, which uses SQS to make the metadata generation process asynchronous in order to handle a large number of resources (source code available [here](https://github.com/coralogix/coralogix-aws-serverless/tree/master/src/resource-metadata-sqs)).
+
 ## v2.4.1
 #### **firehose-logs**
 ### 💡 Enhancements 💡
