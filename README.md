@@ -21,6 +21,9 @@ Firehose Metrics module is designed to support AWS Firehose Metrics integration 
 ### resource-metadata:
 Send metadata from your AWS account to coralogix - [resource-metadata](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/resource-metadata)
 
+### resource-metadata-sqs:
+Send metadata from your AWS account to Coralogix. This is an extended version of the [resource-metadata](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/resource-metadata) module that uses SQS to make the metadata generation process asynchronous, allowing it to handle a large number of resources. This module is recommended for environments with more than 5,000 Lambda functions (or EC2 instances) in the target AWS region - [resource-metadata-sqs](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/resource-metadata-sqs)
+
 ### eventbridge
 Send aws events to your coralogix account - [eventbridge](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/eventbridge)
 
