@@ -58,7 +58,11 @@ resource "random_string" "this" {
 resource "null_resource" "s3_bucket" {
   count = var.custom_s3_bucket == "" ? 0 : 1
   provisioner "local-exec" {
-    command = "curl -o ${var.package_name}.zip https://coralogix-serverless-repo-eu-central-1.s3.eu-central-1.amazonaws.com/${var.package_name}.zip ; aws s3 cp ./${var.package_name}.zip s3://${var.custom_s3_bucket} ; rm ./${var.package_name}.zip"
+    command = "curl -o ${var.package_name}-collector.zip https://coralogix-serverless-repo-eu-central-1.s3.eu-central-1.amazonaws.com/${var.package_name}-collector.zip ; aws s3 cp ./${var.package_name}-collector.zip s3://${var.custom_s3_bucket} ; rm ./${var.package_name}-collector.zip"
+  }
+
+  provisioner "local-exec" {
+    command = "curl -o ${var.package_name}-generator.zip https://coralogix-serverless-repo-eu-central-1.s3.eu-central-1.amazonaws.com/${var.package_name}-generator.zip ; aws s3 cp ./${var.package_name}-generator.zip s3://${var.custom_s3_bucket} ; rm ./${var.package_name}-generator.zip"
   }
 }
 
