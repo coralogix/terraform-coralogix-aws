@@ -55,8 +55,16 @@ resource "random_string" "this" {
   special = false
 }
 
+resource "null_resource" "s3_bucket" {
+  count = var.custom_s3_bucket == "" ? 0 : 1
+  provisioner "local-exec" {
+    command = "curl -o ${var.package_name}.zip https://coralogix-serverless-repo-eu-central-1.s3.eu-central-1.amazonaws.com/${var.package_name}.zip ; aws s3 cp ./${var.package_name}.zip s3://${var.custom_s3_bucket} ; rm ./${var.package_name}.zip"
+  }
+}
+
 module "collector_lambda" {
   source                 = "terraform-aws-modules/lambda/aws"
+  depends_on             = [null_resource.s3_bucket]
   version                = "7.20.1"
   publish                = true
   function_name          = "${local.function_name}-collector"
@@ -129,6 +137,7 @@ module "collector_lambda" {
 
 module "generator_lambda" {
   source                 = "terraform-aws-modules/lambda/aws"
+  depends_on             = [null_resource.s3_bucket]
   version                = "7.20.1"
   publish                = true
   create                 = var.secret_manager_enabled == false ? true : false
@@ -204,6 +213,7 @@ module "generator_lambda" {
 
 module "generator_lambda_sm" {
   source                 = "terraform-aws-modules/lambda/aws"
+  depends_on             = [null_resource.s3_bucket]
   version                = "7.20.1"
   publish                = true
   create                 = var.secret_manager_enabled ? true : false
