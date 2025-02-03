@@ -14,7 +14,7 @@ variable "custom_url" {
   default     = ""
 }
 
-variable "private_key" {
+variable "api_key" {
   description = "Your Coralogix Send Your Data - API Key or incase you use pre created secret (created in AWS secret manager) put here the name of the secret that contains the Coralogix send your data key"
   type        = string
   sensitive   = true

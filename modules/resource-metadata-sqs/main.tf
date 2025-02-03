@@ -153,7 +153,7 @@ module "generator_lambda" {
 
   environment_variables = {
     CORALOGIX_METADATA_URL       = lookup(local.coralogix_regions, var.coralogix_region, "EU1")
-    private_key                  = var.private_key
+    private_key                  = var.api_key
     LATEST_VERSIONS_PER_FUNCTION = var.latest_versions_per_function
     COLLECT_ALIASES              = var.collect_aliases == true ? "True" : "False"
     RESOURCE_TTL_MINUTES         = var.resource_ttl_minutes
@@ -231,7 +231,7 @@ module "generator_lambda_sm" {
   environment_variables = {
     CORALOGIX_METADATA_URL       = lookup(local.coralogix_regions, var.coralogix_region, "EU1")
     AWS_LAMBDA_EXEC_WRAPPER      = "/opt/wrapper.sh"
-    SECRET_NAME                  = var.create_secret == false ? var.private_key : ""
+    SECRET_NAME                  = var.create_secret == false ? var.api_key : ""
     LATEST_VERSIONS_PER_FUNCTION = var.latest_versions_per_function
     COLLECT_ALIASES              = var.collect_aliases == true ? "True" : "False"
     RESOURCE_TTL_MINUTES         = var.resource_ttl_minutes
@@ -303,7 +303,7 @@ resource "aws_sns_topic" "this" {
   tags         = merge(var.tags, local.tags)
 }
 
-resource "aws_secretsmanager_secret" "private_key_secret" {
+resource "aws_secretsmanager_secret" "api_key_secret" {
   count       = var.secret_manager_enabled && var.create_secret ? 1 : 0
   name        = "lambda/coralogix/${data.aws_region.this.name}/${local.function_name}"
   description = "Coralogix Send Your Data key Secret"
@@ -311,9 +311,9 @@ resource "aws_secretsmanager_secret" "private_key_secret" {
 
 resource "aws_secretsmanager_secret_version" "service_user" {
   count         = var.secret_manager_enabled && var.create_secret ? 1 : 0
-  depends_on    = [aws_secretsmanager_secret.private_key_secret]
-  secret_id     = aws_secretsmanager_secret.private_key_secret[count.index].id
-  secret_string = var.private_key
+  depends_on    = [aws_secretsmanager_secret.api_key_secret]
+  secret_id     = aws_secretsmanager_secret.api_key_secret[count.index].id
+  secret_string = var.api_key
 }
 
 resource "aws_sns_topic_subscription" "this" {

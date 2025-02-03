@@ -16,14 +16,14 @@ module "resource-metadata-sqs-no-event-mode" {
   source = "../../modules/resource-metadata-sqs"
 
   coralogix_region = "EU1"
-  private_key      = "{{ secrets.TESTING_PRIVATE_KEY }}"
+  api_key          = "{{ secrets.TESTING_PRIVATE_KEY }}"
 }
 
 module "resource-metadata-sqs-event-mode" {
   source = "../../modules/resource-metadata-sqs"
 
   coralogix_region = "EU1"
-  private_key      = "{{ secrets.TESTING_PRIVATE_KEY }}"
+  api_key          = "{{ secrets.TESTING_PRIVATE_KEY }}"
   event_mode       = "EnabledCreateTrail"
 }
 
@@ -31,6 +31,6 @@ module "resource-metadata-sqs-event-mode-existing-trail" {
   source = "../../modules/resource-metadata-sqs"
 
   coralogix_region = "EU1"
-  private_key      = "{{ secrets.TESTING_PRIVATE_KEY }}"
+  api_key          = "{{ secrets.TESTING_PRIVATE_KEY }}"
   event_mode       = "EnabledWithExistingTrail"
 }
