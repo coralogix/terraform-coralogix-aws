@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.5.1
+#### **firehose-metrics**
+### 🧰 Bug fixes 🧰
+- Update null_resource.s3_bucket_copy to skip deleting the bootstrap.zip file if it doesn't exist
+
 ## v2.5.0
 #### **resource-metadata-sqs**
 ### 🚀 New components 🚀

@@ -60,7 +60,12 @@ resource "null_resource" "s3_bucket_copy" {
     command = <<-EOF
       curl -o bootstrap.zip https://cx-cw-metrics-tags-lambda-processor-eu-west-1.s3.eu-west-1.amazonaws.com/bootstrap.zip
       aws s3 cp --region ${data.aws_region.current_region.name} ./bootstrap.zip s3://${var.custom_s3_bucket}
-      rm ./bootstrap.zip
+      if [ -f bootstrap.zip ]; then
+        rm ./bootstrap.zip
+      else
+        echo "Couldn't find bootstrap.zip, skip deleting"
+      fi
+      
     EOF
   }
 }
