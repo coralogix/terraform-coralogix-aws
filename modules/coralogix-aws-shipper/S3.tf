@@ -1,5 +1,5 @@
 resource "aws_s3_bucket_notification" "lambda_notification" {
-  count      = var.s3_bucket_name != null && local.sns_enable != true && var.sqs_name == null ? 1 : 0
+  count      = var.s3_bucket_name != null && local.sns_enable != true && var.sqs_name == null && var.telemetry_mode != "metrics" ? 1 : 0
   depends_on = [module.lambda]
   bucket     = data.aws_s3_bucket.this[0].bucket
   dynamic "lambda_function" {

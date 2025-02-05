@@ -10,7 +10,7 @@ locals {
     for group in var.log_groups : group =>
     length(group) > 100 ? "${substr(replace(group, "/", "_"), 0, 95)}_${substr(sha256(group), 0, 4)}" : replace(group, "/", "_")
   }
-  
+
   log_group_prefix = var.log_group_prefix != null ? {
     # Need to convert the log group prefix to a map so we could use it in the for_each in CloudWatch file
     for group in var.log_group_prefix : group =>
@@ -21,16 +21,16 @@ locals {
 
   integration_info = var.integration_info == null ? {
     integration = {
-      application_name     = var.application_name
-      subsystem_name       = var.subsystem_name
-      integration_type     = var.integration_type
-      s3_key_prefix        = var.s3_key_prefix
-      s3_key_suffix        = var.s3_key_suffix
-      newline_pattern      = var.newline_pattern
-      blocking_pattern     = var.blocking_pattern
-      lambda_name          = var.lambda_name
-      lambda_log_retention = var.lambda_log_retention
-      api_key              = var.api_key
+      application_name                 = var.application_name
+      subsystem_name                   = var.subsystem_name
+      integration_type                 = var.integration_type
+      s3_key_prefix                    = var.s3_key_prefix
+      s3_key_suffix                    = var.s3_key_suffix
+      newline_pattern                  = var.newline_pattern
+      blocking_pattern                 = var.blocking_pattern
+      lambda_name                      = var.lambda_name
+      lambda_log_retention             = var.lambda_log_retention
+      api_key                          = var.api_key
       store_api_key_in_secrets_manager = var.store_api_key_in_secrets_manager
     }
   } : {}
