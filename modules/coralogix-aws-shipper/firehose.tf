@@ -83,6 +83,7 @@ resource "aws_iam_role_policy" "cloudwatch_metrics_policy" {
 
 # cloudwatch metrics stream
 resource "aws_cloudwatch_metric_stream" "cloudWatch_metric_stream" {
+  count         = var.telemetry_mode == "metrics" ? 1 : 0
   name          = "metrics-firehose-shipper-test-coralogix-metric-stream-${random_string.lambda_role[0].result}"
   role_arn      = aws_iam_role.cloudwatch_metrics_role[0].arn
   firehose_arn  = aws_kinesis_firehose_delivery_stream.extended_s3_stream[0].arn
