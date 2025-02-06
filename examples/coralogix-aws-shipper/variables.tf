@@ -352,3 +352,23 @@ variable "govcloud_deployment" {
   type        = bool
   default     = false
 }
+
+variable "telemetry_mode" {
+  description = "The telemetry mode for the shipper, i.e metrics or logs"
+  type        = string
+  default     = "logs"
+  validation {
+    condition     = contains(["logs", "metrics"], var.telemetry_mode)
+    error_message = "The telemetry_mode must be one of these values: [logs, metrics]."
+  }
+}
+
+variable "include_metric_stream_filter" {
+  description = "List of inclusive metric filters. If you specify this parameter, the stream sends only the conditional metric names from the metric namespaces that you specify here. Leave empty to send all metrics"
+  type = list(object({
+    namespace    = string
+    metric_names = list(string)
+    })
+  )
+  default = []
+}

@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.6.0
+#### **coralogix-aws-shipper**
+### 🚀 New components 🚀
+- Add support for ingesting Cloudwatch Stream Metrics via Firehose over PrivateLink for more information refer to [README.md](./modules/coralogix-aws-shipper/README.md#cloudwatch-metrics-stream-via-privatelink-beta)
+### 🧰 Bug fixes 🧰
+- Update null_resource.s3_bucket_copy resource to delete source code file only if exists
+#### **firehose-metrics**
+### 🧰 Bug fixes 🧰
+- Update null_resource.s3_bucket_copy to skip deleting the bootstrap.zip file if it doesn't exist
+
 ## v2.5.0
 #### **resource-metadata-sqs**
 ### 🚀 New components 🚀

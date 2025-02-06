@@ -147,6 +147,32 @@ module "coralogix-shipper-multiple-s3-integrations" {
 ```
 ### This example will create 2 lambda functions 1 for cloudtrail integration and 1 for vpcflow integration
 
+### Use the cloudwatch metrics stream via private link
+```bash
+module "coralogix_aws_shipper" "coralogix_firehose_metrics_private_link" {
+  source = "coralogix/aws-shipper/coralogix"
+  telemetry_mode = "metrics"
+  api_key = <your private key>
+  application_name = "firehose_metrics_private_link_application"
+  subsystem_name = "firehose_metrics_private_link_subsystem"
+  coralogix_region = <coralogix region>
+  s3_bucket_name = <s3 bucket name>
+  subnet_ids = <subnet ids>
+  security_group_ids = <security group ids>
+
+  include_metric_stream_filter = [
+    {
+      namespace    = "AWS/EC2"
+      metric_names = ["CPUUtilization", "NetworkOut"]
+    },
+    {
+      namespace    = "AWS/S3"
+      metric_names = ["BucketSizeBytes"]
+    },
+  ]
+}
+```
+
 now execute:
 ```bash
 $ terraform init

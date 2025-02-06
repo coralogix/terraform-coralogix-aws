@@ -86,16 +86,16 @@ variable "custom_csv_header" {
 variable "integration_info" {
   description = "Values of s3 integraion in case that you want to deploy more than one integration"
   type = map(object({
-    s3_key_prefix        = optional(string)
-    s3_key_suffix        = optional(string)
-    application_name     = string
-    subsystem_name       = string
-    integration_type     = string
-    lambda_name          = optional(string)
-    newline_pattern      = optional(string)
-    blocking_pattern     = optional(string)
-    lambda_log_retention = optional(number)
-    api_key              = string
+    s3_key_prefix                    = optional(string)
+    s3_key_suffix                    = optional(string)
+    application_name                 = string
+    subsystem_name                   = string
+    integration_type                 = string
+    lambda_name                      = optional(string)
+    newline_pattern                  = optional(string)
+    blocking_pattern                 = optional(string)
+    lambda_log_retention             = optional(number)
+    api_key                          = string
     store_api_key_in_secrets_manager = optional(bool)
   }))
   default = null
@@ -320,7 +320,7 @@ variable "integration_type" {
     condition     = contains(["CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv", "Sns", "Sqs", "Kinesis", "CloudFront", "MSK", "Kafka", "EcrScan", ""], var.integration_type)
     error_message = "The integration type must be: [CloudWatch, CloudTrail, VpcFlow, S3, S3Csv, Sns, Sqs, Kinesis, CloudFront, MSK, Kafka, EcrScan]."
   }
-  default = ""
+  default = "S3"
 }
 
 variable "store_api_key_in_secrets_manager" {
@@ -357,4 +357,25 @@ variable "reserved_concurrent_executions" {
   default     = null
   description = "The number of concurrent executions that are reserved for this function, leave as default to use unreserved account concurrency"
   type        = number
+}
+
+# firehose metrics varialbe
+variable "telemetry_mode" {
+  description = "The telemetry mode for the shipper, i.e metrics or logs"
+  type        = string
+  default     = "logs"
+  validation {
+    condition     = contains(["logs", "metrics"], var.telemetry_mode)
+    error_message = "The telemetry_mode must be one of these values: [logs, metrics]."
+  }
+}
+
+variable "include_metric_stream_filter" {
+  description = "List of inclusive metric filters. If you specify this parameter, the stream sends only the conditional metric names from the metric namespaces that you specify here. Leave empty to send all metrics"
+  type = list(object({
+    namespace    = string
+    metric_names = list(string)
+    })
+  )
+  default = []
 }
