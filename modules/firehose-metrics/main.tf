@@ -41,11 +41,12 @@ locals {
   new_firehose_iam_name         = var.firehose_iam_custom_name != null ? var.firehose_iam_custom_name : "${var.firehose_stream}-firehose-metrics-iam"
   new_metric_stream_iam_name    = var.metric_streams_iam_custom_name != null ? var.metric_streams_iam_custom_name : "${var.firehose_stream}-cw-iam"
 
-  arn_prefix = var.govcloud_deployment ? "arn:aws-us-gov" : "arn:aws"
+  arn_prefix = "arn:${data.aws_partition.current.partition}"
 }
 
 data "aws_caller_identity" "current_identity" {}
 data "aws_region" "current_region" {}
+data "aws_partition" "current" {}
 
 resource "random_string" "this" {
   length  = 6
