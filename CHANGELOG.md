@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.6.1
+#### **coralogix-aws-shipper**
+### 🧰 Bug fixes 🧰
+- Update resource ARN to be compatible and dynamic according to the AWS region
+#### **firehose-metrics**
+### 🧰 Bug fixes 🧰
+- Update resource ARN to be compatible and dynamic according to the AWS region
+
 ## v2.6.0
 #### **coralogix-aws-shipper**
 ### 🚀 New components 🚀
