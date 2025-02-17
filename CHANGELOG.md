@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.7.0
+#### **eventbridge**
+### 🚀 New components 🚀
+- Add support to filter events by detail type
+
 ## v2.6.1
 #### **coralogix-aws-shipper**
 ### 🧰 Bug fixes 🧰
