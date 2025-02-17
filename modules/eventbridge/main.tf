@@ -7,30 +7,15 @@ terraform {
   }
 }
 
+module "locals" {
+  source   = "../locals_variables"
+
+  integration_type = "None"
+  random_string = "None"
+}
+
 locals {
-  endpoint_url = {
-    "us" = {
-      url = "https://aws-events.coralogix.us/aws/event"
-    }
-    "singapore" = {
-      url = "https://aws-events.coralogixsg.com/aws/event"
-    }
-    "ireland" = {
-      url = "https://aws-events.coralogix.com/aws/event"
-    }
-    "india" = {
-      url = "https://aws-events.coralogix.in/aws/event"
-    }
-    "stockholm" = {
-      url = "https://aws-events.eu2.coralogix.com/aws/event"
-    }
-    "us2" = {
-      url = "https://aws-events.cx498.coralogix.com/aws/event"
-    }
-    "custom" = {
-      url = "${var.custom_url}"
-    }
-  }
+  endpoint_url = "https://aws-events.${lookup(module.locals.coralogix_domains, var.coralogix_region, "EU1")}/aws/event"
   tags = {
     terraform-module         = "eventbridge-to-coralogix"
     terraform-module-version = "v0.0.3"
@@ -105,7 +90,7 @@ resource "aws_cloudwatch_event_connection" "event-connectiong" {
 resource "aws_cloudwatch_event_api_destination" "api-connection" {
   name                             = "toCoralogix"
   description                      = "EventBridge Api destination to Coralogix"
-  invocation_endpoint              = local.endpoint_url[var.coralogix_region].url
+  invocation_endpoint              = local.endpoint_url
   http_method                      = "POST"
   invocation_rate_limit_per_second = 300
   connection_arn                   = aws_cloudwatch_event_connection.event-connectiong.arn
@@ -113,18 +98,25 @@ resource "aws_cloudwatch_event_api_destination" "api-connection" {
 
 // Connecting between the rule and the api target
 resource "aws_cloudwatch_event_target" "my_event_target" {
-  arn      = aws_cloudwatch_event_api_destination.api-connection.arn
-  rule     = aws_cloudwatch_event_rule.eventbridge_rule.name
-  role_arn = aws_iam_role.eventbridge_role.arn
+  event_bus_name = var.eventbridge_stream
+  arn            = aws_cloudwatch_event_api_destination.api-connection.arn
+  rule           = aws_cloudwatch_event_rule.eventbridge_rule.name
+  role_arn       = aws_iam_role.eventbridge_role.arn
 }
 // Creating Rule for classify the events we want to get
 
 resource "aws_cloudwatch_event_rule" "eventbridge_rule" {
   name        = "eventbridge_rule"
   description = "Capture the main events"
+  event_bus_name = var.eventbridge_stream
   ///A number of services that we think are relevant to monitor, sub-alerts can be changed and classified
-  event_pattern = jsonencode(
+  event_pattern = var.detail_type != null ? jsonencode(
     {
       "source" : var.sources
-  })
+      "detail-type" : var.detail_type
+  }): jsonencode(
+    {
+      "source" : var.sources
+    }
+  )
 }
