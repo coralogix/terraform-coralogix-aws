@@ -2,3 +2,4 @@
 
 # Technical writers own documentation
 README.md @coralogix/team-technical-writers
+modules/*/README.md @coralogix/team-technical-writers
