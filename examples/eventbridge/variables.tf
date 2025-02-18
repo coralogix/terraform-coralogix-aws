@@ -15,7 +15,18 @@ variable "private_key" {
 }
 
 variable "coralogix_region" {
-  description = "Coralogix account region: us, singapore, ireland, india, stockholm [in lower-case letters]"
+  description = "The Coralogix location region, possible options are [EU1, EU2, AP1, AP2, AP3, US1, US2]"
+  type        = string
+  validation {
+    condition     = contains(["EU1", "EU2", "AP1", "AP2", "AP3", "US1", "US2", "ireland", "india", "stockholm", "singapore", "us", "us2", "Custom"], var.coralogix_region)
+    error_message = "The coralogix region must be one of these values: [EU1, EU2, AP1, AP2, AP3, US1, US2, Custom]."
+  }
+}
+
+variable "custom_url" {
+  description = "Custom coralogix url"
+  type        = string
+  default     = ""
 }
 
 variable "sources" {
@@ -27,5 +38,16 @@ variable "sources" {
 variable "application_name" {
   description = "Coralogix application name"
   type        = string
+  default     = null
+}
+variable "policy_name" {
+  description = "AWS IAM policy name"
+  type        = string
+  default     = "EventBridge_policy"
+}
+
+variable "detail_type" {
+  description = "AWS eventbridge detail type"
+  type        = list(string)
   default     = null
 }
