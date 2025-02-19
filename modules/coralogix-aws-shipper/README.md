@@ -161,6 +161,7 @@ When using this variable you will need to create an S3 bucket in the region wher
 
 The metadata features decribed below are only available in `coralogix-aws-shipper v1.1.0` and later.
 The `add_metadata` parameter allows you to add metadata to the log message. The metadata is added to the log message as a JSON object. The metadata is specific to the integration type. For example, for S3, the metadata is `s3.object.key` and `s3.bucket`. For CloudWatch, the metadata is `cw.log.group` and `cw.log.stream`. See the table below for full metadata list.
+
 | Integration Type | Metadata Key             | Description                           |
 |------------------|--------------------------|---------------------------------------|
 | S3               | s3.bucket                | The name of the S3 bucket             |
