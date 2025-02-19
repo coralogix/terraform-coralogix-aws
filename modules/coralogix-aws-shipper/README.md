@@ -40,8 +40,10 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
     If you already have a Lambda function with an S3 trigger set up, this Terraform deployment will remove the trigger. This applies to the following integration types within 
     the same S3 bucket: S3, CloudTrail, VpcFlow, S3Csv, and CloudFront. 
     To prevent this issue, you can explore alternative deployment methods:
-     -  Deploy the integration using CF Quick Create or SAR, as explained in [this document](https://coralogix.com/docs/coralogix-aws-shipper/).
-     -  Migrate your existing integrations to Terraform and use the `integration_info` variable.
+    
+      -  Deploy the integration using CF Quick Create or SAR, as explained in [this document](https://coralogix.com/docs/coralogix-aws-shipper/).
+     
+      -  Migrate your existing integrations to Terraform and use the `integration_info` variable.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
