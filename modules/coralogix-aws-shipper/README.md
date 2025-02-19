@@ -11,15 +11,15 @@ This integration guide walks you through completing the predefined Lambda functi
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.1 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 2.23 |
+| <a name="requirement_terraform"></a> [Terraform](#requirement\_terraform) | >= 0.13.1 |
+| <a name="requirement_aws"></a> [AWS](#requirement\_aws) | >= 2.23 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.15.1 |
-| <a name="provider_random"></a> [random](#provider\_random) | >= 3.1.0 |
+| <a name="provider_aws"></a> [AWS](#provider\_aws) | >= 4.15.1 |
+| <a name="provider_random"></a> [Random](#provider\_random) | >= 3.1.0 |
 
 ## Modules
 
@@ -29,7 +29,7 @@ This integration guide walks you through completing the predefined Lambda functi
 
 ### Universal configuration
 
-You need to use an existing Coralogix [Send-Your-Data API key](https://coralogix.com/docs/send-your-data-management-api/) to make the connection. Also, make sure your integration is [Region-specific](https://coralogix.com/docs/coralogix-domain/). You should always deploy the AWS Lambda function in the same AWS region as your resource (e.g. the S3 bucket).
+You need to use an existing Coralogix [Send-Your-Data API key](https://coralogix.com/docs/send-your-data-management-api/) to make the connection. Also, make sure your integration is [region-specific](https://coralogix.com/docs/coralogix-domain/). You should always deploy the AWS Lambda function in the same AWS region as your resource (e.g. the S3 bucket).
 
 **Using a single S3 bucket for multiple integrations**
 
@@ -37,9 +37,10 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 
 !!! note
 
-   If you already have a Lambda function with an S3 trigger set up, this Terraform deployment will remove the trigger. This applies to the following integration types within the same S3 bucket: S3, CloudTrail, 
-   VpcFlow, S3Csv, and CloudFront. To prevent this issue, you can explore alternative deployment methods:
-   -  Deploy the integration using CF Quick Create or SAR, as explaine in [this document](https://coralogix.com/docs/coralogix-aws-shipper/).
+   If you already have a Lambda function with an S3 trigger set up, this Terraform deployment will remove the trigger. This applies to the following integration types within 
+   the same S3 bucket: S3, CloudTrail, VpcFlow, S3Csv, and CloudFront. 
+   To prevent this issue, you can explore alternative deployment methods:
+   -  Deploy the integration using CF Quick Create or SAR, as explained in [this document](https://coralogix.com/docs/coralogix-aws-shipper/).
    -  Migrate your existing integrations to Terraform and use the `integration_info` variable.
 
 | Name | Description | Type | Default | Required |
@@ -47,8 +48,8 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 | <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | The Coralogix location region, available options: [`EU1`, `EU2`, `AP1`, `AP2`, `AP3`, `US1`, `US2`, `Custom`] | `string` | n/a | yes |
 | <a name="input_custom_domain"></a> [custom_domain](#input\_custom\_domain) | If using a custom domain name for your private cluster, Coralogix will send telemetry from the specified address (e.g. custom.coralogix.com). There is no need to add `ingress.` to the domain.| `string` | n/a | no |
 | <a name="input_integration_type"></a> [integration_type](#input\_data\_type) | The AWS service to integrate with Coralogix. Possible values: S3, CloudTrail, VpcFlow, CloudWatch, S3Csv, SNS, SQS, Kinesis, CloudFront, MSK, Kafka, EcrScan. | `string` | `S3` | yes |
-| <a name="input_api_key"></a> [api\_key](#input\_api_\_key) | The Coralogix Send Your Data - [API Key](https://coralogix.com/docs/send-your-data-api-key/) validates your authenticity. This value can be a direct Coralogix API key or an AWS secret manager ARN containing the API key.| `string` | n/a | yes |
-| <a name="input_store_api_key_in_secrets_manager"></a> [store\_api\_key\_in\_secrets\_manager](#input\_store\_api\_key\_in\_secrets\_manager) | Enable this to store your API Key securely. Otherwise, it will remain exposed in plain text as an environment variable in the Lambda function console.| bool | true | no |
+| <a name="input_api_key"></a> [api\_key](#input\_api_\_key) | The Coralogix Send Your Data - [API key](https://coralogix.com/docs/send-your-data-api-key/) validates your authenticity. This value can be a direct Coralogix API key or an AWS secret manager ARN containing the API key.| `string` | n/a | yes |
+| <a name="input_store_api_key_in_secrets_manager"></a> [store\_api\_key\_in\_secrets\_manager](#input\_store\_api\_key\_in\_secrets\_manager) | Enable this to store your API key securely. Otherwise, it will remain exposed in plain text as an environment variable in the Lambda function console.| bool | true | no |
 | <a name="application_name"></a> [application\_name](#input\_application\_name) | The [name](https://coralogix.com/docs/application-and-subsystem-names/) of your application. For a dynamic value, use `$.my_log.field`. This option is not supported since version `1.1.0` for the [source code](https://github.com/coralogix/coralogix-aws-shipper/blob/master/CHANGELOG.md) | string | n\a | yes | 
 | <a name="subsystem_name"></a> [subsystem\_name](#input\_subsysten_\_name) | The [name](https://coralogix.com/docs/application-and-subsystem-names/) of your subsystem. For a dynamic value, use `$.my_log.field` for CloudWatch log group leave empty. This option is not supported since version `1.1.0` for the [source code](https://github.com/coralogix/coralogix-aws-shipper/blob/master/CHANGELOG.md) | string | n\a | yes |
 
@@ -69,7 +70,7 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
 | <a name="input_integration_type"></a> [integration_type](#input\_data\_type) | The AWS service to integrate with Coralogix. Possible values: S3, CloudTrail, VpcFlow, S3Csv, CloudFront. | `string` | n/a | yes |
-| <a name="input_api_key"></a> [api\_key](#input\_api_\_key) | The Coralogix Send Your Data - [API Key](https://coralogix.com/docs/send-your-data-api-key/) validates your authenticity. This value can be a direct Coralogix API key or an AWS secret mManager ARN containing the API Key.| `string` | n/a | yes |
+| <a name="input_api_key"></a> [api\_key](#input\_api_\_key) | The Coralogix Send Your Data - [API key](https://coralogix.com/docs/send-your-data-api-key/) validates your authenticity. This value can be a direct Coralogix API key or an AWS secret mManager ARN containing the API key.| `string` | n/a | yes |
 | <a name="input_store_api_key_in_secrets_manager"></a> [store\_api\_key\_in\_secrets\_manager](#input\_store\_api\_key\_in\_secrets\_manager) | Enable this to store your API key securely. Otherwise, it will remain exposed in plain text as an environment variable in the Lambda function console.| bool | true | no |
 | <a name="application_name"></a> [application\_name](#input\_application\_name) | The [name](https://coralogix.com/docs/application-and-subsystem-names/) of your application. For dynamic values, refer to [Metadata](#metadata) | string | n\a | yes | 
 | <a name="subsystem_name"></a> [subsystem\_name](#input\_subsysten_\_name) | The [name](https://coralogix.com/docs/application-and-subsystem-names/) of your subsystem. For dynamic values, refer to [Metadata](#metadata) | string | n\a | yes |
@@ -260,9 +261,9 @@ If you want to bypass using the public internet, you can use AWS PrivateLink to 
 
 ### Cloudwatch metrics streaming via PrivateLink (beta)
 
-As of [lambda source code version](https://github.com/coralogix/coralogix-aws-shipper) `v1.3.0` and terraform module version `v2.6.0`, the Coralogix AWS Shipper supports streaming **Cloudwatch metrics to Coralogix via Firehose over a PrivateLink**.
+As of [Lambda source code version](https://github.com/coralogix/coralogix-aws-shipper) `v1.3.0` and Terraform module version `v2.6.0`, the Coralogix AWS Shipper supports streaming **Cloudwatch metrics to Coralogix via Firehose over a PrivateLink**.
 
-TThis workflow is designed for scenarios where you need to stream metrics from a CloudWatch metrics stream to Coralogix via a PrivateLink endpoint.
+This workflow is designed for scenarios where you need to stream metrics from a CloudWatch metrics stream to Coralogix via a PrivateLink endpoint.
 
 #### Why to use this workflow
 
@@ -281,7 +282,7 @@ To enable CloudWatch metrics streaming via Firehose (PrivateLink), you must prov
 | Parameter | Description | Default Value | Required |
 |-----------|-------------|---------------|--------------------|
 | telemetry_mode | Specify the telemetry collection modes, supported values (`metrics`, `logs`). Note that this value must be set to `metrics` for the Cloudwatch metric stream workflow | logs. | :heavy_check_mark: |
-| api_key | The Coralogix Send Your Data - [API Key](https://coralogix.com/docs/send-your-data-api-key/) validates your authenticity. This value can be a direct Coralogix API key or an AWS secret manager ARN containing the API key.| `string` | n/a | yes |
+| api_key | The Coralogix Send Your Data - [API key](https://coralogix.com/docs/send-your-data-api-key/) validates your authenticity. This value can be a direct Coralogix API key or an AWS secret manager ARN containing the API key.| `string` | n/a | yes |
 | application_name | The name of the application for which the integration is configured. [Metadata](#metadata) specifies dynamic value retrieval options. | string | n\a | yes | 
 | subsystem_name | The name of your subsystem. For a dynamic value, refer to the [Metadata](#metadata) section. For CloudWatch, leave this field empty to use the log group name. | string | n\a | yes |
 | coralogix_region | The Coralogix location region, possible options are [`EU1`, `EU2`, `AP1`, `AP2`, `AP3`, `US1`, `US2`, `Custom`] | `string` | n/a | yes |
@@ -320,7 +321,7 @@ module "coralogix_aws_shipper" "coralogix_firehose_metrics_private_link" {
 
 | Name | Description |
 |------|-------------|
-| <a name="output_lambda_function_arn"></a> [lambda\_function\_arn](#output\_lambda\_function\_arn) | The ARN of the Lambda Function. |
-| <a name="output_lambda_function_name"></a> [lambda\_function\_name](#output\_lambda\_function\_name) | The name of the Lambda Function. |
-| <a name="output_lambda_role_arn"></a> [lambda\_role\_arn](#output\_lambda\_role\_arn) | The ARN of the IAM role created for the Lambda Function. |
-| <a name="output_lambda_role_name"></a> [lambda\_role\_name](#output\_lambda\_role\_name) | The name of the IAM role created for the Lambda Function. |
+| <a name="output_lambda_function_arn"></a> [lambda\_function\_arn](#output\_lambda\_function\_arn) | The ARN of the Lambda function. |
+| <a name="output_lambda_function_name"></a> [lambda\_function\_name](#output\_lambda\_function\_name) | The name of the Lambda function. |
+| <a name="output_lambda_role_arn"></a> [lambda\_role\_arn](#output\_lambda\_role\_arn) | The ARN of the IAM role created for the Lambda function. |
+| <a name="output_lambda_role_name"></a> [lambda\_role\_name](#output\_lambda\_role\_name) | The name of the IAM role created for the Lambda function. |
