@@ -182,10 +182,10 @@ The `add_metadata` parameter allows you to add metadata to the log message. The 
 
 !!! note
 
-   The metadata is not added by default. You must specify the metadata keys in the `add_metadata` parameter.
-   For example, to add the bucket name and key name to the log message, set the `add_metadata` parameter to `s3.object.key,s3.bucket`.
-   Some metadata keys will overlap as some integrations share the same metadata. For example, both Kafka and MSK have the same metadata key `kafka.topic` or both Kinesis and Cloudwatch metadata will be added in cases 
-   where a Cloudwatch log stream is being ingested from a Kinesis stream.
+    The metadata is not added by default. You must specify the metadata keys in the `add_metadata` parameter.
+    For example, to add the bucket name and key name to the log message, set the `add_metadata` parameter to `s3.object.key,s3.bucket`.
+    Some metadata keys will overlap as some integrations share the same metadata. For example, both Kafka and MSK have the same metadata key `kafka.topic` or both Kinesis and Cloudwatch metadata will be 
+    added in cases where a Cloudwatch log stream is being ingested from a Kinesis stream.
 
 ##### Dynamic subsystem or application name
 
