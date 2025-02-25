@@ -49,93 +49,102 @@ resource "aws_iam_policy" "lambda_policy" {
   description = "Policy for Lambda function ${each.value.lambda_name == null ? module.locals[each.key].function_name : each.value.lambda_name}"
   policy = jsonencode({
     Version = "2012-10-17",
-    Statement = [
-      # because its not possible to leave a condition empty than we need the add the condition for cloudwatch
+    Statement = concat(
+      [
+        # because its not possible to leave a condition empty than we need the add the condition for cloudwatch
 
-      # DLQ SQS Permissions
-      {
-        Effect   = "Allow",
-        Action   = var.enable_dlq ? ["sqs:SendMessage", "sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
-        Resource = var.enable_dlq ? [aws_sqs_queue.DLQ[0].arn] : ["*"]
-      },
+        # DLQ SQS Permissions
+        {
+          Effect   = "Allow",
+          Action   = var.enable_dlq ? ["sqs:SendMessage", "sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+          Resource = var.enable_dlq ? [aws_sqs_queue.DLQ[0].arn] : ["*"]
+        },
 
-      # DLQ S3 Permissions
-      {
-        Effect   = "Allow",
-        Action   = var.enable_dlq ? ["s3:PutObject", "s3:PutObjectAcl", "s3:AbortMultipartUpload", "s3:DeleteObject", "s3:PutObjectTagging", "s3:PutObjectVersionTagging"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
-        Resource = var.enable_dlq ? ["${data.aws_s3_bucket.dlq_bucket[0].arn}/*", data.aws_s3_bucket.dlq_bucket[0].arn] : ["*"]
-      },
+        # DLQ S3 Permissions
+        {
+          Effect   = "Allow",
+          Action   = var.enable_dlq ? ["s3:PutObject", "s3:PutObjectAcl", "s3:AbortMultipartUpload", "s3:DeleteObject", "s3:PutObjectTagging", "s3:PutObjectVersionTagging"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+          Resource = var.enable_dlq ? ["${data.aws_s3_bucket.dlq_bucket[0].arn}/*", data.aws_s3_bucket.dlq_bucket[0].arn] : ["*"]
+        },
 
-      # Secrets Access Policy
-      {
-        Effect   = "Allow",
-        Action   = each.value.store_api_key_in_secrets_manager == null || each.value.store_api_key_in_secrets_manager == true || local.api_key_is_arn ? ["secretsmanager:GetSecretValue"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
-        Resource = local.api_key_is_arn ? [var.api_key] : each.value.store_api_key_in_secrets_manager == null || each.value.store_api_key_in_secrets_manager == true ? [aws_secretsmanager_secret.coralogix_secret[each.key].arn] : ["*"]
-      },
+        # Secrets Access Policy
+        {
+          Effect   = "Allow",
+          Action   = each.value.store_api_key_in_secrets_manager == null || each.value.store_api_key_in_secrets_manager == true || local.api_key_is_arn ? ["secretsmanager:GetSecretValue"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+          Resource = local.api_key_is_arn ? [var.api_key] : each.value.store_api_key_in_secrets_manager == null || each.value.store_api_key_in_secrets_manager == true ? [aws_secretsmanager_secret.coralogix_secret[each.key].arn] : ["*"]
+        },
 
-      # Destination on Failure Policy
-      {
-        Effect   = "Allow",
-        Action   = var.notification_email != null ? ["sns:Publish"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
-        Resource = var.notification_email != null ? [aws_sns_topic.this[each.key].arn] : ["*"]
-      },
+        # Destination on Failure Policy
+        {
+          Effect   = "Allow",
+          Action   = var.notification_email != null ? ["sns:Publish"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+          Resource = var.notification_email != null ? [aws_sns_topic.this[each.key].arn] : ["*"]
+        },
 
-      # Private Link Policy
-      {
-        Effect   = "Allow",
-        Action   = var.subnet_ids != null ? ["ec2:CreateNetworkInterface", "ec2:DescribeNetworkInterfaces", "ec2:DeleteNetworkInterface"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
-        Resource = ["*"]
-      },
+        # Private Link Policy
+        {
+          Effect   = "Allow",
+          Action   = var.subnet_ids != null ? ["ec2:CreateNetworkInterface", "ec2:DescribeNetworkInterfaces", "ec2:DeleteNetworkInterface"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+          Resource = ["*"]
+        },
 
-      # SQS S3 Integration Policy
-      {
-        Effect   = "Allow",
-        Action   = var.sqs_name != null && var.s3_bucket_name != null ? ["s3:GetObject", "s3:ListBucket", "s3:GetBucketLocation", "s3:GetObjectVersion", "s3:GetLifecycleConfiguration"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
-        Resource = var.sqs_name != null && var.s3_bucket_name != null ? ["${data.aws_s3_bucket.this[0].arn}/*", data.aws_s3_bucket.this[0].arn] : ["*"]
-      },
+        # SQS S3 Integration Policy
+        {
+          Effect   = "Allow",
+          Action   = var.sqs_name != null && var.s3_bucket_name != null ? ["s3:GetObject", "s3:ListBucket", "s3:GetBucketLocation", "s3:GetObjectVersion", "s3:GetLifecycleConfiguration"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+          Resource = var.sqs_name != null && var.s3_bucket_name != null ? ["${data.aws_s3_bucket.this[0].arn}/*", data.aws_s3_bucket.this[0].arn] : ["*"]
+        },
 
-      # EcrScan Integration Policy
-      {
-        Effect   = "Allow",
-        Action   = var.integration_type == "EcrScan" ? ["ecr:DescribeImageScanFindings"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
-        Resource = ["*"]
-      },
+        # EcrScan Integration Policy
+        {
+          Effect   = "Allow",
+          Action   = var.integration_type == "EcrScan" ? ["ecr:DescribeImageScanFindings"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+          Resource = ["*"]
+        },
 
-      # S3 Integration Policy
-      {
-        Effect   = "Allow",
-        Action   = var.s3_bucket_name != null && var.sqs_name == null ? ["s3:GetObject"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
-        Resource = var.s3_bucket_name != null && var.sqs_name == null ? ["${data.aws_s3_bucket.this[0].arn}/*"] : ["*"]
-      },
+        # S3 Integration Policy
+        {
+          Effect   = "Allow",
+          Action   = var.s3_bucket_name != null && var.sqs_name == null ? ["s3:GetObject"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+          Resource = var.s3_bucket_name != null && var.sqs_name == null ? ["${data.aws_s3_bucket.this[0].arn}/*"] : ["*"]
+        },
 
-      #S3 with SQS Integration Policy
-      {
-        Effect   = "Allow",
-        Action   = var.s3_bucket_name != null && var.sqs_name != null ? ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
-        Resource = var.s3_bucket_name != null && var.sqs_name != null ? [data.aws_sqs_queue.name[0].arn] : ["*"]
-      },
+        #S3 with SQS Integration Policy
+        {
+          Effect   = "Allow",
+          Action   = var.s3_bucket_name != null && var.sqs_name != null ? ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+          Resource = var.s3_bucket_name != null && var.sqs_name != null ? [data.aws_sqs_queue.name[0].arn] : ["*"]
+        },
 
-      # Kinesis Integration policy
-      {
-        Effect   = "Allow",
-        Action   = var.kinesis_stream_name != null ? ["kinesis:GetRecords", "kinesis:GetShardIterator", "kinesis:DescribeStream", "kinesis:ListStreams", "kinesis:ListShards", "kinesis:DescribeStreamSummary", "kinesis:SubscribeToShard"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
-        Resource = var.kinesis_stream_name != null ? [data.aws_kinesis_stream.kinesis_stream[0].arn] : ["*"]
-      },
+        # Kinesis Integration policy
+        {
+          Effect   = "Allow",
+          Action   = var.kinesis_stream_name != null ? ["kinesis:GetRecords", "kinesis:GetShardIterator", "kinesis:DescribeStream", "kinesis:ListStreams", "kinesis:ListShards", "kinesis:DescribeStreamSummary", "kinesis:SubscribeToShard"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+          Resource = var.kinesis_stream_name != null ? [data.aws_kinesis_stream.kinesis_stream[0].arn] : ["*"]
+        },
 
-      # Kafka Integration Policy
-      {
-        Effect   = "Allow",
-        Action   = var.kafka_brokers != null ? ["ec2:CreateNetworkInterface", "ec2:DescribeNetworkInterfaces", "ec2:DescribeVpcs", "ec2:DeleteNetworkInterface", "ec2:DescribeSubnets", "ec2:DescribeSecurityGroups"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
-        Resource = ["*"]
-      },
+        # Kafka Integration Policy
+        {
+          Effect   = "Allow",
+          Action   = var.kafka_brokers != null ? ["ec2:CreateNetworkInterface", "ec2:DescribeNetworkInterfaces", "ec2:DescribeVpcs", "ec2:DeleteNetworkInterface", "ec2:DescribeSubnets", "ec2:DescribeSecurityGroups"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+          Resource = ["*"]
+        },
 
-      # CloudWatch Logs Policy
-      {
-        Effect   = "Allow"
-        Action   = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"]
-        Resource = ["*"]
-      }
-    ]
+        # CloudWatch Logs Policy
+        {
+          Effect   = "Allow"
+          Action   = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"]
+          Resource = ["*"]
+        }
+      ],
+      var.s3_bucket_kms_arn != null ? [
+        {
+          Effect   = "Allow",
+          Action   = ["kms:Decrypt"],
+          Resource = [var.s3_bucket_kms_arn]
+        }
+      ] : []
+    )
   })
 }
 
