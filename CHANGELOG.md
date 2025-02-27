@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.8.0
+#### **coralogix-aws-shipper**
+### 🚀 New components 🚀
+- Add KMS Key support for S3 Buckets
+
 ## v2.7.0
 #### **eventbridge**
 ### 🚀 New components 🚀
