@@ -1,1 +1,6 @@
 * @coralogix/team-cs-devops
+
+# Technical writers own documentation
+README.md @coralogix/team-technical-writers
+modules/*/README.md @coralogix/team-technical-writers
+examples/coralogix-aws-shipper/README.md @coralogix/team-technical-writers
