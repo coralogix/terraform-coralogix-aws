@@ -13,8 +13,9 @@ data "aws_cloudwatch_log_group" "this" {
 }
 
 data "aws_s3_bucket" "this" {
-  count  = var.s3_bucket_name == null ? 0 : 1
-  bucket = var.s3_bucket_name
+  count    = var.s3_bucket_name == null ? 0 : 1
+  bucket   = var.s3_bucket_name
+  provider = aws.bucket_s3  # Gunakan provider yang bisa akses akun lain
 }
 
 data "aws_s3_bucket" "dlq_bucket" {
