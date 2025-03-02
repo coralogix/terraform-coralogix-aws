@@ -13,6 +13,10 @@ terraform {
   }
 }
 
+provider "aws" {
+  region = "us-west-2"
+}
+
 resource "random_id" "this" {
   byte_length = 8
 }
