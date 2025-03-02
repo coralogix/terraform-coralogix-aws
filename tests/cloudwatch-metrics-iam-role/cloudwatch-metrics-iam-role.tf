@@ -13,17 +13,6 @@ terraform {
   }
 }
 
-provider "aws" {
-  region = "us-east-1"
-
-  default_tags {
-    tags = {
-      service = "Coralogix"
-    }
-  }
-}
-
-
 resource "random_id" "this" {
   byte_length = 8
 }
