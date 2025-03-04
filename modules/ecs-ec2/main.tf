@@ -8,10 +8,8 @@ locals {
   )
   coralogix_region_domain_map = module.locals_variables.coralogix_domains
   coralogix_domain = coalesce(var.custom_domain, local.coralogix_region_domain_map[var.coralogix_region])
-  otel_config_file = coalesce(var.otel_config_file,
-    (var.metrics ? "${path.module}/otel_config_metrics.tftpl.yaml" : "${path.module}/otel_config.tftpl.yaml")
-  )
-  otel_config = templatefile(local.otel_config_file, {})
+  otel_config_file = coalesce(var.otel_config_file, "${path.module}/otel_config.tftpl.yaml")
+  otel_config = file(local.otel_config_file)
 }
 
 module "locals_variables" {
@@ -34,6 +32,7 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
   cpu                      = max(var.memory, 256)
   memory                   = var.memory
   requires_compatibilities = ["EC2"]
+  execution_role_arn      = (var.custom_config_parameter_store_name != null || var.use_api_key_secret == true) ? var.task_execution_role_arn : null
   volume {
     name      = "hostfs"
     host_path = "/var/lib/docker/"
@@ -57,6 +56,7 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
       {
         containerPort : 4317
         hostPort : 4317
+        appProtocol: "grpc"
       },
       {
         containerPort : 4318
@@ -83,14 +83,10 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
         containerPath : "/var/run/docker.sock"
       }
     ],
-    environment : [
+    environment : concat([
       {
         name : "CORALOGIX_DOMAIN"
         value : local.coralogix_domain
-      },
-      {
-        name : "PRIVATE_KEY"
-        value : var.api_key
       },
       {
         name : "APP_NAME"
@@ -99,12 +95,26 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
       {
         name : "SUB_SYS"
         value : var.default_subsystem_name
-      },
-      {
-        name : "OTEL_CONFIG"
-        value : local.otel_config
       }
     ],
+    var.custom_config_parameter_store_name == null ? [{
+      name : "OTEL_CONFIG"
+      value : local.otel_config
+    }] : [],
+    var.use_api_key_secret != true ? [{
+      name : "PRIVATE_KEY"
+      value : var.api_key
+    }] : []),
+    secrets : concat(
+      var.custom_config_parameter_store_name != null ? [{
+        name : "OTEL_CONFIG"
+        valueFrom : var.custom_config_parameter_store_name
+      }] : [],
+      var.use_api_key_secret == true ? [{
+        name : "PRIVATE_KEY"
+        valueFrom : var.api_key_secret_arn
+      }] : []
+    ),
     command: ["--config", "env:OTEL_CONFIG"],
     healthCheck : {
       command : ["CMD-SHELL", "nc -vz localhost 13133 || exit 1"]
