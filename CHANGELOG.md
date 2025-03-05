@@ -1,4 +1,14 @@
 # Changelog
+## v3.0.0
+#### **ecs-ec2**
+### 🛑 Breaking changes 🛑
+### 💡 Enhancements 💡
+- Added support for Parameter Store for custom configurations.
+- Added support for Secret API Key.
+- Added Resource Catalog support.
+- Added new tests for ECS EC2 integration.
+- Added support for AP3 region.
+
 ## v2.9.0
 #### **cloudwatch-metrics-iam-role**
 ### 🚀 New components 🚀
