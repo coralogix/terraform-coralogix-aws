@@ -1,11 +1,13 @@
 variable "aws_region" {
   description = "AWS region to deploy resources"
   type        = string
+  default     = "us-east-1"
 }
 
 variable "ecs_cluster_name" {
   description = "Name of the ECS cluster"
   type        = string
+  default     = "ecs-cluster"
 }
 
 variable "image" {
@@ -17,11 +19,13 @@ variable "image" {
 variable "image_version" {
   description = "Version tag for the coralogix-otel-collector image"
   type        = string
+  default     = "v0.4.0"
 }
 
 variable "coralogix_region" {
   description = "Coralogix region for data ingestion"
   type        = string
+  default     = "EU1"
 }
 
 variable "custom_domain" {
@@ -58,7 +62,7 @@ variable "api_key" {
   description = "Coralogix API key for data ingestion"
   type        = string
   sensitive   = true
-  default     = null
+  default     = "cxtp_CoralogixSendYourDataKey"
 }
 
 variable "use_custom_config_parameter_store" {

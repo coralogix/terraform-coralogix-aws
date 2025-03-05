@@ -30,7 +30,7 @@ module "ecs-ec2" {
   default_application_name            = "Coralogix Application Name"
   default_subsystem_name              = "Coralogix Subsystem Name"
   # OPTIONAL
-  api_key                             = "ctxp_CoralogixSendYourDataAPIKey"
+  api_key                             = "cxtp_CoralogixSendYourDataAPIKey"
   custom_domain                       = "custom.coralogix.domain"
   otel_config_file                    = "file path to custom OTEL collector config file"
   use_api_key_secret                  = true|false
