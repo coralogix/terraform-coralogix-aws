@@ -8,19 +8,36 @@ terraform {
 }
 
 provider "aws" {
-  region = "eu-central-1"
+  region = var.aws_region
 }
 
 module "ecs-ec2" {
-  source                   = "../../modules/ecs-ec2"
-  ecs_cluster_name         = "test-lab-cluster"
-  image_version            = "latest"
-  memory                   = 256
-  coralogix_region         = "Europe"
-  custom_domain            = null
-  default_application_name = "ecs-ec2"
-  default_subsystem_name   = "collector"
-  api_key                  = "1234567890_DUMMY_API_KEY"
-  otel_config_file         = "./otel_config.tftpl.yaml"
-  metrics                  = true
+  source                              = "../../modules/ecs-ec2"
+  ecs_cluster_name                    = var.ecs_cluster_name
+  
+  image                               = var.image
+  image_version                       = var.image_version
+
+  memory                              = 256
+  
+  coralogix_region                    = var.coralogix_region
+  custom_domain                       = var.custom_domain
+
+  default_application_name            = var.default_application_name
+  default_subsystem_name              = var.default_subsystem_name
+
+  use_api_key_secret                  = var.use_api_key_secret
+  api_key_secret_arn                  = var.api_key_secret_arn
+  api_key                             = var.api_key
+
+  use_custom_config_parameter_store   = var.use_custom_config_parameter_store
+  custom_config_parameter_store_name  = var.custom_config_parameter_store_name
+  otel_config_file                    = var.otel_config_file
+
+  task_execution_role_arn             = var.task_execution_role_arn
+  
+  tags = {
+    Environment = "test"
+    Project     = "otel-testing"
+  }
 }

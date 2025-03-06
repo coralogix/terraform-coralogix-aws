@@ -71,6 +71,12 @@ variable "s3_key_suffix" {
   default     = null
 }
 
+variable "s3_bucket_kms_arn" {
+  description = "The AWS ARN of the KMS key used to encrypt/decrypt objects in the specified S3 bucket. If provided, the Lambda policy will include permissions to decrypt using this key."
+  type        = string
+  default     = null
+}
+
 variable "cs_delimiter" {
   type        = string
   description = "The delimiter used in the CSV file to process This value is applied when the S3Csv integration type is selected"

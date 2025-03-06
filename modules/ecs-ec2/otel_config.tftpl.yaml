@@ -1,25 +1,26 @@
 receivers:
   otlp:
     protocols:
-      grpc:
-        endpoint: "0.0.0.0:4317"
-      http:
-        endpoint: "0.0.0.0:4318"
+      grpc: { endpoint: 0.0.0.0:4317 }
+      http: { endpoint: 0.0.0.0:4318 }
+
+  awsecscontainermetricsd:
+
   prometheus:
     config:
       scrape_configs:
       - job_name: otel-collector-metrics
-        scrape_interval: 60s
+        scrape_interval: 30s
         static_configs:
-        - targets: ['localhost:8888']
-  awsecscontainermetricsd:
+        - targets: ["localhost:8888"]
+
   filelog:
     start_at: end
     force_flush_period: 0
     include:
       - /hostfs/var/lib/docker/containers/*/*.log
+    include_file_name: false
     include_file_path: true
-    # add log.file.path to resource attributes
     operators:
       - type: router
         id: docker_log_json_parser
@@ -51,16 +52,30 @@ receivers:
         id: move_log_file_path
         from: attributes["log.file.path"]
         to: resource["log.file.path"]
+
+  hostmetrics:
+    root_path: /
+    collection_interval: 10s
+    scrapers:
+      cpu: { metrics: { system.cpu.utilization: { enabled: true } } }
+      filesystem:
+        exclude_fs_types: { fs_types: [autofs, binfmt_misc, bpf, cgroup2, configfs, debugfs, devpts, devtmpfs, fusectl, hugetlbfs, iso9660, mqueue, nsfs, overlay, proc, procfs, pstore, rpc_pipefs, securityfs, selinuxfs, squashfs, sysfs, tracefs], match_type: strict }
+        exclude_mount_points: { match_type: regexp, mount_points: [/dev/*, /proc/*, /sys/*, /run/k3s/containerd/*, /run/containerd/runc/*, /var/lib/docker/*, /var/lib/kubelet/*, /snap/*] }
+      memory: { metrics: { system.memory.utilization: { enabled: true } } }
+      process:
+        metrics:
+          process.cpu.utilization: { enabled: true }
+          process.memory.utilization: { enabled: true }
+          process.threads: { enabled: true }
+        mute_process_exe_error: true
+        mute_process_user_error: true
+
 processors:
-  resourcedetection:
-    # ecs & docker detectors not required when using ecslogresourcedetection for logs
-    detectors: [env, ec2, system]
-    timeout: 2s
-    override: false
-  ecsattributes:
+  ecsattributes/container-logs:
     container_id:
       sources:
         - "log.file.path"
+
   transform/logs:
     error_mode: ignore
     log_statements:
@@ -70,33 +85,86 @@ processors:
           - set(attributes["aws_ecs_task_family"], attributes["aws.ecs.task.definition.family"])
           - set(attributes["image_id"], attributes["image.id"])
           - delete_key(attributes, "image.id")
-  batch:
-    send_batch_size: 1024
-    send_batch_max_size: 2048
-    timeout: "1s"
+
+  transform/entity-event:
+    error_mode: silent
+    log_statements:
+      - context: log
+        statements:
+          - set(attributes["otel.entity.id"]["host.id"], resource.attributes["host.id"])
+          - merge_maps(attributes, resource.attributes, "insert")
+      - context: resource
+        statements:
+          - keep_keys(attributes, [""])
+
+  batch: { send_batch_max_size: 2048, send_batch_size: 1024, timeout: 1s }
+
+  resource/metadata:
+    attributes:
+      - action: upsert
+        key: cx.otel_integration.name
+        value: coralogix-integration-ecs-ec2
+
   # otel-collector resource detection for collector
   resourcedetection/otel-collector:
-    detectors: [ecs, ec2]
-    timeout: 2s
+    detectors: [system, env, ecs, ec2]
     override: false
+    timeout: 2s
+    system:
+      resource_attributes:
+        host.id: { enabled: false }
+        host.cpu.cache.l2.size: { enabled: true }
+        host.cpu.stepping: { enabled: true }
+        host.cpu.model.name: { enabled: true }
+        host.cpu.model.id: { enabled: true }
+        host.cpu.family: { enabled: true }
+        host.cpu.vendor.id: { enabled: true }
+        host.mac: { enabled: true }
+        host.ip: { enabled: true }
+        os.description: { enabled: true }
+
+  resourcedetection/entity:
+    detectors: [system, env, ecs, ec2]
+    override: false
+    timeout: 2s
+    system:
+      resource_attributes:
+        host.id: { enabled: false }
+        host.cpu.cache.l2.size: { enabled: true }
+        host.cpu.stepping: { enabled: true }
+        host.cpu.model.name: { enabled: true }
+        host.cpu.model.id: { enabled: true }
+        host.cpu.family: { enabled: true }
+        host.cpu.vendor.id: { enabled: true }
+        host.mac: { enabled: true }
+        host.ip: { enabled: true }
+        os.description: { enabled: true }
 
 exporters:
   coralogix:
-    domain: "$CORALOGIX_DOMAIN"
-    private_key: "$PRIVATE_KEY"
-    application_name: "$APP_NAME"
-    subsystem_name: "$SUB_SYS"
+    domain: "${CORALOGIX_DOMAIN}"
+    private_key: "${PRIVATE_KEY}"
+    application_name: "${APP_NAME}"
+    subsystem_name: "${SUB_SYS}"
     application_name_attributes:
     - "aws.ecs.cluster"
-    - "aws.ecs.cluster.name"
     - "aws.ecs.task.definition.family"
     subsystem_name_attributes:
     - "aws.ecs.container.name"
     - "aws.ecs.docker.name"
     - "docker.name"
     timeout: 30s
-  debug:
-    verbosity: detailed
+
+  coralogix/resource_catalog:
+    application_name: resource
+    domain: ${CORALOGIX_DOMAIN}
+    private_key: ${PRIVATE_KEY}
+    logs:
+      headers:
+        X-Coralogix-Distribution: ecs-ec2-integration/1.0.0
+        x-coralogix-ingress: metadata-as-otlp-logs/v1
+    subsystem_name: catalog
+    timeout: 30s
 
 extensions:
   health_check:
@@ -106,35 +174,46 @@ service:
   extensions:
     - health_check
     - pprof
+
+  pipelines:
+    logs/container-logs:
+      receivers: [filelog]
+      processors: [ecsattributes/container-logs, resource/metadata, transform/logs, batch]
+      exporters: [coralogix]
+
+    metrics/container-metrics:
+      receivers: [awsecscontainermetricsd]
+      processors: [batch]
+      exporters: [coralogix]
+
+    logs/otlp:
+      receivers: [otlp]
+      processors: [resource/metadata, batch]
+      exporters: [coralogix]
+
+    metrics/otlp:
+      receivers: [otlp]
+      processors: [resource/metadata, batch]
+      exporters: [coralogix]
+
+    traces/otlp:
+      receivers: [otlp]
+      processors: [resource/metadata, batch]
+      exporters: [coralogix]
+
+    logs/resource_catalog:
+      receivers: [hostmetrics]
+      processors: [resourcedetection/entity, transform/entity-event, batch]
+      exporters: [coralogix/resource_catalog]
+
+    metrics/otel-collector:
+      receivers: [prometheus, hostmetrics]
+      processors: [resourcedetection/otel-collector, resource/metadata, batch]
+      exporters: [coralogix]
+
   telemetry:
     logs:
       level: warn
     metrics:
       address: 0.0.0.0:8888
       level: detailed
-  pipelines:
-    logs:
-      receivers:
-        - filelog
-      processors:
-        # - resourcedetection # For logs relayed from other containers, don't use otel container's resource attributes.
-        - ecsattributes
-        - transform/logs
-        - batch
-      exporters:
-        - coralogix
-    traces:
-      receivers:
-        - otlp
-      processors:
-        - batch
-      exporters:
-        - coralogix
-    metrics/otel-collector:
-      receivers:
-        - prometheus
-      processors:
-        - resourcedetection/otel-collector
-        - batch
-      exporters:
-        - coralogix

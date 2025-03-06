@@ -1,0 +1,32 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+exporters:
+  coralogix:
+    domain: "${CORALOGIX_DOMAIN}"
+    private_key: "${PRIVATE_KEY}"
+    application_name: "${APP_NAME}"
+    subsystem_name: "${SUB_SYS}"
+    timeout: 30s
+
+extensions:
+  health_check:
+
+service:
+  extensions:
+    - health_check
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [coralogix]
+    metrics:
+      receivers: [otlp]
+      exporters: [coralogix]
+    logs:
+      receivers: [otlp]
+      exporters: [coralogix]

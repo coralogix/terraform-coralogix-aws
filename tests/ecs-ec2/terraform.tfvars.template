@@ -1,2 +1,13 @@
-coralogix_region = "Singapore"
-api_key          = "XXXX_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+aws_region       = "us-east-1"
+
+ecs_cluster_name = "ecs-ec2-testing-cluster"
+
+default_subsystem_name = "ecs-ec2-tf-base_vars-test"
+
+image = "coralogixrepo/coralogix-otel-collector"
+image_version    = "v0.4.0"
+
+coralogix_region = "EU1"
+
+api_key = "cxtp_CoralogixSendYourDataApiKey"
+
