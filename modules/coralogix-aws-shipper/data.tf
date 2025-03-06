@@ -13,8 +13,8 @@ data "aws_cloudwatch_log_group" "this" {
 }
 
 data "aws_s3_bucket" "this" {
-  count  = var.s3_bucket_name == null ? 0 : 1
-  bucket = var.s3_bucket_name
+  for_each = local.s3_bucket_names
+  bucket   = each.value
 }
 
 data "aws_s3_bucket" "dlq_bucket" {
