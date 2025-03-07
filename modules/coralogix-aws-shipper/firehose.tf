@@ -9,7 +9,7 @@ resource "aws_iam_role_policy" "s3_firehose_metrics_policy" {
       {
         Effect   = "Allow"
         Action   = ["s3:AbortMultipartUpload", "s3:GetBucketLocation", "s3:GetObject", "s3:ListBucket", "s3:ListBucketMultipartUploads", "s3:PutObject"]
-        Resource = ["${local.arn_prefix}:s3:::${var.s3_bucket_name}", "${local.arn_prefix}:s3:::${var.s3_bucket_name}/*"]
+        Resource = flatten([for bucket in local.s3_bucket_names : ["${local.arn_prefix}:s3:::${bucket}", "${local.arn_prefix}:s3:::${bucket}/*"]])
       },
       {
         Effect   = "Allow"

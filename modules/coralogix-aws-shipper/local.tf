@@ -19,8 +19,9 @@ locals {
 
   api_key_is_arn = replace(nonsensitive(var.api_key), ":", "") != nonsensitive(var.api_key) ? true : false
 
-  integration_info = var.integration_info == null ? {
+  sensitive_integration_info = var.integration_info == null ? {
     integration = {
+      bucket_name                      = local.s3_bucket_names[0]
       application_name                 = var.application_name
       subsystem_name                   = var.subsystem_name
       integration_type                 = var.integration_type
@@ -33,11 +34,28 @@ locals {
       api_key                          = var.api_key
       store_api_key_in_secrets_manager = var.store_api_key_in_secrets_manager
     }
-  } : {}
+    } : var.api_key == "" ? var.integration_info : {
+    for k, v in var.integration_info : k => {
+      s3_bucket_name                   = v.s3_bucket_name
+      s3_key_prefix                    = v.s3_key_prefix
+      s3_key_suffix                    = v.s3_key_suffix
+      application_name                 = v.application_name
+      subsystem_name                   = v.subsystem_name
+      integration_type                 = v.integration_type
+      lambda_name                      = v.lambda_name
+      newline_pattern                  = v.newline_pattern
+      blocking_pattern                 = v.blocking_pattern
+      lambda_log_retention             = v.lambda_log_retention
+      api_key                          = v.api_key != null ? v.api_key : var.api_key
+      store_api_key_in_secrets_manager = v.store_api_key_in_secrets_manager
+    }
+  }
+  integration_info = nonsensitive(local.sensitive_integration_info)
 
   is_s3_integration  = var.integration_type == "S3Csv" || var.integration_type == "CloudFront" || var.integration_type == "S3" || var.integration_type == "CloudTrail" || var.integration_type == "VpcFlow" ? true : false
   is_sns_integration = local.sns_enable && (var.integration_type == "S3" || var.integration_type == "Sns" || var.integration_type == "CloudTrail") ? true : false
   is_sqs_integration = var.sqs_name != null && (var.integration_type == "S3" || var.integration_type == "CloudTrail" || var.integration_type == "Sqs") ? true : false
 
-  arn_prefix = "arn:${data.aws_partition.current.partition}"
+  arn_prefix      = "arn:${data.aws_partition.current.partition}"
+  s3_bucket_names = var.s3_bucket_name != null ? toset(split(",", var.s3_bucket_name)) : toset([])
 }
