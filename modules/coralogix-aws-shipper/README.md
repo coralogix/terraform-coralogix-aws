@@ -119,6 +119,11 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 [//]: # (description id="SQS-integration" title="AWS Shipper Terraform Module for SQS Integration" examples_path="examples/coralogix-aws-shipper/README.md")
 | <a name="input_sns_topic_filter"></a> [sns_topic_filter](#input\_sns\_topic\_filter) | Map of filters to add to the SNS topic Lambda subscription. | `map(any)` |  n/a | no |
 | <a name="input_sns_topic_filter_scope"></a> [sns_topic_filter_scope](#input\_sns\_topic\_filter\_scope) | The scope of the filter policy for the SNS topic Lambda subscription, could be MessageAttributes or MessageBody | `string` |  n/a | no |
+
+[//]: # (/description)
+
+[//]: # (description id="sqs-integration" title="sqs Integration" examples_path="examples/coralogix-aws-shipper/README.md")
+
 ### SQS configuration
 
 | Name | Description | Type | Default | Required | 
