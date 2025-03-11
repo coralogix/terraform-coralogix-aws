@@ -55,6 +55,8 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 | <a name="application_name"></a> [application\_name](#input\_application\_name) | The [name](https://coralogix.com/docs/application-and-subsystem-names/) of your application. For a dynamic value, use `$.my_log.field`. This option is not supported since version `1.1.0` for the [source code](https://github.com/coralogix/coralogix-aws-shipper/blob/master/CHANGELOG.md) | string | n\a | yes | 
 | <a name="subsystem_name"></a> [subsystem\_name](#input\_subsysten_\_name) | The [name](https://coralogix.com/docs/application-and-subsystem-names/) of your subsystem. For a dynamic value, use `$.my_log.field` for CloudWatch log group leave empty. This option is not supported since version `1.1.0` for the [source code](https://github.com/coralogix/coralogix-aws-shipper/blob/master/CHANGELOG.md) | string | n\a | yes |
 
+[//]: # (description id="s3-integration" title="S3 Integration" examples_path="examples/coralogix-aws-shipper/README.md")
+
 ### S3, CloudTrail, VpcFlow, S3Csv configuration
 
 | Name | Description | Type | Default | Required |
@@ -83,6 +85,9 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 | <a name="input_s3_key_suffix"></a> [s3\_key\_suffix](#input\_s3\_key\_suffix) | The S3 path suffix to watch. | `string` |  n/a` | no |
 | <a name="input_newline_pattern"></a> [newline\_pattern](#input\_newline\_pattern) | A regular expression to detect a new log line for multiline logs, e.g., \n(?=\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}.\d{3}). | `string` | n/a | no |
 
+[//]: # (/description)
+
+[//]: # (description id="cloudwatch-integration" title="cloudwatch Integration" examples_path="examples/coralogix-aws-shipper/README.md")
 ### CloudWatch configuration
 
 | Name | Description | Type | Default | Required | 
@@ -90,6 +95,9 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 | <a name="input_log_groups"></a> [log\_groups](#input\_log\_groups) | A comma-separated list of CloudWatch log group names to monitor. For example, (log-group1, log-group2, log-group3). | `list(string)` | n/a | yes |
 | <a name="input_log_group_prefix"></a> [log\_group\_prefix](#input\_log\_group\_prefix) | Instead of creating one permission for each log group in the destination lambda, the code will take the prefix that you set in this parameter and create 1 permission for all of the log groups that match the prefix. For example, if you define `/aws/log/logs`, then the lLambda will create only 1 permission for all of your log groups that start with `/aws/log/logs` instead of 1 permision for each of the log group. Use this parameter when you have more than 50 log groups. Pay attention that you will not see the log groups as a trigger in the Lambda if you use this parameter. | `list(string)` | n/a | no |
 
+[//]: # (/description)
+
+[//]: # (description id="sns-integration" title="sns Integration" examples_path="examples/coralogix-aws-shipper/README.md")
 ### SNS configuration
 
 | Name | Description | Type | Default | Required | 
@@ -97,18 +105,29 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 | <a name="input_sns_topic_name"></a> [sns_topic_name](#input\_sns\_topic\_name) | The SNS topic containing the SNS subscription. You need this only when using the SNS integration. | `string` |  n/a | yes |
 | <a name="input_sns_topic_filter"></a> [sns_topic_filter](#input\_sns\_topic\_filter) | Map of filters to add to the SNS topic Lambda subscription. | `map(any)` |  n/a | no |
 | <a name="input_sns_topic_filter_scope"></a> [sns_topic_filter_scope](#input\_sns\_topic\_filter\_scope) | The scope of the filter policy for the SNS topic Lambda subscription, could be MessageAttributes or MessageBody | `string` |  n/a | no |
+
+[//]: # (/description)
+
+[//]: # (description id="sqs-integration" title="sqs Integration" examples_path="examples/coralogix-aws-shipper/README.md")
+
 ### SQS configuration
 
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
 | <a name="input_sqs_topic_name"></a> [sqs_topic_name](#input\_sqs\_topic\_name) | The name of the SQS queue to which you want to subscribe for retrieving messages.| `string` |  n/a | yes |
 
+[//]: # (/description)
+
+[//]: # (description id="kinesis-integration" title="kinesis Integration" examples_path="examples/coralogix-aws-shipper/README.md")
 ### Kinesis configuration
 
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
 | <a name="input_kinesis_stream_name"></a> [kinesis_stream_name](#input\_Kinesis_\_stream_\_name) | The name of the Kinesis stream to which you want to subscribe for retrieving messages.| `string` |  n/a | yes |
 
+[//]: # (/description)
+
+[//]: # (description id="msk-integration" title="msk Integration" examples_path="examples/coralogix-aws-shipper/README.md")
 ### MSK configuration
 
 | Name | Description | Type | Default | Required | 
@@ -116,6 +135,9 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 | <a name="input_msk_cluster_arn"></a> [msk_cluster_arn](#input\_msk\_cluster\_arn) | The ARN of the MSK cluster to subscribe to retrieving messages.| `string` |  n/a | yes |
 | <a name="input_msk_topic_name"></a> [msk_topic_name](#input\_msk\_topic\_name) | List of The Kafka topic mames used to store records in your Kafka cluster [\"topic-name1\" ,\"topic-name2\"].| `list of strings` |  n/a | yes |
 
+[//]: # (/description)
+
+[//]: # (description id="kafka-integration" title="kafka Integration" examples_path="examples/coralogix-aws-shipper/README.md")
 ### Kafka configuration
 
 | Name | Description | Type | Default | Required | 
@@ -124,6 +146,8 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 | <a name="input_kafka_topic"></a> [kafka_topic](#input\_kafka\_topic) | The Kafka topic to subscribe to.| `string` |  n/a | yes |
 | <a name="input_kafka_subnets_ids"></a> [kafka_subnets_ids](#input\_kafka\_subnets\_ids) | List of Kafka subnets to use when connecting to Kafka.| `list` |  n/a | yes |
 | <a name="input_kafka_security_groups"></a> [kafka_security_groups](#input\_kafka\_security\_groups) | List of Kafka security groups to use when connecting to Kafka.| `list` |  n/a | yes |
+
+[//]: # (/description)
 
 ### Generic configuration (optional)
 
