@@ -54,7 +54,7 @@ variable "sampling_rate" {
 }
 
 variable "s3_bucket_name" {
-  description = "The name of the S3 bucket to watch"
+  description = "The name of the S3 bucket to watch, this accepts also a comma separated list of bucket names."
   type        = string
   default     = null
 }
@@ -67,12 +67,6 @@ variable "s3_key_prefix" {
 
 variable "s3_key_suffix" {
   description = "The AWS S3 path suffix to watch. This value is ignored when the SNSTopicArn parameter is provided."
-  type        = string
-  default     = null
-}
-
-variable "s3_bucket_kms_arn" {
-  description = "The AWS ARN of the KMS key used to encrypt/decrypt objects in the specified S3 bucket. If provided, the Lambda policy will include permissions to decrypt using this key."
   type        = string
   default     = null
 }
@@ -92,6 +86,7 @@ variable "custom_csv_header" {
 variable "integration_info" {
   description = "Values of s3 integraion in case that you want to deploy more than one integration"
   type = map(object({
+    s3_bucket_name                   = optional(string)
     s3_key_prefix                    = optional(string)
     s3_key_suffix                    = optional(string)
     application_name                 = string
@@ -101,7 +96,7 @@ variable "integration_info" {
     newline_pattern                  = optional(string)
     blocking_pattern                 = optional(string)
     lambda_log_retention             = optional(number)
-    api_key                          = string
+    api_key                          = optional(string)
     store_api_key_in_secrets_manager = optional(bool)
   }))
   default = null
@@ -121,7 +116,7 @@ variable "log_group_prefix" {
   default     = null
 }
 
-# kinesis variables
+# kinesis variables 
 
 variable "kinesis_stream_name" {
   description = "The name of Kinesis stream to subscribe to retrieving messages"
