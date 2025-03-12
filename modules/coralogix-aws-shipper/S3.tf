@@ -1,5 +1,5 @@
 resource "aws_s3_bucket_notification" "lambda_notification" {
-  for_each   = local.s3_bucket_names != [] && local.sns_enable != true && var.sqs_name == null && var.telemetry_mode != "metrics" ? data.aws_s3_bucket.this : {}
+  for_each   = local.s3_bucket_names != toset([]) && local.sns_enable != true && var.sqs_name == null && var.telemetry_mode != "metrics" ? data.aws_s3_bucket.this : {}
   depends_on = [module.lambda]
   bucket     = each.value.bucket
   dynamic "lambda_function" {
