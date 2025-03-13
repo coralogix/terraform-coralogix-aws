@@ -53,7 +53,7 @@ data "aws_iam_policy_document" "topic" {
     condition {
       test     = "ArnLike"
       variable = "aws:SourceArn"
-      values   = [data.aws_s3_bucket.this[0].arn]
+      values   = [one(values(data.aws_s3_bucket.this)).arn]
     }
   }
 }
