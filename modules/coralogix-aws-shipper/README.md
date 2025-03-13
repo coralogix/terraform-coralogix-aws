@@ -122,8 +122,7 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 
 [//]: # (/description)
 
-[//]: # (description id="sqs-integration" title="sqs Integration" examples_path="examples/coralogix-aws-shipper/README.md")
-
+[//]: # (description id="SQS-integration" title="SQS Integration" examples_path="examples/coralogix-aws-shipper/README.md")
 ### SQS configuration
 
 | Name | Description | Type | Default | Required | 
