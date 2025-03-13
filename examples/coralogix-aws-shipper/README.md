@@ -6,7 +6,7 @@ Coralogix provides a predefined AWS Lambda function to easily forward your logs 
 
 To run this example you need to save this code in Terraform file, and change the values according to our settings.
 
-[//]: # (example id="s3-integration")
+[//]: # (example id="S3-integration")
 
 ### Use the default s3 integration
 ```bash
@@ -143,7 +143,7 @@ module "coralogix-shipper-multiple-s3-integrations" {
 
 [//]: # (/example)
 
-[//]: # (example id="cloudwatch-integration")
+[//]: # (example id="CloudWatch-integration")
 
 ### Use the CloudWatch integration
 ```bash
@@ -161,7 +161,7 @@ module "coralogix-shipper-cloudwatch" {
 
 [//]: # (/example)
 
-[//]: # (example id="kinesis-integration")
+[//]: # (example id="Kinesis-integration")
 
 ### Use the Kinesis integration
 ```bash
@@ -179,7 +179,7 @@ module "coralogix-shipper-kinesis" {
 
 [//]: # (/example)
 
-[//]: # (example id="msk-integration")
+[//]: # (example id="MSK-integration")
 
 ### Use the MSK integration
 ```bash
@@ -198,7 +198,7 @@ module "coralogix-shipper-msk" {
 
 [//]: # (/example)
 
-[//]: # (example id="ecrscan-integration")
+[//]: # (example id="EcrScan-integration")
 
 ### Use the EcrScan integration
 ```bash
@@ -215,7 +215,7 @@ module "coralogix-shipper-ecrscan" {
 
 [//]: # (/example)
 
-[//]: # (example id="kafka-integration")
+[//]: # (example id="Kafka-integration")
 
 ### Use the Kafka integration
 ```bash
@@ -237,7 +237,7 @@ module "coralogix-shipper-kafka" {
 
 [//]: # (/example)
 
-[//]: # (example id="sqs-integration")
+[//]: # (example id="SQS-integration")
 
 ### Use the SQS integration
 ```bash
@@ -256,7 +256,7 @@ module "coralogix-shipper-Sqs" {
 
 [//]: # (/example)
 
-[//]: # (example id="sns-integration")
+[//]: # (example id="SNS-integration")
 
 ### Use the SNS integration
 ```bash
