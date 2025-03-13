@@ -293,7 +293,7 @@ module "coralogix-shipper-kinesis" {
 
 ### Use the CloudWatch metrics stream via a private link
 ```bash
-module "coralogix_aws_shipper" "coralogix_firehose_metrics_private_link" {
+module "coralogix_firehose_metrics_private_link" {
   source             = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
   telemetry_mode     = "metrics"
   api_key            = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
