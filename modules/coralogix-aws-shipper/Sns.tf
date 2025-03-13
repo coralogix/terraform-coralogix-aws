@@ -1,7 +1,7 @@
 resource "aws_s3_bucket_notification" "topic_notification" {
   depends_on = [module.lambda]
   count      = local.sns_enable == true && (var.integration_type == "S3" || var.integration_type == "CloudTrail") ? 1 : 0
-  bucket     = data.aws_s3_bucket.this[0].bucket
+  bucket     = one(values(data.aws_s3_bucket.this)).bucket
   topic {
     topic_arn     = data.aws_sns_topic.sns_topic[0].arn
     events        = ["s3:ObjectCreated:*"]
