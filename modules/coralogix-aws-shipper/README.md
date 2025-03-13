@@ -1,6 +1,6 @@
-[//]: # (static-modules-readme-start-description)
-
 # Forward AWS Logs via Lambda Shipper with Terraform
+
+[//]: # (static-modules-readme-start-description)
 
 ## Overview
 
