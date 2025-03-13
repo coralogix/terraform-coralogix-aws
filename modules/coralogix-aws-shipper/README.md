@@ -1,8 +1,12 @@
+[//]: # (static-modules-readme-start-description)
+
 # Forward AWS Logs via Lambda Shipper with Terraform
 
 ## Overview
 
 Our latest AWS integration provides the easiest way to connect with Coralogix. By using a predefined Lambda function, you can seamlessly send AWS logs and events to your Coralogix subscription for detailed analysis, monitoring, and troubleshooting.
+
+[//]: # (/static-modules-readme-start-description)
 
 This integration guide walks you through completing the predefined Lambda function template using Terraform. You’ll need to provide specific configuration parameters based on the service you want to connect. A reference list for these parameters is provided below.
 
@@ -45,6 +49,8 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
      
       -  Migrate your existing integrations to Terraform and use the `integration_info` variable.
 
+[//]: # (static-modules-readme-end-description)
+
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | The Coralogix location region, available options: [`EU1`, `EU2`, `AP1`, `AP2`, `AP3`, `US1`, `US2`, `Custom`] | `string` | n/a | yes |
@@ -54,6 +60,8 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 | <a name="input_store_api_key_in_secrets_manager"></a> [store\_api\_key\_in\_secrets\_manager](#input\_store\_api\_key\_in\_secrets\_manager) | Enable this to store your API key securely. Otherwise, it will remain exposed in plain text as an environment variable in the Lambda function console.| bool | true | no |
 | <a name="application_name"></a> [application\_name](#input\_application\_name) | The [name](https://coralogix.com/docs/application-and-subsystem-names/) of your application. For a dynamic value, use `$.my_log.field`. This option is not supported since version `1.1.0` for the [source code](https://github.com/coralogix/coralogix-aws-shipper/blob/master/CHANGELOG.md) | string | n\a | yes | 
 | <a name="subsystem_name"></a> [subsystem\_name](#input\_subsysten_\_name) | The [name](https://coralogix.com/docs/application-and-subsystem-names/) of your subsystem. For a dynamic value, use `$.my_log.field` for CloudWatch log group leave empty. This option is not supported since version `1.1.0` for the [source code](https://github.com/coralogix/coralogix-aws-shipper/blob/master/CHANGELOG.md) | string | n\a | yes |
+
+[//]: # (/static-modules-readme-end-description)
 
 [//]: # (description id="s3-integration" title="S3 Integration" examples_path="examples/coralogix-aws-shipper/README.md")
 
