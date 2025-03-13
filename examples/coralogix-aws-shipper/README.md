@@ -317,6 +317,8 @@ module "coralogix_aws_shipper" "coralogix_firehose_metrics_private_link" {
 }
 ```
 
+[//]: # (static-examples-readme-start-description)
+
 now execute:
 ```bash
 $ terraform init
@@ -325,3 +327,4 @@ $ terraform apply
 ```
 Run `terraform destroy` when you don't need these resources.
 
+[//]: # (/static-examples-readme-start-description)
