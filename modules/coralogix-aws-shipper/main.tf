@@ -91,8 +91,8 @@ resource "aws_iam_policy" "lambda_policy" {
       # SQS S3 Integration Policy
       {
         Effect   = "Allow",
-        Action   = var.sqs_name != null && local.s3_bucket_names != [] ? ["s3:GetObject", "s3:ListBucket", "s3:GetBucketLocation", "s3:GetObjectVersion", "s3:GetLifecycleConfiguration"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
-        Resource = var.sqs_name != null && local.s3_bucket_names != [] ? flatten([for bucket in data.aws_s3_bucket.this : ["${bucket.arn}/*", "${bucket.arn}"]]) : ["*"]
+        Action   = var.sqs_name != null && local.s3_bucket_names != toset([]) ? ["s3:GetObject", "s3:ListBucket", "s3:GetBucketLocation", "s3:GetObjectVersion", "s3:GetLifecycleConfiguration"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+        Resource = var.sqs_name != null && local.s3_bucket_names != toset([]) ? flatten([for bucket in data.aws_s3_bucket.this : ["${bucket.arn}/*", "${bucket.arn}"]]) : ["*"]
       },
 
         # EcrScan Integration Policy
@@ -105,15 +105,15 @@ resource "aws_iam_policy" "lambda_policy" {
       # S3 Integration Policy
       {
         Effect   = "Allow",
-        Action   = local.s3_bucket_names != [] && var.sqs_name == null ? ["s3:GetObject"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
-        Resource = local.s3_bucket_names != [] && var.sqs_name == null ? flatten([for bucket in data.aws_s3_bucket.this : ["${bucket.arn}/*", "${bucket.arn}"]]) : ["*"]
+        Action   = local.s3_bucket_names != toset([]) && var.sqs_name == null ? ["s3:GetObject"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+        Resource = local.s3_bucket_names != toset([]) && var.sqs_name == null ? flatten([for bucket in data.aws_s3_bucket.this : ["${bucket.arn}/*", "${bucket.arn}"]]) : ["*"]
       },
 
       #S3 with SQS Integration Policy
       {
         Effect   = "Allow",
-        Action   = local.s3_bucket_names != [] && var.sqs_name != null ? ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
-        Resource = local.s3_bucket_names != [] && var.sqs_name != null ? [data.aws_sqs_queue.name[0].arn] : ["*"]
+        Action   = local.s3_bucket_names != toset([]) && var.sqs_name != null ? ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"] : ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+        Resource = local.s3_bucket_names != toset([]) && var.sqs_name != null ? [data.aws_sqs_queue.name[0].arn] : ["*"]
       },
 
         # Kinesis Integration policy
@@ -227,7 +227,7 @@ module "lambda" {
   attach_policy_statements                = false
   create_role                             = false
   lambda_role                             = var.execution_role_name != null ? data.aws_iam_role.LambdaExecutionRole[0].arn : aws_iam_role.lambda_role[0].arn
-  allowed_triggers = local.s3_bucket_names != [] && local.sns_enable != true ? {
+  allowed_triggers = local.s3_bucket_names != toset([]) && local.sns_enable != true ? {
     for bucket in data.aws_s3_bucket.this : "AllowExecutionFromS3_${bucket.bucket}" => {
       principal  = "s3.amazonaws.com"
       source_arn = bucket.arn
@@ -305,7 +305,7 @@ resource "aws_secretsmanager_secret" "coralogix_secret" {
 
 resource "aws_secretsmanager_secret_version" "service_user" {
   for_each = {
-    for key, integration_info in local.integration_info : key => integration_info
+    for key, integration_info in var.integration_info != null ? var.integration_info : local.integration_info : key => integration_info
     if !local.api_key_is_arn && (integration_info.store_api_key_in_secrets_manager == null || integration_info.store_api_key_in_secrets_manager == true)
   }
   depends_on    = [aws_secretsmanager_secret.coralogix_secret]

@@ -19,6 +19,11 @@
 ### 🚀 New components 🚀
 - Add KMS Key support for S3 Buckets
 
+## v3.1.0
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 💡
+- Add support to deploy the integration with multiple S3 buckets
+
 ## v2.7.0
 #### **eventbridge**
 ### 🚀 New components 🚀

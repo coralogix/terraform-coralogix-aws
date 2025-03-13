@@ -21,7 +21,7 @@ locals {
 
   sensitive_integration_info = var.integration_info == null ? {
     integration = {
-      bucket_name                      = local.s3_bucket_names[0]
+      s3_bucket_name                   = var.s3_bucket_name
       application_name                 = var.application_name
       subsystem_name                   = var.subsystem_name
       integration_type                 = var.integration_type
