@@ -63,7 +63,7 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 
 [//]: # (/static-modules-readme-end-description)
 
-[//]: # (description id="S3-integration" title="S3 Integration" examples_path="examples/coralogix-aws-shipper/README.md")
+[//]: # (description id="S3-integration" title="AWS Shipper Terraform Module for S3 Integration" examples_path="examples/coralogix-aws-shipper/README.md")
 
 ### S3, CloudTrail, VpcFlow, S3Csv configuration
 
@@ -95,7 +95,7 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 
 [//]: # (/description)
 
-[//]: # (description id="CloudWatch-integration" title="CloudWatch Integration" examples_path="examples/coralogix-aws-shipper/README.md")
+[//]: # (description id="CloudWatch-integration" title="AWS Shipper Terraform Module for CloudWatch Integration" examples_path="examples/coralogix-aws-shipper/README.md")
 ### CloudWatch configuration
 
 | Name | Description | Type | Default | Required | 
@@ -105,7 +105,7 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 
 [//]: # (/description)
 
-[//]: # (description id="SNS-integration" title="SNS Integration" examples_path="examples/coralogix-aws-shipper/README.md")
+[//]: # (description id="SNS-integration" title="AWS Shipper Terraform Module for SNS Integration" examples_path="examples/coralogix-aws-shipper/README.md")
 ### SNS configuration
 
 | Name | Description | Type | Default | Required | 
@@ -116,7 +116,7 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 
 [//]: # (/description)
 
-[//]: # (description id="SQS-integration" title="SQS Integration" examples_path="examples/coralogix-aws-shipper/README.md")
+[//]: # (description id="SQS-integration" title="AWS Shipper Terraform Module for SQS Integration" examples_path="examples/coralogix-aws-shipper/README.md")
 ### SQS configuration
 
 | Name | Description | Type | Default | Required | 
@@ -125,7 +125,7 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 
 [//]: # (/description)
 
-[//]: # (description id="Kinesis-integration" title="Kinesis Integration" examples_path="examples/coralogix-aws-shipper/README.md")
+[//]: # (description id="Kinesis-integration" title="AWS Shipper Terraform Module for Kinesis Integration" examples_path="examples/coralogix-aws-shipper/README.md")
 ### Kinesis configuration
 
 | Name | Description | Type | Default | Required | 
@@ -134,7 +134,7 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 
 [//]: # (/description)
 
-[//]: # (description id="MSK-integration" title="MSK Integration" examples_path="examples/coralogix-aws-shipper/README.md")
+[//]: # (description id="MSK-integration" title="AWS Shipper Terraform Module for MSK Integration" examples_path="examples/coralogix-aws-shipper/README.md")
 ### MSK configuration
 
 | Name | Description | Type | Default | Required | 
@@ -144,7 +144,7 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 
 [//]: # (/description)
 
-[//]: # (description id="Kafka-integration" title="Kafka Integration" examples_path="examples/coralogix-aws-shipper/README.md")
+[//]: # (description id="Kafka-integration" title="AWS Shipper Terraform Module for Kafka Integration" examples_path="examples/coralogix-aws-shipper/README.md")
 ### Kafka configuration
 
 | Name | Description | Type | Default | Required | 
