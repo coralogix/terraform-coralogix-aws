@@ -95,6 +95,7 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
 | <a name="input_sns_topic_name"></a> [sns_topic_name](#input\_sns\_topic\_name) | The SNS topic containing the SNS subscription. You need this only when using the SNS integration. | `string` |  n/a | yes |
+| <a name="input_sns_topic_filter"></a> [sns_topic_filter](#input\_sns\_topic\_filter) | Map of filters to add to the SNS topic lambda subscription. | `map(any)` |  n/a | no |
 
 ### SQS configuration
 

@@ -186,6 +186,12 @@ variable "sns_topic_name" {
   default     = ""
 }
 
+variable "sns_topic_filter" {
+  description = "Map of filters to add to the SNS topic lambda subscription"
+  type        = map(any)
+  default     = null
+}
+
 # vpc variables
 
 variable "subnet_ids" {
