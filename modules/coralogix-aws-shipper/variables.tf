@@ -193,7 +193,7 @@ variable "sns_topic_filter" {
 }
 
 variable "sns_topic_filter_policy_scope" {
-  description = "The scope of the filter policy for the SNS topic lambda subscription, could be MessageAttributes or MessageBody"
+  description = "The scope of the filter policy for the SNS topic Lambda subscription, could be MessageAttributes or MessageBody"
   type        = string
   default     = null
 }
