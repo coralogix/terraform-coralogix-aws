@@ -7,13 +7,13 @@ locals {
     var.tags
   )
   coralogix_region_domain_map = module.locals_variables.coralogix_domains
-  coralogix_domain = coalesce(var.custom_domain, local.coralogix_region_domain_map[var.coralogix_region])
-  otel_config_file = coalesce(var.otel_config_file, "${path.module}/otel_config.tftpl.yaml")
-  otel_config = file(local.otel_config_file)
+  coralogix_domain            = coalesce(var.custom_domain, local.coralogix_region_domain_map[var.coralogix_region])
+  otel_config_file            = coalesce(var.otel_config_file, "${path.module}/otel_config.tftpl.yaml")
+  otel_config                 = file(local.otel_config_file)
 }
 
 module "locals_variables" {
-  source = "../locals_variables"
+  source           = "../locals_variables"
   integration_type = "ecs-ec2"
   random_string    = random_string.id.result
 }
@@ -27,12 +27,12 @@ resource "random_string" "id" {
 }
 
 resource "aws_ecs_task_definition" "coralogix_otel_agent" {
-  count = var.task_definition_arn == null ? 1 : 0
+  count                    = var.task_definition_arn == null ? 1 : 0
   family                   = "${local.name}-${random_string.id.result}"
   cpu                      = max(var.memory, 256)
   memory                   = var.memory
   requires_compatibilities = ["EC2"]
-  execution_role_arn      = (var.custom_config_parameter_store_name != null || var.use_api_key_secret == true) ? var.task_execution_role_arn : null
+  execution_role_arn       = (var.custom_config_parameter_store_name != null || var.use_api_key_secret == true) ? var.task_execution_role_arn : null
   volume {
     name      = "hostfs"
     host_path = "/var/lib/docker/"
@@ -56,7 +56,7 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
       {
         containerPort : 4317
         hostPort : 4317
-        appProtocol: "grpc"
+        appProtocol : "grpc"
       },
       {
         containerPort : 4318
@@ -96,14 +96,14 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
         name : "SUB_SYS"
         value : var.default_subsystem_name
       }
-    ],
-    var.custom_config_parameter_store_name == null ? [{
-      name : "OTEL_CONFIG"
-      value : local.otel_config
-    }] : [],
-    var.use_api_key_secret != true ? [{
-      name : "PRIVATE_KEY"
-      value : var.api_key
+      ],
+      var.custom_config_parameter_store_name == null ? [{
+        name : "OTEL_CONFIG"
+        value : local.otel_config
+      }] : [],
+      var.use_api_key_secret != true ? [{
+        name : "PRIVATE_KEY"
+        value : var.api_key
     }] : []),
     secrets : concat(
       var.custom_config_parameter_store_name != null ? [{
@@ -115,7 +115,7 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
         valueFrom : var.api_key_secret_arn
       }] : []
     ),
-    command: ["--config", "env:OTEL_CONFIG"],
+    command : ["--config", "env:OTEL_CONFIG"],
     healthCheck : {
       command : ["CMD-SHELL", "nc -vz localhost 13133 || exit 1"]
       startPeriod : 30
@@ -123,8 +123,8 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
       timeout : 5
       retries : 3
     },
-    logConfiguration: {
-      logDriver: "json-file"
+    logConfiguration : {
+      logDriver : "json-file"
     }
   }])
 }

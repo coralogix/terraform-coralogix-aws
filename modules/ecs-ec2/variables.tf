@@ -75,7 +75,7 @@ variable "api_key_secret_arn" {
   description = "ARN of the Secrets Manager secret containing the API key"
   type        = string
   default     = null
-  
+
   validation {
     condition     = var.use_api_key_secret ? var.api_key_secret_arn != null : var.api_key_secret_arn == null
     error_message = "Check api_key_secret_arn variable. If use_api_key_secret is true, it must be populated. If not, it must be null"
@@ -92,7 +92,7 @@ variable "custom_config_parameter_store_name" {
   description = "Name of the Parameter Store parameter containing the OTEL configuration. If not provided, default configuration will be used"
   type        = string
   default     = null
-  
+
   validation {
     condition     = var.use_custom_config_parameter_store ? var.custom_config_parameter_store_name != null : true
     error_message = "Check custom_config_parameter_store_name variable. It must be provided if use_custom_config_parameter_store is true."
@@ -103,7 +103,7 @@ variable "otel_config_file" {
   type        = string
   description = "File path to a custom opentelemetry configuration file. Defaults to an embedded configuration."
   default     = null
-  
+
   validation {
     condition     = var.use_custom_config_parameter_store ? var.otel_config_file == null : true
     error_message = "Check otel_config_file variable. It must be null if using a Custom Configuration from a Parameter Store"
@@ -128,7 +128,7 @@ variable "tags" {
 }
 
 variable "task_definition_arn" {
-  type = string
+  type        = string
   description = "Existing Coralogix OTEL task definition ARN"
-  default = null
+  default     = null
 }

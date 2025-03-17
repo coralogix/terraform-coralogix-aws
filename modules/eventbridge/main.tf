@@ -8,10 +8,10 @@ terraform {
 }
 
 module "locals" {
-  source   = "../locals_variables"
+  source = "../locals_variables"
 
   integration_type = "None"
-  random_string = "None"
+  random_string    = "None"
 }
 
 locals {
@@ -106,15 +106,15 @@ resource "aws_cloudwatch_event_target" "my_event_target" {
 // Creating Rule for classify the events we want to get
 
 resource "aws_cloudwatch_event_rule" "eventbridge_rule" {
-  name        = "eventbridge_rule"
-  description = "Capture the main events"
+  name           = "eventbridge_rule"
+  description    = "Capture the main events"
   event_bus_name = var.eventbridge_stream
   ///A number of services that we think are relevant to monitor, sub-alerts can be changed and classified
   event_pattern = var.detail_type != null ? jsonencode(
     {
       "source" : var.sources
       "detail-type" : var.detail_type
-  }): jsonencode(
+    }) : jsonencode(
     {
       "source" : var.sources
     }
