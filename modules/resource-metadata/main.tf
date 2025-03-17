@@ -20,7 +20,7 @@ data "aws_region" "this" {}
 module "eventbridge" {
   source = "terraform-aws-modules/eventbridge/aws"
 
-  create_bus = false
+  create_bus  = false
   create_role = false
   rules = {
     crons = {
@@ -55,7 +55,7 @@ resource "null_resource" "s3_bucket" {
 
 module "lambda" {
   create                 = var.secret_manager_enabled == false ? true : false
-  depends_on             = [ null_resource.s3_bucket ]
+  depends_on             = [null_resource.s3_bucket]
   source                 = "terraform-aws-modules/lambda/aws"
   version                = "3.2.1"
   function_name          = local.function_name
@@ -120,7 +120,7 @@ module "lambda" {
 
 module "lambdaSM" {
   create                 = var.secret_manager_enabled ? true : false
-  depends_on             = [ null_resource.s3_bucket ]
+  depends_on             = [null_resource.s3_bucket]
   source                 = "terraform-aws-modules/lambda/aws"
   version                = "3.2.1"
   function_name          = local.function_name
@@ -135,7 +135,7 @@ module "lambdaSM" {
   destination_on_failure = aws_sns_topic.this.arn
   environment_variables = {
     CORALOGIX_METADATA_URL               = lookup(local.coralogix_regions, var.coralogix_region, "Europe")
-    AWS_LAMBDA_EXEC_WRAPPER              =  "/opt/wrapper.sh"
+    AWS_LAMBDA_EXEC_WRAPPER              = "/opt/wrapper.sh"
     SECRET_NAME                          = var.create_secret == false ? var.private_key : ""
     LATEST_VERSIONS_PER_FUNCTION         = var.latest_versions_per_function
     RESOURCE_TTL_MINUTES                 = var.resource_ttl_minutes

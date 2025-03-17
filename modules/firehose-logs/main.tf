@@ -86,7 +86,7 @@ resource "aws_s3_bucket_public_access_block" "firehose_bucket_bucket_access" {
 }
 
 data "aws_iam_policy_document" "bucket_policy_doc" {
-  count  = var.existing_s3_backup != null ? 0 : var.s3_enable_secure_transport ? 1 : 0
+  count = var.existing_s3_backup != null ? 0 : var.s3_enable_secure_transport ? 1 : 0
   statement {
     sid    = "AllowSSLRequestsOnly"
     effect = "Deny"

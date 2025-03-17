@@ -138,34 +138,34 @@ resource "aws_msk_cluster_policy" "coralogix-msk-cluster-policy" {
   cluster_arn = aws_msk_cluster.coralogix-msk-cluster.arn
 
   policy = jsonencode({
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "AWS": [
-          "${local.coraloigx_role}"
-        ]
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Principal" : {
+          "AWS" : [
+            "${local.coraloigx_role}"
+          ]
+        },
+        "Action" : [
+          "kafka-cluster:Connect"
+        ],
+        "Resource" : "${aws_msk_cluster.coralogix-msk-cluster.arn}"
       },
-      "Action": [
-        "kafka-cluster:Connect"
-      ],
-      "Resource": "${aws_msk_cluster.coralogix-msk-cluster.arn}"
-    },
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "AWS": [
-          "${local.coraloigx_role}"
-        ]
-      },
-      "Action": [
-        "kafka-cluster:DescribeTopic",
-        "kafka-cluster:WriteData"
-      ],
-       "Resource": "arn:aws:kafka:${var.aws_region}:${data.aws_caller_identity.current.account_id}:topic/${aws_msk_cluster.coralogix-msk-cluster.cluster_name}/*"
-    }
-  ]
+      {
+        "Effect" : "Allow",
+        "Principal" : {
+          "AWS" : [
+            "${local.coraloigx_role}"
+          ]
+        },
+        "Action" : [
+          "kafka-cluster:DescribeTopic",
+          "kafka-cluster:WriteData"
+        ],
+        "Resource" : "arn:aws:kafka:${var.aws_region}:${data.aws_caller_identity.current.account_id}:topic/${aws_msk_cluster.coralogix-msk-cluster.cluster_name}/*"
+      }
+    ]
   })
 }
 
@@ -199,6 +199,6 @@ resource "null_resource" "enable-msk-public-access" {
 }
 
 data "aws_msk_cluster" "msk_public_brokers" {
-  depends_on = [ null_resource.enable-msk-public-access ]
+  depends_on   = [null_resource.enable-msk-public-access]
   cluster_name = var.cluster_name == "coralogix-msk-cluster" ? "coralogix-msk-cluster-${random_string.unique.result}" : var.cluster_name
 }
