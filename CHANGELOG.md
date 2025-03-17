@@ -3,7 +3,7 @@
 ## v3.1.0
 #### **coralogix-aws-shipper**
 ### 💡 Enhancements 💡
-- Add option to use SNS topic filter for the lambda subscription
+- Add variables `sns_topic_filter_policy_scope` and `sns_topic_filter` to allow SNS topic filter for the Lambda subscription
 
 ## v3.0.0
 #### **ecs-ec2**

@@ -192,6 +192,12 @@ variable "sns_topic_filter" {
   default     = null
 }
 
+variable "sns_topic_filter_policy_scope" {
+  description = "The scope of the filter policy for the SNS topic lambda subscription, could be MessageAttributes or MessageBody"
+  type        = string
+  default     = null
+}
+
 # vpc variables
 
 variable "subnet_ids" {
