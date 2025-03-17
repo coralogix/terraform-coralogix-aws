@@ -18,9 +18,11 @@ resource "aws_sns_topic" "this" {
 }
 
 resource "aws_sns_topic_subscription" "lambda_sns_subscription" {
-  count      = local.sns_enable ? 1 : 0
-  depends_on = [module.lambda]
-  topic_arn  = data.aws_sns_topic.sns_topic[count.index].arn
-  protocol   = "lambda"
-  endpoint   = module.lambda.integration.lambda_function_arn
+  count               = local.sns_enable ? 1 : 0
+  depends_on          = [module.lambda]
+  topic_arn           = data.aws_sns_topic.sns_topic[count.index].arn
+  protocol            = "lambda"
+  endpoint            = module.lambda.integration.lambda_function_arn
+  filter_policy       = var.sns_topic_filter != null ? jsonencode(var.sns_topic_filter) : null
+  filter_policy_scope = var.sns_topic_filter_policy_scope != null ? var.sns_topic_filter_policy_scope : null
 }

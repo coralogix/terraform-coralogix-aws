@@ -5,6 +5,11 @@
 - Updated ECS-EC2 default otel config to use new collector metric config format
     - Added a transform to remove unneeded labels from metrics added as of otel v0.119.0
 
+## v3.1.0
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 💡
+- Add variables `sns_topic_filter_policy_scope` and `sns_topic_filter` to allow SNS topic filter for the Lambda subscription
+
 ## v3.0.0
 #### **ecs-ec2**
 ### 🛑 Breaking changes 🛑
@@ -15,6 +20,11 @@
 - Added new tests for ECS EC2 integration.
 - Added support for AP3 region.
 
+## v2.10.0
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 💡
+- Add support to deploy the integration with multiple S3 buckets
+
 ## v2.9.0
 #### **cloudwatch-metrics-iam-role**
 ### 🚀 New components 🚀
@@ -24,11 +34,6 @@
 #### **coralogix-aws-shipper**
 ### 🚀 New components 🚀
 - Add KMS Key support for S3 Buckets
-
-## v3.1.0
-#### **coralogix-aws-shipper**
-### 💡 Enhancements 💡
-- Add support to deploy the integration with multiple S3 buckets
 
 ## v2.7.0
 #### **eventbridge**
