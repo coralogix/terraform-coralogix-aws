@@ -273,6 +273,24 @@ module "coralogix-shipper-sns" {
 }
 ```
 
+### Use the SNS integration with a filter policy by account-id
+```bash
+module "coralogix-shipper-sns-with-filter" {
+  source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
+
+  coralogix_region  = "EU1"
+  integration_type  = "Sns"
+  api_key           = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  application_name  = "sns-application"
+  subsystem_name    = "sns-subsystem"
+  sns_topic_name    = "sns-topic-name"
+  sns_topic_filter_scope = "MessageBody"
+  sns_topic_filter_policy = {
+    "account-id" = ["123456789012"]
+  }
+}
+```
+
 [//]: # (/example)
 
 ### Use Kinesis with a private link
