@@ -96,6 +96,7 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 [//]: # (/description)
 
 [//]: # (description id="CloudWatch-integration" title="AWS Shipper Terraform Module for CloudWatch Integration" examples_path="examples/coralogix-aws-shipper/README.md")
+
 ### CloudWatch configuration
 
 | Name | Description | Type | Default | Required | 
@@ -106,17 +107,12 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 [//]: # (/description)
 
 [//]: # (description id="SNS-integration" title="AWS Shipper Terraform Module for SNS Integration" examples_path="examples/coralogix-aws-shipper/README.md")
+
 ### SNS configuration
 
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
 | <a name="input_sns_topic_name"></a> [sns_topic_name](#input\_sns\_topic\_name) | The SNS topic containing the SNS subscription. You need this only when using the SNS integration. | `string` |  n/a | yes |
-| <a name="input_sns_topic_filter"></a> [sns_topic_filter](#input\_sns\_topic\_filter) | Map of filters to add to the SNS topic Lambda subscription. | `map(any)` |  n/a | no |
-| <a name="input_sns_topic_filter_scope"></a> [sns_topic_filter_scope](#input\_sns\_topic\_filter\_scope) | The scope of the filter policy for the SNS topic Lambda subscription, could be MessageAttributes or MessageBody | `string` |  n/a | no |
-
-[//]: # (/description)
-
-[//]: # (description id="SQS-integration" title="AWS Shipper Terraform Module for SQS Integration" examples_path="examples/coralogix-aws-shipper/README.md")
 | <a name="input_sns_topic_filter"></a> [sns_topic_filter](#input\_sns\_topic\_filter) | Map of filters to add to the SNS topic Lambda subscription. | `map(any)` |  n/a | no |
 | <a name="input_sns_topic_filter_policy_scope"></a> [sns_topic_filter_policy_scope](#input\_sns\_topic\_filter\_policy\_scope) | The scope of the filter policy for the SNS topic Lambda subscription, could be `MessageAttributes` or `MessageBody` | `string` |  n/a | no |
 
@@ -127,7 +123,7 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
-| <a name="input_sqs_topic_name"></a> [sqs_topic_name](#input\_sqs\_topic\_name) | The name of the SQS queue to which you want to subscribe for retrieving messages.| `string` |  n/a | yes |
+| <a name="input_sqs_name"></a> [sqs_name](#input\_sqs\_name) | The name of the SQS queue to which you want to subscribe for retrieving messages.| `string` |  n/a | yes |
 
 [//]: # (/description)
 
@@ -141,6 +137,7 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 [//]: # (/description)
 
 [//]: # (description id="MSK-integration" title="AWS Shipper Terraform Module for MSK Integration" examples_path="examples/coralogix-aws-shipper/README.md")
+
 ### MSK configuration
 
 | Name | Description | Type | Default | Required | 
@@ -151,6 +148,7 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 [//]: # (/description)
 
 [//]: # (description id="Kafka-integration" title="AWS Shipper Terraform Module for Kafka Integration" examples_path="examples/coralogix-aws-shipper/README.md")
+
 ### Kafka configuration
 
 | Name | Description | Type | Default | Required | 
