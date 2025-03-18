@@ -1,8 +1,12 @@
 # Forward AWS Logs via Lambda Shipper with Terraform
 
+[//]: # (static-modules-readme-start-description)
+
 ## Overview
 
 Our latest AWS integration provides the easiest way to connect with Coralogix. By using a predefined Lambda function, you can seamlessly send AWS logs and events to your Coralogix subscription for detailed analysis, monitoring, and troubleshooting.
+
+[//]: # (/static-modules-readme-start-description)
 
 This integration guide walks you through completing the predefined Lambda function template using Terraform. You’ll need to provide specific configuration parameters based on the service you want to connect. A reference list for these parameters is provided below.
 
@@ -45,6 +49,8 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
      
       -  Migrate your existing integrations to Terraform and use the `integration_info` variable.
 
+[//]: # (static-modules-readme-end-description)
+
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | The Coralogix location region, available options: [`EU1`, `EU2`, `AP1`, `AP2`, `AP3`, `US1`, `US2`, `Custom`] | `string` | n/a | yes |
@@ -54,6 +60,10 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 | <a name="input_store_api_key_in_secrets_manager"></a> [store\_api\_key\_in\_secrets\_manager](#input\_store\_api\_key\_in\_secrets\_manager) | Enable this to store your API key securely. Otherwise, it will remain exposed in plain text as an environment variable in the Lambda function console.| bool | true | no |
 | <a name="application_name"></a> [application\_name](#input\_application\_name) | The [name](https://coralogix.com/docs/application-and-subsystem-names/) of your application. For a dynamic value, use `$.my_log.field`. This option is not supported since version `1.1.0` for the [source code](https://github.com/coralogix/coralogix-aws-shipper/blob/master/CHANGELOG.md) | string | n\a | yes | 
 | <a name="subsystem_name"></a> [subsystem\_name](#input\_subsysten_\_name) | The [name](https://coralogix.com/docs/application-and-subsystem-names/) of your subsystem. For a dynamic value, use `$.my_log.field` for CloudWatch log group leave empty. This option is not supported since version `1.1.0` for the [source code](https://github.com/coralogix/coralogix-aws-shipper/blob/master/CHANGELOG.md) | string | n\a | yes |
+
+[//]: # (/static-modules-readme-end-description)
+
+[//]: # (description id="S3-integration" title="AWS Shipper Terraform Module for S3 Integration" examples_path="examples/coralogix-aws-shipper/README.md")
 
 ### S3, CloudTrail, VpcFlow, S3Csv configuration
 
@@ -83,6 +93,10 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 | <a name="input_s3_key_suffix"></a> [s3\_key\_suffix](#input\_s3\_key\_suffix) | The S3 path suffix to watch. | `string` |  n/a` | no |
 | <a name="input_newline_pattern"></a> [newline\_pattern](#input\_newline\_pattern) | A regular expression to detect a new log line for multiline logs, e.g., \n(?=\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}.\d{3}). | `string` | n/a | no |
 
+[//]: # (/description)
+
+[//]: # (description id="CloudWatch-integration" title="AWS Shipper Terraform Module for CloudWatch Integration" examples_path="examples/coralogix-aws-shipper/README.md")
+
 ### CloudWatch configuration
 
 | Name | Description | Type | Default | Required | 
@@ -90,24 +104,39 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 | <a name="input_log_groups"></a> [log\_groups](#input\_log\_groups) | A comma-separated list of CloudWatch log group names to monitor. For example, (log-group1, log-group2, log-group3). | `list(string)` | n/a | yes |
 | <a name="input_log_group_prefix"></a> [log\_group\_prefix](#input\_log\_group\_prefix) | Instead of creating one permission for each log group in the destination lambda, the code will take the prefix that you set in this parameter and create 1 permission for all of the log groups that match the prefix. For example, if you define `/aws/log/logs`, then the lLambda will create only 1 permission for all of your log groups that start with `/aws/log/logs` instead of 1 permision for each of the log group. Use this parameter when you have more than 50 log groups. Pay attention that you will not see the log groups as a trigger in the Lambda if you use this parameter. | `list(string)` | n/a | no |
 
+[//]: # (/description)
+
+[//]: # (description id="SNS-integration" title="AWS Shipper Terraform Module for SNS Integration" examples_path="examples/coralogix-aws-shipper/README.md")
+
 ### SNS configuration
 
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
 | <a name="input_sns_topic_name"></a> [sns_topic_name](#input\_sns\_topic\_name) | The SNS topic containing the SNS subscription. You need this only when using the SNS integration. | `string` |  n/a | yes |
 | <a name="input_sns_topic_filter"></a> [sns_topic_filter](#input\_sns\_topic\_filter) | Map of filters to add to the SNS topic Lambda subscription. | `map(any)` |  n/a | no |
-| <a name="input_sns_topic_filter_scope"></a> [sns_topic_filter_scope](#input\_sns\_topic\_filter\_scope) | The scope of the filter policy for the SNS topic Lambda subscription, could be MessageAttributes or MessageBody | `string` |  n/a | no |
+| <a name="input_sns_topic_filter_policy_scope"></a> [sns_topic_filter_policy_scope](#input\_sns\_topic\_filter\_policy\_scope) | The scope of the filter policy for the SNS topic Lambda subscription, could be `MessageAttributes` or `MessageBody` | `string` |  n/a | no |
+
+[//]: # (/description)
+
+[//]: # (description id="SQS-integration" title="SQS Integration" examples_path="examples/coralogix-aws-shipper/README.md")
 ### SQS configuration
 
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
-| <a name="input_sqs_topic_name"></a> [sqs_topic_name](#input\_sqs\_topic\_name) | The name of the SQS queue to which you want to subscribe for retrieving messages.| `string` |  n/a | yes |
+| <a name="input_sqs_name"></a> [sqs_name](#input\_sqs\_name) | The name of the SQS queue to which you want to subscribe for retrieving messages.| `string` |  n/a | yes |
 
+[//]: # (/description)
+
+[//]: # (description id="Kinesis-integration" title="AWS Shipper Terraform Module for Kinesis Integration" examples_path="examples/coralogix-aws-shipper/README.md")
 ### Kinesis configuration
 
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
 | <a name="input_kinesis_stream_name"></a> [kinesis_stream_name](#input\_Kinesis_\_stream_\_name) | The name of the Kinesis stream to which you want to subscribe for retrieving messages.| `string` |  n/a | yes |
+
+[//]: # (/description)
+
+[//]: # (description id="MSK-integration" title="AWS Shipper Terraform Module for MSK Integration" examples_path="examples/coralogix-aws-shipper/README.md")
 
 ### MSK configuration
 
@@ -115,6 +144,10 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 |------|-------------|------|---------|:--------:|
 | <a name="input_msk_cluster_arn"></a> [msk_cluster_arn](#input\_msk\_cluster\_arn) | The ARN of the MSK cluster to subscribe to retrieving messages.| `string` |  n/a | yes |
 | <a name="input_msk_topic_name"></a> [msk_topic_name](#input\_msk\_topic\_name) | List of The Kafka topic mames used to store records in your Kafka cluster [\"topic-name1\" ,\"topic-name2\"].| `list of strings` |  n/a | yes |
+
+[//]: # (/description)
+
+[//]: # (description id="Kafka-integration" title="AWS Shipper Terraform Module for Kafka Integration" examples_path="examples/coralogix-aws-shipper/README.md")
 
 ### Kafka configuration
 
@@ -124,6 +157,8 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 | <a name="input_kafka_topic"></a> [kafka_topic](#input\_kafka\_topic) | The Kafka topic to subscribe to.| `string` |  n/a | yes |
 | <a name="input_kafka_subnets_ids"></a> [kafka_subnets_ids](#input\_kafka\_subnets\_ids) | List of Kafka subnets to use when connecting to Kafka.| `list` |  n/a | yes |
 | <a name="input_kafka_security_groups"></a> [kafka_security_groups](#input\_kafka\_security\_groups) | List of Kafka security groups to use when connecting to Kafka.| `list` |  n/a | yes |
+
+[//]: # (/description)
 
 ### Generic configuration (optional)
 

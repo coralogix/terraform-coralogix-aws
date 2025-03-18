@@ -6,6 +6,7 @@ Coralogix provides a predefined AWS Lambda function to easily forward your logs 
 
 To run this example you need to save this code in Terraform file, and change the values according to our settings.
 
+[//]: # (example id="S3-integration")
 
 ### Use the default s3 integration
 ```bash
@@ -20,8 +21,6 @@ module "coralogix-shipper-s3" {
   application_name   = "s3"
   subsystem_name     = "logs"
   s3_bucket_name     = "test-bucket-name"
-  s3_key_prefix      = "files/example"
-  s3_key_suffix      = ".txt"
 }
 ```
 
@@ -41,19 +40,17 @@ module "coralogix-shipper-cloudtrail" {
 ```
 
 ### Use the S3Csv integration
-#### In this example we show how to use the S3Csv option, we also use an option that allows us to not save the api_key as text in the lambda but direct it to the secret that continues the secret.
 ```bash
 module "coralogix-shipper-S3Csv" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
 
   coralogix_region   = "EU1"
   integration_type   = "S3Csv"
-  api_key            = "arn of secret that contain the api_key"
+  api_key            = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
   application_name   = "S3Csv"
   subsystem_name     = "logs"
   s3_bucket_name     = "test-bucket-name"
   cs_delimiter       = ","
-  store_api_key_in_secrets_manager = false
 }
 ```
 
@@ -98,20 +95,17 @@ module "coralogix-shipper-cloudtrail" {
 }
 ```
 
-### Use the cloudwatch integration with a private link
-#### For more information about how to use private link click [here](https://coralogix.com/docs/coralogix-amazon-web-services-aws-privatelink-endpoints/)
+### Use the VpcFlow integration
 ```bash
-module "coralogix-shipper-cloudwatch" {
+module "coralogix-shipper-vpcflow" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
 
   coralogix_region   = "EU1"
-  integration_type   = "CloudWatch"
+  integration_type   = "VpcFlow"
   api_key            = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
-  application_name   = "cloudwatch-logs"
-  subsystem_name     = "logs"
-  log_groups         = ["log_gruop"]
-  subnet_ids         = "Your subnet ids"
-  security_group_ids = ["Your Security group id"]
+  application_name   = "vpcflow-application"
+  subsystem_name     = "vpcflow-subsystem"
+  s3_bucket_name     = "test-bucket-name"
 }
 ```
 
@@ -127,38 +121,206 @@ module "coralogix-shipper-multiple-s3-integrations" {
       integration_type = "CloudTrail"
       application_name = "CloudTrail_application"
       subsystem_name   = "logs_from_cloudtrail"
-      api_key            = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+      api_key          = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
     }
     "VpcFlow_integration" = {
       integration_type = "VpcFlow"
       application_name = "VpcFlow_application"
       subsystem_name   = "logs_from_vpcflow"
-      api_key            = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+      api_key          = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
     }
     "S3_integration" = {
       integration_type = "S3"
       application_name = "s3_application"
       subsystem_name   = "s3_vpcflow"
       s3_key_prefix    = "s3_prefix"
-      api_key            = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+      api_key          = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
     }
   }
 }
 ```
-### This example will create 2 lambda functions 1 for cloudtrail integration and 1 for vpcflow integration
+### This example will create three lambda functions: 1 for CloudTrail integration, 1 for VpcFlow integration, and 1 for S3 integration with a prefix
 
-### Use the cloudwatch metrics stream via private link
+[//]: # (/example)
+
+[//]: # (example id="CloudWatch-integration")
+
+### Use the CloudWatch integration
 ```bash
-module "coralogix_aws_shipper" "coralogix_firehose_metrics_private_link" {
-  source = "coralogix/aws-shipper/coralogix"
-  telemetry_mode = "metrics"
-  api_key = <your private key>
-  application_name = "firehose_metrics_private_link_application"
-  subsystem_name = "firehose_metrics_private_link_subsystem"
-  coralogix_region = <coralogix region>
-  s3_bucket_name = <s3 bucket name>
-  subnet_ids = <subnet ids>
-  security_group_ids = <security group ids>
+module "coralogix-shipper-cloudwatch" {
+  source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
+
+  coralogix_region   = "EU1"
+  integration_type   = "CloudWatch"
+  api_key            = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  application_name   = "cloudwatch-application"
+  subsystem_name     = "cloudwatch-subsystem"
+  log_groups         = ["log_gruop"]
+}
+```
+
+[//]: # (/example)
+
+[//]: # (example id="Kinesis-integration")
+
+### Use the Kinesis integration
+```bash
+module "coralogix-shipper-kinesis" {
+  source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
+
+  coralogix_region    = "EU1"
+  integration_type    = "Kinesis"
+  api_key             = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  application_name    = "kinesis-application"
+  subsystem_name      = "kinesis-subsystem"
+  kinesis_stream_name = "kinesis-stream-name"
+}
+```
+
+[//]: # (/example)
+
+[//]: # (example id="MSK-integration")
+
+### Use the MSK integration
+```bash
+module "coralogix-shipper-msk" {
+  source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
+
+  coralogix_region  = "EU1"
+  integration_type  = "MSK"
+  api_key           = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  application_name  = "msk-application"
+  subsystem_name    = "msk-subsystem"
+  msk_cluster_arn   = "msk-cluster-arn"
+  msk_topic_name    = "msk-topic-name"
+}
+```
+
+[//]: # (/example)
+
+[//]: # (example id="EcrScan-integration")
+
+### Use the EcrScan integration
+```bash
+module "coralogix-shipper-ecrscan" {
+  source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
+
+  coralogix_region  = "EU1"
+  integration_type  = "EcrScan"
+  api_key           = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  application_name  = "ecrscan-application"
+  subsystem_name    = "ecrscan-subsystem"
+}
+```
+
+[//]: # (/example)
+
+[//]: # (example id="Kafka-integration")
+
+### Use the Kafka integration
+```bash
+module "coralogix-shipper-kafka" {
+  source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
+
+  coralogix_region  = "EU1"
+  integration_type  = "Kafka"
+  api_key           = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  application_name  = "kafka-application"
+  subsystem_name    = "kafka-subsystem"
+  kafka_brokers     = "kafka-broker-1,kafka-broker-2"
+  kafka_topic       = "kafka-topic-name"
+  kafka_subnets_ids = ["kafka-subnet-1", "kafka-subnet-2"]
+  kafka_security_groups = ["kafka-security-group-1", "kafka-security-group-2"]
+  ]
+}
+```
+
+[//]: # (/example)
+
+[//]: # (example id="SQS-integration")
+
+### Use the SQS integration
+```bash
+module "coralogix-shipper-Sqs" {
+  source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
+
+  coralogix_region  = "EU1"
+  integration_type  = "Sqs"
+  api_key           = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  application_name  = "sqs-application"
+  subsystem_name    = "sqs-subsystem"
+  sqs_topic_name    = "sqs-topic-name"
+  ]
+}
+```
+
+[//]: # (/example)
+
+[//]: # (example id="SNS-integration")
+
+### Use the SNS integration
+```bash
+module "coralogix-shipper-sns" {
+  source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
+
+  coralogix_region  = "EU1"
+  integration_type  = "Sns"
+  api_key           = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  application_name  = "sns-application"
+  subsystem_name    = "sns-subsystem"
+  sns_topic_name    = "sns-topic-name"
+  ]
+}
+```
+
+### Use the SNS integration with a filter policy by account-id
+```bash
+module "coralogix-shipper-sns-with-filter" {
+  source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
+
+  coralogix_region  = "EU1"
+  integration_type  = "Sns"
+  api_key           = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  application_name  = "sns-application"
+  subsystem_name    = "sns-subsystem"
+  sns_topic_name    = "sns-topic-name"
+  sns_topic_filter_scope = "MessageBody"
+  sns_topic_filter_policy = {
+    "account-id" = ["123456789012"]
+  }
+}
+```
+
+[//]: # (/example)
+
+### Use Kinesis with a private link
+```bash
+module "coralogix-shipper-kinesis" {
+  source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
+
+  coralogix_region    = "EU1"
+  integration_type    = "Kinesis"
+  api_key             = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  application_name    = "kinesis-application"
+  subsystem_name      = "kinesis-subsystem"
+  kinesis_stream_name = "kinesis-stream-name"
+  subnet_ids          = ["subnet-1", "subnet-2"]
+  security_group_ids  = ["security-group-1", "security-group-2"]
+}
+```
+
+### Use the CloudWatch metrics stream via a private link
+```bash
+module "coralogix_firehose_metrics_private_link" {
+  source             = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
+  telemetry_mode     = "metrics"
+  api_key            = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  application_name   = "firehose_metrics_private_link_application"
+  subsystem_name     = "firehose_metrics_private_link_subsystem"
+  coralogix_region   = "EU1"
+  s3_bucket_name     = "test-bucket-name"
+  subnet_ids         = ["subnet-1", "subnet-2"]
+  security_group_ids = ["security-group-1", "security-group-2"]
 
   include_metric_stream_filter = [
     {
@@ -173,6 +335,8 @@ module "coralogix_aws_shipper" "coralogix_firehose_metrics_private_link" {
 }
 ```
 
+[//]: # (static-examples-readme-start-description)
+
 now execute:
 ```bash
 $ terraform init
@@ -181,3 +345,4 @@ $ terraform apply
 ```
 Run `terraform destroy` when you don't need these resources.
 
+[//]: # (/static-examples-readme-start-description)

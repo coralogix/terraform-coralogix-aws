@@ -1,0 +1,23 @@
+name: trigger documentation sync
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - 'examples/coralogix-aws-shipper/README.md'
+      - 'modules/coralogix-aws-shipper/README.md'
+
+jobs:
+  trigger_action:
+    runs-on: ubuntu-latest
+    steps:
+      - name: trigger  ci action in documentation repo
+        run: |
+          curl -X POST -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
+               -H "Accept: application/vnd.github.v3+json" \
+               https://api.github.com/repos/coralogix/documentation/dispatches \
+               -d '{
+                     "event_type": "trigger-deploy"
+                   }'
