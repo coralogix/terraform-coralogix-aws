@@ -1,4 +1,9 @@
 # Changelog
+## v3.2.0
+#### **ecs-ec2**
+### 💡 Enhancements 💡
+- Updated ECS-EC2 default otel config to use new collector metric config format
+- Added a transform to remove unneeded labels from metrics added as of otel v0.119.0
 
 ## v3.1.0
 #### **coralogix-aws-shipper**

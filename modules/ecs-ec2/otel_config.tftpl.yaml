@@ -97,6 +97,23 @@ processors:
         statements:
           - keep_keys(attributes, [""])
 
+  # remove unneeded labels from metrics added as of otel v0.119.0
+  transform/prometheus:
+    error_mode: ignore
+    metric_statements:
+      - context: metric
+        statements:
+          - replace_pattern(name, "_total$", "")
+      - context: datapoint
+        statements:
+          - delete_key(attributes, "otel_scope_name") where resource.attributes["service.name"] == "cdot"
+          - delete_key(attributes, "service.name") where resource.attributes["service.name"] == "cdot"
+
+      - context: resource
+        statements:
+          - delete_key(attributes, "service.instance.id") where attributes["service.name"] == "cdot"
+          - delete_key(attributes, "service.name") where attributes["service.name"] == "cdot"
+
   batch: { send_batch_max_size: 2048, send_batch_size: 1024, timeout: 1s }
 
   resource/metadata:
@@ -208,13 +225,17 @@ service:
 
     metrics/otel-collector:
       receivers: [prometheus, hostmetrics]
-      processors: [resourcedetection/otel-collector, resource/metadata, batch]
+      processors: [resourcedetection/otel-collector, resource/metadata, transform/prometheus, batch]
       exporters: [coralogix]
 
   telemetry:
     logs:
       level: warn
     metrics:
-      address: 0.0.0.0:8888
-      level: detailed
+      readers:
+        - pull:
+            exporter:
+              prometheus:
+                host: 0.0.0.0
+                port: 8888
       
