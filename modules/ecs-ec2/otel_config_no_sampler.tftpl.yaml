@@ -76,10 +76,6 @@ processors:
       sources:
         - "log.file.path"
 
-  probabilistic_sampler:
-    sampling_percentage: "${SAMPLING_PERCENTAGE}"
-    mode: "${SAMPLER_MODE}"
-
   transform/logs:
     error_mode: ignore
     log_statements:
@@ -187,9 +183,6 @@ exporters:
     subsystem_name: catalog
     timeout: 30s
 
-connectors:
-  forward/sampled: {}
-
 extensions:
   health_check:
   pprof:
@@ -223,11 +216,6 @@ service:
     traces/otlp:
       receivers: [otlp]
       processors: [resource/metadata, batch]
-      exporters: [forward/sampled]
-      
-    traces/sampled:
-      receivers: [forward/sampled]
-      processors: [probabilistic_sampler, batch]
       exporters: [coralogix]
 
     logs/resource_catalog:
