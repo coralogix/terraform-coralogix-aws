@@ -303,7 +303,7 @@ module "coralogix-shipper-sns-with-filter" {
 
 [//]: # (/example)
 
-### Kinesis with a private links
+### Kinesis with a private link
 ```bash
 module "coralogix-shipper-kinesis" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
