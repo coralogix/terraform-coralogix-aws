@@ -8,7 +8,9 @@ To run this example you need to save this code in Terraform file, and change the
 
 [//]: # (example id="S3-integration")
 
-### Use the default s3 integration
+## S3
+
+### S3 (default)
 ```bash
 provider "aws" {}
 
@@ -24,7 +26,7 @@ module "coralogix-shipper-s3" {
 }
 ```
 
-### Use the cloudtrail-sns integration
+### CloudTrail-SNS
 ```bash
 module "coralogix-shipper-cloudtrail" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
@@ -39,7 +41,7 @@ module "coralogix-shipper-cloudtrail" {
 }
 ```
 
-### Use the S3Csv integration
+### S3Csv
 ```bash
 module "coralogix-shipper-S3Csv" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
@@ -54,8 +56,9 @@ module "coralogix-shipper-S3Csv" {
 }
 ```
 
-### Use the s3-sns integration
-#### In this example we deploy the s3 integration via sns, we set the subsystem to be a value of a log field for example if send this log:
+### S3-SNS
+- In this example, you deploy the S3 integration via SNS and set the subsystem to the value of a log field. For instance, if we send this log:
+- In this example, the value of the subsystem will be set to "Subsystem name.”
 ```hcl
 {
     timestamp: "2024-01-01T00:00:01Z"
@@ -64,7 +67,6 @@ module "coralogix-shipper-S3Csv" {
       field: "Subsystem name"
 }
 ```
-#### the value of the subsystem will be "Subsystem name"
 
 ```bash
 module "coralogix-shipper-sns" {
@@ -80,8 +82,8 @@ module "coralogix-shipper-sns" {
 }
 ```
 
-### Use the cloudtrail integration with the dynamic subsystem name
-#### When you set the subsystem to $.eventSource then the value of subsystem will be the name of your Trail.
+### CloudTrail-SNS with the dynamic subsystem name
+- When you set the subsystem to $.eventSource, the subsystem value will be populated with the name of your Trail.
 ```bash
 module "coralogix-shipper-cloudtrail" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
@@ -95,7 +97,7 @@ module "coralogix-shipper-cloudtrail" {
 }
 ```
 
-### Use the VpcFlow integration
+### Vpc Flow
 ```bash
 module "coralogix-shipper-vpcflow" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
@@ -109,7 +111,14 @@ module "coralogix-shipper-vpcflow" {
 }
 ```
 
-### Use the multiple s3 integrations at once using the integration_info variable
+### Multiple simultaneous S3 integrations using the `integration_info` variable
+
+This example illustrates creation of the following Lambda functions: 
+
+- CloudTrail integration
+- VPC Flow integration
+- S3 integration with a prefix
+
 ```bash
 module "coralogix-shipper-multiple-s3-integrations" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
@@ -138,14 +147,13 @@ module "coralogix-shipper-multiple-s3-integrations" {
     }
   }
 }
-```
-### This example will create three lambda functions: 1 for CloudTrail integration, 1 for VpcFlow integration, and 1 for S3 integration with a prefix
+```  
 
 [//]: # (/example)
 
 [//]: # (example id="CloudWatch-integration")
 
-### Use the CloudWatch integration
+### CloudWatch
 ```bash
 module "coralogix-shipper-cloudwatch" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
@@ -163,7 +171,7 @@ module "coralogix-shipper-cloudwatch" {
 
 [//]: # (example id="Kinesis-integration")
 
-### Use the Kinesis integration
+### Kinesis
 ```bash
 module "coralogix-shipper-kinesis" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
@@ -181,7 +189,7 @@ module "coralogix-shipper-kinesis" {
 
 [//]: # (example id="MSK-integration")
 
-### Use the MSK integration
+### MSK
 ```bash
 module "coralogix-shipper-msk" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
@@ -200,7 +208,7 @@ module "coralogix-shipper-msk" {
 
 [//]: # (example id="EcrScan-integration")
 
-### Use the EcrScan integration
+### EcrScan
 ```bash
 module "coralogix-shipper-ecrscan" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
@@ -217,7 +225,7 @@ module "coralogix-shipper-ecrscan" {
 
 [//]: # (example id="Kafka-integration")
 
-### Use the Kafka integration
+### Kafka
 ```bash
 module "coralogix-shipper-kafka" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
@@ -239,7 +247,7 @@ module "coralogix-shipper-kafka" {
 
 [//]: # (example id="SQS-integration")
 
-### Use the SQS integration
+### SQS
 ```bash
 module "coralogix-shipper-Sqs" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
@@ -258,7 +266,9 @@ module "coralogix-shipper-Sqs" {
 
 [//]: # (example id="SNS-integration")
 
-### Use the SNS integration
+## SNS
+
+### SNS (default)
 ```bash
 module "coralogix-shipper-sns" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
@@ -273,7 +283,7 @@ module "coralogix-shipper-sns" {
 }
 ```
 
-### Use the SNS integration with a filter policy by account-id
+### SNS with a filter policy by `account-id`
 ```bash
 module "coralogix-shipper-sns-with-filter" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
@@ -293,7 +303,7 @@ module "coralogix-shipper-sns-with-filter" {
 
 [//]: # (/example)
 
-### Use Kinesis with a private link
+### Kinesis with a private links
 ```bash
 module "coralogix-shipper-kinesis" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
@@ -309,7 +319,7 @@ module "coralogix-shipper-kinesis" {
 }
 ```
 
-### Use the CloudWatch metrics stream via a private link
+### CloudWatch metrics stream via a private link
 ```bash
 module "coralogix_firehose_metrics_private_link" {
   source             = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
