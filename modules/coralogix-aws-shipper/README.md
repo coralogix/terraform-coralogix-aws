@@ -65,7 +65,7 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 
 [//]: # (description id="S3-integration" title="AWS Shipper Terraform Module for S3 Integration" examples_path="examples/coralogix-aws-shipper/README.md")
 
-### S3, CloudTrail, VpcFlow, S3Csv configuration
+### S3, CloudTrail, Vpc Flow, S3Csv configuration
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|

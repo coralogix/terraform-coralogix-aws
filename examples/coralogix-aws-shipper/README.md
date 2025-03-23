@@ -8,7 +8,7 @@ To run this example you need to save this code in Terraform file, and change the
 
 [//]: # (example id="S3-integration")
 
-## S3
+## Configuration examples
 
 ### S3 (default)
 ```bash
@@ -153,7 +153,7 @@ module "coralogix-shipper-multiple-s3-integrations" {
 
 [//]: # (example id="CloudWatch-integration")
 
-### CloudWatch
+### Configuration example
 ```bash
 module "coralogix-shipper-cloudwatch" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
@@ -171,7 +171,7 @@ module "coralogix-shipper-cloudwatch" {
 
 [//]: # (example id="Kinesis-integration")
 
-### Kinesis
+### Configuration example
 ```bash
 module "coralogix-shipper-kinesis" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
@@ -189,7 +189,7 @@ module "coralogix-shipper-kinesis" {
 
 [//]: # (example id="MSK-integration")
 
-### MSK
+### Configuration example
 ```bash
 module "coralogix-shipper-msk" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
@@ -208,7 +208,7 @@ module "coralogix-shipper-msk" {
 
 [//]: # (example id="EcrScan-integration")
 
-### EcrScan
+### Configuration example
 ```bash
 module "coralogix-shipper-ecrscan" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
@@ -225,7 +225,7 @@ module "coralogix-shipper-ecrscan" {
 
 [//]: # (example id="Kafka-integration")
 
-### Kafka
+### Configuration example
 ```bash
 module "coralogix-shipper-kafka" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
@@ -247,7 +247,7 @@ module "coralogix-shipper-kafka" {
 
 [//]: # (example id="SQS-integration")
 
-### SQS
+### Configuration example
 ```bash
 module "coralogix-shipper-Sqs" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
@@ -266,7 +266,7 @@ module "coralogix-shipper-Sqs" {
 
 [//]: # (example id="SNS-integration")
 
-## SNS
+## Configuration examples
 
 ### SNS (default)
 ```bash
