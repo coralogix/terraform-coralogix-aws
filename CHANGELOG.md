@@ -1,4 +1,10 @@
 # Changelog
+
+## v3.3.0
+#### **ecs-ec2**
+### 💡 Enhancements 💡
+- Updated ECS-EC2 default otel config with tarces head sampling
+
 ## v3.2.0
 #### **ecs-ec2**
 ### 💡 Enhancements 💡

@@ -8,8 +8,12 @@ locals {
   )
   coralogix_region_domain_map = module.locals_variables.coralogix_domains
   coralogix_domain            = coalesce(var.custom_domain, local.coralogix_region_domain_map[var.coralogix_region])
-  otel_config_file            = coalesce(var.otel_config_file, "${path.module}/otel_config.tftpl.yaml")
-  otel_config                 = file(local.otel_config_file)
+
+  otel_config_file_default    = "${path.module}/otel_config.tftpl.yaml"
+  otel_config_file_no_sampler = "${path.module}/otel_config_no_sampler.tftpl.yaml"
+  otel_config_file            = coalesce(var.otel_config_file, var.enable_head_sampler ? local.otel_config_file_default : local.otel_config_file_no_sampler)
+
+  otel_config = file(local.otel_config_file)
 }
 
 module "locals_variables" {
@@ -95,6 +99,14 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
       {
         name : "SUB_SYS"
         value : var.default_subsystem_name
+      },
+      {
+        name : "SAMPLING_PERCENTAGE"
+        value : tostring(var.sampling_percentage)
+      },
+      {
+        name : "SAMPLER_MODE"
+        value : var.sampler_mode
       }
       ],
       var.custom_config_parameter_store_name == null ? [{
