@@ -6,9 +6,9 @@ module "otel_ecs_ec2_coralogix" {
   ecs_cluster_name         = "test-lab-cluster"
   image_version            = "v0.3.1"
   memory                   = 256
-  coralogix_region         = "EU1"
+  coralogix_region         = "EU2"
   custom_domain            = null
-  default_application_name = "YOUR_APPLICATION_NAME"
-  default_subsystem_name   = "YOUR_SUBSYSTEM_NAME"
+  default_application_name = "ecs-ec2-test"
+  default_subsystem_name   = "ecs-ec2-test"
   api_key                  = "1234567890_DUMMY_API_KEY"
 }
