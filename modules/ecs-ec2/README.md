@@ -12,7 +12,14 @@ The OTEL agent uses a [filelog receiver](https://github.com/open-telemetry/opent
 
 The CDOT OTEL agent also features enhancements specific to ECS integration. These improvements are proprietary to the Coralogix Distribution for Open Telemetry.
 
-The default OTEL collector config is available [with metrics](otel_config_metrics.tftpl.yaml) and [without metrics](otel_config.tftpl.yaml) options. The config can be customized.
+The default OTEL collector traces are sampled at 10% rate using head sampling. Head sampling is a feature that allows you to sample traces at the collection point before any processing occurs. When enabled, it creates a separate pipeline for sampled traces using probabilistic sampling. This helps reduce the volume of traces while maintaining a representative sample.
+
+The sampling configuration can be adjusted using the following parameters:
+- `EnableHeadSampler`: Enable/disable head sampling
+- `SamplerMode`: Choose between proportional, equalizing, or hash_seed sampling modes
+- `SamplingPercentage`: Set the desired sampling rate (0-100%). The config can be customized.
+
+The default OTEL collector config is available [with Head Sampling](otel_config.tftpl.yaml) and [without Head Sampling](otel_config_no_sampler.tftpl.yaml) options. The config can be customized.
 
 For further details, see documentation: [AWS ECS-EC2 using OpenTelemetry](https://coralogix.com/docs/opentelemetry-using-ecs-ec2).
 
@@ -88,6 +95,9 @@ No modules.
 | <a name="input_task_execution_role_arn"></a> [task\_execution\_role\_arn](#input\_task\_execution\_role\_arn) | ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Resource tags | `map(string)` | `null` | no |
 | <a name="input_task_definition_arn"></a> [task\_definition\_arn](#input\_task\_definition\_arn) | Existing Coralogix OTEL task definition ARN | `string` | `null` | no |
+| <a name="input_enable_head_sampler"></a> [enable\_head\_sampler](#input\_enable\_head\_sampler) | Enable or disable head sampling for traces. When enabled, sampling decisions are made at the collection point before any processing occurs. | `bool` | `true` | no | 
+| <a name="input_sampler_mode"></a> [sampler\_mode](#input\_sampler\_mode) | The sampling mode to use:<br>**proportional**: Maintains the relative proportion of traces across services.<br>**equalizing**: Attempts to sample equal numbers of traces from each service.<br>**hash_seed**: Uses consistent hashing to ensure the same traces are sampled across restarts.| `string` | `"proportional"` | no |
+| <a name="input_sampling_percentage"></a> [sampling\_percentage](#input_sampling_percentage) | The percentage of traces to sample (0-100). A value of 100 means all traces will be sampled, while 0 means no traces will be sampled. | `number` | `10` | no |
 
 ## Outputs
 

@@ -8,11 +8,11 @@ locals {
   )
   coralogix_region_domain_map = module.locals_variables.coralogix_domains
   coralogix_domain            = coalesce(var.custom_domain, local.coralogix_region_domain_map[var.coralogix_region])
-  
-  otel_config_file_default = "${path.module}/otel_config.tftpl.yaml"
+
+  otel_config_file_default    = "${path.module}/otel_config.tftpl.yaml"
   otel_config_file_no_sampler = "${path.module}/otel_config_no_sampler.tftpl.yaml"
-  otel_config_file = coalesce(var.otel_config_file, var.enable_head_sampler ? local.otel_config_file_default : local.otel_config_file_no_sampler)
-  
+  otel_config_file            = coalesce(var.otel_config_file, var.enable_head_sampler ? local.otel_config_file_default : local.otel_config_file_no_sampler)
+
   otel_config = file(local.otel_config_file)
 }
 
