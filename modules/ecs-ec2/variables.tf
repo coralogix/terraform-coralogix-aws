@@ -132,3 +132,29 @@ variable "task_definition_arn" {
   description = "Existing Coralogix OTEL task definition ARN"
   default     = null
 }
+
+variable "enable_head_sampler" {
+  description = "Enable or disable head sampling for traces. When enabled, sampling decisions are made at the collection point before any processing occurs."
+  type        = bool
+  default     = true
+}
+
+variable "sampling_percentage" {
+  description = "The percentage of traces to sample (0-100). A value of 100 means all traces will be sampled."
+  type        = number
+  default     = 10
+  validation {
+    condition     = var.sampling_percentage >= 0 && var.sampling_percentage <= 100
+    error_message = "Sampling percentage must be between 0 and 100."
+  }
+}
+
+variable "sampler_mode" {
+  description = "The sampling mode to use (proportional, equalizing, or hash_seed)."
+  type        = string
+  default     = "proportional"
+  validation {
+    condition     = contains(["proportional", "equalizing", "hash_seed"], var.sampler_mode)
+    error_message = "Sampler mode must be one of: proportional, equalizing, hash_seed."
+  }
+}
