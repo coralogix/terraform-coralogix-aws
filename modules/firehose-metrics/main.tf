@@ -334,7 +334,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_metrics" {
     buffering_interval = 60
     s3_backup_mode     = "FailedDataOnly"
     role_arn           = local.firehose_iam_role_arn
-    retry_duration     = 30
+    retry_duration     = 300
 
     s3_configuration {
       role_arn           = local.firehose_iam_role_arn
