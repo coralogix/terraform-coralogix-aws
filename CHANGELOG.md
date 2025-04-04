@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.4.0
+#### **resource-metadata-sqs**
+### 💡 Enhancements 💡
+- Add support for multi-region and cross-account metadata collection
+
 ## v3.3.0
 #### **ecs-ec2**
 ### 💡 Enhancements 💡

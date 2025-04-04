@@ -30,6 +30,18 @@ variable "event_mode" {
   default = "Disabled"
 }
 
+variable "source_regions" {
+  description = "The regions to collect metadata from, separated by commas (e.g. eu-north-1,eu-west-1,us-east-1). Leave empty if you want to collect metadata from the current region only."
+  type        = list(string)
+  default     = []
+}
+
+variable "cross_account_iam_role_arns" {
+  description = "The IAM role ARNs to collect metadata from, separated by commas (e.g. arn:aws:iam::123456789012:role/CrossAccountRole,arn:aws:iam::123456789012:role/AnotherCrossAccountRole). Leave empty if you want to collect metadata from the current account only."
+  type        = list(string)
+  default     = []
+}
+
 variable "secret_manager_enabled" {
   description = "Set to true in case that you want to keep your Coralogix Send Your Data API Key as a secret in aws Secret Manager"
   type        = bool
