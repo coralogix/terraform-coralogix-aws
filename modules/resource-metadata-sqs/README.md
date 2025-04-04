@@ -4,7 +4,10 @@ Manage the application which retrieves resource metadata from all Lambda functio
 
 Also, it supports the `EventMode` feature, which allows you to use CloudTrail+EventBridge to create new Lambda and EC2 resources in Coralogix near-real-time.
 
-It's recommended to use this module for environments with more than 5000 Lambda functions (or EC2 instances) in the target AWS region.
+It's recommended to use this module for:
+
+1. Environments with more than 5000 Lambda functions (or EC2 instances) in the target AWS region.
+2. Environments that require a support for cross-account and multi-region collection of metadata from multiple AWS accounts.
 
 ## Requirements
 
@@ -35,6 +38,8 @@ It's recommended to use this module for environments with more than 5000 Lambda 
 | <a name="input_secret_manager_enabled"></a> [secret_manager_enabled](#input\_secret\_manager\_enabled) | Set to true in case that you want to keep your [Coralogix Send Your Data – API Key](https://coralogix.com/docs/send-your-data-api-key/) as a secret in aws secret manager | `bool` | false | no |
 | <a name="input_api_key"></a> [api\_key](#input\_api\_key) | Your [Coralogix Send Your Data – API Key](https://coralogix.com/docs/send-your-data-api-key/) or incase you use pre created secret (created in AWS secret manager) put here the name of the secret that contains the Coralogix send your data key| `string` | n/a | yes |
 | <a name="input_event_mode"></a> [event\_mode](#input\_event\_mode) | Additionally to the regular schedule, enable real-time processing of CloudTrail events via EventBridge for immediate generation of new resources in Coralogix [Disabled, EnabledWithExistingTrail, EnabledCreateTrail] | `string` | Disabled | no |
+| <a name="input_source_regions"></a> [source_regions](#input\_source\_regions) | The regions to collect metadata from, separated by commas (e.g. eu-north-1,eu-west-1,us-east-1). Leave empty if you want to collect metadata from the current region only. | `string` | n/a | no |
+| <a name="input_cross_account_iam_role_arns"></a> [cross_account_iam_role_arns](#input\_cross\_account\_iam\_role\_arns) | The IAM role ARNs to collect metadata from, separated by commas (e.g. arn:aws:iam::123456789012:role/CrossAccountRole,arn:aws:iam::123456789012:role/AnotherCrossAccountRole). Leave empty if you want to collect metadata from the current account only. | `string` | n/a | no |
 | <a name="input_layer_arn"></a> [layer_arn](#input\_layer\_arn) | In case you want to use Secret Manager This is the ARN of the Coralogix [lambda layer](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/597078901540/Coralogix-Lambda-SSMLayer). | `string` | n/a | no |
 | <a name="input_create_secret"></a> [create_secret](#input\_create\_secret) | Set to False In case you want to use secrets manager with a predefine secret that was already created and contains Coralogix Send Your Data API key| `string` | True | no |
 | <a name="input_schedule"></a> [schedule](#input\_schedule) | The rate to collacet metadata  | `string` | `rate(30 minutes)` | no |
@@ -70,6 +75,62 @@ It's recommended to use this module for environments with more than 5000 Lambda 
 | `AP3` | `ap-southeast-3` | ap3.coralogix.com |
 | `US1` | `us-east-2` | coralogix.us |
 | `US2` | `us-west-2` | cx498.coralogix.com |
+
+## Cross-Account Collection
+
+This module supports cross-account collection of metadata from multiple AWS accounts. To enable this feature, you need to specify the `cross_account_iam_role_arns` parameter with the IAM role ARNs of the accounts you want to collect metadata from. The module needs to be managed separately from this module.
+
+Here is the set of required IAM permissions that should be set on the target roles:
+
+```
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+            "ec2:DescribeInstances",
+            "lambda:ListFunctions",
+            "lambda:ListVersionsByFunction", 
+            "lambda:GetFunction",
+            "lambda:ListAliases",
+            "lambda:ListEventSourceMappings",
+            "lambda:GetPolicy",
+            "tag:GetResources"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+As you will know the exact functions' role ARNs only after the module is deployed, you need to follow these steps to make it work and avoid a circular dependency at the same time:
+
+1. Create the roles in the target accounts, setting necessary IAM permissions, but without setting the trust relationship, since we don't know Lambda functions role ARNs yet.
+2. Deploy the module, referencing the target roles' ARNs in the `cross_account_iam_role_arns` parameter.
+3. Add the following trust relationship to the source account IAM role:
+
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": [
+                    "arn:aws:iam::123456789012:role/mystackname-GeneratorLambdaFunctionRole-randomid",
+                    "arn:aws:iam::123456789012:role/mystackname-CollectorLambdaFunctionRole-randomid"
+                ]
+            },
+            "Action": "sts:AssumeRole"
+        }
+    ]
+}
+```
+
+After setting the trust relationship, the `generator` and `collector` functions will be able to assume the target roles and collect metadata from those accounts.
+
+You can find an example of handling the cross-account collection in Terraform [here](https://github.com/coralogix/terraform-aws-coralogix/tree/main/examples/resource-metadata-sqs/README.md#cross-account-collection).
 
 ## Outputs
 

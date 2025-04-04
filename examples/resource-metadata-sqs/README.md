@@ -29,3 +29,66 @@ $ terraform apply
 ```
 
 Run `terraform destroy` when you don't need these resources.
+
+## Cross-Account Collection
+
+This example shows how to collect metadata from multiple AWS accounts using the IAM role with the trust relationship to the source account.
+
+```hcl
+provider "aws" {}
+
+module "resource-metadata" {
+  source = "coralogix/aws/coralogix//modules/resource-metadata-sqs"
+
+  coralogix_region    = "EU2"
+  api_key             = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  event_mode          = "EnabledCreateTrail"
+  source_regions      = ["eu-north-1", "eu-west-1", "us-east-1"]
+  cross_account_iam_role_arns = [aws_iam_role.cross_account_role.arn]
+}
+
+resource "aws_iam_role" "cross_account_role" {
+  provider = aws.source_account
+  name = "CrossAccountRoleForResourceMetadata"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          AWS = [
+            # comment those two lines before deploying the module
+            module.resource-metadata.generator_lambda_function_role_arn,
+            module.resource-metadata.collector_lambda_function_role_arn
+          ]
+        }
+      }
+    ]
+  })
+
+  inline_policy {
+    name = "CoralogixResourceMetadata"
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Effect = "Allow"
+          Action = [
+            "ec2:DescribeInstances",
+            "lambda:ListFunctions", 
+            "lambda:ListVersionsByFunction",
+            "lambda:GetFunction",
+            "lambda:ListAliases",
+            "lambda:ListEventSourceMappings",
+            "lambda:GetPolicy",
+            "tag:GetResources"
+          ]
+          Resource = "*"
+        }
+      ]
+    })
+  }
+}
+```

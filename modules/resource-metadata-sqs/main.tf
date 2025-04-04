@@ -90,6 +90,8 @@ module "collector_lambda" {
     IS_EC2_RESOURCE_TYPE_EXCLUDED        = var.excluded_ec2_resource_type
     IS_LAMBDA_RESOURCE_TYPE_EXCLUDED     = var.excluded_lambda_resource_type
     METADATA_QUEUE_URL                   = aws_sqs_queue.metadata_queue.url
+    REGIONS                              = length(var.source_regions) > 0 ? join(",", var.source_regions) : null
+    CROSSACCOUNT_IAM_ROLE_ARNS           = length(var.cross_account_iam_role_arns) > 0 ? join(",", var.cross_account_iam_role_arns) : null
   }
 
   s3_existing_package = {
@@ -127,6 +129,13 @@ module "collector_lambda" {
       ]
       resources = [aws_sqs_queue.metadata_queue.arn]
     }
+    assume_role = length(var.cross_account_iam_role_arns) > 0 ? {
+      effect = "Allow"
+      actions = [
+        "sts:AssumeRole"
+      ]
+      resources = var.cross_account_iam_role_arns
+    } : null
   }
 
   allowed_triggers = {
@@ -192,6 +201,13 @@ module "generator_lambda" {
       ]
       resources = [aws_sqs_queue.metadata_queue.arn]
     }
+    assume_role = length(var.cross_account_iam_role_arns) > 0 ? {
+      effect = "Allow"
+      actions = [
+        "sts:AssumeRole"
+      ]
+      resources = var.cross_account_iam_role_arns
+    } : null
   }
 
   allowed_triggers = {
@@ -270,6 +286,13 @@ module "generator_lambda_sm" {
       ]
       resources = [aws_sqs_queue.metadata_queue.arn]
     }
+    assume_role = length(var.cross_account_iam_role_arns) > 0 ? {
+      effect = "Allow"
+      actions = [
+        "sts:AssumeRole"
+      ]
+      resources = var.cross_account_iam_role_arns
+    } : null
     secrets = {
       effect = "Allow"
       actions = [
