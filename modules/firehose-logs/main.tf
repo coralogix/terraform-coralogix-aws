@@ -228,7 +228,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs" {
     url                = local.endpoint_url
     name               = "Coralogix"
     access_key         = var.api_key
-    buffering_size     = 6
+    buffering_size     = 1
     buffering_interval = 60
     s3_backup_mode     = "FailedDataOnly"
     role_arn           = local.firehose_iam_role_arn

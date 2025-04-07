@@ -1,5 +1,14 @@
 # Changelog
 
+
+## v3.4.1
+#### **firehose-logs**
+###  💡 Configuration update 💡
+- Update buffering_size to be in line with documentation, use the value of 1MiB.
+#### **firehose-metrics**
+### 💡 Configuration update 💡
+- Update retry_duration to be in line with documentation, use the value of 300 seconds to secure we do not lose the data on any issues.
+
 ## v3.4.0
 #### **resource-metadata-sqs**
 ### 💡 Enhancements 💡
