@@ -39,9 +39,18 @@ This Lambda Function was created to pick up newly created and existing log group
 | notification_email | Failure notification email address | | |
 
 > [!Note]
-> In case the destination is lambda, then the code will add log groups that match the regex_pattern and then add them to the destination Lambda as triggers, each log group will also add permission to the Lambda, in some cases when there are a lot of log groups this will cause an error because the code tries to create too many permissions for the Lambda (AWS have a limitation for the number of permission that you can have for a Lambda), and this is why we have the `log_group_permissions_prefix` parameter, this parameter will add only permission to the Lambda 
-> using a wildcard( * ).for example, in case I have the log groups: log1,log2,log3 instead that the code will create for each of the log group permission to trigger the destination Lambda then you can set `log_group_permissions_prefix = log`, and then it will create 
-> only 1 permission for all of the log groups to trigger the destination Lambda, but you will still need to set `regex_pattern = log.*`. When using this parameter, you will not be able to see the log groups as triggers for the Lambda.
+> If the destination is a Lambda function, the code will identify log groups that match the specified `regex_pattern` and configure them as triggers for the destination Lambda. Each matching log group is also granted the necessary permission to invoke the Lambda.
+
+> However, when dealing with a large number of log groups, this process may result in an error. This occurs because the code attempts to create a separate permission for each log group, and AWS imposes a limit on the number of permissions that can be attached to a single Lambda function.
+
+> To address this limitation, the `log_group_permissions_prefix` parameter is used. Instead of creating individual permissions for each log group, this parameter allows you to assign a single wildcard-based permission to the Lambda function.
+
+> For example, if you have the log groups log1, log2, and log3, setting `log_group_permissions_prefix = log` will generate one permission using a wildcard (e.g., log*) to cover all matching log groups. This avoids exceeding AWS's permission limit for a Lambda function.
+
+> However, it's important to note that:
+>
+> - You must still set `regex_pattern = log.*` to match the desired log groups.
+> - When using `log_group_permissions_prefix`, the log groups will not appear as individual triggers on the Lambda function in the AWS Console, although they will still be able to invoke it.
 
 ## Requirements
 
