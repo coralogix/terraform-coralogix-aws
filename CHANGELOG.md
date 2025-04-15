@@ -1,6 +1,13 @@
 # Changelog
 
 
+## v3.4.2
+#### **lambda-manager**
+### 🧰 Bug fixes 🧰
+- Add missing permissions to lambda function
+### 💡 Enhancements 💡
+- Add support for log_group_permissions_prefix variable
+
 ## v3.4.1
 #### **firehose-logs**
 ###  💡 Configuration update 💡

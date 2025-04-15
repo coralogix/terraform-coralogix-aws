@@ -2,6 +2,10 @@ data "aws_region" "this" {}
 
 data "aws_caller_identity" "current" {}
 
+locals {
+  log_groups_prefix_string = join(",", var.log_group_permissions_prefix)
+}
+
 resource "random_string" "this" {
   length  = 12
   special = false
@@ -26,6 +30,7 @@ module "lambda" {
     DESTINATION_ROLE   = var.destination_role
     DESTINATION_TYPE   = var.destination_type
     SCAN_OLD_LOGGROUPS = var.scan_old_loggroups
+    LOG_GROUP_PERMISSION_PREFIX = local.log_groups_prefix_string
   }
   s3_existing_package = {
     bucket = "coralogix-serverless-repo-${data.aws_region.this.name}"
@@ -40,7 +45,7 @@ module "lambda" {
   policy_statements = {
     CXLambdaUpdateConfig = {
       effect    = "Allow"
-      actions   = ["lambda:UpdateFunctionConfiguration", "lambda:GetFunctionConfiguration"]
+      actions   = ["lambda:UpdateFunctionConfiguration", "lambda:GetFunctionConfiguration", "lambda:AddPermission"]
       resources = ["arn:aws:lambda:${data.aws_region.this.name}:${data.aws_caller_identity.current.account_id}:function:*"]
     },
     CXLogConfig = {
@@ -94,3 +99,9 @@ resource "aws_sns_topic_subscription" "this" {
   endpoint   = var.notification_email
 }
 
+resource "aws_lambda_invocation" "example" {
+  function_name = module.lambda.lambda_function_arn
+  input = jsonencode({
+    RequestType = "Create"
+  })
+}

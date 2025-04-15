@@ -25,10 +25,11 @@ This Lambda Function was created to pick up newly created and existing log group
 ## Environment variables:
 
 | Parameter | Description | Default Value | Required |
-|---|---|---|---|
+|-----------|-------------|---------------|----------|
 | regex_pattern | Set up this regex to match the Log Groups names that you want to automatically subscribe to the destination| | yes |
 | logs_filter | Subscription filter to select which logs needs to be sent to Coralogix. For Example for Lambda Errors that are not sendable by Coralogix Lambda Layer '?REPORT ?"Task timed out" ?"Process exited before completing" ?errorMessage ?"module initialization error:" ?"Unable to import module" ?"ERROR Invoke Error" ?"EPSAGON_TRACE:"'. | | yes |
-| destination_arn | Arn for the firehose to subscribe the log groups (By default is the firehose created by Serverless Template) | | yes |
+| log_group_permissions_prefix | A list of strings of log group prefixes. The code will use these prefixes to create permissions for the Lambda instead of creating for each log group permission it will use the prefix with a wild card to give the Lambda access for all of the log groups that start with these prefix. This parameter doesn't replace the regex_pattern parameter.  For more information, refer to the Note below.| | no |
+| destination_arn | Arn for the firehose to subscribe the log groups (By default, is the firehose created by Serverless Template) | | yes |
 | destination_role | Arn for the role to allow destination subscription to be pushed (In case you use Firehose) | n/a | no |
 | destination_type | Type of destination (Lambda or Firehose) | | yes |
 | scan_old_loggroups | This will scan all LogGroups in the account and apply the subscription configured, will only run Once and set to false. Default is false | false | yes |
@@ -36,6 +37,11 @@ This Lambda Function was created to pick up newly created and existing log group
 | memory_size | The maximum allocated memory this lambda may consume. Default value is the minimum recommended setting please consult coralogix support before changing. | 1024 |  |
 | timeout | The maximum time in seconds the function may be allowed to run. Default value is the minimum recommended setting please consult coralogix support before changing. | 300 |  |
 | notification_email | Failure notification email address | | |
+
+> [!Note]
+> In case the destination is lambda, then the code will add log groups that match the regex_pattern and then add them to the destination Lambda as triggers, each log group will also add permission to the Lambda, in some cases when there are a lot of log groups this will cause an error because the code tries to create too many permissions for the Lambda (AWS have a limitation for the number of permission that you can have for a Lambda), and this is why we have the `log_group_permissions_prefix` parameter, this parameter will add only permission to the Lambda 
+> using a wildcard( * ).for example, in case I have the log groups: log1,log2,log3 instead that the code will create for each of the log group permission to trigger the destination Lambda then you can set `log_group_permissions_prefix = log`, and then it will create 
+> only 1 permission for all of the log groups to trigger the destination Lambda, but you will still need to set `regex_pattern = log.*`. When using this parameter, you will not be able to see the log groups as triggers for the Lambda.
 
 ## Requirements
 
