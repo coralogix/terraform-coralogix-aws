@@ -1,3 +1,9 @@
+variable "log_group_permissions_prefix" {
+  description = "A list of strings of log group prefixes. The code will use these prefixes to create permissions for the Lambda instead of creating for each log group permission it will use the prefix with a wild card to give the Lambda access for all of the log groups that start with these prefix. This parameter doesn't replace the regex_pattern parameter."
+  type        = list(string)
+  default     = []
+}
+
 variable "regex_pattern" {
   description = "Set up this regex to match the Log Groups names that you want to automatically subscribe to the destination"
   type        = string
