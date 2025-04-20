@@ -103,7 +103,6 @@ resource "aws_iam_policy" "lambda_policy" {
           Resource = flatten([for bucket in data.aws_s3_bucket.this : ["${bucket.arn}/*", "${bucket.arn}"]])
         },
       ] : [],
-
       # S3 Integration Policy
       local.s3_bucket_names != toset([]) && var.sqs_name == null ? [
         {
