@@ -104,20 +104,15 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 | <a name="input_log_groups"></a> [log\_groups](#input\_log\_groups) | A comma-separated list of CloudWatch log group names to monitor. For example, (log-group1, log-group2, log-group3). | `list(string)` | n/a | yes |
 | <a name="input_log_group_prefix"></a> [log\_group\_prefix](#input\_log\_group\_prefix) |  list of strings of log group prefixes. The code will use these prefixes to create permissions for the Lambda instead of creating for each log group permission it will use the prefix with a wild card to give the Lambda access for all of the log groups that start with these prefix. This parameter doesn't replace the `log_groups` parameter.  For more information, refer to the Note below. | `list(string)` | n/a | no |
 
-!!! !Note
+!!! note
 
-If the destination is a Lambda function, the code will identify log groups that match the specified `regex_pattern` and configure them as triggers for the destination Lambda. Each matching log group is also granted the necessary permission to invoke the Lambda.
+The `log_group` variable will get a list of log groups and then add them to the Lambda as triggers, each log group will also add permission to the Lambda, in some cases when there are a lot of log groups this will cause an error because the code 
+tries to create too many permissions for the Lambda (AWS have a limitation for the number of permission that you can have for a Lambda), and this is why we have the `log_group_prefix` parameter, this parameter will add **only** permission to the Lambda using a wildcard( * ).
 
-However, when dealing with a large number of log groups, this process may result in an error. This occurs because the code attempts to create a separate permission for each log group, and AWS imposes a limit on the number of permissions that can be attached to a single Lambda function.
+for example, in case I have the log groups: log1,log2,log3 instead that the code will create for each of the log group permission to trigger the shipper Lambda then you can set `log_group_prefix = ["log"]`, and then it will create only 1 permission for all of the log groups to trigger the shipper Lambda, but you will still need to set `log_groups = ["log1","log2","log3"]`. When using this parameter, you will not be able to see the log groups as triggers for the Lambda.
 
-To address this limitation, the `log_group_permissions_prefix` parameter is used. Instead of creating individual permissions for each log group, this parameter allows you to assign a single wildcard-based permission to the Lambda function.
+If you need to add multiple log groups to the Lambda function using regex, refer to our [Lambda manager](https://github.com/coralogix/terraform-coralogix-aws/tree/master/modules/lambda-manager)
 
-For example, if you have the log groups log1, log2, and log3, setting `log_group_permissions_prefix = log` will generate one permission using a wildcard (e.g., log*) to cover all matching log groups. This avoids exceeding AWS's permission limit for a Lambda function.
-
-However, it's important to note that:
-
-- You must still set `regex_pattern = log.*` to match the desired log groups.
-- When using `log_group_permissions_prefix`, the log groups will not appear as individual triggers on the Lambda function in the AWS Console, although they will still be able to invoke it.
 
 [//]: # (/description)
 
