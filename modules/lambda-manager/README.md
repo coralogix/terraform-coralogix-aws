@@ -27,7 +27,7 @@ This Lambda Function was created to pick up newly created and existing log group
 | Parameter | Description | Default Value | Required |
 |-----------|-------------|---------------|----------|
 | regex_pattern | Set up this regex to match the Log Groups names that you want to automatically subscribe to the destination| | yes |
-| logs_filter | Subscription filter to select which logs needs to be sent to Coralogix. For Example for Lambda Errors that are not sendable by Coralogix Lambda Layer '?REPORT ?"Task timed out" ?"Process exited before completing" ?errorMessage ?"module initialization error:" ?"Unable to import module" ?"ERROR Invoke Error" ?"EPSAGON_TRACE:"'. | | yes |
+| logs_filter | Subscription filter to select which logs needs to be sent to Coralogix. For Example for Lambda Errors that are not sendable by Coralogix Lambda Layer '?REPORT ?"Task timed out" ?"Process exited before completing" ?errorMessage ?"module initialization error:" ?"Unable to import module" ?"ERROR Invoke Error" ?"EPSAGON_TRACE:"'. |  | no |
 | log_group_permissions_prefix | A list of strings of log group prefixes. The code will use these prefixes to create permissions for the Lambda instead of creating for each log group permission it will use the prefix with a wild card to give the Lambda access for all of the log groups that start with these prefix. This parameter doesn't replace the regex_pattern parameter.  For more information, refer to the Note below.| | no |
 | destination_arn | Arn for the firehose to subscribe the log groups (By default, is the firehose created by Serverless Template) | | yes |
 | destination_role | Arn for the role to allow destination subscription to be pushed (In case you use Firehose) | n/a | no |
