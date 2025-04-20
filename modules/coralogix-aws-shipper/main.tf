@@ -64,7 +64,7 @@ resource "aws_iam_policy" "lambda_policy" {
         {
           Effect   = "Allow",
           Action   = ["s3:PutObject", "s3:PutObjectAcl", "s3:AbortMultipartUpload", "s3:DeleteObject", "s3:PutObjectTagging", "s3:PutObjectVersionTagging"],
-          Resource = ["${data.aws_s3_bucket.dlq_bucket[0].arn}/*", data.aws_s3_bucket.dlq_bucket[0].arn] 
+          Resource = ["${data.aws_s3_bucket.dlq_bucket[0].arn}/*", data.aws_s3_bucket.dlq_bucket[0].arn]
         },
       ] : [],
 
@@ -103,7 +103,7 @@ resource "aws_iam_policy" "lambda_policy" {
           Resource = flatten([for bucket in data.aws_s3_bucket.this : ["${bucket.arn}/*", "${bucket.arn}"]])
         },
       ] : [],
-      
+
       # S3 Integration Policy
       local.s3_bucket_names != toset([]) && var.sqs_name == null ? [
         {
