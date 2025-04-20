@@ -4,6 +4,9 @@
 #### **coralogix-aws-shipper**
 ### 🧰 Bug fixes 🧰
 - Fix an issue with `newline_pattern` variable, which is not showing in the env for the lambda.
+#### **lambda-manager**
+### 💡 Enhancements 💡
+- Add a default value to `logs_filter` to be an empty string
 
 ## v3.3.1
 #### **lambda-manager**
