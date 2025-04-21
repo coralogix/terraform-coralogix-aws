@@ -59,15 +59,6 @@ resource "aws_iam_policy" "lambda_policy" {
         }
       ],
 
-      # DLQ S3 Permissions
-      var.enable_dlq ? [
-        {
-          Effect   = "Allow",
-          Action   = ["s3:PutObject", "s3:PutObjectAcl", "s3:AbortMultipartUpload", "s3:DeleteObject", "s3:PutObjectTagging", "s3:PutObjectVersionTagging"],
-          Resource = ["${data.aws_s3_bucket.dlq_bucket[0].arn}/*", data.aws_s3_bucket.dlq_bucket[0].arn]
-        },
-      ] : [],
-
       # Secrets Access Policy
       each.value.store_api_key_in_secrets_manager == null || each.value.store_api_key_in_secrets_manager == true || local.api_key_is_arn ? [
         {
@@ -90,7 +81,7 @@ resource "aws_iam_policy" "lambda_policy" {
       var.subnet_ids != null ? [
         {
           Effect   = "Allow",
-          Action   = ["ec2:CreateNetworkInterface", "ec2:DescribeNetworkInterfaces", "ec2:DeleteNetworkInterface"],
+          Action   = ["ec2:CreateNetworkInterface", "ec2:DescribeNetworkInterfaces", "ec2:DescribeVpcs", "ec2:DeleteNetworkInterface", "ec2:DescribeSubnets", "ec2:DescribeSecurityGroups"],
           Resource = ["*"]
         },
       ] : [],
@@ -99,8 +90,8 @@ resource "aws_iam_policy" "lambda_policy" {
       var.sqs_name != null && local.s3_bucket_names != toset([]) ? [
         {
           Effect   = "Allow",
-          Action   = ["s3:GetObject", "s3:ListBucket", "s3:GetBucketLocation", "s3:GetObjectVersion", "s3:GetLifecycleConfiguration"],
-          Resource = flatten([for bucket in data.aws_s3_bucket.this : ["${bucket.arn}/*", "${bucket.arn}"]])
+          Action   = ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"],
+          Resource = [data.aws_sqs_queue.name[0].arn]
         },
       ] : [],
       # S3 Integration Policy
@@ -112,12 +103,44 @@ resource "aws_iam_policy" "lambda_policy" {
         },
       ] : [],
 
-      #S3 with SQS Integration Policy
-      local.s3_bucket_names != toset([]) && var.sqs_name != null ? [
+      # SNS S3 Integration Policy
+      var.sns_topic_name != null && local.s3_bucket_names != toset([]) ? [
+        {
+          Effect   = "Allow",
+          Action   = ["sns:Publish"],
+          Resource = [data.aws_sns_topic.sns_topic[0].arn]
+        },
+        {
+          Effect   = "Allow",
+          Action   = ["s3:GetObject"],
+          Resource = flatten([for bucket in data.aws_s3_bucket.this : ["${bucket.arn}/*", "${bucket.arn}"]])
+        },
+      ] : [],
+
+      # S3 Integration Policy
+      local.s3_bucket_names != toset([]) && var.sqs_name == null  && var.sns_topic_name == null ? [
+        {
+          Effect   = "Allow",
+          Action   = ["s3:GetObject"],
+          Resource = flatten([for bucket in data.aws_s3_bucket.this : ["${bucket.arn}/*", "${bucket.arn}"]])
+        },
+      ] : [],
+
+      # SQS Integration Policy
+      local.s3_bucket_names == toset([]) && var.sqs_name != null ? [
         {
           Effect   = "Allow",
           Action   = ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"]
           Resource = [data.aws_sqs_queue.name[0].arn]
+        },
+      ] : [],
+
+      # SNS Integration Policy
+      local.s3_bucket_names == toset([]) && var.sns_topic_name != null ? [
+        {
+          Effect   = "Allow",
+          Action   = ["sns:Publish"]
+          Resource = [data.aws_sns_topic.sns_topic[0].arn]
         },
       ] : [],
 
@@ -139,22 +162,18 @@ resource "aws_iam_policy" "lambda_policy" {
         },
       ] : [],
 
-      # DLQ SQS Permissions
+      # DLQ Permissions
       var.enable_dlq ? [
         {
           Effect   = "Allow",
           Action   = ["sqs:SendMessage", "sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"],
           Resource = [aws_sqs_queue.DLQ[0].arn]
         },
-      ] : [],
-
-      # Kafka Integration Policy
-      var.kafka_brokers != null ? [
         {
           Effect   = "Allow",
-          Action   = ["ec2:CreateNetworkInterface", "ec2:DescribeNetworkInterfaces", "ec2:DescribeVpcs", "ec2:DeleteNetworkInterface", "ec2:DescribeSubnets", "ec2:DescribeSecurityGroups"],
-          Resource = ["*"]
-        },
+          Action   = ["s3:PutObject", "s3:PutObjectAcl", "s3:AbortMultipartUpload", "s3:DeleteObject", "s3:PutObjectTagging", "s3:PutObjectVersionTagging"]
+          Resource = ["${data.aws_s3_bucket.dlq_bucket[0].arn}/*", data.aws_s3_bucket.dlq_bucket[0].arn]
+        }
       ] : [],
 
       # EcrScan Integration Policy

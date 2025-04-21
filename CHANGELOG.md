@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.3.3
+#### **coralogix-aws-shipper**
+### 🧰 Bug fixes 🧰
+- Add missing permissions to sns and sqs integrations
+
 ## v3.3.2
 #### **coralogix-aws-shipper**
 ### 🧰 Bug fixes 🧰
