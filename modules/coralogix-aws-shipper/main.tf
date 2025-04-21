@@ -115,7 +115,7 @@ resource "aws_iam_policy" "lambda_policy" {
       ] : [],
 
       # S3 Integration Policy
-      local.s3_bucket_names != toset([]) && var.sqs_name == null  && var.sns_topic_name == null ? [
+      local.s3_bucket_names != toset([]) && var.sqs_name == null && var.sns_topic_name == null ? [
         {
           Effect   = "Allow",
           Action   = ["s3:GetObject"],
