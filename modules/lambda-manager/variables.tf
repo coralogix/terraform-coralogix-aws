@@ -18,6 +18,7 @@ variable "destination_role" {
 variable "logs_filter" {
   description = "Subscription filter to select which logs needs to be sent to Coralogix. For Example for Lambda Errors that are not sendable by Coralogix Lambda Layer '?REPORT ?\"Task timed out\" ?\"Process exited before completing\" ?errorMessage ?\"module initialization error:\" ?\"Unable to import module\" ?\"ERROR Invoke Error\" ?\"EPSAGON_TRACE:\"'."
   type        = string
+  default     = ""
 }
 
 variable "destination_arn" {

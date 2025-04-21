@@ -1,14 +1,19 @@
 # Changelog
 
+## v3.3.2
+#### **coralogix-aws-shipper**
+### 🧰 Bug fixes 🧰
+- Fix an issue with `newline_pattern` variable, which is not showing in the env for the lambda.
+#### **lambda-manager**
+### 💡 Enhancements 💡
+- Add a default value to `logs_filter` to be an empty string
 
-## v3.4.2
+## v3.3.1
 #### **lambda-manager**
 ### 🧰 Bug fixes 🧰
 - Add missing permissions to lambda function
 ### 💡 Enhancements 💡
 - Add support for log_group_permissions_prefix variable
-
-## v3.4.1
 #### **firehose-logs**
 ###  💡 Configuration update 💡
 - Update buffering_size to be in line with documentation, use the value of 1MiB.
@@ -16,19 +21,15 @@
 ### 💡 Configuration update 💡
 - Update retry_duration to be in line with documentation, use the value of 300 seconds to secure we do not lose the data on any issues.
 
-## v3.4.0
+## v3.3.0
 #### **resource-metadata-sqs**
 ### 💡 Enhancements 💡
 - Add support for multi-region and cross-account metadata collection
 
-## v3.3.0
-#### **ecs-ec2**
-### 💡 Enhancements 💡
-- Updated ECS-EC2 default otel config with tarces head sampling
-
 ## v3.2.0
 #### **ecs-ec2**
 ### 💡 Enhancements 💡
+- Updated ECS-EC2 default otel config with tarces head sampling
 - Updated ECS-EC2 default otel config to use new collector metric config format
 - Added a transform to remove unneeded labels from metrics added as of otel v0.119.0
 

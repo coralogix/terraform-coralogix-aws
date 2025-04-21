@@ -38,7 +38,7 @@ variable "subsystem_name" {
 variable "newline_pattern" {
   description = "The pattern for lines splitting"
   type        = string
-  default     = ""
+  default     = null
 }
 
 variable "blocking_pattern" {

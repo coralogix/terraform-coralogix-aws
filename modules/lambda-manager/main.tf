@@ -99,7 +99,7 @@ resource "aws_sns_topic_subscription" "this" {
   endpoint   = var.notification_email
 }
 
-resource "aws_lambda_invocation" "example" {
+resource "aws_lambda_invocation" "trigger_lambda_for_first_time" {
   function_name = module.lambda.lambda_function_arn
   input = jsonencode({
     RequestType = "Create"
