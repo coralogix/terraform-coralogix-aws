@@ -93,9 +93,6 @@ resource "aws_iam_policy" "lambda_policy" {
           Action   = ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"],
           Resource = [data.aws_sqs_queue.name[0].arn]
         },
-      ] : [],
-      # S3 Integration Policy
-      local.s3_bucket_names != toset([]) && var.sqs_name == null ? [
         {
           Effect   = "Allow",
           Action   = ["s3:GetObject"],
