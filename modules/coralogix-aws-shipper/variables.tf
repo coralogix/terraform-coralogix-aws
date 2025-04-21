@@ -183,7 +183,7 @@ variable "sqs_name" {
 variable "sns_topic_name" {
   description = "The name of your SNS topic"
   type        = string
-  default     = ""
+  default     = null
 }
 
 variable "sns_topic_filter" {

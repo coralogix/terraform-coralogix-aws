@@ -4,7 +4,7 @@ locals {
     VpcFlow    = ".log.gz"
   }
 
-  sns_enable = var.sns_topic_name != "" ? true : false
+  sns_enable = var.sns_topic_name != null ? true : false
 
   log_groups = {
     for group in var.log_groups : group =>
