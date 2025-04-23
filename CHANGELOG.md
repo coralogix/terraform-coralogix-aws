@@ -1,5 +1,14 @@
 # Changelog
 
+## v3.3.4
+#### **coralogix-aws-shipper**, **firehose-metrics**, **firehose-logs**, **ecs-ec2**
+### 🧰 Bug fixes 🧰
+- Update the required version of the modules:
+  - coralogix-aws-shipper: >= 1.7.0
+  - firehose-metrics: >= 1.6.0
+  - firehose-logs: >= 1.6.0
+  - ecs-ec2: >= 1.9.0
+
 ## v3.3.3
 #### **coralogix-aws-shipper**
 ### 🧰 Bug fixes 🧰

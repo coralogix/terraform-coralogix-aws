@@ -152,8 +152,9 @@ module "coralogix-shipper-multiple-s3-integrations" {
 [//]: # (/example)
 
 [//]: # (example id="CloudWatch-integration")
+## Configuration examples
 
-### Configuration example
+### CloudWatch (default)
 ```bash
 module "coralogix-shipper-cloudwatch" {
   source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
@@ -166,6 +167,38 @@ module "coralogix-shipper-cloudwatch" {
   log_groups         = ["log_gruop"]
 }
 ```
+
+### CloudWatch with lambda-manager
+
+In some cases, you will have a large number of log groups that you would like to monitor.
+In this case, instead of adding the log groups manually, you can use the lambda-manager to add a subscription to your coralogix-shipper lambda using a regex.
+Pay attention that the lambda-manager will also add new log groups to the integration automatically.
+For more information, please refer to the [lambda-manager](https://github.com/coralogix/terraform-coralogix-aws/blob/master/modules/lambda-manager/README.md)
+```bash
+module "coralogix-shipper-cloudwatch" {
+  source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
+
+  coralogix_region   = "EU1"
+  integration_type   = "CloudWatch"
+  api_key            = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  application_name   = "cloudwatch-application"
+  subsystem_name     = "cloudwatch-subsystem"
+  log_groups         = ["log_gruop"]
+}
+
+module "coralogix-lambda-manager" {
+  source = "coralogix/aws/coralogix//modules/lambda-manager"
+
+  regex_pattern                = "log_groups_name*"
+  destination_arn              = module.coralogix-shipper-cloudwatch.lambda_function_arn[0]
+  destination_type             = "lambda"
+  scan_old_loggroups           = true
+  log_group_permissions_prefix = ["log_groups_name"]
+}
+
+```
+Important note: the `log_group_permissions_prefix` is optional, and will ONLY add permissions to the lambda and will not add the subscription.
+For more information about the variables, please refer to the [lambda-manager README](https://github.com/coralogix/terraform-coralogix-aws/tree/master/modules/lambda-manager#environment-variables)
 
 [//]: # (/example)
 

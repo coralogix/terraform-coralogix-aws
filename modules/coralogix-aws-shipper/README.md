@@ -175,7 +175,7 @@ If you need to add multiple log groups to the Lambda function using regex, refer
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
 | <a name="input_custom_metadata"></a> [custom\_metadata](#input\_custom\_metadata) | Custom metadata to be added to the log message in the comma-separated format. Options are: `key1=value1,key2=value2` | `string` | n/a | no |
-| <a name="input_add_metadata"></a> [add\_metadata](#input\_add\_metadata) | Custom metadata to be added to the log message in the comma-separated format. The S3 options are: `bucket_name`,`key_name`. For CloudWatch `stream_name` | `string` | n/a | no |
+| <a name="input_add_metadata"></a> [add\_metadata](#input\_add\_metadata) | Custom metadata to be added to the log message in the comma-separated format. The S3 options are: `bucket_name`,`key_name`. For CloudWatch `stream_name`, `loggroup_name`. For Kafka/MSK, use `topic_name` | `string` | n/a | no |
 | <a name="input_lambda_name"></a> [lambda\_name](#input\_lambda\_name) | The name the Lambda function to create. | `string` | n/a | no |
 | <a name="input_blocking_pattern"></a> [blocking\_pattern](#input\_blocking\_pattern) | A regular expression to identify lines excluded from being sent to Coralogix. For example, use `MainActivity.java:\d{3}` to match log lines with MainActivity followed by exactly three digits. | `string` | n/a | no |
 | <a name="input_sampling_rate"></a> [sampling\_rate](#input\_sampling\_rate) | A message rate, such as 1 out of every N logs. For example, if your value is 10, a message will be sent for every 10th log. | `number` | `1` | no |
