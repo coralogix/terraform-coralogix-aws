@@ -15,7 +15,7 @@ This integration guide walks you through completing the predefined Lambda functi
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [Terraform](#requirement\_terraform) | >= 0.13.1 |
+| <a name="requirement_terraform"></a> [Terraform](#requirement\_terraform) | >= 1.7.0 |
 | <a name="requirement_aws"></a> [AWS](#requirement\_aws) | >= 2.23 |
 
 ## Providers
