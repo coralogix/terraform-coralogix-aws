@@ -9,7 +9,7 @@ resource "random_string" "this" {
 
 module "lambda" {
   source                 = "terraform-aws-modules/lambda/aws"
-  version                = "6.5.0"
+  version                = "6.6.0"
   function_name          = "serverlessrepo-Coralogix-Lambda-Man-LambdaFunction-${random_string.this.result}"
   description            = "Send CloudWatch logs to Coralogix."
   handler                = "lambda_function.lambda_handler"
@@ -26,6 +26,7 @@ module "lambda" {
     DESTINATION_ROLE   = var.destination_role
     DESTINATION_TYPE   = var.destination_type
     SCAN_OLD_LOGGROUPS = var.scan_old_loggroups
+    DISABLE_ADD_PERMISSION = var.disable_add_permission
   }
   s3_existing_package = {
     bucket = "coralogix-serverless-repo-${data.aws_region.this.name}"

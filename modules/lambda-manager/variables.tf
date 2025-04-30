@@ -1,3 +1,9 @@
+variable "disable_add_permission" {
+  description = "Disable the add permission to the destination loggroup"
+  type        = bool
+  default     = false
+}
+
 variable "regex_pattern" {
   description = "Set up this regex to match the Log Groups names that you want to automatically subscribe to the destination"
   type        = string
