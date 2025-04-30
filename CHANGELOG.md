@@ -1,5 +1,110 @@
 # Changelog
 
+## v3.3.4
+#### **coralogix-aws-shipper**, **firehose-metrics**, **firehose-logs**, **ecs-ec2**
+### 🧰 Bug fixes 🧰
+- Update the required version of the modules:
+  - coralogix-aws-shipper: >= 1.7.0
+  - firehose-metrics: >= 1.6.0
+  - firehose-logs: >= 1.6.0
+  - ecs-ec2: >= 1.9.0
+
+## v3.3.3
+#### **coralogix-aws-shipper**
+### 🧰 Bug fixes 🧰
+- Add missing permissions to sns and sqs integrations
+
+## v3.3.2
+#### **coralogix-aws-shipper**
+### 🧰 Bug fixes 🧰
+- Fix an issue with `newline_pattern` variable, which is not showing in the env for the lambda.
+#### **lambda-manager**
+### 💡 Enhancements 💡
+- Add a default value to `logs_filter` to be an empty string
+
+## v3.3.1
+#### **lambda-manager**
+### 🧰 Bug fixes 🧰
+- Add missing permissions to lambda function
+### 💡 Enhancements 💡
+- Add support for log_group_permissions_prefix variable
+#### **firehose-logs**
+###  💡 Configuration update 💡
+- Update buffering_size to be in line with documentation, use the value of 1MiB.
+#### **firehose-metrics**
+### 💡 Configuration update 💡
+- Update retry_duration to be in line with documentation, use the value of 300 seconds to secure we do not lose the data on any issues.
+
+## v3.3.0
+#### **resource-metadata-sqs**
+### 💡 Enhancements 💡
+- Add support for multi-region and cross-account metadata collection
+
+## v3.2.0
+#### **ecs-ec2**
+### 💡 Enhancements 💡
+- Updated ECS-EC2 default otel config with tarces head sampling
+- Updated ECS-EC2 default otel config to use new collector metric config format
+- Added a transform to remove unneeded labels from metrics added as of otel v0.119.0
+
+## v3.1.0
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 💡
+- Add variables `sns_topic_filter_policy_scope` and `sns_topic_filter` to allow SNS topic filter for the Lambda subscription
+
+## v3.0.0
+#### **ecs-ec2**
+### 🛑 Breaking changes 🛑
+### 💡 Enhancements 💡
+- Added support for Parameter Store for custom configurations.
+- Added support for Secret API Key.
+- Added Resource Catalog support.
+- Added new tests for ECS EC2 integration.
+- Added support for AP3 region.
+
+## v2.10.0
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 💡
+- Add support to deploy the integration with multiple S3 buckets
+
+## v2.9.0
+#### **cloudwatch-metrics-iam-role**
+### 🚀 New components 🚀
+- Add new module to collect metrics from AWS services that expose them via AWS CloudWatch
+
+## v2.8.0
+#### **coralogix-aws-shipper**
+### 🚀 New components 🚀
+- Add KMS Key support for S3 Buckets
+
+## v2.7.0
+#### **eventbridge**
+### 🚀 New components 🚀
+- Add support to filter events by detail type
+
+## v2.6.1
+#### **coralogix-aws-shipper**
+### 🧰 Bug fixes 🧰
+- Update resource ARN to be compatible and dynamic according to the AWS region
+#### **firehose-metrics**
+### 🧰 Bug fixes 🧰
+- Update resource ARN to be compatible and dynamic according to the AWS region
+
+## v2.6.0
+#### **coralogix-aws-shipper**
+### 🚀 New components 🚀
+- Add support for ingesting Cloudwatch Stream Metrics via Firehose over PrivateLink for more information refer to [README.md](./modules/coralogix-aws-shipper/README.md#cloudwatch-metrics-stream-via-privatelink-beta)
+### 🧰 Bug fixes 🧰
+- Update null_resource.s3_bucket_copy resource to delete source code file only if exists
+#### **firehose-metrics**
+### 🧰 Bug fixes 🧰
+- Update null_resource.s3_bucket_copy to skip deleting the bootstrap.zip file if it doesn't exist
+
+## v2.5.0
+#### **resource-metadata-sqs**
+### 🚀 New components 🚀
+- Created [resource-metadata-sqs](./modules/resource-metadata-sqs) module – extended version of the [resource-metadata](./modules/resource-metadata) module, which uses SQS to make the metadata generation process asynchronous in order to handle a large number of resources (source code available [here](https://github.com/coralogix/coralogix-aws-serverless/tree/master/src/resource-metadata-sqs)).
+
 ## v2.4.1
 #### **firehose-logs**
 ### 💡 Enhancements 💡
@@ -9,12 +114,13 @@
 - Added module output `firehose_stream_arn`
 ### 🧰 Bug fixes 🧰
 – Added missing docs on module outputs
+– Add a new variable `custom_s3_bucket` to allow users to deploy the integration in govcloud. specify a custom s3 bucket to save the lambda zip code in
 
 ## v2.4.0
 #### **firehose-logs**
 ### 💡 Enhancements 💡
 - Added Amazon S3 bucket policies to require encryption during data transit.
-  
+
 ## v2.3.4
 #### **firehose-logs**
 ### 🧰 Bug fixes 🧰
@@ -33,12 +139,12 @@
 
 ## v2.3.1
 #### **coralogix-aws-shipper**
-### 🧰 Bug fixes 🧰 
+### 🧰 Bug fixes 🧰
 - Fix issue with local variable `api_key_is_arn` being nonsensitive, for terraform version lower than `1.10.0`
 
 ## v2.3.0
 #### **coralogix-aws-shipper**
-### 💡 Enhancements 
+### 💡 Enhancements
 - Add new variable `source_code_version`, to allow user to specify the source lambda code version
 ### 🛑 Breaking changes In the source code 🛑
 - updated support for dynamic value allocation of Application and Subsystem names based on internal metadata
@@ -55,30 +161,30 @@
 ## v2.2.3
 #### **firehose-metrics**
 #### **firehose-logs**
-### 🧰 Bug fixes 🧰 
+### 🧰 Bug fixes 🧰
 - Added new variable `govcloud_deployment`, when set to true the arn of resource that are being used by the module will start with `arn:aws-us-gov` instead of `arn:aws`
 
 ## v2.2.2
 #### **coralogix-aws-shipper**
-### 💡 Enhancements 
+### 💡 Enhancements
 - Add `reserved_concurrent_executions` variable to allow user to define lambda Function concurrency.
 - Add `execution_role_name` variable, when deffined the lambda will use this role as execution role. The module will add to this variable the necessary permissions to run the lambda.
 - Add `lambda_assume_role_arn` variable, when set the lambda will assume this role in the code level.
 
 ## v2.1.2
 #### **coralogix-aws-shipper**
-### 🧰 Bug fixes 🧰 
+### 🧰 Bug fixes 🧰
 - Add new variable `govcloud_deployment`, when set to true the arn of resource that are being used by the module will start with `arn:aws-us-gov` instead of `arn:aws`
 - Add a condition to the `aws_iam_policy.AWSLambdaMSKExecutionRole` block so it will only create it when MSK is enabled
 
 ## v2.1.1
 #### **S3-archive**
-### 🧰 Bug fixes 🧰 
+### 🧰 Bug fixes 🧰
 - Add `logs_bucket_force_destroy` and `metrics_bucket_force_destroy` variables to allow force destroy the bucekts.
 
 ## v2.1.0
 #### **firehose-metrics**
-### 💡 Enhancements 
+### 💡 Enhancements
 - Added an option to include metrics from source accounts linked to the monitoring account in the Firehose CloudWatch metric stream.
 - Introduced the `include_linked_accounts_metrics` variable to control the inclusion of linked account metrics for Firehose.
 - Updated example configurations to demonstrate usage of the `include_linked_accounts_metrics` variable in Firehose metric streams.
@@ -90,7 +196,7 @@
 - Removed latest flag from ecs-ec2 module example.
 - Removed deprecated logging exporter from ecs-ec2 module otel configs.
 
-### 💡 Enhancements 
+### 💡 Enhancements
 - Added pprof extension to default ecs-ec2 otel configurations.
 
 ## v2.0.0
@@ -99,7 +205,7 @@
 
 ## v1.0.107
 #### **firehose-logs & firehose-metrics**
-### 💡 Enhancements 
+### 💡 Enhancements
 - Add AP3 region to the list of regions
 - Added custom naming for global resources
 - Added ability to import global resources (s3 & iam)
@@ -109,22 +215,22 @@
 
 ## v1.0.106
 #### **msk-data-stream**
-### 💡 Enhancements 
+### 💡 Enhancements
 - Update coralogix role from `arn:aws:iam::<account-id>:role/msk-access-<region>` to  `arn:aws:iam::<account-id>:role/coralogix-archive-<region>`
 - allow the module to run in AP3 region
 
 #### **coralogix-aws-shipper**
-### 💡 Enhancements 
+### 💡 Enhancements
 - Allow the module to be deployed in AP3
 
 #### **S3-archive**
-### 💡 Enhancements 
+### 💡 Enhancements
 - Allow the module to be deployed in ap-southeast-3 region
 
 
 ## v1.0.105
 #### **firehose-metrics**
-### 💡 Enhancements 
+### 💡 Enhancements
 - Add AP3 region to the list of regions
 - Added custom naming for global resources
 - Added ability to import global resources (s3 & iam)
@@ -138,7 +244,7 @@
 
 ## v1.0.103
 #### **resource-metadata**
-### 💡 Enhancements 
+### 💡 Enhancements
 - Update lambda runtime from nodejs18 to nodejs20
 ### 🛑 Breaking changes 🛑
 - Update variables: `collect_aliases` and `create_secret` to be type `bool` instead of `string`.
@@ -146,11 +252,11 @@
 ## v1.0.102
 #### **coralogix-aws-shipper**
 ### 🧰 Bug fixes 🧰
-- Add new parameter runtime, to allow users to specify lambda run time, possible options: `provided.al2023` or `provided.al2` 
+- Add new parameter runtime, to allow users to specify lambda run time, possible options: `provided.al2023` or `provided.al2`
 
 ## v1.0.101
 #### **coralogix-aws-shipper**
-### 💡 Enhancements 
+### 💡 Enhancements
 - Allow to specify multiple api_key when using the parameter integration_info
 - Remove the creation of an SNS topic for lambda failure in case the user didn't set up notification_email
 - Add new variable create_endpoint to allow users to choose if they want to create an endpoint in case they are using a private link and store their ApiKey in secret.
@@ -159,25 +265,25 @@ when using integration_info varialbe will now need to specify the api_key as par
 
 ## v1.0.100
 #### **s3-archive**
-### 💡 Enhancements 
+### 💡 Enhancements
 - Add delete permissions to the archive buckets
 - replace ap1 region with ap2 in the aws_role_region mapping
 
 ## v1.0.99
 #### **ecs-ec2**
-### 💡 Enhancements 
+### 💡 Enhancements
 - Added validation using operator route to default otel config for ecs-ec2 config
 
 ## v1.0.98
 #### **coralogix-aws-shipper**
-### 💡 Enhancements 
+### 💡 Enhancements
 - Add support for DLQ
 - Add log_group_prefix variable to avoid limitation of number of log groups
 - Update versions for github actions to avoid node.js 16 issue
 
 ## v1.0.97
 #### firehose-metrics
-### 💡 Enhancements 
+### 💡 Enhancements
 - [cds-1198] set default type parameter to CloudWatch_Metrics_OpenTelemetry070_WithAggregations
 - add README description for aggregation
 
@@ -202,7 +308,7 @@ when using integration_info varialbe will now need to specify the api_key as par
 - Update permissions for EcrScan integration
 
 ## v1.0.93
-### 💡 Enhancements 
+### 💡 Enhancements
 - [cds-1099] set default force_flush_period parameter to 0 for ecs-ec2 otel filelog receiver💡
 
 
@@ -267,12 +373,12 @@ when using integration_info varialbe will now need to specify the api_key as par
 
 ## v1.0.82
 ### 🧰 Bug fixes 🧰
-#### **s3-archive**  
+#### **s3-archive**
 - Update the role for the metrics bucket
 
 ## v1.0.81
 ### 🧰 Bug fixes 🧰
-#### **ecs-ec2**  
+#### **ecs-ec2**
 - Missing resource instance key
 
 ## v1.0.80
@@ -298,7 +404,7 @@ when using integration_info varialbe will now need to specify the api_key as par
 
 ## v1.0.76
 ### 💡 Enhancements 💡
-#### **ecs-ec2**  
+#### **ecs-ec2**
 - Use unique resource names - this will allow the deployment of the service multiple times on the same cluster (for configuration tests for example) and to maintain separate definitions within the same account/region
 - [optionally] Allow tagging
 - [optionally] Reuse task definition for multiple service deployments
@@ -322,12 +428,12 @@ when using integration_info varialbe will now need to specify the api_key as par
 
 ## v1.0.72
 ### 🧰 Bug fixes 🧰
-#### **coralogix-aws-shipper** 
+#### **coralogix-aws-shipper**
 - Update the Coralogix Region list to be the same as the list in the [website](https://coralogix.com/docs/coralogix-domain/)
 
 ## v1.0.71
 ### 🧰 Bug fixes 🧰
-#### **coralogix-aws-shipper** 
+#### **coralogix-aws-shipper**
 - Change default loglevel to WARN
 
 ## v1.0.70
@@ -337,7 +443,7 @@ when using integration_info varialbe will now need to specify the api_key as par
 
 ## v1.0.69
 ### 🚀 New components 🚀
-#### **coralogix-aws-shipper**  
+#### **coralogix-aws-shipper**
 - Add submodule for the coralogix-aws-shipper
 
 ## v1.0.68
@@ -363,7 +469,7 @@ when using integration_info varialbe will now need to specify the api_key as par
 ## v1.0.64
 ### 🚩 Deprecations 🚩
 #### **firehose**
-- firehose submodule will be deprecated in favor of two separate submodules firehose-metrics and firehose-logs 
+- firehose submodule will be deprecated in favor of two separate submodules firehose-metrics and firehose-logs
 
 ## v1.0.63
 ### 🚩 Deprecations 🚩
@@ -372,7 +478,7 @@ when using integration_info varialbe will now need to specify the api_key as par
 
 ## v1.0.62
 ### 🚀 New components 🚀
-#### **ecs-ec2**  
+#### **ecs-ec2**
 - Add submodule for the ecs-ec2
 
 ## v1.0.61

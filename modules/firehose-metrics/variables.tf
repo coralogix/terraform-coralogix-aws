@@ -218,3 +218,8 @@ variable "override_default_tags" {
   default     = false
 }
 
+variable "custom_s3_bucket" {
+  description = "Custom S3 bucket to use for the lambda processor"
+  type        = string
+  default     = null
+}

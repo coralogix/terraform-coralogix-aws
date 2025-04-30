@@ -1,3 +1,9 @@
+variable "log_group_permissions_prefix" {
+  description = "A list of strings of log group prefixes. The code will use these prefixes to create permissions for the Lambda instead of creating for each log group permission it will use the prefix with a wild card to give the Lambda access for all of the log groups that start with these prefix. This parameter doesn't replace the regex_pattern parameter."
+  type        = list(string)
+  default     = []
+}
+
 variable "disable_add_permission" {
   description = "Disable the add permission to the destination loggroup"
   type        = bool
@@ -18,6 +24,7 @@ variable "destination_role" {
 variable "logs_filter" {
   description = "Subscription filter to select which logs needs to be sent to Coralogix. For Example for Lambda Errors that are not sendable by Coralogix Lambda Layer '?REPORT ?\"Task timed out\" ?\"Process exited before completing\" ?errorMessage ?\"module initialization error:\" ?\"Unable to import module\" ?\"ERROR Invoke Error\" ?\"EPSAGON_TRACE:\"'."
   type        = string
+  default     = ""
 }
 
 variable "destination_arn" {

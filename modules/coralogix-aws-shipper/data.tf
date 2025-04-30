@@ -13,8 +13,8 @@ data "aws_cloudwatch_log_group" "this" {
 }
 
 data "aws_s3_bucket" "this" {
-  count  = var.s3_bucket_name == null ? 0 : 1
-  bucket = var.s3_bucket_name
+  for_each = local.s3_bucket_names
+  bucket   = each.value
 }
 
 data "aws_s3_bucket" "dlq_bucket" {
@@ -53,7 +53,7 @@ data "aws_iam_policy_document" "topic" {
     condition {
       test     = "ArnLike"
       variable = "aws:SourceArn"
-      values   = [data.aws_s3_bucket.this[0].arn]
+      values   = [one(values(data.aws_s3_bucket.this)).arn]
     }
   }
 }
@@ -65,5 +65,7 @@ data "aws_iam_policy" "AWSLambdaMSKExecutionRole" {
 
 data "aws_iam_role" "LambdaExecutionRole" {
   count = var.execution_role_name != null ? 1 : 0
-  name = var.execution_role_name
+  name  = var.execution_role_name
 }
+
+data "aws_partition" "current" {}

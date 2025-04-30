@@ -1,4 +1,5 @@
 terraform {
+  required_version = ">= 1.6.0"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -41,16 +42,34 @@ locals {
   new_firehose_iam_name         = var.firehose_iam_custom_name != null ? var.firehose_iam_custom_name : "${var.firehose_stream}-firehose-metrics-iam"
   new_metric_stream_iam_name    = var.metric_streams_iam_custom_name != null ? var.metric_streams_iam_custom_name : "${var.firehose_stream}-cw-iam"
 
-  arn_prefix = var.govcloud_deployment ? "arn:aws-us-gov" : "arn:aws"
+  arn_prefix = "arn:${data.aws_partition.current.partition}"
 }
 
 data "aws_caller_identity" "current_identity" {}
 data "aws_region" "current_region" {}
+data "aws_partition" "current" {}
 
 resource "random_string" "this" {
   length  = 6
   special = false
   upper   = false
+}
+
+resource "null_resource" "s3_bucket_copy" {
+  count = var.custom_s3_bucket != null ? 1 : 0
+
+  provisioner "local-exec" {
+    command = <<-EOF
+      curl -o bootstrap.zip https://cx-cw-metrics-tags-lambda-processor-eu-west-1.s3.eu-west-1.amazonaws.com/bootstrap.zip
+      aws s3 cp --region ${data.aws_region.current_region.name} ./bootstrap.zip s3://${var.custom_s3_bucket}
+      if [ -f bootstrap.zip ]; then
+        rm ./bootstrap.zip
+      else
+        echo "Couldn't find bootstrap.zip, skip deleting"
+      fi
+      
+    EOF
+  }
 }
 
 ################################################################################
@@ -283,8 +302,9 @@ resource "aws_cloudwatch_log_group" "loggroup" {
 }
 
 resource "aws_lambda_function" "lambda_processor" {
+  depends_on    = [null_resource.s3_bucket_copy]
   count         = var.lambda_processor_enable ? 1 : 0
-  s3_bucket     = "cx-cw-metrics-tags-lambda-processor-${data.aws_region.current_region.name}"
+  s3_bucket     = coalesce(var.custom_s3_bucket, "cx-cw-metrics-tags-lambda-processor-${data.aws_region.current_region.name}")
   s3_key        = "bootstrap.zip"
   function_name = local.lambda_processor_name
   role          = local.lambda_processor_iam_role_arn
@@ -315,7 +335,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_metrics" {
     buffering_interval = 60
     s3_backup_mode     = "FailedDataOnly"
     role_arn           = local.firehose_iam_role_arn
-    retry_duration     = 30
+    retry_duration     = 300
 
     s3_configuration {
       role_arn           = local.firehose_iam_role_arn

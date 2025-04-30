@@ -182,6 +182,7 @@ then the CloudWatch metric stream must be configured with the same format, confi
 | Name | Version |
 |------|---------|
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 4.17.1 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.6.0 |
 
 ## Providers
 
@@ -212,6 +213,7 @@ then the CloudWatch metric stream must be configured with the same format, confi
 | <a name="input_s3_backup_custom_name"></a> [s3\_backup\_custom\_name](variables.tf#L143) | Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup-metrics' will be used. | `string` | n/a | no |
 | <a name="input_existing_s3_backup"></a> [existing\_s3\_backup](variables.tf#L149) | Use an existing S3 bucket to use as a backup bucket. | `string` | n/a | no |
 | <a name="input_govcloud_deployment"></a> [govcloud\_deployment](#input\_govcloud\_deployment) | Enable if you deploy the integration in govcloud | `bool` | false | no |
+| <a name="input_custom_s3_bucket"></a> [custom\_s3\_bucket](variables.tf#L215) | The name of the s3 bucket that exists in your account to save the lambda zip code in | `string` | n/a | no |
 | <a name="input_lambda_processor_enable"></a> [lambda\_processor\_enable](variables.tf#L155) | Enable the lambda processor function. Set to false to remove the lambda and all associated resources. | `bool` | `true` | no |
 | <a name="input_lambda_processor_custom_name"></a> [lambda\_processor\_custom\_name](variables.tf#L161) | Set the name of the lambda processor function, otherwise variable '{firehose_stream}-metrics-transform' will be used | `string` | `null` | no |
 | <a name="input_lambda_processor_iam_custom_name"></a> [lambda\_processor\_iam\_custom\_name](variables.tf#L167) | Set the name of the lambda processor IAM role, otherwise variable '{firehose_stream}-lambda-processor-iam' will be used. | `string` | n/a | no |
@@ -234,6 +236,10 @@ then the CloudWatch metric stream must be configured with the same format, confi
 | `AP3` | `ap-southeast-3` | ap3.coralogix.com |
 | `US` | `us-east-2` | coralogix.us |
 | `US2` | `us-west-2` | cx498.coralogix.com |
+
+
+> [!NOTE]
+> When trying to deploy the lambda in govcloud, you will need to set the variable `govcloud_deployment` to `true` and set the variable `custom_s3_bucket` to a bucket that exists in your account, the module will upload the function source code into this bucket
 
 ## Outputs
 

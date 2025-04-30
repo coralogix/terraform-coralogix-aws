@@ -1,4 +1,5 @@
 terraform {
+  required_version = ">= 1.6.0"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -86,7 +87,7 @@ resource "aws_s3_bucket_public_access_block" "firehose_bucket_bucket_access" {
 }
 
 data "aws_iam_policy_document" "bucket_policy_doc" {
-  count  = var.existing_s3_backup != null ? 0 : var.s3_enable_secure_transport ? 1 : 0
+  count = var.existing_s3_backup != null ? 0 : var.s3_enable_secure_transport ? 1 : 0
   statement {
     sid    = "AllowSSLRequestsOnly"
     effect = "Deny"
@@ -228,7 +229,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs" {
     url                = local.endpoint_url
     name               = "Coralogix"
     access_key         = var.api_key
-    buffering_size     = 6
+    buffering_size     = 1
     buffering_interval = 60
     s3_backup_mode     = "FailedDataOnly"
     role_arn           = local.firehose_iam_role_arn

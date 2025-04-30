@@ -71,6 +71,12 @@ variable "s3_key_suffix" {
   default     = null
 }
 
+variable "s3_bucket_kms_arn" {
+  description = "The AWS ARN of the KMS key used to encrypt/decrypt objects in the specified S3 bucket. If provided, the Lambda policy will include permissions to decrypt using this key."
+  type        = string
+  default     = null
+}
+
 variable "cs_delimiter" {
   type        = string
   description = "The delimiter used in the CSV file to process This value is applied when the S3Csv integration type is selected"
@@ -177,6 +183,18 @@ variable "sns_topic_name" {
   description = "The name of your SNS topic"
   type        = string
   default     = ""
+}
+
+variable "sns_topic_filter" {
+  description = "Map of filters to add to the SNS topic lambda subscription"
+  type        = map(any)
+  default     = null
+}
+
+variable "sns_topic_filter_policy_scope" {
+  description = "The scope of the filter policy for the SNS topic lambda subscription, could be MessageAttributes or MessageBody"
+  type        = string
+  default     = null
 }
 
 # vpc variables
@@ -351,4 +369,24 @@ variable "govcloud_deployment" {
   description = "Enable if you deploy the integration in govcloud"
   type        = bool
   default     = false
+}
+
+variable "telemetry_mode" {
+  description = "The telemetry mode for the shipper, i.e metrics or logs"
+  type        = string
+  default     = "logs"
+  validation {
+    condition     = contains(["logs", "metrics"], var.telemetry_mode)
+    error_message = "The telemetry_mode must be one of these values: [logs, metrics]."
+  }
+}
+
+variable "include_metric_stream_filter" {
+  description = "List of inclusive metric filters. If you specify this parameter, the stream sends only the conditional metric names from the metric namespaces that you specify here. Leave empty to send all metrics"
+  type = list(object({
+    namespace    = string
+    metric_names = list(string)
+    })
+  )
+  default = []
 }

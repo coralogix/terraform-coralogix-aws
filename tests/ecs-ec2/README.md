@@ -4,8 +4,7 @@
 
 * Setup ECS cluster on EC2.
 * Setup AWS profile, or AWS session environment variables including ```AWS_DEFAULT_REGION```.
-* Configure file "terraform.tfvars" accordingly from [./terraform.tfvars.template](./terraform.tfvars.template). 
-* Edit ```cluster-name``` in  [./ecs-ec2.tf](./ecs-ec2.tf) to match your environment ECS cluster name accordingly.
+* Configure a "terraform.tfvars" accordingly from [./terraform.tfvars.template](./terraform.tfvars.template).
 
 ## Test provisioning ECS/EC2 OTEL collector
 
@@ -15,28 +14,58 @@ terraform apply
 ```
 
 Expected results:
-* ECS Service ```coralogix-otel-agent``` runs as a Daemon on every EC2 cluster instance.
+* ECS Service ```coralogix-otel-agent-<UUID>``` runs as a Daemon on every EC2 cluster node.
 * Logs, traces, and metrics, are captured at your Coralogix endpoint.
 
-## Test using custom config file.
+## Test using local custom config file.
 
-To test with an optional custom config file, e.g. [./otel_config_custom.tftpl.yaml](./otel_config_custom.tftpl.yaml):
+To test with an optional local custom config file, e.g. [./local_config.yaml](./local_config.yaml):
 
 ```
-terraform plan -var otel_config_file="$(pwd)/otel_config_custom.tftpl.yaml"
-terraform apply -var otel_config_file="$(pwd)/otel_config_custom.tftpl.yaml"
+terraform plan -var="otel_config_file=local_config.yaml"
+terraform apply -var="otel_config_file=local_config.yaml"
 ```
 
 Expected results:
-* Any logs to application containers are captured at ```Warning``` severity.
+* OTEL_CONFIG environment variable is set to the contents of the local configuration file.
+
+## Test using custom config file from Parameter Store.
+
+To test with an optional custom configuration stored in Parameter Store:
+* Create a Parameter Store in AWS for your configuration and a Role with access to it.
+    * Example TF for creating test resources is available in [resources](./resources/)
+* Edit [ps_config.vars](./ps_config.vars) to include the Parameter Store name and Task Execution Role ARN with access to the Parameter Store.
+
+```
+terraform plan -var-file="ps_config.vars"
+terraform apply -var-file="ps_config.vars"
+```
+
+Expected results:
+* OTEL_CONFIG environment variable is set to the Parameter Store defined above.
+
+## Test using Secret API Key.
+
+To test with a Secret API Key:
+* Create a Secrets Manager Secret for your API Key and a Role with access to it.
+    * Example TF for creating test resources is available in [resources](./resources/)
+* Edit [secret_api_key.vars](./secret_api_key.vars) to include the Secret ARN and Task Execution Role ARN with access to the Secret.
+
+```
+terraform plan -var-file="secret_api_key.vars"
+terraform apply -var-file="secret_api_key.vars"
+```
+
+Expected results:
+* PRIVATE_KEY environment variable is set to the Secret defined above.
 
 ## Test custom domain
 
 To test using an optional custom Coralogix domain, such as a [Private Link Endpoint](https://coralogix.com/docs/coralogix-amazon-web-services-aws-privatelink-endpoints/).
 
 ```
-terraform plan -var custom_domain=your-custom-domain.com -var api_key=your-api-key
-terraform apply -var custom_domain=your-custom-domain.com -var api_key=your-api-key
+terraform plan -var="custom_domain=your-custom-domain.com"
+terraform apply -var="custom_domain=your-custom-domain.com"
 ```
 
 Expected results:
@@ -45,7 +74,7 @@ Expected results:
 ## Test de-provisioning ECS/EC2 OTEL collector
 
 ```
-terraform destroy
+terraform destroy <Any of your test variables or files>
 ```
 
 Expected results:

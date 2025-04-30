@@ -38,7 +38,7 @@ variable "subsystem_name" {
 variable "newline_pattern" {
   description = "The pattern for lines splitting"
   type        = string
-  default     = ""
+  default     = null
 }
 
 variable "blocking_pattern" {
@@ -54,7 +54,7 @@ variable "sampling_rate" {
 }
 
 variable "s3_bucket_name" {
-  description = "The name of the S3 bucket to watch"
+  description = "The name of the S3 bucket to watch, this accepts also a comma separated list of bucket names."
   type        = string
   default     = null
 }
@@ -67,6 +67,12 @@ variable "s3_key_prefix" {
 
 variable "s3_key_suffix" {
   description = "The AWS S3 path suffix to watch. This value is ignored when the SNSTopicArn parameter is provided."
+  type        = string
+  default     = null
+}
+
+variable "s3_bucket_kms_arn" {
+  description = "The AWS ARN of the KMS key used to encrypt/decrypt objects in the specified S3 bucket. If provided, the Lambda policy will include permissions to decrypt using this key."
   type        = string
   default     = null
 }
@@ -86,16 +92,17 @@ variable "custom_csv_header" {
 variable "integration_info" {
   description = "Values of s3 integraion in case that you want to deploy more than one integration"
   type = map(object({
-    s3_key_prefix        = optional(string)
-    s3_key_suffix        = optional(string)
-    application_name     = string
-    subsystem_name       = string
-    integration_type     = string
-    lambda_name          = optional(string)
-    newline_pattern      = optional(string)
-    blocking_pattern     = optional(string)
-    lambda_log_retention = optional(number)
-    api_key              = string
+    s3_bucket_name                   = optional(string)
+    s3_key_prefix                    = optional(string)
+    s3_key_suffix                    = optional(string)
+    application_name                 = string
+    subsystem_name                   = string
+    integration_type                 = string
+    lambda_name                      = optional(string)
+    newline_pattern                  = optional(string)
+    blocking_pattern                 = optional(string)
+    lambda_log_retention             = optional(number)
+    api_key                          = optional(string)
     store_api_key_in_secrets_manager = optional(bool)
   }))
   default = null
@@ -115,7 +122,7 @@ variable "log_group_prefix" {
   default     = null
 }
 
-# kinesis variables 
+# kinesis variables
 
 variable "kinesis_stream_name" {
   description = "The name of Kinesis stream to subscribe to retrieving messages"
@@ -176,7 +183,19 @@ variable "sqs_name" {
 variable "sns_topic_name" {
   description = "The name of your SNS topic"
   type        = string
-  default     = ""
+  default     = null
+}
+
+variable "sns_topic_filter" {
+  description = "Map of filters to add to the SNS topic lambda subscription"
+  type        = map(any)
+  default     = null
+}
+
+variable "sns_topic_filter_policy_scope" {
+  description = "The scope of the filter policy for the SNS topic Lambda subscription, could be MessageAttributes or MessageBody"
+  type        = string
+  default     = null
 }
 
 # vpc variables
@@ -320,7 +339,7 @@ variable "integration_type" {
     condition     = contains(["CloudWatch", "CloudTrail", "VpcFlow", "S3", "S3Csv", "Sns", "Sqs", "Kinesis", "CloudFront", "MSK", "Kafka", "EcrScan", ""], var.integration_type)
     error_message = "The integration type must be: [CloudWatch, CloudTrail, VpcFlow, S3, S3Csv, Sns, Sqs, Kinesis, CloudFront, MSK, Kafka, EcrScan]."
   }
-  default = ""
+  default = "S3"
 }
 
 variable "store_api_key_in_secrets_manager" {
@@ -357,4 +376,25 @@ variable "reserved_concurrent_executions" {
   default     = null
   description = "The number of concurrent executions that are reserved for this function, leave as default to use unreserved account concurrency"
   type        = number
+}
+
+# firehose metrics varialbe
+variable "telemetry_mode" {
+  description = "The telemetry mode for the shipper, i.e metrics or logs"
+  type        = string
+  default     = "logs"
+  validation {
+    condition     = contains(["logs", "metrics"], var.telemetry_mode)
+    error_message = "The telemetry_mode must be one of these values: [logs, metrics]."
+  }
+}
+
+variable "include_metric_stream_filter" {
+  description = "List of inclusive metric filters. If you specify this parameter, the stream sends only the conditional metric names from the metric namespaces that you specify here. Leave empty to send all metrics"
+  type = list(object({
+    namespace    = string
+    metric_names = list(string)
+    })
+  )
+  default = []
 }
