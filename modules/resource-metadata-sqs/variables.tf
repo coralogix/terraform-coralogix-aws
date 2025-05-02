@@ -56,7 +56,7 @@ variable "crossaccount_mode" {
   description = "Enable cross-account access mode [Disabled, StaticIAM, Config]"
   type        = string
   validation {
-    condition     = contains(["Disabled", "StaticIAM", "Config"], var.cross_account_mode)
+    condition     = contains(["Disabled", "StaticIAM", "Config"], var.crossaccount_mode)
     error_message = "The cross-account mode must be one of these values: [Disabled, StaticIAM, Config]."
   }
   default = "Disabled"
