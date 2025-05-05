@@ -1,4 +1,9 @@
 # Changelog
+## v3.3.5
+#### **lambda-manager**
+### 💡 Enhancements 💡
+- Add  disable_add_permission variable
+
 
 ## v3.3.4
 #### **coralogix-aws-shipper**, **firehose-metrics**, **firehose-logs**, **ecs-ec2**

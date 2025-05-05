@@ -31,6 +31,7 @@ module "lambda" {
     DESTINATION_TYPE            = var.destination_type
     SCAN_OLD_LOGGROUPS          = var.scan_old_loggroups
     LOG_GROUP_PERMISSION_PREFIX = local.log_groups_prefix_string
+    DISABLE_ADD_PERMISSION = var.disable_add_permission
   }
   s3_existing_package = {
     bucket = "coralogix-serverless-repo-${data.aws_region.this.name}"
