@@ -5,6 +5,11 @@
 - Add  disable_add_permission variable
 
 
+## v3.3.5
+#### **resource-metadata-sqs**
+### 💡 Configuration update 💡
+- Update the module according to the function's latest release (v0.3.0)
+
 ## v3.3.4
 #### **coralogix-aws-shipper**, **firehose-metrics**, **firehose-logs**, **ecs-ec2**
 ### 🧰 Bug fixes 🧰

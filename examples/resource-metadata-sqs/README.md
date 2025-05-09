@@ -40,11 +40,12 @@ provider "aws" {}
 module "resource-metadata" {
   source = "coralogix/aws/coralogix//modules/resource-metadata-sqs"
 
-  coralogix_region    = "EU2"
-  api_key             = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
-  event_mode          = "EnabledCreateTrail"
-  source_regions      = ["eu-north-1", "eu-west-1", "us-east-1"]
-  cross_account_iam_role_arns = [aws_iam_role.cross_account_role.arn]
+  coralogix_region           = "EU2"
+  api_key                    = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  source_regions             = ["eu-north-1", "eu-west-1", "us-east-1"]
+  crossaccount_mode          = "StaticIAM"
+  crossaccount_account_ids   = ["123456789012", "234567890123"]
+  crossaccount_iam_role_name = "CrossAccountRoleForResourceMetadata"
 }
 
 resource "aws_iam_role" "cross_account_role" {
