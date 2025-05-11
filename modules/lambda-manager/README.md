@@ -33,6 +33,7 @@ This Lambda Function was created to pick up newly created and existing log group
 | destination_role | Arn for the role to allow destination subscription to be pushed (In case you use Firehose) | n/a | no |
 | destination_type | Type of destination (Lambda or Firehose) | | yes |
 | scan_old_loggroups | This will scan all LogGroups in the account and apply the subscription configured, will only run Once and set to false. Default is false | false | yes |
+| add_permissions_to_all_log_groups | When set to true, grants subscription permissions to the destination for all current and future log groups using a wildcard | false | |
 | disable_add_permission | Disable add permission to loggroup| false | |
 | architecture | Lambda function architecture, possible options are [x86_64, arm64] | x86_64 | |
 | memory_size | The maximum allocated memory this lambda may consume. Default value is the minimum recommended setting please consult coralogix support before changing. | 1024 |  |

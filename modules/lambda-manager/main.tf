@@ -24,14 +24,15 @@ module "lambda" {
   create_package         = false
   destination_on_failure = aws_sns_topic.this.arn
   environment_variables = {
-    LOGS_FILTER                 = var.logs_filter
-    REGEX_PATTERN               = var.regex_pattern
-    DESTINATION_ARN             = var.destination_arn
-    DESTINATION_ROLE            = var.destination_role
-    DESTINATION_TYPE            = var.destination_type
-    SCAN_OLD_LOGGROUPS          = var.scan_old_loggroups
-    LOG_GROUP_PERMISSION_PREFIX = local.log_groups_prefix_string
-    DISABLE_ADD_PERMISSION = var.disable_add_permission
+    LOGS_FILTER                       = var.logs_filter
+    REGEX_PATTERN                     = var.regex_pattern
+    DESTINATION_ARN                   = var.destination_arn
+    DESTINATION_ROLE                  = var.destination_role
+    DESTINATION_TYPE                  = var.destination_type
+    SCAN_OLD_LOGGROUPS                = var.scan_old_loggroups
+    LOG_GROUP_PERMISSION_PREFIX       = local.log_groups_prefix_string
+    DISABLE_ADD_PERMISSION            = var.disable_add_permission
+    ADD_PERMISSIONS_TO_ALL_LOG_GROUPS = var.add_permissions_to_all_log_groups
   }
   s3_existing_package = {
     bucket = "coralogix-serverless-repo-${data.aws_region.this.name}"

@@ -43,6 +43,12 @@ variable "scan_old_loggroups" {
   default     = "false"
 }
 
+variable "add_permissions_to_all_log_groups" {
+  description = "When set to true, grants subscription permissions to the destination for all current and future log groups using a wildcard"
+  type        = string
+  default     = "false"
+}
+
 variable "memory_size" {
   description = "The maximum allocated memory this lambda may consume. Default value is the minimum recommended setting please consult coralogix support before changing."
   type        = number

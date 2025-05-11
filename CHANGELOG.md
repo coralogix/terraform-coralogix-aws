@@ -1,11 +1,16 @@
 # Changelog
-## v3.3.5
+## v3.5.0
+#### **lambda-manager**
+### 💡 Enhancements 💡
+- Add add_permissions_to_all_log_groups variable, When set to true, grants subscription permissions to the destination for all current and future log groups using a wildcard
+
+## v3.4.0
 #### **lambda-manager**
 ### 💡 Enhancements 💡
 - Add  disable_add_permission variable
 
 
-## v3.3.5
+## v3.4.0
 #### **resource-metadata-sqs**
 ### 💡 Configuration update 💡
 - Update the module according to the function's latest release (v0.3.0)
