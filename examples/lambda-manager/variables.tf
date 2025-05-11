@@ -1,3 +1,15 @@
+variable "log_group_permissions_prefix" {
+  description = "A list of strings of log group prefixes. The code will use these prefixes to create permissions for the Lambda instead of creating for each log group permission it will use the prefix with a wild card to give the Lambda access for all of the log groups that start with these prefix. This parameter doesn't replace the regex_pattern parameter."
+  type        = list(string)
+  default     = []
+}
+
+variable "disable_add_permission" {
+  description = "Disable the add permission to the destination loggroup"
+  type        = bool
+  default     = false
+}
+
 variable "regex_pattern" {
   description = "Set up this regex to match the Log Groups names that you want to automatically subscribe to the destination"
   type        = string
@@ -12,6 +24,7 @@ variable "destination_role" {
 variable "logs_filter" {
   description = "Subscription filter to select which logs needs to be sent to Coralogix. For Example for Lambda Errors that are not sendable by Coralogix Lambda Layer '?REPORT ?\"Task timed out\" ?\"Process exited before completing\" ?errorMessage ?\"module initialization error:\" ?\"Unable to import module\" ?\"ERROR Invoke Error\" ?\"EPSAGON_TRACE:\"'."
   type        = string
+  default     = ""
 }
 
 variable "destination_arn" {
@@ -26,6 +39,12 @@ variable "destination_type" {
 
 variable "scan_old_loggroups" {
   description = "This will scan all LogGroups in the account and apply the subscription configured, will only run Once and set to false. Default is false"
+  type        = string
+  default     = "false"
+}
+
+variable "add_permissions_to_all_log_groups" {
+  description = "When set to true, grants subscription permissions to the destination for all current and future log groups using a wildcard"
   type        = string
   default     = "false"
 }
