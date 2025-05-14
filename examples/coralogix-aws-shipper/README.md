@@ -6,7 +6,7 @@ Coralogix provides a predefined AWS Lambda function to easily forward your logs 
 
 To run this example you need to save this code in Terraform file, and change the values according to our settings.
 
-[//]: # (example id="S3-integration")
+<!-- example id="S3-integration" -->
 
 ## Configuration examples
 
@@ -149,9 +149,9 @@ module "coralogix-shipper-multiple-s3-integrations" {
 }
 ```  
 
-[//]: # (/example)
+<!-- /example -->
 
-[//]: # (example id="CloudWatch-integration")
+<!-- example id="CloudWatch-integration" -->
 ## Configuration examples
 
 ### CloudWatch (default)
@@ -200,9 +200,9 @@ module "coralogix-lambda-manager" {
 Important note: the `log_group_permissions_prefix` is optional, and will ONLY add permissions to the lambda and will not add the subscription.
 For more information about the variables, please refer to the [lambda-manager README](https://github.com/coralogix/terraform-coralogix-aws/tree/master/modules/lambda-manager#environment-variables)
 
-[//]: # (/example)
+<!-- /example -->
 
-[//]: # (example id="Kinesis-integration")
+<!-- example id="Kinesis-integration" -->
 
 ### Configuration example
 ```bash
@@ -218,9 +218,9 @@ module "coralogix-shipper-kinesis" {
 }
 ```
 
-[//]: # (/example)
+<!-- /example -->
 
-[//]: # (example id="MSK-integration")
+<!-- example id="MSK-integration" -->
 
 ### Configuration example
 ```bash
@@ -237,9 +237,9 @@ module "coralogix-shipper-msk" {
 }
 ```
 
-[//]: # (/example)
+<!-- /example -->
 
-[//]: # (example id="EcrScan-integration")
+<!-- example id="EcrScan-integration" -->
 
 ### Configuration example
 ```bash
@@ -254,9 +254,9 @@ module "coralogix-shipper-ecrscan" {
 }
 ```
 
-[//]: # (/example)
+<!-- /example -->
 
-[//]: # (example id="Kafka-integration")
+<!-- example id="Kafka-integration" -->
 
 ### Configuration example
 ```bash
@@ -276,9 +276,9 @@ module "coralogix-shipper-kafka" {
 }
 ```
 
-[//]: # (/example)
+<!-- /example -->
 
-[//]: # (example id="SQS-integration")
+<!-- example id="SQS-integration" -->
 
 ### Configuration example
 ```bash
@@ -295,9 +295,9 @@ module "coralogix-shipper-Sqs" {
 }
 ```
 
-[//]: # (/example)
+<!-- /example -->
 
-[//]: # (example id="SNS-integration")
+<!-- example id="SNS-integration" -->
 
 ## Configuration examples
 
@@ -334,7 +334,7 @@ module "coralogix-shipper-sns-with-filter" {
 }
 ```
 
-[//]: # (/example)
+<!-- /example -->
 
 ### Kinesis with a private link
 ```bash
@@ -378,7 +378,7 @@ module "coralogix_firehose_metrics_private_link" {
 }
 ```
 
-[//]: # (static-examples-readme-start-description)
+<!-- static-examples-readme-start-description -->
 
 now execute:
 ```bash
@@ -388,4 +388,4 @@ $ terraform apply
 ```
 Run `terraform destroy` when you don't need these resources.
 
-[//]: # (/static-examples-readme-start-description)
+<!-- /static-examples-readme-start-description -->
