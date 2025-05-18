@@ -104,9 +104,7 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 > [!NOTE]
 > The `log_group` variable will get a list of log groups and then add them to the Lambda as triggers, each log group will also add permission to the Lambda, in some cases when there are a lot of log groups this will cause an error because the code 
 > tries to create too many permissions for the Lambda (AWS have a limitation for the number of permission that you can have for a Lambda), and this is why we have the `log_group_prefix` parameter, this parameter will add **only** permission to the Lambda using a wildcard( * ).
-
 > for example, in case I have the log groups: log1,log2,log3 instead that the code will create for each of the log group permission to trigger the shipper Lambda then you can set `log_group_prefix = ["log"]`, and then it will create only 1 permission for all of the log groups to trigger the shipper Lambda, but you will still need to set `log_groups = ["log1","log2","log3"]`. When using this parameter, you will not be able to see the log groups as triggers for the Lambda.
-
 >If you need to add multiple log groups to the Lambda function using regex, refer to our [Lambda manager](https://github.com/coralogix/terraform-coralogix-aws/tree/master/modules/lambda-manager)
 
 
