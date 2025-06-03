@@ -1,4 +1,17 @@
 # Changelog
+## v3.6.0
+#### **resource-metadata**
+### 🔒 Security Enhancements 🔒
+- **IAM Policy Security Fix**: Replaced wildcard (`"*"`) permissions in secret access policy with specific ARN-based permissions 
+- **Enhanced Secret Manager Support**: Improved IAM policy logic to handle existing secrets referenced by name or full ARN
+
+### 💡 Enhancements 💡
+- **Module Architecture Refactor**: Simplified from dual Lambda modules to single conditional Lambda module for better maintainability
+- **Enhanced `private_key` Variable**: Now supports multiple input formats:
+  - Direct API key (basic usage)
+  - API key value for new secret creation
+  - Existing secret name or full ARN reference
+
 ## v3.5.0
 #### **lambda-manager**
 ### 💡 Enhancements 💡
