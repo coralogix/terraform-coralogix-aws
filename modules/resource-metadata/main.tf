@@ -30,7 +30,7 @@ locals {
   # Secret manager specific environment variables
   secret_manager_environment_variables = var.secret_manager_enabled ? {
     AWS_LAMBDA_EXEC_WRAPPER = "/opt/wrapper.sh"
-    SECRET_NAME            = var.create_secret == false ? var.private_key : ""
+    SECRET_NAME             = var.create_secret == false ? var.private_key : ""
   } : {}
 
   # Basic scenario environment variables
@@ -162,7 +162,7 @@ resource "aws_secretsmanager_secret_version" "service_user" {
 # Separate IAM policy for secret access - created after both Lambda and secret exist
 resource "aws_iam_policy" "secret_access_policy" {
   count = var.secret_manager_enabled ? 1 : 0
-  
+
   name        = "${local.function_name}-SecretAccess"
   path        = "/coralogix/"
   description = "Policy for Lambda to access Coralogix secret"
@@ -190,7 +190,7 @@ resource "aws_iam_policy" "secret_access_policy" {
 
 resource "aws_iam_role_policy_attachment" "secret_access_policy_attachment" {
   count = var.secret_manager_enabled ? 1 : 0
-  
+
   role       = module.lambda.lambda_role_name
   policy_arn = aws_iam_policy.secret_access_policy[0].arn
 }
