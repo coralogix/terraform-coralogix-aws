@@ -50,6 +50,8 @@ data "aws_region" "this" {}
 
 data "aws_caller_identity" "current" {}
 
+data "aws_partition" "current" {}
+
 module "eventbridge" {
   source = "terraform-aws-modules/eventbridge/aws"
 
@@ -179,7 +181,7 @@ resource "aws_iam_policy" "secret_access_policy" {
           "secretsmanager:UpdateSecret"
         ]
         Resource = var.create_secret ? [aws_secretsmanager_secret.private_key_secret[0].arn] : [
-          startswith(var.private_key, "arn:aws:secretsmanager:") ? var.private_key : "arn:aws:secretsmanager:${data.aws_region.this.name}:${data.aws_caller_identity.current.account_id}:secret:${var.private_key}*"
+          startswith(var.private_key, "arn:${data.aws_partition.current.partition}:secretsmanager:") ? var.private_key : "arn:${data.aws_partition.current.partition}:secretsmanager:${data.aws_region.this.name}:${data.aws_caller_identity.current.account_id}:secret:${var.private_key}*"
         ]
       }
     ]
