@@ -13,9 +13,44 @@ locals {
     Provider = "Coralogix"
     License  = "Apache-2.0"
   }
+
+  # Base environment variables (common to both scenarios)
+  base_environment_variables = {
+    CORALOGIX_METADATA_URL               = lookup(local.coralogix_regions, var.coralogix_region, "Europe")
+    LATEST_VERSIONS_PER_FUNCTION         = var.latest_versions_per_function
+    COLLECT_ALIASES                      = var.collect_aliases == true ? "True" : "False"
+    LAMBDA_FUNCTION_INCLUDE_REGEX_FILTER = var.lambda_function_include_regex_filter
+    LAMBDA_FUNCTION_EXCLUDE_REGEX_FILTER = var.lambda_function_exclude_regex_filter
+    LAMBDA_FUNCTION_TAG_FILTERS          = var.lambda_function_tag_filters
+    RESOURCE_TTL_MINUTES                 = var.resource_ttl_minutes
+    AWS_RETRY_MODE                       = "adaptive"
+    AWS_MAX_ATTEMPTS                     = 10
+  }
+
+  # Secret manager specific environment variables
+  secret_manager_environment_variables = var.secret_manager_enabled ? {
+    AWS_LAMBDA_EXEC_WRAPPER = "/opt/wrapper.sh"
+    SECRET_NAME             = var.create_secret == false ? var.private_key : ""
+  } : {}
+
+  # Basic scenario environment variables
+  basic_environment_variables = var.secret_manager_enabled ? {} : {
+    private_key = var.private_key
+  }
+
+  # Combined environment variables
+  environment_variables = merge(
+    local.base_environment_variables,
+    local.secret_manager_environment_variables,
+    local.basic_environment_variables
+  )
 }
 
 data "aws_region" "this" {}
+
+data "aws_caller_identity" "current" {}
+
+data "aws_partition" "current" {}
 
 module "eventbridge" {
   source = "terraform-aws-modules/eventbridge/aws"
@@ -33,13 +68,12 @@ module "eventbridge" {
     crons = [
       {
         name  = "cron-for-lambda"
-        arn   = var.secret_manager_enabled == false ? module.lambda.lambda_function_arn : module.lambdaSM.lambda_function_arn
+        arn   = module.lambda.lambda_function_arn
         input = jsonencode({ "job" : "cron-by-rate" })
       }
     ]
   }
 }
-
 
 resource "random_string" "this" {
   length  = 12
@@ -54,11 +88,11 @@ resource "null_resource" "s3_bucket" {
 }
 
 module "lambda" {
-  create                 = var.secret_manager_enabled == false ? true : false
   depends_on             = [null_resource.s3_bucket]
   source                 = "terraform-aws-modules/lambda/aws"
   version                = "3.2.1"
   function_name          = local.function_name
+  layers                 = var.secret_manager_enabled ? [var.layer_arn] : []
   description            = "Send metadata to Coralogix."
   handler                = "index.handler"
   runtime                = "nodejs20.x"
@@ -67,18 +101,7 @@ module "lambda" {
   timeout                = var.timeout
   create_package         = false
   destination_on_failure = aws_sns_topic.this.arn
-  environment_variables = {
-    CORALOGIX_METADATA_URL               = lookup(local.coralogix_regions, var.coralogix_region, "Europe")
-    private_key                          = var.private_key
-    LATEST_VERSIONS_PER_FUNCTION         = var.latest_versions_per_function
-    COLLECT_ALIASES                      = var.collect_aliases == true ? "True" : "False"
-    LAMBDA_FUNCTION_INCLUDE_REGEX_FILTER = var.lambda_function_include_regex_filter
-    LAMBDA_FUNCTION_EXCLUDE_REGEX_FILTER = var.lambda_function_exclude_regex_filter
-    LAMBDA_FUNCTION_TAG_FILTERS          = var.lambda_function_tag_filters
-    RESOURCE_TTL_MINUTES                 = var.resource_ttl_minutes
-    AWS_RETRY_MODE                       = "adaptive"
-    AWS_MAX_ATTEMPTS                     = 10
-  }
+  environment_variables  = local.environment_variables
   s3_existing_package = {
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
     key    = "${var.package_name}.zip"
@@ -104,83 +127,6 @@ module "lambda" {
         "lambda:ListAliases",
         "lambda:ListEventSourceMappings",
         "lambda:GetPolicy"
-      ]
-      resources = ["*"]
-    }
-  }
-  allowed_triggers = {
-    ScanAmiRule = {
-      principal  = "events.amazonaws.com"
-      source_arn = module.eventbridge.eventbridge_rule_arns["crons"]
-    }
-  }
-
-  tags = merge(var.tags, local.tags)
-}
-
-module "lambdaSM" {
-  create                 = var.secret_manager_enabled ? true : false
-  depends_on             = [null_resource.s3_bucket]
-  source                 = "terraform-aws-modules/lambda/aws"
-  version                = "3.2.1"
-  function_name          = local.function_name
-  layers                 = [var.layer_arn]
-  description            = "Send metadata to Coralogix."
-  handler                = "index.handler"
-  runtime                = "nodejs20.x"
-  architectures          = [var.architecture]
-  memory_size            = var.memory_size
-  timeout                = var.timeout
-  create_package         = false
-  destination_on_failure = aws_sns_topic.this.arn
-  environment_variables = {
-    CORALOGIX_METADATA_URL               = lookup(local.coralogix_regions, var.coralogix_region, "Europe")
-    AWS_LAMBDA_EXEC_WRAPPER              = "/opt/wrapper.sh"
-    SECRET_NAME                          = var.create_secret == false ? var.private_key : ""
-    LATEST_VERSIONS_PER_FUNCTION         = var.latest_versions_per_function
-    RESOURCE_TTL_MINUTES                 = var.resource_ttl_minutes
-    COLLECT_ALIASES                      = var.collect_aliases == true ? "True" : "False"
-    LAMBDA_FUNCTION_INCLUDE_REGEX_FILTER = var.lambda_function_include_regex_filter
-    LAMBDA_FUNCTION_EXCLUDE_REGEX_FILTER = var.lambda_function_exclude_regex_filter
-    LAMBDA_FUNCTION_TAG_FILTERS          = var.lambda_function_tag_filters
-    AWS_RETRY_MODE                       = "adaptive"
-    AWS_MAX_ATTEMPTS                     = 10
-  }
-  s3_existing_package = {
-    bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
-    key    = "${var.package_name}.zip"
-  }
-  policy_path                             = "/coralogix/"
-  role_path                               = "/coralogix/"
-  role_name                               = "${local.function_name}-Role"
-  role_description                        = "Role for ${local.function_name} Lambda Function."
-  cloudwatch_logs_retention_in_days       = var.cloudwatch_logs_retention_in_days
-  create_current_version_allowed_triggers = false
-  create_async_event_config               = true
-  attach_async_event_policy               = true
-  attach_policy_statements                = true
-  policy_statements = {
-    allow = {
-      sid    = "GetLambdaMetadata"
-      effect = "Allow"
-      actions = [
-        "ec2:DescribeInstances",
-        "lambda:ListFunctions",
-        "lambda:ListVersionsByFunction",
-        "lambda:GetFunction",
-        "lambda:ListAliases",
-        "lambda:ListEventSourceMappings",
-        "lambda:GetPolicy"
-      ]
-      resources = ["*"]
-    }
-    secret_access_policy = {
-      effect = "Allow"
-      actions = [
-        "secretsmanager:DescribeSecret",
-        "secretsmanager:GetSecretValue",
-        "secretsmanager:PutSecretValue",
-        "secretsmanager:UpdateSecret"
       ]
       resources = ["*"]
     }
@@ -203,7 +149,7 @@ resource "aws_sns_topic" "this" {
 
 resource "aws_secretsmanager_secret" "private_key_secret" {
   count       = var.secret_manager_enabled && var.create_secret ? 1 : 0
-  depends_on  = [module.lambdaSM]
+  depends_on  = [module.lambda]
   name        = "lambda/coralogix/${data.aws_region.this.name}/${local.function_name}"
   description = "Coralogix Send Your Data key Secret"
 }
@@ -213,6 +159,42 @@ resource "aws_secretsmanager_secret_version" "service_user" {
   depends_on    = [aws_secretsmanager_secret.private_key_secret]
   secret_id     = aws_secretsmanager_secret.private_key_secret[count.index].id
   secret_string = var.private_key
+}
+
+# Separate IAM policy for secret access - created after both Lambda and secret exist
+resource "aws_iam_policy" "secret_access_policy" {
+  count = var.secret_manager_enabled ? 1 : 0
+
+  name        = "${local.function_name}-SecretAccess"
+  path        = "/coralogix/"
+  description = "Policy for Lambda to access Coralogix secret"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:DescribeSecret",
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:PutSecretValue",
+          "secretsmanager:UpdateSecret"
+        ]
+        Resource = var.create_secret ? [aws_secretsmanager_secret.private_key_secret[0].arn] : [
+          startswith(var.private_key, "arn:${data.aws_partition.current.partition}:secretsmanager:") ? var.private_key : "arn:${data.aws_partition.current.partition}:secretsmanager:${data.aws_region.this.name}:${data.aws_caller_identity.current.account_id}:secret:${var.private_key}*"
+        ]
+      }
+    ]
+  })
+
+  tags = merge(var.tags, local.tags)
+}
+
+resource "aws_iam_role_policy_attachment" "secret_access_policy_attachment" {
+  count = var.secret_manager_enabled ? 1 : 0
+
+  role       = module.lambda.lambda_role_name
+  policy_arn = aws_iam_policy.secret_access_policy[0].arn
 }
 
 resource "aws_sns_topic_subscription" "this" {
