@@ -76,7 +76,10 @@ resource "aws_cloudwatch_event_rule" "EventBridgeRule" {
     detail-type = ["AWS API Call via CloudTrail"],
     detail = {
       eventSource = ["logs.amazonaws.com"],
-      eventName   = ["CreateLogGroup"]
+      eventName   = ["CreateLogGroup"],
+      requestParameters = {
+        logGroupClass = ["STANDARD"]
+      }
     }
   })
 }

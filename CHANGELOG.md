@@ -1,4 +1,9 @@
 # Changelog
+## v3.6.1
+#### **lambda-manager**
+### 💡 Enhancements 💡
+- Update the eventhub rule to only scan log groups of type STANDARD
+
 ## v3.6.0
 #### **resource-metadata**
 ### 🔒 Security Enhancements 🔒
