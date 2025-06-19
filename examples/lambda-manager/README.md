@@ -11,7 +11,7 @@ provider "aws" {
 }
 
 module "lambda-manager" {
-  source = "coralogix/aws/coralogix//modules/cloudwatch-logs"
+  source = "coralogix/aws/coralogix//modules/lambda-manager"
 
   regex_pattern    = ".*"
   destination_arn  = <your destination lambda/firehose arn>
