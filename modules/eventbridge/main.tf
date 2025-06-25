@@ -1,12 +1,3 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 4.17.1"
-    }
-  }
-}
-
 module "locals" {
   source   = "../locals_variables"
 
