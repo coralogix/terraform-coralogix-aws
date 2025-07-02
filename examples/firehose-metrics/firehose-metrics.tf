@@ -13,4 +13,5 @@ module "cloudwatch_firehose_metrics_coralogix" {
   coralogix_region                    = var.coralogix_region
   user_supplied_tags                  = var.user_supplied_tags
   cloudwatch_retention_days           = var.cloudwatch_retention_days
+  server_side_encryption              = var.server_side_encryption
 }

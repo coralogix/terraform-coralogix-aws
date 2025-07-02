@@ -107,3 +107,21 @@ variable "s3_enable_secure_transport" {
   type        = bool
   default     = true
 }
+
+variable "server_side_encryption" {
+  description = "Server side encryption configuration"
+  type = object({
+    enabled  = bool
+    key_type = optional(string)
+    key_arn  = optional(string)
+  })
+  default = {
+    enabled  = false
+    key_type = "AWS_OWNED_CMK"
+  }
+
+  validation {
+    condition = contains(["AWS_OWNED_CMK", "CUSTOMER_MANAGED_CMK"], var.server_side_encryption.key_type)
+    error_message = "Valid values for key_type are AWS_OWNED_CMK and CUSTOMER_MANAGED_CMK."
+  }
+}

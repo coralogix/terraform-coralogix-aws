@@ -277,4 +277,10 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs" {
       }
     }
   }
+
+  server_side_encryption {
+    enabled  = var.server_side_encryption.enabled
+    key_type = var.server_side_encryption.key_type
+    key_arn  = var.server_side_encryption.key_arn
+  }
 }

@@ -62,3 +62,16 @@ variable "govcloud_deployment" {
   type        = bool
   default     = false
 }
+
+variable "server_side_encryption" {
+  description = "Server side encryption configuration"
+  type = object({
+    enabled  = bool
+    key_type = optional(string)
+    key_arn  = optional(string)
+  })
+  default = {
+    enabled  = false
+    key_type = "AWS_OWNED_CMK"
+  }
+}
