@@ -54,6 +54,7 @@ data "aws_partition" "current" {}
 
 module "eventbridge" {
   source = "terraform-aws-modules/eventbridge/aws"
+  version = "3.17.1"
 
   create_bus  = false
   create_role = false

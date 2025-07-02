@@ -16,7 +16,7 @@ Manage the application which retrieves `meta data` from your aws account and sen
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.15.1 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.15.1, < 6.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | >= 3.1.0 |
 
 ## Modules
