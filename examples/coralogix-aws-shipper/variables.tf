@@ -129,6 +129,19 @@ variable "kinesis_stream_name" {
   default     = null
 }
 
+variable "kinesis_server_side_encryption" {
+  description = "Server side encryption configuration"
+  type = object({
+    enabled  = bool
+    key_type = optional(string)
+    key_arn  = optional(string)
+  })
+  default = {
+    enabled  = false
+    key_type = "AWS_OWNED_CMK"
+  }
+}
+
 # MSK variables
 
 variable "msk_cluster_arn" {
