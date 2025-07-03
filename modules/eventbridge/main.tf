@@ -14,7 +14,7 @@ locals {
     managed-by               = "coralogix-terraform"
     refactored-by            = "krom-devops-team"
   }
-  application_name = var.application_name == null ? "coralogix-${var.eventbridge_stream}" : var.application_name
+  application_name  = var.application_name == null ? "coralogix-${var.eventbridge_stream}" : var.application_name
 }
 
 data "aws_caller_identity" "current_identity" {}
@@ -74,8 +74,8 @@ resource "aws_cloudwatch_event_connection" "event-connectiong" {
       dynamic "header" {
         for_each = var.additional_headers
         content {
-          key             = "cx-application-name"
-          value           = local.application_name
+          key             = header.value.key
+          value           = header.value.value
           is_value_secret = false
         }
       }
