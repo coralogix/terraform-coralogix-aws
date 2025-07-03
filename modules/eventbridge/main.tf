@@ -14,7 +14,7 @@ locals {
     managed-by               = "coralogix-terraform"
     refactored-by            = "krom-devops-team"
   }
-  application_name  = var.application_name == null ? "coralogix-${var.eventbridge_stream}" : var.application_name
+  application_name = var.application_name == null ? "coralogix-${var.eventbridge_stream}" : var.application_name
 }
 
 data "aws_caller_identity" "current_identity" {}
@@ -70,15 +70,15 @@ resource "aws_cloudwatch_event_connection" "event-connectiong" {
       key   = "x-amz-event-bridge-access-key"
       value = var.private_key
     }
-    invocation_http_parameters {
-      dynamic "header" {
-        for_each = var.additional_headers
-        content {
-          key             = header.value.key
-          value           = header.value.value
-          is_value_secret = false
-        }
+   invocation_http_parameters {
+    dynamic "header" {
+      for_each = var.additional_headers
+      content {
+        key             = header.value.key
+        value           = header.value.value
+        is_value_secret = lookup(header.value, "is_value_secret", false)
       }
+    }
     }
   }
 }
