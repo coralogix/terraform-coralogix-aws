@@ -2,9 +2,17 @@
 
 Manage the application which retrieves resource metadata from all Lambda functions and EC2 instances in the target AWS region and sends it to your *Coralogix* account. This is an extended version of the [resource-metadata](../resource-metadata) module, which uses SQS to make the metadata generation process asynchronous in order to handle a large number of resources.
 
-Also, it supports the `EventMode` feature, which allows you to use CloudTrail+EventBridge to create new Lambda and EC2 resources in Coralogix near-real-time.
+Also, it supports:
 
-It's recommended to use this module for environments with more than 5000 Lambda functions (or EC2 instances) in the target AWS region.
+1. `EventMode` feature, which allows you to use CloudTrail+EventBridge to create new Lambda and EC2 resources in Coralogix near-real-time.
+2. Resource metadata collection from multiple accounts and regions.
+
+Read the [docs](https://coralogix.com/docs/integrations/aws/aws-resource-metadata-collection-terraform-module/#high-volume-mode) or [function's README](https://github.com/coralogix/coralogix-aws-serverless/blob/master/src/resource-metadata-sqs/README.md) for more details on how to work with both.
+
+It's recommended to use this module for:
+
+1. Environments with more than 5000 Lambda functions (or EC2 instances) in the target AWS region.
+2. Environments that require a support for cross-account and multi-region collection of metadata from multiple AWS accounts.
 
 ## Requirements
 
@@ -28,15 +36,35 @@ It's recommended to use this module for environments with more than 5000 Lambda 
 
 ## Inputs
 
+### Coralogix Configuration Parameters
+
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | The Coralogix location region, possible options are [`Europe`, `Europe2`, `India`, `Singapore`, `US`, `US2`, `Custom`] | `string` | n/a | yes |
-| <a name="input_custom_url"></a> [custom_url](#input\_custom\_domain) | Custom url for coralogix for example: https://<your_custom_domain>/api/v1/logs| `string` | n/a | no |
-| <a name="input_secret_manager_enabled"></a> [secret_manager_enabled](#input\_secret\_manager\_enabled) | Set to true in case that you want to keep your [Coralogix Send Your Data – API Key](https://coralogix.com/docs/send-your-data-api-key/) as a secret in aws secret manager | `bool` | false | no |
 | <a name="input_api_key"></a> [api\_key](#input\_api\_key) | Your [Coralogix Send Your Data – API Key](https://coralogix.com/docs/send-your-data-api-key/) or incase you use pre created secret (created in AWS secret manager) put here the name of the secret that contains the Coralogix send your data key| `string` | n/a | yes |
+| <a name="input_custom_url"></a> [custom_url](#input\_custom\_domain) | Custom url for coralogix for example: https://<your_custom_domain>/api/v1/logs| `string` | n/a | no |
+
+### Event Mode Parameters
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
 | <a name="input_event_mode"></a> [event\_mode](#input\_event\_mode) | Additionally to the regular schedule, enable real-time processing of CloudTrail events via EventBridge for immediate generation of new resources in Coralogix [Disabled, EnabledWithExistingTrail, EnabledCreateTrail] | `string` | Disabled | no |
-| <a name="input_layer_arn"></a> [layer_arn](#input\_layer\_arn) | In case you want to use Secret Manager This is the ARN of the Coralogix [lambda layer](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/597078901540/Coralogix-Lambda-SSMLayer). | `string` | n/a | no |
-| <a name="input_create_secret"></a> [create_secret](#input\_create\_secret) | Set to False In case you want to use secrets manager with a predefine secret that was already created and contains Coralogix Send Your Data API key| `string` | True | no |
+| <a name="input_organization_id"></a> [organization\_id](#input\_organization\_id) | AWS Organization ID (starts with 'o-'). Leave empty if you want to collect metadata from the current account only. | `string` | n/a | no |
+
+### Cross-account and cross-region parameters
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_source_regions"></a> [source_regions](#input\_source\_regions) | The regions to collect metadata from, separated by commas (e.g. eu-north-1,eu-west-1,us-east-1). Leave empty if you want to collect metadata from the current region only. | `list(string)` | n/a | no |
+| <a name="input_crossaccount_mode"></a> [crossaccount_mode](#input\_crossaccount\_mode) | The mode to collect metadata from multiple accounts[Disabled, StaticIAM, Config]. Leave Disabled if you want to collect metadata from the current account only. | `string` | `Disabled` | no |
+| <a name="input_crossaccount_config_aggregator"></a> [crossaccount_config_aggregator](#input\_crossaccount\_config\_aggregator) | The name of the AWS Config Aggregator to run the query. Used if `CrossAccountMode` is set to `Config`. | `string` | n/a | no |
+| <a name="input_crossaccount_account_ids"></a> [crossaccount_account_ids](#input\_crossaccount\_account\_ids) | The list of account IDs, separated by comma. Used if `CrossAccountMode` is set to `StaticIAM`. | `list(string)` | n/a | no |
+| <a name="input_crossaccount_iam_role_name"></a> [crossaccount_iam_role_name](#input\_crossaccount\_iam\_role\_name) | The name of the IAM cross-account roles set in each source account. Used if `CrossAccountMode` is not `Disabled`. | `string` | n/a | no |
+
+### Integration parameters
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
 | <a name="input_schedule"></a> [schedule](#input\_schedule) | The rate to collacet metadata  | `string` | `rate(30 minutes)` | no |
 | <a name="input_maximum_concurrency"></a> [maximum_concurrency](#input\_maximum\_concurrency) | Maximum number of concurrent SQS messages to be processed by `generator` lambda after the collection has finished. | `number` | 5 | no |
 | <a name="input_latest_versions_per_function"></a> [latest_versions_per_function](#input\_latest\_versions\_per\_function) | How many latest published versions of each Lambda function should be collected  | `number` | 5 | no |
@@ -44,14 +72,28 @@ It's recommended to use this module for environments with more than 5000 Lambda 
 | <a name="input_collect_aliases"></a> [collect_aliases](#input\_collect\_aliases) | Collect Aliases | `string` | `false` | no |
 | <a name="lambda_function_include_regex_filter"></a> [lambda_function_include_regex_filter](#lambda\_function\_include\_regex\_filter) | If specified, only lambda functions with ARNs matching the regex will be included in the collected metadata | `string` | n/a | no |
 | <a name="lambda_function_exclude_regex_filter"></a> [lambda_function_exclude_regex_filter](#lambda\_function\_exclude\_regex\_filter) | If specified, only lambda functions with ARNs NOT matching the regex will be included in the collected metadata | `string` | n/a | no |
+| <a name="input_lambda_telemetry_exporter_filter"></a> [lambda_telemetry_exporter_filter](#input\_lambda\_telemetry\_exporter\_filter) | If set to `True`, only lambda functions with `coralogix-telemetry-exporter` layer will be included in the collected metadata | `bool` | `false` | no |
 | <a name="lambda_function_tag_filters"></a> [lambda_function_tag_filters](#lambda\_function\_tag\_filters) | If specified, only lambda functions with tags matching the filters will be included in the collected metadata. Values should follow the JSON syntax for --tag-filters as documented [here](https://docs.aws.amazon.com/cli/latest/reference/resourcegroupstaggingapi/get-resources.html#options) | `string` | n/a | no |
 | <a name="input_custom_s3_bucket"></a> [custom\_s3\_bucket](#input\_custom\_s3\_bucket) | The name of an existing s3 bucket in your region, in which the lambda zip code will be upload to. | `string` | n/a | no |
+
+### Lambda Configuration Parameters
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
 | <a name="input_memory_size"></a> [memory\_size](#input\_memory\_size) | Lambda function memory limit | `number` | `256` | no |
 | <a name="input_timeout"></a> [timeout](#input\_timeout) | Lambda function timeout limit | `number` | `300` | no |
 | <a name="input_architecture"></a> [architecture](#input\_architecture) | Lambda function architecture | `string` | `x86_64` | no |
 | <a name="input_notification_email"></a> [notification_email](#input\_notification\_email) | Failure notification email address | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to add to all resources | `map(string)` | `{}` | no |
 | <a name="input_cloudwatch_logs_retention_in_days"></a> [cloudwatch\_logs\_retention\_in\_days](#input\_cloudwatch\_logs\_retention\_in\_days) | Retention time of the Cloudwatch log group in which the logs of the lambda function are written to | `number` | `null` | no |
+
+### Security Parameters
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_secret_manager_enabled"></a> [secret_manager_enabled](#input\_secret\_manager\_enabled) | Set to true in case that you want to keep your [Coralogix Send Your Data – API Key](https://coralogix.com/docs/send-your-data-api-key/) as a secret in aws secret manager | `bool` | false | no |
+| <a name="input_layer_arn"></a> [layer_arn](#input\_layer\_arn) | In case you want to use Secret Manager This is the ARN of the Coralogix [lambda layer](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/597078901540/Coralogix-Lambda-SSMLayer). | `string` | n/a | no |
+| <a name="input_create_secret"></a> [create_secret](#input\_create\_secret) | Set to False In case you want to use secrets manager with a predefine secret that was already created and contains Coralogix Send Your Data API key| `string` | True | no |
 
 ## Notes
 

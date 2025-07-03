@@ -2,6 +2,10 @@ data "aws_region" "this" {}
 
 data "aws_caller_identity" "current" {}
 
+locals {
+  log_groups_prefix_string = join(",", var.log_group_permissions_prefix)
+}
+
 resource "random_string" "this" {
   length  = 12
   special = false
@@ -20,12 +24,15 @@ module "lambda" {
   create_package         = false
   destination_on_failure = aws_sns_topic.this.arn
   environment_variables = {
-    LOGS_FILTER        = var.logs_filter
-    REGEX_PATTERN      = var.regex_pattern
-    DESTINATION_ARN    = var.destination_arn
-    DESTINATION_ROLE   = var.destination_role
-    DESTINATION_TYPE   = var.destination_type
-    SCAN_OLD_LOGGROUPS = var.scan_old_loggroups
+    LOGS_FILTER                       = var.logs_filter
+    REGEX_PATTERN                     = var.regex_pattern
+    DESTINATION_ARN                   = var.destination_arn
+    DESTINATION_ROLE                  = var.destination_role
+    DESTINATION_TYPE                  = var.destination_type
+    SCAN_OLD_LOGGROUPS                = var.scan_old_loggroups
+    LOG_GROUP_PERMISSION_PREFIX       = local.log_groups_prefix_string
+    DISABLE_ADD_PERMISSION            = var.disable_add_permission
+    ADD_PERMISSIONS_TO_ALL_LOG_GROUPS = var.add_permissions_to_all_log_groups
   }
   s3_existing_package = {
     bucket = "coralogix-serverless-repo-${data.aws_region.this.name}"
@@ -40,7 +47,7 @@ module "lambda" {
   policy_statements = {
     CXLambdaUpdateConfig = {
       effect    = "Allow"
-      actions   = ["lambda:UpdateFunctionConfiguration", "lambda:GetFunctionConfiguration"]
+      actions   = ["lambda:UpdateFunctionConfiguration", "lambda:GetFunctionConfiguration", "lambda:AddPermission"]
       resources = ["arn:aws:lambda:${data.aws_region.this.name}:${data.aws_caller_identity.current.account_id}:function:*"]
     },
     CXLogConfig = {
@@ -69,7 +76,10 @@ resource "aws_cloudwatch_event_rule" "EventBridgeRule" {
     detail-type = ["AWS API Call via CloudTrail"],
     detail = {
       eventSource = ["logs.amazonaws.com"],
-      eventName   = ["CreateLogGroup"]
+      eventName   = ["CreateLogGroup"],
+      requestParameters = {
+        logGroupClass = ["STANDARD"]
+      }
     }
   })
 }
@@ -94,3 +104,9 @@ resource "aws_sns_topic_subscription" "this" {
   endpoint   = var.notification_email
 }
 
+resource "aws_lambda_invocation" "trigger_lambda_for_first_time" {
+  function_name = module.lambda.lambda_function_arn
+  input = jsonencode({
+    RequestType = "Create"
+  })
+}

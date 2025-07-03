@@ -23,14 +23,14 @@ variable "custom_coralogix_arn" {
 variable "coralogix_arn_mapping" {
   type = map(string)
   default = {
-    "eu-west-1"          = "625240141681"
-    "eu-north-1"         = "625240141681"
-    "ap-southeast-1"     = "625240141681"
-    "ap-southeast-3"     = "025066248247"
-    "ap-south-1"         = "625240141681"
-    "us-east-2"          = "625240141681"
-    "us-west-2"          = "739076534691"
-    ""                   = "625240141681"
+    "eu-west-1"      = "625240141681"
+    "eu-north-1"     = "625240141681"
+    "ap-southeast-1" = "625240141681"
+    "ap-southeast-3" = "025066248247"
+    "ap-south-1"     = "625240141681"
+    "us-east-2"      = "625240141681"
+    "us-west-2"      = "739076534691"
+    ""               = "625240141681"
   }
 }
 
@@ -70,16 +70,16 @@ variable "metrics_bucket_force_destroy" {
   default     = false
 }
 
-variable "aws_role_region"  {
-  type = map
+variable "aws_role_region" {
+  type = map(any)
   default = {
-      "eu-west-1"="eu1"
-      "eu-north-1"="eu2"
-      "ap-southeast-1"="ap2"
-      "ap-south-1"="ap1"
-      "us-east-2"="us1"
-      "us-west-2"="us2"
-      "ap-southeast-3"="ap3"
-    }
+    "eu-west-1"      = "eu1"
+    "eu-north-1"     = "eu2"
+    "ap-southeast-1" = "ap2"
+    "ap-south-1"     = "ap1"
+    "us-east-2"      = "us1"
+    "us-west-2"      = "us2"
+    "ap-southeast-3" = "ap3"
   }
+}
   

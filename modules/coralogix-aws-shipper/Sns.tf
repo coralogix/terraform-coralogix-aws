@@ -1,7 +1,7 @@
 resource "aws_s3_bucket_notification" "topic_notification" {
   depends_on = [module.lambda]
   count      = local.sns_enable == true && (var.integration_type == "S3" || var.integration_type == "CloudTrail") ? 1 : 0
-  bucket     = data.aws_s3_bucket.this[0].bucket
+  bucket     = one(values(data.aws_s3_bucket.this)).bucket
   topic {
     topic_arn     = data.aws_sns_topic.sns_topic[0].arn
     events        = ["s3:ObjectCreated:*"]
@@ -18,9 +18,11 @@ resource "aws_sns_topic" "this" {
 }
 
 resource "aws_sns_topic_subscription" "lambda_sns_subscription" {
-  count      = local.sns_enable ? 1 : 0
-  depends_on = [module.lambda]
-  topic_arn  = data.aws_sns_topic.sns_topic[count.index].arn
-  protocol   = "lambda"
-  endpoint   = module.lambda.integration.lambda_function_arn
+  count               = local.sns_enable ? 1 : 0
+  depends_on          = [module.lambda]
+  topic_arn           = data.aws_sns_topic.sns_topic[count.index].arn
+  protocol            = "lambda"
+  endpoint            = module.lambda.integration.lambda_function_arn
+  filter_policy       = var.sns_topic_filter != null ? jsonencode(var.sns_topic_filter) : null
+  filter_policy_scope = var.sns_topic_filter_policy_scope != null ? var.sns_topic_filter_policy_scope : null
 }

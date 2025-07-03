@@ -9,7 +9,7 @@ resource "aws_iam_role_policy" "s3_firehose_metrics_policy" {
       {
         Effect   = "Allow"
         Action   = ["s3:AbortMultipartUpload", "s3:GetBucketLocation", "s3:GetObject", "s3:ListBucket", "s3:ListBucketMultipartUploads", "s3:PutObject"]
-        Resource = ["${local.arn_prefix}:s3:::${var.s3_bucket_name}", "${local.arn_prefix}:s3:::${var.s3_bucket_name}/*"]
+        Resource = flatten([for bucket in local.s3_bucket_names : ["${local.arn_prefix}:s3:::${bucket}", "${local.arn_prefix}:s3:::${bucket}/*"]])
       },
       {
         Effect   = "Allow"
@@ -126,14 +126,14 @@ resource "aws_kinesis_firehose_delivery_stream" "extended_s3_stream" {
   extended_s3_configuration {
     s3_backup_mode     = "Enabled"
     role_arn           = aws_iam_role.s3_firehose_metrics_role[0].arn
-    bucket_arn         = data.aws_s3_bucket.this[0].arn
+    bucket_arn         = one(values(data.aws_s3_bucket.this)).arn
     compression_format = "GZIP"
     prefix             = "coralogix-aws-shipper-metrics"
     buffering_size     = 5
     buffering_interval = 60
 
     s3_backup_configuration {
-      bucket_arn         = data.aws_s3_bucket.this[0].arn
+      bucket_arn         = one(values(data.aws_s3_bucket.this)).arn
       role_arn           = aws_iam_role.s3_firehose_metrics_role[0].arn
       buffering_size     = 5
       buffering_interval = 60

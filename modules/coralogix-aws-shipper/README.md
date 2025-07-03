@@ -1,8 +1,12 @@
 # Forward AWS Logs via Lambda Shipper with Terraform
 
+<!-- static-modules-readme-start-description -->
+
 ## Overview
 
 Our latest AWS integration provides the easiest way to connect with Coralogix. By using a predefined Lambda function, you can seamlessly send AWS logs and events to your Coralogix subscription for detailed analysis, monitoring, and troubleshooting.
+
+<!-- /static-modules-readme-start-description -->
 
 This integration guide walks you through completing the predefined Lambda function template using Terraform. You’ll need to provide specific configuration parameters based on the service you want to connect. A reference list for these parameters is provided below.
 
@@ -11,7 +15,7 @@ This integration guide walks you through completing the predefined Lambda functi
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [Terraform](#requirement\_terraform) | >= 0.13.1 |
+| <a name="requirement_terraform"></a> [Terraform](#requirement\_terraform) | >= 1.7.0 |
 | <a name="requirement_aws"></a> [AWS](#requirement\_aws) | >= 2.23 |
 
 ## Providers
@@ -35,15 +39,14 @@ You need to use an existing Coralogix [Send-Your-Data API key](https://coralogix
 
 If you're deploying multiple integrations through the same S3 bucket, you'll need to specify parameters for each integration separately using `integration_info`.
 
-!!! note
+> [!NOTE]
+> If you already have a Lambda function with an S3 trigger set up, this Terraform deployment will remove the trigger. This applies to the following integration types within 
+> the same S3 bucket: S3, CloudTrail, VpcFlow, S3Csv, and CloudFront. 
+> To prevent this issue, you can explore alternative deployment methods:
+> -  Deploy the integration using CF Quick Create or SAR, as explained in [this document](https://coralogix.com/docs/coralogix-aws-shipper/).
+> -  Migrate your existing integrations to Terraform and use the `integration_info` variable. 
 
-    If you already have a Lambda function with an S3 trigger set up, this Terraform deployment will remove the trigger. This applies to the following integration types within 
-    the same S3 bucket: S3, CloudTrail, VpcFlow, S3Csv, and CloudFront. 
-    To prevent this issue, you can explore alternative deployment methods:
-    
-      -  Deploy the integration using CF Quick Create or SAR, as explained in [this document](https://coralogix.com/docs/coralogix-aws-shipper/).
-     
-      -  Migrate your existing integrations to Terraform and use the `integration_info` variable.
+<!-- static-modules-readme-end-description -->
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
@@ -55,11 +58,15 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 | <a name="application_name"></a> [application\_name](#input\_application\_name) | The [name](https://coralogix.com/docs/application-and-subsystem-names/) of your application. For a dynamic value, use `$.my_log.field`. This option is not supported since version `1.1.0` for the [source code](https://github.com/coralogix/coralogix-aws-shipper/blob/master/CHANGELOG.md) | string | n\a | yes | 
 | <a name="subsystem_name"></a> [subsystem\_name](#input\_subsysten_\_name) | The [name](https://coralogix.com/docs/application-and-subsystem-names/) of your subsystem. For a dynamic value, use `$.my_log.field` for CloudWatch log group leave empty. This option is not supported since version `1.1.0` for the [source code](https://github.com/coralogix/coralogix-aws-shipper/blob/master/CHANGELOG.md) | string | n\a | yes |
 
-### S3, CloudTrail, VpcFlow, S3Csv configuration
+<!-- /static-modules-readme-end-description -->
+
+<!-- description id="S3-integration" title="AWS Shipper Terraform Module for S3 Integration" examples_path="examples/coralogix-aws-shipper/README.md" -->
+
+### S3, CloudTrail, Vpc Flow, S3Csv configuration
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_s3_bucket_name"></a> [s3\_bucket\_name](#input\_s3\_bucket\_name) | The name of the S3 bucket to watch. | `string` | n/a | yes |
+| <a name="input_s3_bucket_name"></a> [s3\_bucket\_name](#input\_s3\_bucket\_name) | Comma separated list of the names for the S3 bucket to watch. | `string` | n/a | yes |
 | <a name="input_s3_key_prefix"></a> [s3\_key\_prefix](#input\_s3\_key\_prefix) | The S3 path prefix to watch. | `string` |  n/a | no |
 | <a name="input_s3_key_suffix"></a> [s3\_key\_suffix](#input\_s3\_key\_suffix) | The S3 path suffix to watch. | `string` |  n/a | no |
 | <a name="input_s3_bucket_kms_arn"></a> [s3\_bucket\_kms\_arn](#input\_s3\_bucket\_kms\_arn) | The AWS ARN of the KMS key used to encrypt/decrypt objects in the specified S3 bucket. If provided, the Lambda policy will include permissions to decrypt using this key. | `string` |  n/a | no |
@@ -83,37 +90,68 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 | <a name="input_s3_key_suffix"></a> [s3\_key\_suffix](#input\_s3\_key\_suffix) | The S3 path suffix to watch. | `string` |  n/a` | no |
 | <a name="input_newline_pattern"></a> [newline\_pattern](#input\_newline\_pattern) | A regular expression to detect a new log line for multiline logs, e.g., \n(?=\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}.\d{3}). | `string` | n/a | no |
 
+<!-- /description -->
+
+<!-- description id="CloudWatch-integration" title="AWS Shipper Terraform Module for CloudWatch Integration" examples_path="examples/coralogix-aws-shipper/README.md" -->
+
 ### CloudWatch configuration
 
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
 | <a name="input_log_groups"></a> [log\_groups](#input\_log\_groups) | A comma-separated list of CloudWatch log group names to monitor. For example, (log-group1, log-group2, log-group3). | `list(string)` | n/a | yes |
-| <a name="input_log_group_prefix"></a> [log\_group\_prefix](#input\_log\_group\_prefix) | Instead of creating one permission for each log group in the destination lambda, the code will take the prefix that you set in this parameter and create 1 permission for all of the log groups that match the prefix. For example, if you define `/aws/log/logs`, then the lLambda will create only 1 permission for all of your log groups that start with `/aws/log/logs` instead of 1 permision for each of the log group. Use this parameter when you have more than 50 log groups. Pay attention that you will not see the log groups as a trigger in the Lambda if you use this parameter. | `list(string)` | n/a | no |
+| <a name="input_log_group_prefix"></a> [log\_group\_prefix](#input\_log\_group\_prefix) |  list of strings of log group prefixes. The code will use these prefixes to create permissions for the Lambda instead of creating for each log group permission it will use the prefix with a wild card to give the Lambda access for all of the log groups that start with these prefix. This parameter doesn't replace the `log_groups` parameter.  For more information, refer to the Note below. | `list(string)` | n/a | no |
+
+> [!NOTE]
+> The `log_group` variable will get a list of log groups and then add them to the Lambda as triggers, each log group will also add permission to the Lambda, in some cases when there are a lot of log groups this will cause an error because the code 
+> tries to create too many permissions for the Lambda (AWS have a limitation for the number of permission that you can have for a Lambda), and this is why we have the `log_group_prefix` parameter, this parameter will add **only** permission to the Lambda using a wildcard( * ).
+> for example, in case I have the log groups: log1,log2,log3 instead that the code will create for each of the log group permission to trigger the shipper Lambda then you can set `log_group_prefix = ["log"]`, and then it will create only 1 permission for all of the log groups to trigger the shipper Lambda, but you will still need to set `log_groups = ["log1","log2","log3"]`. When using this parameter, you will not be able to see the log groups as triggers for the Lambda.
+>If you need to add multiple log groups to the Lambda function using regex, refer to our [Lambda manager](https://github.com/coralogix/terraform-coralogix-aws/tree/master/modules/lambda-manager)
+
+
+<!-- /description -->
+
+<!-- description id="SNS-integration" title="AWS Shipper Terraform Module for SNS Integration" examples_path="examples/coralogix-aws-shipper/README.md" -->
 
 ### SNS configuration
 
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
 | <a name="input_sns_topic_name"></a> [sns_topic_name](#input\_sns\_topic\_name) | The SNS topic containing the SNS subscription. You need this only when using the SNS integration. | `string` |  n/a | yes |
+| <a name="input_sns_topic_filter"></a> [sns_topic_filter](#input\_sns\_topic\_filter) | Map of filters to add to the SNS topic Lambda subscription. | `map(any)` |  n/a | no |
+| <a name="input_sns_topic_filter_policy_scope"></a> [sns_topic_filter_policy_scope](#input\_sns\_topic\_filter\_policy\_scope) | The scope of the filter policy for the SNS topic Lambda subscription, could be `MessageAttributes` or `MessageBody` | `string` |  n/a | no |
 
+<!-- /description -->
+
+<!-- description id="SQS-integration" title="SQS Integration" examples_path="examples/coralogix-aws-shipper/README.md" -->
 ### SQS configuration
 
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
-| <a name="input_sqs_topic_name"></a> [sqs_topic_name](#input\_sqs\_topic\_name) | The name of the SQS queue to which you want to subscribe for retrieving messages.| `string` |  n/a | yes |
+| <a name="input_sqs_name"></a> [sqs_name](#input\_sqs\_name) | The name of the SQS queue to which you want to subscribe for retrieving messages.| `string` |  n/a | yes |
 
+<!-- /description -->
+
+<!-- description id="Kinesis-integration" title="AWS Shipper Terraform Module for Kinesis Integration" examples_path="examples/coralogix-aws-shipper/README.md" -->
 ### Kinesis configuration
 
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
 | <a name="input_kinesis_stream_name"></a> [kinesis_stream_name](#input\_Kinesis_\_stream_\_name) | The name of the Kinesis stream to which you want to subscribe for retrieving messages.| `string` |  n/a | yes |
 
+<!-- /description -->
+
+<!-- description id="MSK-integration" title="AWS Shipper Terraform Module for MSK Integration" examples_path="examples/coralogix-aws-shipper/README.md" -->
+
 ### MSK configuration
 
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
 | <a name="input_msk_cluster_arn"></a> [msk_cluster_arn](#input\_msk\_cluster\_arn) | The ARN of the MSK cluster to subscribe to retrieving messages.| `string` |  n/a | yes |
-| <a name="input_msk_topic_name"></a> [msk_topic_name](#input\_msk\_topic\_name) | List of The Kafka topic mames used to store records in your Kafka cluster [\"topic-name1\" ,\"topic-name2\"].| `list of strings` |  n/a | yes |
+| <a name="input_msk_topic_name"></a> [msk_topic_name](#input\_msk\_topic\_name) | List of The Kafka topic names used to store records in your Kafka cluster [\"topic-name1\" ,\"topic-name2\"].| `list of strings` |  n/a | yes |
+
+<!-- /description -->
+
+<!-- description id="Kafka-integration" title="AWS Shipper Terraform Module for Kafka Integration" examples_path="examples/coralogix-aws-shipper/README.md" -->
 
 ### Kafka configuration
 
@@ -124,12 +162,14 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 | <a name="input_kafka_subnets_ids"></a> [kafka_subnets_ids](#input\_kafka\_subnets\_ids) | List of Kafka subnets to use when connecting to Kafka.| `list` |  n/a | yes |
 | <a name="input_kafka_security_groups"></a> [kafka_security_groups](#input\_kafka\_security\_groups) | List of Kafka security groups to use when connecting to Kafka.| `list` |  n/a | yes |
 
+<!-- /description -->
+
 ### Generic configuration (optional)
 
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
 | <a name="input_custom_metadata"></a> [custom\_metadata](#input\_custom\_metadata) | Custom metadata to be added to the log message in the comma-separated format. Options are: `key1=value1,key2=value2` | `string` | n/a | no |
-| <a name="input_add_metadata"></a> [add\_metadata](#input\_add\_metadata) | Custom metadata to be added to the log message in the comma-separated format. The S3 options are: `bucket_name`,`key_name`. For CloudWatch `stream_name` | `string` | n/a | no |
+| <a name="input_add_metadata"></a> [add\_metadata](#input\_add\_metadata) | Custom metadata to be added to the log message in the comma-separated format. The S3 options are: `bucket_name`,`key_name`. For CloudWatch `stream_name`, `loggroup_name`. For Kafka/MSK, use `topic_name` | `string` | n/a | no |
 | <a name="input_lambda_name"></a> [lambda\_name](#input\_lambda\_name) | The name the Lambda function to create. | `string` | n/a | no |
 | <a name="input_blocking_pattern"></a> [blocking\_pattern](#input\_blocking\_pattern) | A regular expression to identify lines excluded from being sent to Coralogix. For example, use `MainActivity.java:\d{3}` to match log lines with MainActivity followed by exactly three digits. | `string` | n/a | no |
 | <a name="input_sampling_rate"></a> [sampling\_rate](#input\_sampling\_rate) | A message rate, such as 1 out of every N logs. For example, if your value is 10, a message will be sent for every 10th log. | `number` | `1` | no |
@@ -183,12 +223,11 @@ The `add_metadata` parameter allows you to add metadata to the log message. The 
 | Ecr              | ecr.scan.id              | The EXR scan ID                       |
 | Ecr              | ecr.scan.source          | The ECR scan source                   |
 
-!!! note
-
-    The metadata is not added by default. You must specify the metadata keys in the `add_metadata` parameter.
-    For example, to add the bucket name and key name to the log message, set the `add_metadata` parameter to `s3.object.key,s3.bucket`.
-    Some metadata keys will overlap as some integrations share the same metadata. For example, both Kafka and MSK have the same metadata key `kafka.topic` or both Kinesis and Cloudwatch metadata will be 
-    added in cases where a Cloudwatch log stream is being ingested from a Kinesis stream.
+> [!NOTE]
+> The metadata is not added by default. You must specify the metadata keys in the `add_metadata` parameter.
+> For example, to add the bucket name and key name to the log message, set the `add_metadata` parameter to `s3.object.key,s3.bucket`.
+> Some metadata keys will overlap as some integrations share the same metadata. For example, both Kafka and MSK have the same metadata key `kafka.topic` or both Kinesis and Cloudwatch metadata will be 
+> added in cases where a Cloudwatch log stream is being ingested from a Kinesis stream.
 
 ##### Dynamic subsystem or application name
 
@@ -211,11 +250,10 @@ To use a part of the metadata value, use a regular expression to extract the des
 ```
 This would result in a SubsystemName value of `elb.log` as this is the part of the regex captured by the group `(.*)`.
 
-!!! important
-
-    - The regex must be a valid regex pattern.
-    - The regex must define a capture group for part of the string you want to use as the value
-    - The metadata key must exist in the list defined above and be a part of the integration type that is deployed.
+> [!IMPORTANT]
+> - The regex must be a valid regex pattern.
+> - The regex must define a capture group for part of the string you want to use as the value
+> - The metadata key must exist in the list defined above and be a part of the integration type that is deployed.
     
 Dynamic values are only supported for the `application_name` and `subsystem_name` parameters, the `custom_metadata` parameter is not supported.
 

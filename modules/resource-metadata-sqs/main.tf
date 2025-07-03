@@ -26,6 +26,29 @@ resource "aws_sqs_queue" "metadata_queue" {
   tags                       = merge(var.tags, local.tags)
 }
 
+data "aws_iam_policy_document" "metadata_queue" {
+  statement {
+    effect = "Allow"
+    principals {
+      type        = "*"
+      identifiers = ["*"]
+    }
+    actions   = ["sqs:SendMessage"]
+    resources = [aws_sqs_queue.metadata_queue.arn]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:PrincipalOrgID"
+      values   = [var.organization_id]
+    }
+  }
+}
+
+resource "aws_sqs_queue_policy" "metadata_queue" {
+  count     = var.organization_id != "" ? 1 : 0
+  queue_url = aws_sqs_queue.metadata_queue.url
+  policy    = data.aws_iam_policy_document.metadata_queue.json
+}
+
 module "eventbridge" {
   source = "terraform-aws-modules/eventbridge/aws"
 
@@ -85,6 +108,11 @@ module "collector_lambda" {
     LAMBDA_FUNCTION_INCLUDE_REGEX_FILTER = var.lambda_function_include_regex_filter
     LAMBDA_FUNCTION_EXCLUDE_REGEX_FILTER = var.lambda_function_exclude_regex_filter
     LAMBDA_FUNCTION_TAG_FILTERS          = var.lambda_function_tag_filters
+    REGIONS                              = length(var.source_regions) > 0 ? join(",", var.source_regions) : null
+    CROSSACCOUNT_MODE                    = var.crossaccount_mode
+    CROSSACCOUNT_IAM_ACCOUNTIDS          = length(var.crossaccount_account_ids) > 0 ? join(",", var.crossaccount_account_ids) : null
+    CROSSACCOUNT_IAM_ROLENAME            = length(var.crossaccount_iam_role_name) > 0 ? var.crossaccount_iam_role_name : null
+    CROSSACCOUNT_CONFIG_AGGREGATOR       = length(var.crossaccount_config_aggregator) > 0 ? var.crossaccount_config_aggregator : null
     AWS_RETRY_MODE                       = "adaptive"
     AWS_MAX_ATTEMPTS                     = 10
     IS_EC2_RESOURCE_TYPE_EXCLUDED        = var.excluded_ec2_resource_type
@@ -127,6 +155,20 @@ module "collector_lambda" {
       ]
       resources = [aws_sqs_queue.metadata_queue.arn]
     }
+    assume_role = var.crossaccount_mode == "StaticIAM" ? {
+      effect = "Allow"
+      actions = [
+        "sts:AssumeRole"
+      ]
+      resources = ["arn:aws:iam::*:role/${var.crossaccount_iam_role_name}"]
+    } : null
+    config = var.crossaccount_mode == "Config" ? {
+      effect = "Allow"
+      actions = [
+        "config:SelectAggregateResourceConfig"
+      ]
+      resources = ["*"]
+    } : null
   }
 
   allowed_triggers = {
@@ -157,6 +199,8 @@ module "generator_lambda" {
 
   environment_variables = {
     CORALOGIX_METADATA_URL       = lookup(local.coralogix_regions, var.coralogix_region, "EU1")
+    CROSSACCOUNT_IAM_ROLENAME    = length(var.crossaccount_iam_role_name) > 0 ? var.crossaccount_iam_role_name : null
+    LAMBDA_LAYER_FILTER          = var.lambda_telemetry_exporter_filter ? "True" : "False"
     private_key                  = var.api_key
     LATEST_VERSIONS_PER_FUNCTION = var.latest_versions_per_function
     COLLECT_ALIASES              = var.collect_aliases == true ? "True" : "False"
@@ -172,11 +216,20 @@ module "generator_lambda" {
 
   attach_policy_statements = true
   policy_statements = {
+    ec2 = {
+      effect = "Allow"
+      actions = [
+        "ec2:DescribeInstances"
+      ]
+      resources = ["*"]
+    }
     lambda = {
       effect = "Allow"
       actions = [
         "lambda:ListVersionsByFunction",
-        "lambda:GetFunction",
+        "lambda:GetFunctionConfiguration",
+        "lambda:GetFunctionConcurrency",
+        "lambda:ListTags",
         "lambda:ListAliases",
         "lambda:ListEventSourceMappings",
         "lambda:GetPolicy"
@@ -191,6 +244,13 @@ module "generator_lambda" {
         "sqs:GetQueueAttributes"
       ]
       resources = [aws_sqs_queue.metadata_queue.arn]
+    }
+    assume_role = var.crossaccount_mode == "Disabled" ? null : {
+      effect = "Allow"
+      actions = [
+        "sts:AssumeRole"
+      ]
+      resources = ["arn:aws:iam::*:role/${var.crossaccount_iam_role_name}"]
     }
   }
 
@@ -234,6 +294,8 @@ module "generator_lambda_sm" {
 
   environment_variables = {
     CORALOGIX_METADATA_URL       = lookup(local.coralogix_regions, var.coralogix_region, "EU1")
+    CROSSACCOUNT_IAM_ROLENAME    = length(var.crossaccount_iam_role_name) > 0 ? var.crossaccount_iam_role_name : null
+    LAMBDA_LAYER_FILTER          = var.lambda_telemetry_exporter_filter ? "True" : "False"
     AWS_LAMBDA_EXEC_WRAPPER      = "/opt/wrapper.sh"
     SECRET_NAME                  = var.create_secret == false ? var.api_key : ""
     LATEST_VERSIONS_PER_FUNCTION = var.latest_versions_per_function
@@ -250,11 +312,20 @@ module "generator_lambda_sm" {
 
   attach_policy_statements = true
   policy_statements = {
+    ec2 = {
+      effect = "Allow"
+      actions = [
+        "ec2:DescribeInstances"
+      ]
+      resources = ["*"]
+    }
     lambda = {
       effect = "Allow"
       actions = [
         "lambda:ListVersionsByFunction",
-        "lambda:GetFunction",
+        "lambda:GetFunctionConfiguration",
+        "lambda:GetFunctionConcurrency",
+        "lambda:ListTags",
         "lambda:ListAliases",
         "lambda:ListEventSourceMappings",
         "lambda:GetPolicy"
@@ -269,6 +340,13 @@ module "generator_lambda_sm" {
         "sqs:GetQueueAttributes"
       ]
       resources = [aws_sqs_queue.metadata_queue.arn]
+    }
+    assume_role = var.crossaccount_mode == "Disabled" ? null : {
+      effect = "Allow"
+      actions = [
+        "sts:AssumeRole"
+      ]
+      resources = ["arn:aws:iam::*:role/${var.crossaccount_iam_role_name}"]
     }
     secrets = {
       effect = "Allow"

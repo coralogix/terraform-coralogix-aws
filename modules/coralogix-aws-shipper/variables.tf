@@ -38,7 +38,7 @@ variable "subsystem_name" {
 variable "newline_pattern" {
   description = "The pattern for lines splitting"
   type        = string
-  default     = ""
+  default     = null
 }
 
 variable "blocking_pattern" {
@@ -54,7 +54,7 @@ variable "sampling_rate" {
 }
 
 variable "s3_bucket_name" {
-  description = "The name of the S3 bucket to watch"
+  description = "The name of the S3 bucket to watch, this accepts also a comma separated list of bucket names."
   type        = string
   default     = null
 }
@@ -92,6 +92,7 @@ variable "custom_csv_header" {
 variable "integration_info" {
   description = "Values of s3 integraion in case that you want to deploy more than one integration"
   type = map(object({
+    s3_bucket_name                   = optional(string)
     s3_key_prefix                    = optional(string)
     s3_key_suffix                    = optional(string)
     application_name                 = string
@@ -101,7 +102,7 @@ variable "integration_info" {
     newline_pattern                  = optional(string)
     blocking_pattern                 = optional(string)
     lambda_log_retention             = optional(number)
-    api_key                          = string
+    api_key                          = optional(string)
     store_api_key_in_secrets_manager = optional(bool)
   }))
   default = null
@@ -182,7 +183,19 @@ variable "sqs_name" {
 variable "sns_topic_name" {
   description = "The name of your SNS topic"
   type        = string
-  default     = ""
+  default     = null
+}
+
+variable "sns_topic_filter" {
+  description = "Map of filters to add to the SNS topic lambda subscription"
+  type        = map(any)
+  default     = null
+}
+
+variable "sns_topic_filter_policy_scope" {
+  description = "The scope of the filter policy for the SNS topic Lambda subscription, could be MessageAttributes or MessageBody"
+  type        = string
+  default     = null
 }
 
 # vpc variables

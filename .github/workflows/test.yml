@@ -75,6 +75,14 @@ jobs:
         run: |
           echo "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" >> $GITHUB_ENV
+
+      - if: ${{ github.event.pull_request.head.repo.full_name == github.repository }} 
+        name: Terraform fmt check
+        run: |
+          if [[ ${{ matrix.package }} != "locals_variables" ]];then
+            cd "modules/${{ matrix.package }}"
+            terraform fmt -check -recursive
+          fi
           
       - if: ${{ github.event.pull_request.head.repo.full_name == github.repository }} 
         name: Terraform init

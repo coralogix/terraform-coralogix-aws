@@ -51,20 +51,20 @@ variable "architecture" {
 
 variable "schedule" {
   description = ""
-  type = string
-  default = "rate(10 minutes)"
+  type        = string
+  default     = "rate(10 minutes)"
 }
 
 variable "latest_versions_per_function" {
   description = "How many latest published versions of each Lambda function should be collected"
-  type = number
-  default = 5
+  type        = number
+  default     = 5
 }
 
 variable "resource_ttl_minutes" {
-  type = number
-  description = "Once a resource is collected, how long should it remain valid"  
-  default = 60
+  type        = number
+  description = "Once a resource is collected, how long should it remain valid"
+  default     = 60
 }
 
 variable "notification_email" {
