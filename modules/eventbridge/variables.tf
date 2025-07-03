@@ -51,3 +51,12 @@ variable "detail_type" {
   type        = list(string)
   default     = null
 }
+
+variable "additional_headers" {
+  type = list(object({
+    key   = string
+    value = string
+  }))
+  description = "Additional headers to send in API destination"
+  default     = []
+}

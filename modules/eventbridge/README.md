@@ -13,6 +13,18 @@ module "eventbridge_coralogix" {
   sources                        = var.eventbridge_sources
   application_name               = var.application_name
   policy_name                    = var.policy_name
+
+  additional_headers = [
+  {
+    key   = "subsystem-logs"
+    value = "string"
+  },
+  {
+    key   = "another-header"
+    value = "string"
+  }
+]
+
 }
 ```
 
@@ -85,6 +97,7 @@ The coralogix region variable accepts one of the following regions:
 | <a name="input_sources"></a> [sources](#input\_sources) | The services for which we will send events | `list(any)` | <pre>[<br>  "aws.ec2",<br>  "aws.autoscaling",<br>  "aws.cloudwatch",<br>  "aws.events",<br>  "aws.health",<br>  "aws.rds"<br>]</pre> | no |
 | <a name="input_policy_name"></a> [policy_name](#input\_custom\_url) | Custom aws_iam_policy | `string` | `EventBridge_policy` | no |
 | <a name="input_detail_type"></a> [detail_type](#input\_detail\_type) | AWS eventbridge detail type for the rule to filter by | `list(string)` | `null` | no |
+| <a name="input_additional_headers"></a> [additional_headers](#input\_additional\_headers) | Additional HTTP headers to send in API destination requests (list of key-value pairs) | `list(object({ key = string, value = string }))` | `[]` | no |
 
 ## Outputs
 
