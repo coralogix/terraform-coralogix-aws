@@ -1,5 +1,11 @@
 # Changelog
-## v3.6.1
+## v3.7.1
+#### **S3-archive**
+### 💡 Enhancements 💡
+- Update the metrics archive rule to be `arn:aws:iam::<ACCOUNT_ID>:role/coralogix-archive-<REGION>` instead of `arn:aws:iam::<ACCOUNT_ID>:root`
+- Merge the bucket policy for metrics and logs buckets,as they are using the same permissions
+
+## v3.7.0
 #### **lambda-manager**
 ### 💡 Enhancements 💡
 - Update the eventhub rule to only scan log groups of type STANDARD
