@@ -56,12 +56,12 @@ You should use the `custom_s3_bucket` variable only when you need to deploy the 
 ## Coralgoix regions
 | Coralogix region | AWS Region | Coralogix Domain |
 |------|------------|------------|
-| `Europe` |  `eu-west-1` | coralogix.com |
+| `Europe` |  `eu-west-1` | eu1.coralogix.com |
 | `Europe2` |  `eu-north-1` | eu2.coralogix.com |
-| `India` | `ap-south-1`  | coralogix.in |
-| `Singapore` | `ap-southeast-1` | coralogixsg.com |
-| `US` | `us-east-2` | coralogix.us |
-| `US2` | `us-west-2` | cx498.coralogix.com |
+| `India` | `ap-south-1`  | ap1.coralogix.com |
+| `Singapore` | `ap-southeast-1` | ap2.coralogix.com |
+| `US` | `us-east-2` | us1.coralogix.com |
+| `US2` | `us-west-2` | us2.coralogix.com |
 
 ## Outputs
 

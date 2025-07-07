@@ -1,12 +1,12 @@
 locals {
   function_name = "Coralogix-${var.package_name}-${random_string.this.result}"
   coralogix_regions = {
-    Europe    = "ingress.coralogix.com:443"
+    Europe    = "ingress.eu1.coralogix.com:443"
     Europe2   = "ingress.eu2.coralogix.com:443"
-    India     = "ingress.app.coralogix.in:443"
-    Singapore = "ingress.coralogixsg.com:443"
-    US        = "ingress.coralogix.us:443"
-    US2       = "ingress.cx498.coralogix.com:443"
+    India     = "ingress.ap1.coralogix.com:443"
+    Singapore = "ingress.ap2.coralogix.com:443"
+    US        = "ingress.us1.coralogix.com:443"
+    US2       = "ingress.us2.coralogix.com:443"
     Custom    = var.custom_url
   }
   tags = {
