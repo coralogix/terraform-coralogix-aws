@@ -158,13 +158,13 @@ The coralogix region variable accepts one of the following regions:
 
 | Region    | Domain                 |  Endpoint                                          |
 |-----------|------------------------|----------------------------------------------------|
-| EU1       | `coralogix.com`        | `https://ingress.coralogix.com/aws/firehose`       |
+| EU1       | `eu1.coralogix.com`        | `https://ingress.coralogix.com/aws/firehose`       |
 | EU2       | `eu2.coralogix.com`    | `https://ingress.eu2.coralogix.com/aws/firehose`   |
-| AP1       | `coralogix.in`         | `https://ingress.app.coralogix.in/aws/firehose`    |
-| AP2       | `coralogixsg.com`      | `https://ingress.coralogixsg.com/aws/firehose`     |
+| AP1       | `ap1.coralogix.com`         | `https://ingress.app.ap1.coralogix.com/aws/firehose`    |
+| AP2       | `ap2.coralogix.com`      | `https://ingress.ap2.coralogix.com/aws/firehose`     |
 | AP3       | `ap3.coralogix.com`    | `https://ingress.ap3.coralogix.com/aws/firehose`   |
-| US1       | `coralogix.us`         | `https://ingress.coralogix.us/aws/firehose`        |
-| US2       | `cx498.coralogix.com`  | `https://ingress.cx498.coralogix.com/aws/firehose` |
+| US1       | `us1.coralogix.com`         | `https://ingress.us1.coralogix.com/aws/firehose`        |
+| US2       | `us2.coralogix.com`  | `https://ingress.us2.coralogix.com/aws/firehose` |
 
 ### Custom endpoints
 It is possible to pass a custom firehose ingress endpoint with by using the `coralogix_firehose_custom_endpoint` variable.
@@ -229,13 +229,13 @@ then the CloudWatch metric stream must be configured with the same format, confi
 
 | Coralogix region | AWS Region | Coralogix Domain |
 |------------------|------------|------------------|
-| `Europe` | `eu-west-1` | coralogix.com |
+| `Europe` | `eu-west-1` | eu1.coralogix.com |
 | `Europe2` | `eu-north-1` | eu2.coralogix.com |
-| `India` | `ap-south-1` | coralogix.in |
-| `Singapore` | `ap-southeast-1` | coralogixsg.com |
+| `India` | `ap-south-1` | ap1.coralogix.com |
+| `Singapore` | `ap-southeast-1` | ap2.coralogix.com |
 | `AP3` | `ap-southeast-3` | ap3.coralogix.com |
-| `US` | `us-east-2` | coralogix.us |
-| `US2` | `us-west-2` | cx498.coralogix.com |
+| `US` | `us-east-2` | us1.coralogix.com |
+| `US2` | `us-west-2` | us2.coralogix.com |
 
 
 > [!NOTE]
