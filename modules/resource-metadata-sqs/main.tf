@@ -51,7 +51,7 @@ resource "aws_sqs_queue_policy" "metadata_queue" {
 
 module "eventbridge" {
   source = "terraform-aws-modules/eventbridge/aws"
-
+  version = "3.17.1"
   create_bus  = false
   create_role = false
 
