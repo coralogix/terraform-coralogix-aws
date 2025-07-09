@@ -36,13 +36,13 @@ The coralogix region variable accepts one of the following regions:
 
 | Region    | Logs Endpoint
 |-----------|-----------------------------------------------------------------|
-| EU1       | `https://aws-events.coralogix.us/aws/event`                |
+| EU1       | `https://aws-events.coralogix.com/aws/event`                |
 | EU2       | `https://aws-events.eu2.coralogix.com/aws/event`           |
-| AP1       | `https://aws-events.coralogixsg.com/aws/event`             |
-| AP2       | `https://aws-events.coralogixsg.com/aws/event`             |
+| AP1       | `https://aws-events.ap1.coralogix.com/aws/event`             |
+| AP2       | `https://aws-events.ap2.coralogix.com/aws/event`             |
 | AP3       | `https://aws-events.ap3.coralogix.com/aws/event`           |
-| US1       | `https://aws-events.coralogix.us/aws/event`                |
-| US2       | `https://aws-events.cx498.coralogix.us/aws/event`          |
+| US1       | `https://aws-events.us1.coralogix.com/aws/event`                |
+| US2       | `https://aws-events.us2.coralogix.com/aws/event`          |
 | Custom    | `https://aws-events.<custom_domain>/aws/event`             |
 
 

@@ -105,13 +105,13 @@ It's recommended to use this module for:
 ## Coralgoix regions
 | Coralogix region | AWS Region | Coralogix Domain |
 |------|------------|------------|
-| `EU1` |  `eu-west-1` | coralogix.com |
+| `EU1` |  `eu-west-1` | eu1.coralogix.com |
 | `EU2` |  `eu-north-1` | eu2.coralogix.com |
-| `AP1` | `ap-south-1`  | coralogix.in |
-| `AP2` | `ap-southeast-1` | coralogixsg.com |
+| `AP1` | `ap-south-1`  | ap1.coralogix.com |
+| `AP2` | `ap-southeast-1` | ap2.coralogix.com |
 | `AP3` | `ap-southeast-3` | ap3.coralogix.com |
-| `US1` | `us-east-2` | coralogix.us |
-| `US2` | `us-west-2` | cx498.coralogix.com |
+| `US1` | `us-east-2` | us1.coralogix.com |
+| `US2` | `us-west-2` | us2.coralogix.com |
 
 ## Outputs
 
