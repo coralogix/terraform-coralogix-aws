@@ -1,4 +1,24 @@
 # Changelog
+## v3.7.0
+#### **resource-metadata** && **resource-metadata-sqs**
+### 🧰 Bug fixes 🧰
+- Set the module version to be < 6.0, and the eventbridge module to version `3.17.1`, as there is a conflict between versions
+### 💡 Enhancements 💡
+- Update coralogix endpoint to the new format `<coralogix env>.coralogix.com`
+
+#### **coralogix-awss-hipper**, **firehose-logs**, **firehose-metrics**
+### 💡 Enhancements 💡
+- Add new variable `server_side_encryption`, to allow enabling server-side encryption for the Firehose.
+- Update coralogix endpoint to the new format `<coralogix env>.coralogix.com`
+
+### **S3-archive**
+### 💡 Enhancements 💡
+- Update metrics archive role to be `arn:aws:iam::<coralogix_account_id>:role/coralogix-archive-<coralogix_region>` instead of `arn:aws:iam::<coralogix_account_id>:root`, as this role is working for both metrics and logs archive.
+
+### **eventbridge**
+### 💡 Enhancements 💡
+- Update coralogix endpoint to the new format `<coralogix env>.coralogix.com`
+
 ## v3.6.1
 #### **lambda-manager**
 ### 💡 Enhancements 💡
