@@ -1,4 +1,10 @@
 # Changelog
+## v3.7.1
+#### **ecs-ec2**
+### 💡 Enhancements 💡
+- Added support for spanmetrics (enebaled by default) and traces/db configuration options in ECS-EC2 module
+- Updated healthcheck configuration to use the correct `/healthcheck` binary path which was added to otel versions v0.4.2+
+
 ## v3.7.0
 #### **resource-metadata** && **resource-metadata-sqs**
 ### 🧰 Bug fixes 🧰

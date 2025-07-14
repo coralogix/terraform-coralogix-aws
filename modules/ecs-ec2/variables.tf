@@ -158,3 +158,51 @@ variable "sampler_mode" {
     error_message = "Sampler mode must be one of: proportional, equalizing, hash_seed."
   }
 }
+
+variable "enable_span_metrics" {
+  description = "Enable or disable the spanmetrics processor and pipeline. When enabled (default), span metrics will be generated from traces."
+  type        = bool
+  default     = true
+}
+
+variable "enable_traces_db" {
+  description = "Enable or disable the traces/db pipeline for database operation metrics. When enabled, database operation metrics will be generated. Note: This feature requires spanmetrics to be enabled."
+  type        = bool
+  default     = false
+}
+
+variable "spanmetrics_aggregation_cardinality_limit" {
+  description = "The maximum number of unique combinations of dimensions that can be aggregated by the spanmetrics connector."
+  type        = number
+  default     = 15000
+}
+
+variable "health_check_enabled" {
+  description = "Enable ECS container health check for the OTEL agent container."
+  type        = bool
+  default     = false
+}
+
+variable "health_check_interval" {
+  description = "Health check interval in seconds. Only used if health_check_enabled is true."
+  type        = number
+  default     = 30
+}
+
+variable "health_check_timeout" {
+  description = "Health check timeout in seconds. Only used if health_check_enabled is true."
+  type        = number
+  default     = 5
+}
+
+variable "health_check_retries" {
+  description = "Health check retries. Only used if health_check_enabled is true."
+  type        = number
+  default     = 3
+}
+
+variable "health_check_start_period" {
+  description = "Health check start period in seconds. Only used if health_check_enabled is true."
+  type        = number
+  default     = 10
+}

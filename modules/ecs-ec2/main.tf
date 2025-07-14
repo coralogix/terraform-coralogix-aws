@@ -9,11 +9,15 @@ locals {
   coralogix_region_domain_map = module.locals_variables.coralogix_domains
   coralogix_domain            = coalesce(var.custom_domain, local.coralogix_region_domain_map[var.coralogix_region])
 
-  otel_config_file_default    = "${path.module}/otel_config.tftpl.yaml"
-  otel_config_file_no_sampler = "${path.module}/otel_config_no_sampler.tftpl.yaml"
-  otel_config_file            = coalesce(var.otel_config_file, var.enable_head_sampler ? local.otel_config_file_default : local.otel_config_file_no_sampler)
+  otel_template_vars = {
+    EnableHeadSampler = tostring(var.enable_head_sampler)
+    EnableSpanMetrics = tostring(var.enable_span_metrics)
+    EnableTracesDB    = tostring(var.enable_traces_db)
+    SamplingPercentage = var.sampling_percentage
+    SamplerMode       = var.sampler_mode
+  }
 
-  otel_config = file(local.otel_config_file)
+  otel_config = templatefile("${path.module}/otel_config.tftpl.yaml", local.otel_template_vars)
 }
 
 module "locals_variables" {
@@ -107,6 +111,14 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
       {
         name : "SAMPLER_MODE"
         value : var.sampler_mode
+      },
+      {
+        name : "ENABLE_SPAN_METRICS"
+        value : tostring(var.enable_span_metrics)
+      },
+      {
+        name : "ENABLE_TRACES_DB"
+        value : tostring(var.enable_traces_db)
       }
       ],
       var.custom_config_parameter_store_name == null ? [{
@@ -128,13 +140,13 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
       }] : []
     ),
     command : ["--config", "env:OTEL_CONFIG"],
-    healthCheck : {
-      command : ["CMD-SHELL", "nc -vz localhost 13133 || exit 1"]
-      startPeriod : 30
-      interval : 30
-      timeout : 5
-      retries : 3
-    },
+    healthCheck : var.health_check_enabled ? {
+      command : ["/healthcheck"]
+      startPeriod : var.health_check_start_period
+      interval : var.health_check_interval
+      timeout : var.health_check_timeout
+      retries : var.health_check_retries
+    } : null,
     logConfiguration : {
       logDriver : "json-file"
     }

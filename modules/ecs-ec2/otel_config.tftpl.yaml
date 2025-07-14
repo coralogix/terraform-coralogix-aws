@@ -70,15 +70,12 @@ receivers:
         mute_process_exe_error: true
         mute_process_user_error: true
 
+
 processors:
   ecsattributes/container-logs:
     container_id:
       sources:
         - "log.file.path"
-
-  probabilistic_sampler:
-    sampling_percentage: "${SAMPLING_PERCENTAGE}"
-    mode: "${SAMPLER_MODE}"
 
   transform/logs:
     error_mode: ignore
@@ -89,6 +86,11 @@ processors:
           - set(attributes["aws_ecs_task_family"], attributes["aws.ecs.task.definition.family"])
           - set(attributes["image_id"], attributes["image.id"])
           - delete_key(attributes, "image.id")
+    trace_statements:
+      - context: span
+        statements:
+          - set(attributes["app.name"], "$${APP_NAME}")
+          - set(attributes["subsys.name"], "$${SUB_SYS}")
 
   transform/entity-event:
     error_mode: silent
@@ -118,7 +120,15 @@ processors:
           - delete_key(attributes, "service.instance.id") where attributes["service.name"] == "cdot"
           - delete_key(attributes, "service.name") where attributes["service.name"] == "cdot"
 
-  batch: { send_batch_max_size: 2048, send_batch_size: 1024, timeout: 1s }
+  filter/db_spanmetrics:
+    traces:
+      span:
+      - attributes["db.system"] == nil
+
+  batch:
+    send_batch_max_size: 2048
+    send_batch_size: 1024
+    timeout: 1s
 
   resource/metadata:
     attributes:
@@ -161,12 +171,80 @@ processors:
         host.ip: { enabled: true }
         os.description: { enabled: true }
 
+%{ if EnableHeadSampler }
+  probabilistic_sampler:
+    sampling_percentage: ${SamplingPercentage}
+    mode: ${SamplerMode}
+%{ endif }
+
+connectors:
+  forward/sampled: {}
+
+%{ if EnableSpanMetrics }
+  spanmetrics:
+    dimensions:
+      - name: http.method
+      - name: cgx.transaction
+      - name: cgx.transaction.root
+      - name: status_code
+      - name: db.namespace
+      - name: db.operation.name
+      - name: db.collection.name
+      - name: db.system
+      - name: http.response.status_code
+      - name: rpc.grpc.status_code
+      - name: service.version
+    histogram:
+      explicit:
+        buckets:
+          - 1ms
+          - 4ms
+          - 10ms
+          - 20ms
+          - 50ms
+          - 100ms
+          - 200ms
+          - 500ms
+          - 1s
+          - 2s
+          - 5s
+    metrics_expiration: 5m
+    metrics_flush_interval: '30s'
+    namespace: ""
+%{ endif }
+
+%{ if EnableTracesDB }
+  forward/db: {}
+  spanmetrics/db:
+    dimensions:
+      - name: db.namespace
+      - name: db.operation.name
+      - name: db.collection.name
+      - name: db.system
+      - name: service.version
+    histogram:
+      explicit:
+        buckets:
+          - 100us
+          - 1ms
+          - 2ms
+          - 2.5ms
+          - 4ms
+          - 6ms
+          - 10ms
+          - 100ms
+          - 250ms
+    metrics_expiration: 5m
+    metrics_flush_interval: '30s'
+    namespace: db
+%{ endif }
+
 exporters:
   coralogix:
-    domain: "${CORALOGIX_DOMAIN}"
-    private_key: "${PRIVATE_KEY}"
-    application_name: "${APP_NAME}"
-    subsystem_name: "${SUB_SYS}"
+    domain: $${CORALOGIX_DOMAIN}
+    private_key: $${PRIVATE_KEY}
+    application_name: $${APP_NAME}
+    subsystem_name: $${SUB_SYS}
     application_name_attributes:
     - "aws.ecs.cluster"
     - "aws.ecs.task.definition.family"
@@ -178,17 +256,14 @@ exporters:
 
   coralogix/resource_catalog:
     application_name: resource
-    domain: ${CORALOGIX_DOMAIN}
-    private_key: ${PRIVATE_KEY}
+    domain: $${CORALOGIX_DOMAIN}
+    private_key: $${PRIVATE_KEY}
     logs:
       headers:
         X-Coralogix-Distribution: ecs-ec2-integration/1.0.0
         x-coralogix-ingress: metadata-as-otlp-logs/v1
     subsystem_name: catalog
     timeout: 30s
-
-connectors:
-  forward/sampled: {}
 
 extensions:
   health_check:
@@ -200,35 +275,39 @@ service:
     - pprof
 
   pipelines:
-    logs/container-logs:
-      receivers: [filelog]
+    logs:
+      receivers: [filelog, otlp]
       processors: [ecsattributes/container-logs, resource/metadata, transform/logs, batch]
       exporters: [coralogix]
 
-    metrics/container-metrics:
-      receivers: [awsecscontainermetricsd]
-      processors: [batch]
+    metrics:
+      receivers: [awsecscontainermetricsd, otlp, prometheus, hostmetrics%{ if EnableSpanMetrics }, spanmetrics%{ endif }%{ if EnableTracesDB }, spanmetrics/db%{ endif }]
+      processors: [resource/metadata, transform/prometheus, batch]
       exporters: [coralogix]
 
-    logs/otlp:
+%{ if EnableHeadSampler }
+    traces:
       receivers: [otlp]
       processors: [resource/metadata, batch]
-      exporters: [coralogix]
-
-    metrics/otlp:
-      receivers: [otlp]
-      processors: [resource/metadata, batch]
-      exporters: [coralogix]
-
-    traces/otlp:
-      receivers: [otlp]
-      processors: [resource/metadata, batch]
-      exporters: [forward/sampled]
+      exporters: [forward/sampled%{ if EnableSpanMetrics }, spanmetrics%{ endif }%{ if EnableTracesDB }, forward/db%{ endif }]
       
     traces/sampled:
       receivers: [forward/sampled]
       processors: [probabilistic_sampler, batch]
       exporters: [coralogix]
+%{ else }
+    traces:
+      receivers: [otlp]
+      processors: [resource/metadata, batch]
+      exporters: [%{ if EnableSpanMetrics }spanmetrics%{ endif }%{ if EnableTracesDB }, forward/db%{ endif }, coralogix]
+%{ endif }
+
+%{ if EnableTracesDB }
+    traces/db:
+      receivers: [forward/db]
+      processors: [filter/db_spanmetrics, batch]
+      exporters: [spanmetrics/db]
+%{ endif }
 
     logs/resource_catalog:
       receivers: [hostmetrics]
@@ -250,4 +329,3 @@ service:
               prometheus:
                 host: 0.0.0.0
                 port: 8888
-      
