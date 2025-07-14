@@ -10,11 +10,11 @@ locals {
   coralogix_domain            = coalesce(var.custom_domain, local.coralogix_region_domain_map[var.coralogix_region])
 
   otel_template_vars = {
-    EnableHeadSampler = tostring(var.enable_head_sampler)
-    EnableSpanMetrics = tostring(var.enable_span_metrics)
-    EnableTracesDB    = tostring(var.enable_traces_db)
+    EnableHeadSampler  = tostring(var.enable_head_sampler)
+    EnableSpanMetrics  = tostring(var.enable_span_metrics)
+    EnableTracesDB     = tostring(var.enable_traces_db)
     SamplingPercentage = var.sampling_percentage
-    SamplerMode       = var.sampler_mode
+    SamplerMode        = var.sampler_mode
   }
 
   otel_config = templatefile("${path.module}/otel_config.tftpl.yaml", local.otel_template_vars)
