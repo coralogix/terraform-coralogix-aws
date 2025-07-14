@@ -171,12 +171,6 @@ variable "enable_traces_db" {
   default     = false
 }
 
-variable "spanmetrics_aggregation_cardinality_limit" {
-  description = "The maximum number of unique combinations of dimensions that can be aggregated by the spanmetrics connector."
-  type        = number
-  default     = 15000
-}
-
 variable "health_check_enabled" {
   description = "Enable ECS container health check for the OTEL agent container."
   type        = bool

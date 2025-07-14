@@ -43,6 +43,18 @@ Database operation metrics can be enabled to track performance of database opera
 You can control database traces using:
 - `enable_traces_db`: Enable/disable database traces
 
+### Health Checks
+ECS container health checks can be enabled to monitor the OTEL collector's health status. Health checks use the `/healthcheck` binary that is available in OTEL collector versions v0.4.2 and later.
+
+You can control health checks using:
+- `health_check_enabled`: Enable/disable ECS container health checks
+- `health_check_interval`: Health check interval in seconds (default: 30)
+- `health_check_timeout`: Health check timeout in seconds (default: 5)
+- `health_check_retries`: Number of health check retries (default: 3)
+- `health_check_start_period`: Health check start period in seconds (default: 10)
+
+**Note:** Health checks require OTEL collector image version v0.4.2 or later, as the `/healthcheck` binary was added in that version.
+
 ## Configuration Files
 The module provides different configuration files based on your feature requirements:
 
@@ -136,6 +148,11 @@ No modules.
 | <a name="input_sampling_percentage"></a> [sampling\_percentage](#input_sampling_percentage) | The percentage of traces to sample (0-100). A value of 100 means all traces will be sampled, while 0 means no traces will be sampled. | `number` | `10` | no |
 | <a name="input_enable_span_metrics"></a> [enable\_span\_metrics](#input\_enable\_span\_metrics) | Enable or disable span metrics generation. When enabled, metrics are automatically generated from your traces. | `bool` | `true` | no |
 | <a name="input_enable_traces_db"></a> [enable\_traces\_db](#input\_enable\_traces\_db) | Enable or disable database traces. When enabled, detailed metrics about database operations are collected. | `bool` | `false` | no |
+| <a name="input_health_check_enabled"></a> [health\_check\_enabled](#input\_health\_check\_enabled) | Enable ECS container health check for the OTEL agent container. Requires OTEL collector image version v0.4.2 or later. | `bool` | `false` | no |
+| <a name="input_health_check_interval"></a> [health\_check\_interval](#input\_health\_check\_interval) | Health check interval in seconds. Only used if health_check_enabled is true. | `number` | `30` | no |
+| <a name="input_health_check_timeout"></a> [health\_check\_timeout](#input\_health\_check\_timeout) | Health check timeout in seconds. Only used if health_check_enabled is true. | `number` | `5` | no |
+| <a name="input_health_check_retries"></a> [health\_check\_retries](#input\_health\_check\_retries) | Health check retries. Only used if health_check_enabled is true. | `number` | `3` | no |
+| <a name="input_health_check_start_period"></a> [health\_check\_start\_period](#input\_health\_check\_start\_period) | Health check start period in seconds. Only used if health_check_enabled is true. | `number` | `10` | no |
 
 ## Outputs
 

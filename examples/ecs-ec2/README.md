@@ -20,6 +20,7 @@ This example demonstrates how to deploy the Coralogix OpenTelemetry Agent as a D
    - Requires span metrics to be enabled
 
 4. **Health Checks**
+   - Only available from image v0.4.2
    - Optional ECS container health checks
    - Configurable intervals, timeouts, and retries
 
