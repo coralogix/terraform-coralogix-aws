@@ -12,16 +12,59 @@ The OTEL agent uses a [filelog receiver](https://github.com/open-telemetry/opent
 
 The CDOT OTEL agent also features enhancements specific to ECS integration. These improvements are proprietary to the Coralogix Distribution for Open Telemetry.
 
+## Features
+
+### Head Sampling
 The default OTEL collector traces are sampled at 10% rate using head sampling. Head sampling is a feature that allows you to sample traces at the collection point before any processing occurs. When enabled, it creates a separate pipeline for sampled traces using probabilistic sampling. This helps reduce the volume of traces while maintaining a representative sample.
 
 The sampling configuration can be adjusted using the following parameters:
-- `EnableHeadSampler`: Enable/disable head sampling
-- `SamplerMode`: Choose between proportional, equalizing, or hash_seed sampling modes
-- `SamplingPercentage`: Set the desired sampling rate (0-100%). The config can be customized.
+- `enable_head_sampler`: Enable/disable head sampling
+- `sampler_mode`: Choose between proportional, equalizing, or hash_seed sampling modes
+- `sampling_percentage`: Set the desired sampling rate (0-100%)
 
-The default OTEL collector config is available [with Head Sampling](otel_config.tftpl.yaml) and [without Head Sampling](otel_config_no_sampler.tftpl.yaml) options. The config can be customized.
+### Span Metrics
+Span metrics generation is enabled by default. This feature automatically generates metrics from your traces, providing insights into your application's performance. The metrics include:
+- Request counts
+- Duration histograms
+- Error rates
+- Database operation metrics (when enabled)
 
-For further details, see documentation: [AWS ECS-EC2 using OpenTelemetry](https://coralogix.com/docs/opentelemetry-using-ecs-ec2).
+You can control span metrics generation using:
+- `enable_span_metrics`: Enable/disable span metrics generation
+
+### Database Traces
+Database operation metrics can be enabled to track performance of database operations. This feature provides detailed metrics about:
+- Database operation counts
+- Operation durations
+- Error rates
+- Operation types
+- Database names and collections
+
+You can control database traces using:
+- `enable_traces_db`: Enable/disable database traces
+
+### Health Checks
+ECS container health checks can be enabled to monitor the OTEL collector's health status. Health checks use the `/healthcheck` binary that is available in OTEL collector versions v0.4.2 and later.
+
+You can control health checks using:
+- `health_check_enabled`: Enable/disable ECS container health checks
+- `health_check_interval`: Health check interval in seconds (default: 30)
+- `health_check_timeout`: Health check timeout in seconds (default: 5)
+- `health_check_retries`: Number of health check retries (default: 3)
+- `health_check_start_period`: Health check start period in seconds (default: 10)
+
+**Note:** Health checks require OTEL collector image version v0.4.2 or later, as the `/healthcheck` binary was added in that version.
+
+## Configuration Files
+The module provides different configuration files based on your feature requirements:
+
+1. Basic sampling without spanmetrics or db metrics
+2. Sampling with spanmetrics enabled
+3. Sampling with both spanmetrics and db metrics enabled
+4. No sampling with spanmetrics enabled
+5. No sampling with both spanmetrics and db metrics enabled
+
+The appropriate configuration file is automatically selected based on your feature flags.
 
 ## Usage
 
@@ -44,6 +87,11 @@ module "ecs-ec2" {
   api_key_secret_arn                  = "ARN of the Secrets Manager secret containing the API key" 
   custom_config_parameter_store_name  = "NAME of the Parameter Store parameter containing the OTEL configuration"
   task_execution_role_arn             = "ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume"
+  enable_head_sampler                 = true|false
+  sampler_mode                        = "proportional"|"equalizing"|"hash_seed"
+  sampling_percentage                 = 10
+  enable_span_metrics                 = true|false
+  enable_traces_db                    = true|false
 }
 ```
 <!-- To generate API docs below, delete below this line, and execute: ```terraform-docs markdown . >> README.md```-->
@@ -98,6 +146,13 @@ No modules.
 | <a name="input_enable_head_sampler"></a> [enable\_head\_sampler](#input\_enable\_head\_sampler) | Enable or disable head sampling for traces. When enabled, sampling decisions are made at the collection point before any processing occurs. | `bool` | `true` | no | 
 | <a name="input_sampler_mode"></a> [sampler\_mode](#input\_sampler\_mode) | The sampling mode to use:<br>**proportional**: Maintains the relative proportion of traces across services.<br>**equalizing**: Attempts to sample equal numbers of traces from each service.<br>**hash_seed**: Uses consistent hashing to ensure the same traces are sampled across restarts.| `string` | `"proportional"` | no |
 | <a name="input_sampling_percentage"></a> [sampling\_percentage](#input_sampling_percentage) | The percentage of traces to sample (0-100). A value of 100 means all traces will be sampled, while 0 means no traces will be sampled. | `number` | `10` | no |
+| <a name="input_enable_span_metrics"></a> [enable\_span\_metrics](#input\_enable\_span\_metrics) | Enable or disable span metrics generation. When enabled, metrics are automatically generated from your traces. | `bool` | `true` | no |
+| <a name="input_enable_traces_db"></a> [enable\_traces\_db](#input\_enable\_traces\_db) | Enable or disable database traces. When enabled, detailed metrics about database operations are collected. | `bool` | `false` | no |
+| <a name="input_health_check_enabled"></a> [health\_check\_enabled](#input\_health\_check\_enabled) | Enable ECS container health check for the OTEL agent container. Requires OTEL collector image version v0.4.2 or later. | `bool` | `false` | no |
+| <a name="input_health_check_interval"></a> [health\_check\_interval](#input\_health\_check\_interval) | Health check interval in seconds. Only used if health_check_enabled is true. | `number` | `30` | no |
+| <a name="input_health_check_timeout"></a> [health\_check\_timeout](#input\_health\_check\_timeout) | Health check timeout in seconds. Only used if health_check_enabled is true. | `number` | `5` | no |
+| <a name="input_health_check_retries"></a> [health\_check\_retries](#input\_health\_check\_retries) | Health check retries. Only used if health_check_enabled is true. | `number` | `3` | no |
+| <a name="input_health_check_start_period"></a> [health\_check\_start\_period](#input\_health\_check\_start\_period) | Health check start period in seconds. Only used if health_check_enabled is true. | `number` | `10` | no |
 
 ## Outputs
 

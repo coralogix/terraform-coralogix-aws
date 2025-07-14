@@ -19,7 +19,7 @@ variable "image" {
 variable "image_version" {
   description = "Version tag for the coralogix-otel-collector image"
   type        = string
-  default     = "v0.4.0"
+  default     = "v0.4.2"
 }
 
 variable "coralogix_region" {
