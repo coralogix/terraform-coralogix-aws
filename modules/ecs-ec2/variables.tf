@@ -172,7 +172,7 @@ variable "enable_traces_db" {
 }
 
 variable "health_check_enabled" {
-  description = "Enable ECS container health check for the OTEL agent container."
+  description = "Enable ECS container health check for the OTEL agent container, Requires OTEL collector image version v0.4.2 or later."
   type        = bool
   default     = false
 }

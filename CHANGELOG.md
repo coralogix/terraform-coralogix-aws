@@ -1,5 +1,5 @@
 # Changelog
-## v3.7.1
+## v3.8.0
 #### **ecs-ec2**
 ### 💡 Enhancements 💡
 - Added support for spanmetrics (enebaled by default) and traces/db configuration options in ECS-EC2 module
