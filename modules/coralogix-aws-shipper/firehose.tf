@@ -14,7 +14,7 @@ resource "aws_iam_role_policy" "s3_firehose_metrics_policy" {
       {
         Effect   = "Allow"
         Action   = ["logs:PutLogEvents", "logs:CreateLogStream"]
-        Resource = ["${local.arn_prefix}:logs:${data.aws_region.this.name}:${data.aws_caller_identity.this.account_id}:log-group:${aws_cloudwatch_log_group.firehose_log_group[0].name}:*"]
+        Resource = ["${local.arn_prefix}:logs:${data.aws_region.this.id}:${data.aws_caller_identity.this.account_id}:log-group:${aws_cloudwatch_log_group.firehose_log_group[0].name}:*"]
       },
       {
         Effect   = "Allow"

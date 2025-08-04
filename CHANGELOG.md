@@ -1,4 +1,10 @@
 # Changelog
+## v3.9.1
+#### **coralogix-aws-shipper**
+### 🧰 Bug fixes 🧰
+- Fix `invalid value for statement_id` error when S3 bucket names contain dots by sanitizing bucket names in Lambda permission statement IDs in coralogix-aws-shipper
+- Replace deprecated `data.aws_region.this.name` with `data.aws_region.this.id` to address deprecation warnings
+
 ## v3.9.0
 #### **ecs-ec2**
 ### 💡 Enhancements 💡
