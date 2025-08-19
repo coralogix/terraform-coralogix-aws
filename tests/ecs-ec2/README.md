@@ -83,7 +83,6 @@ Expected results:
 
 To test with configuration stored in Parameter Store:
 
-### Option 1: Auto-created execution role (recommended)
 1. First, create the Parameter Store example resources:
    ```bash
    cd resources/parameter-store
@@ -91,30 +90,13 @@ To test with configuration stored in Parameter Store:
    terraform apply
    ```
 2. Note the outputs: `parameter_store_name` and `task_execution_role_arn`
-3. Update [ps_config.vars](./ps_config.vars) with the actual parameter store name
+3. Update [ps_config.vars](./ps_config.vars) with the actual actual values
 4. Test the module:
    ```bash
    cd ../..
    terraform init
    terraform plan -var-file="ps_config.vars"
    terraform apply -var-file="ps_config.vars"
-   ```
-
-### Option 2: Custom execution role
-1. First, create the Parameter Store example resources:
-   ```bash
-   cd resources/parameter-store
-   terraform init
-   terraform apply
-   ```
-2. Note the outputs: `parameter_store_name` and `task_execution_role_arn`
-3. Update [ps_config_custom_role.vars](./ps_config_custom_role.vars) with the actual values
-4. Test the module:
-   ```bash
-   cd ../..
-   terraform init
-   terraform plan -var-file="ps_config_custom_role.vars"
-   terraform apply -var-file="ps_config_custom_role.vars"
    ```
 
 Expected results:
