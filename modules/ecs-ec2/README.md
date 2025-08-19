@@ -55,8 +55,11 @@ You can control health checks using:
 
 **Note:** Health checks require OTEL collector image version v0.4.2 or later, as the `/healthcheck` binary was added in that version.
 
-## Configuration Files
-The module provides different configuration files based on your feature requirements:
+## Configuration Sources
+The module supports multiple configuration sources for the OpenTelemetry Collector:
+
+### Template Configuration (Default)
+Uses built-in template configuration with customizable sampling and feature flags. The appropriate configuration file is automatically selected based on your feature requirements:
 
 1. Basic sampling without spanmetrics or db metrics
 2. Sampling with spanmetrics enabled
@@ -64,13 +67,27 @@ The module provides different configuration files based on your feature requirem
 4. No sampling with spanmetrics enabled
 5. No sampling with both spanmetrics and db metrics enabled
 
-The appropriate configuration file is automatically selected based on your feature flags.
+### S3 Configuration
+Use configuration files stored in S3. This allows for:
+- Centralized configuration management
+- Version control for configurations
+- Dynamic configuration updates without redeploying the ECS service
+- Custom configurations that go beyond the template options
+
+The S3 configuration uses the OpenTelemetry Collector's S3 provider to fetch configuration files directly from S3 buckets.
+
+### Parameter Store Configuration
+Use configuration stored in AWS Systems Manager Parameter Store. This allows for:
+- Secure configuration storage
+- Integration with AWS Secrets Manager
+- Centralized configuration management
 
 ## Usage
 
 Provision an ECS Service that run the OTEL Collector Agent as a Daemon container on each EC2 container instance.
 <!--For local dev, set local path to source, e.g. ```source  = "../../modules/ecs-ec2"```-->
 ```terraform
+# Template Configuration (Default)
 module "ecs-ec2" {
   source                              = "coralogix/aws/coralogix//modules/ecs-ec2"
   ecs_cluster_name                    = "ecs-cluster-name"
@@ -82,16 +99,55 @@ module "ecs-ec2" {
   # OPTIONAL
   api_key                             = "cxtp_CoralogixSendYourDataAPIKey"
   custom_domain                       = "custom.coralogix.domain"
-  otel_config_file                    = "file path to custom OTEL collector config file"
   use_api_key_secret                  = true|false
   api_key_secret_arn                  = "ARN of the Secrets Manager secret containing the API key" 
-  custom_config_parameter_store_name  = "NAME of the Parameter Store parameter containing the OTEL configuration"
   task_execution_role_arn             = "ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume"
   enable_head_sampler                 = true|false
   sampler_mode                        = "proportional"|"equalizing"|"hash_seed"
   sampling_percentage                 = 10
   enable_span_metrics                 = true|false
   enable_traces_db                    = true|false
+}
+
+# S3 Configuration
+module "ecs-ec2-s3" {
+  source                              = "coralogix/aws/coralogix//modules/ecs-ec2"
+  ecs_cluster_name                    = "ecs-cluster-name"
+  image_version                       = "v0.4.0"
+  memory                              = numeric MiB
+  coralogix_region                    = ["EU1"|"EU2"|"AP1"|"AP2"|"AP3"|"US1"|"US2"|"custom"]
+  default_application_name            = "Coralogix Application Name"
+  default_subsystem_name              = "Coralogix Subsystem Name"
+  # S3 Configuration
+  config_source                       = "s3"
+  s3_config_bucket                    = "my-otel-config-bucket"
+  s3_config_key                       = "configs/otel-config.yaml"
+  # OPTIONAL
+  api_key                             = "cxtp_CoralogixSendYourDataAPIKey"
+  custom_domain                       = "custom.coralogix.domain"
+  use_api_key_secret                  = true|false
+  api_key_secret_arn                  = "ARN of the Secrets Manager secret containing the API key" 
+  task_execution_role_arn             = "ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume"
+}
+
+# Parameter Store Configuration
+module "ecs-ec2-parameter-store" {
+  source                              = "coralogix/aws/coralogix//modules/ecs-ec2"
+  ecs_cluster_name                    = "ecs-cluster-name"
+  image_version                       = "v0.4.0"
+  memory                              = numeric MiB
+  coralogix_region                    = ["EU1"|"EU2"|"AP1"|"AP2"|"AP3"|"US1"|"US2"|"custom"]
+  default_application_name            = "Coralogix Application Name"
+  default_subsystem_name              = "Coralogix Subsystem Name"
+  # Parameter Store Configuration
+  config_source                       = "parameter-store"
+  custom_config_parameter_store_name  = "NAME of the Parameter Store parameter containing the OTEL configuration"
+  # OPTIONAL
+  api_key                             = "cxtp_CoralogixSendYourDataAPIKey"
+  custom_domain                       = "custom.coralogix.domain"
+  use_api_key_secret                  = true|false
+  api_key_secret_arn                  = "ARN of the Secrets Manager secret containing the API key" 
+  task_execution_role_arn             = "ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume"
 }
 ```
 <!-- To generate API docs below, delete below this line, and execute: ```terraform-docs markdown . >> README.md```-->
@@ -140,7 +196,7 @@ No modules.
 | <a name="input_use_custom_config_parameter_store"></a> [use\_custom\_config\_parameter\_store](#input\_use\_custom\_config\_parameter\_store) | Whether to use a custom config from Parameter Store | `bool` | `false` | no |
 | <a name="input_custom_config_parameter_store_name"></a> [custom\_config\_parameter\_store\_name](#input\_custom\_config\_parameter\_store\_name) | Name of the Parameter Store parameter containing the OTEL configuration. If not provided, default configuration will be used | `string` | `null` | no |
 | <a name="input_otel_config_file"></a> [otel\_config\_file](#input\_otel\_config\_file) | File path to a custom opentelemetry configuration file. Defaults to an embedded configuration. | `string` | `null` | no |
-| <a name="input_task_execution_role_arn"></a> [task\_execution\_role\_arn](#input\_task\_execution\_role\_arn) | ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume | `string` | `null` | no |
+| <a name="input_task_execution_role_arn"></a> [task\_execution\_role\_arn](#input\_task\_execution\_role\_arn) | ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume. When using S3 configuration, if not provided, an auto-created role with S3 read permissions will be used. | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Resource tags | `map(string)` | `null` | no |
 | <a name="input_task_definition_arn"></a> [task\_definition\_arn](#input\_task\_definition\_arn) | Existing Coralogix OTEL task definition ARN | `string` | `null` | no |
 | <a name="input_enable_head_sampler"></a> [enable\_head\_sampler](#input\_enable\_head\_sampler) | Enable or disable head sampling for traces. When enabled, sampling decisions are made at the collection point before any processing occurs. | `bool` | `true` | no | 

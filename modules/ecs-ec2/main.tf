@@ -18,6 +18,20 @@ locals {
   }
 
   otel_config = templatefile("${path.module}/otel_config.tftpl.yaml", local.otel_template_vars)
+  
+  # Determine if we need execution role
+  needs_execution_role = var.use_api_key_secret == true || var.config_source == "parameter-store" || var.config_source == "s3"
+  
+  # Determine which execution role to use
+  # Priority: 1. User-provided role, 2. Auto-created S3 role (only for S3), 3. null
+  execution_role_arn = local.needs_execution_role ? (
+    var.task_execution_role_arn != null ? var.task_execution_role_arn : (
+      var.config_source == "s3" ? aws_iam_role.otel_task_execution_role_s3[0].arn : null
+    )
+  ) : null
+  
+  # Determine command based on config source
+  container_command = var.config_source == "s3" ? ["--config", "s3://${var.s3_config_bucket}.s3.${data.aws_region.current.name}.amazonaws.com/${var.s3_config_key}"] : ["--config", "env:OTEL_CONFIG"]
 }
 
 module "locals_variables" {
@@ -25,6 +39,8 @@ module "locals_variables" {
   integration_type = "ecs-ec2"
   random_string    = random_string.id.result
 }
+
+data "aws_region" "current" {}
 
 resource "random_string" "id" {
   length  = 7
@@ -34,13 +50,61 @@ resource "random_string" "id" {
   special = false
 }
 
+# IAM Role for S3 access (only created when config_source=s3 AND no custom role provided)
+resource "aws_iam_role" "otel_task_execution_role_s3" {
+  count = (var.config_source == "s3" && var.task_execution_role_arn == null) ? 1 : 0
+  name  = "${local.name}-${random_string.id.result}-task-execution-role-s3"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        }
+      }
+    ]
+  })
+
+  tags = local.tags
+}
+
+resource "aws_iam_role_policy_attachment" "otel_task_execution_role_s3_policy" {
+  count      = (var.config_source == "s3" && var.task_execution_role_arn == null) ? 1 : 0
+  role       = aws_iam_role.otel_task_execution_role_s3[0].name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+resource "aws_iam_role_policy" "otel_task_execution_role_s3_s3_policy" {
+  count = (var.config_source == "s3" && var.task_execution_role_arn == null) ? 1 : 0
+  name  = "S3ReadAccess"
+  role  = aws_iam_role.otel_task_execution_role_s3[0].id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:GetObjectVersion"
+        ]
+        Resource = "arn:aws:s3:::${var.s3_config_bucket}/*"
+      }
+    ]
+  })
+}
+
 resource "aws_ecs_task_definition" "coralogix_otel_agent" {
   count                    = var.task_definition_arn == null ? 1 : 0
   family                   = "${local.name}-${random_string.id.result}"
   cpu                      = max(var.memory, 256)
   memory                   = var.memory
   requires_compatibilities = ["EC2"]
-  execution_role_arn       = (var.custom_config_parameter_store_name != null || var.use_api_key_secret == true) ? var.task_execution_role_arn : null
+  execution_role_arn       = local.execution_role_arn
+  task_role_arn            = local.execution_role_arn
   volume {
     name      = "hostfs"
     host_path = "/var/lib/docker/"
@@ -121,7 +185,7 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
         value : tostring(var.enable_traces_db)
       }
       ],
-      var.custom_config_parameter_store_name == null ? [{
+      var.config_source == "template" ? [{
         name : "OTEL_CONFIG"
         value : local.otel_config
       }] : [],
@@ -130,7 +194,7 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
         value : var.api_key
     }] : []),
     secrets : concat(
-      var.custom_config_parameter_store_name != null ? [{
+      var.config_source == "parameter-store" ? [{
         name : "OTEL_CONFIG"
         valueFrom : var.custom_config_parameter_store_name
       }] : [],
@@ -139,7 +203,7 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
         valueFrom : var.api_key_secret_arn
       }] : []
     ),
-    command : ["--config", "env:OTEL_CONFIG"],
+    command : local.container_command,
     healthCheck : var.health_check_enabled ? {
       command : ["/healthcheck"]
       startPeriod : var.health_check_start_period

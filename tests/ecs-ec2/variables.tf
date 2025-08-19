@@ -65,6 +65,24 @@ variable "api_key" {
   default     = "cxtp_CoralogixSendYourDataKey"
 }
 
+variable "config_source" {
+  description = "Configuration source for OpenTelemetry Collector. Options: 'template', 's3', 'parameter-store'"
+  type        = string
+  default     = "template"
+}
+
+variable "s3_config_bucket" {
+  description = "S3 bucket name containing the configuration file. Required when config_source is 's3'."
+  type        = string
+  default     = null
+}
+
+variable "s3_config_key" {
+  description = "S3 object key (file path) for the configuration file. Required when config_source is 's3'."
+  type        = string
+  default     = null
+}
+
 variable "use_custom_config_parameter_store" {
   description = "Whether to use a custom config from Parameter Store"
   type        = bool

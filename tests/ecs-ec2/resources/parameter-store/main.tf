@@ -17,7 +17,7 @@ resource "aws_ssm_parameter" "otel_config" {
   description = "Coralogix OpenTelemetry Collector Configuration"
   type        = "String"
   tier        = "Advanced"  # Advanced tier for larger parameter values
-  value       = file("${path.module}/../local_config.yaml")
+  value       = file("${path.module}/../../local_config.yaml")
 }
 
 # Secrets Manager Secret for API Key
@@ -100,4 +100,4 @@ output "api_key_secret_arn" {
 
 output "task_execution_role_arn" {
   value = aws_iam_role.ecs_task_execution_role.arn
-}
+} 

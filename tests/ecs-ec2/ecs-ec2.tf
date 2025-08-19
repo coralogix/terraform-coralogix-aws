@@ -30,7 +30,10 @@ module "ecs-ec2" {
   api_key_secret_arn                  = var.api_key_secret_arn
   api_key                             = var.api_key
 
-  use_custom_config_parameter_store   = var.use_custom_config_parameter_store
+  # Configuration source and related variables
+  config_source                       = var.config_source
+  s3_config_bucket                    = var.s3_config_bucket
+  s3_config_key                       = var.s3_config_key
   custom_config_parameter_store_name  = var.custom_config_parameter_store_name
   otel_config_file                    = var.otel_config_file
 
