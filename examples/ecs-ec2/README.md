@@ -21,7 +21,7 @@ The Coralogix OpenTelemetry Agent is deployed as a Daemon ECS Task, meaning one 
 ```hcl
 module "otel_ecs_ec2_coralogix" {
   source = "coralogix/aws/coralogix//modules/ecs-ec2"
-  
+
   # Required parameters
   ecs_cluster_name         = "your-ecs-cluster-name"
   image_version            = "v0.4.2"
@@ -29,14 +29,14 @@ module "otel_ecs_ec2_coralogix" {
   default_application_name = "MyApplication"
   default_subsystem_name   = "ECS-EC2"
   api_key                  = "your-coralogix-api-key"
-  
+
   # Optional parameters with sensible defaults
-  enable_head_sampler      = true
-  sampling_percentage      = 10
-  sampler_mode            = "proportional"
-  enable_span_metrics     = true
-  enable_traces_db        = false
-  health_check_enabled    = true
+  enable_head_sampler  = true
+  sampling_percentage  = 10
+  sampler_mode         = "proportional"
+  enable_span_metrics  = true
+  enable_traces_db     = false
+  health_check_enabled = true
 }
 ```
 
@@ -46,7 +46,7 @@ module "otel_ecs_ec2_coralogix" {
 ```hcl
 module "ecs-ec2" {
   source = "coralogix/aws/coralogix//modules/ecs-ec2"
-  
+
   ecs_cluster_name         = "my-cluster"
   image_version            = "v0.4.2"
   memory                   = 2048
@@ -54,21 +54,21 @@ module "ecs-ec2" {
   default_application_name = "MyApp"
   default_subsystem_name   = "ECS-EC2"
   api_key                  = "your-api-key"
-  
+
   # Sampling configuration
-  enable_head_sampler      = true
-  sampling_percentage      = 25
-  sampler_mode            = "proportional"
-  
+  enable_head_sampler = true
+  sampling_percentage = 25
+  sampler_mode        = "proportional"
+
   # Features
-  enable_span_metrics      = true
-  enable_traces_db         = true
-  
+  enable_span_metrics = true
+  enable_traces_db    = true
+
   # Health checks
-  health_check_enabled     = true
-  health_check_interval    = 30
-  health_check_timeout     = 5
-  health_check_retries     = 3
+  health_check_enabled  = true
+  health_check_interval = 30
+  health_check_timeout  = 5
+  health_check_retries  = 3
 }
 ```
 
@@ -76,7 +76,7 @@ module "ecs-ec2" {
 ```hcl
 module "ecs-ec2-s3" {
   source = "coralogix/aws/coralogix//modules/ecs-ec2"
-  
+
   ecs_cluster_name         = "my-cluster"
   image_version            = "v0.4.2"
   memory                   = 2048
@@ -84,14 +84,14 @@ module "ecs-ec2-s3" {
   default_application_name = "MyApp"
   default_subsystem_name   = "ECS-EC2"
   api_key                  = "your-api-key"
-  
+
   # S3 Configuration
-  config_source            = "s3"
-  s3_config_bucket         = "my-otel-config-bucket"
-  s3_config_key            = "configs/otel-config.yaml"
-  
+  config_source    = "s3"
+  s3_config_bucket = "my-otel-config-bucket"
+  s3_config_key    = "configs/otel-config.yaml"
+
   # Optional: Custom execution role (auto-created if not provided)
-  task_execution_role_arn  = "arn:aws:iam::123456789012:role/my-custom-role"
+  task_execution_role_arn = "arn:aws:iam::123456789012:role/my-custom-role"
 }
 ```
 
@@ -99,7 +99,7 @@ module "ecs-ec2-s3" {
 ```hcl
 module "ecs-ec2-parameter-store" {
   source = "coralogix/aws/coralogix//modules/ecs-ec2"
-  
+
   ecs_cluster_name         = "my-cluster"
   image_version            = "v0.4.2"
   memory                   = 2048
@@ -107,13 +107,13 @@ module "ecs-ec2-parameter-store" {
   default_application_name = "MyApp"
   default_subsystem_name   = "ECS-EC2"
   api_key                  = "your-api-key"
-  
+
   # Parameter Store Configuration
-  config_source                    = "parameter-store"
+  config_source                      = "parameter-store"
   custom_config_parameter_store_name = "/my-app/otel-config"
-  
+
   # Required: Custom execution role for parameter store access
-  task_execution_role_arn          = "arn:aws:iam::123456789012:role/my-custom-role"
+  task_execution_role_arn = "arn:aws:iam::123456789012:role/my-custom-role"
 }
 ```
 
@@ -121,18 +121,18 @@ module "ecs-ec2-parameter-store" {
 ```hcl
 module "ecs-ec2-secrets" {
   source = "coralogix/aws/coralogix//modules/ecs-ec2"
-  
+
   ecs_cluster_name         = "my-cluster"
   image_version            = "v0.4.2"
   memory                   = 2048
   coralogix_region         = "EU1"
   default_application_name = "MyApp"
   default_subsystem_name   = "ECS-EC2"
-  
+
   # Secrets Manager Configuration
-  use_api_key_secret       = true
-  api_key_secret_arn       = "arn:aws:secretsmanager:region:account:secret:name"
-  task_execution_role_arn  = "arn:aws:iam::123456789012:role/my-custom-role"
+  use_api_key_secret      = true
+  api_key_secret_arn      = "arn:aws:secretsmanager:region:account:secret:name"
+  task_execution_role_arn = "arn:aws:iam::123456789012:role/my-custom-role"
 }
 ```
 
