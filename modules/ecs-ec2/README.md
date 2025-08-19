@@ -91,66 +91,44 @@ Provision an ECS Service that run the OTEL Collector Agent as a Daemon container
 module "ecs-ec2" {
   source                              = "coralogix/aws/coralogix//modules/ecs-ec2"
   ecs_cluster_name                    = "ecs-cluster-name"
-  image_version                       = "v0.4.0"
-  memory                              = numeric MiB
-  coralogix_region                    = ["EU1"|"EU2"|"AP1"|"AP2"|"AP3"|"US1"|"US2"|"custom"]
+  image_version                       = "v0.5.0"
+  coralogix_region                    = "EU1"
   default_application_name            = "Coralogix Application Name"
   default_subsystem_name              = "Coralogix Subsystem Name"
-  # OPTIONAL
-  api_key                             = "cxtp_CoralogixSendYourDataAPIKey"
-  custom_domain                       = "custom.coralogix.domain"
-  use_api_key_secret                  = true|false
-  api_key_secret_arn                  = "ARN of the Secrets Manager secret containing the API key" 
-  task_execution_role_arn             = "ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume"
-  enable_head_sampler                 = true|false
-  sampler_mode                        = "proportional"|"equalizing"|"hash_seed"
-  sampling_percentage                 = 10
-  enable_span_metrics                 = true|false
-  enable_traces_db                    = true|false
+  api_key                             = "cxtp_CoralogixSendYourDataAPIKey"=
 }
 
 # S3 Configuration
 module "ecs-ec2-s3" {
   source                              = "coralogix/aws/coralogix//modules/ecs-ec2"
   ecs_cluster_name                    = "ecs-cluster-name"
-  image_version                       = "v0.4.0"
-  memory                              = numeric MiB
-  coralogix_region                    = ["EU1"|"EU2"|"AP1"|"AP2"|"AP3"|"US1"|"US2"|"custom"]
+  image_version                       = "v0.5.0"
+  coralogix_region                    = "EU1"
   default_application_name            = "Coralogix Application Name"
   default_subsystem_name              = "Coralogix Subsystem Name"
+  api_key                             = "cxtp_CoralogixSendYourDataAPIKey"
   # S3 Configuration
   config_source                       = "s3"
   s3_config_bucket                    = "my-otel-config-bucket"
   s3_config_key                       = "configs/otel-config.yaml"
-  # OPTIONAL
-  api_key                             = "cxtp_CoralogixSendYourDataAPIKey"
-  custom_domain                       = "custom.coralogix.domain"
-  use_api_key_secret                  = true|false
-  api_key_secret_arn                  = "ARN of the Secrets Manager secret containing the API key" 
-  task_execution_role_arn             = "ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume"
 }
 
 # Parameter Store Configuration
 module "ecs-ec2-parameter-store" {
   source                              = "coralogix/aws/coralogix//modules/ecs-ec2"
   ecs_cluster_name                    = "ecs-cluster-name"
-  image_version                       = "v0.4.0"
-  memory                              = numeric MiB
-  coralogix_region                    = ["EU1"|"EU2"|"AP1"|"AP2"|"AP3"|"US1"|"US2"|"custom"]
+  image_version                       = "v0.5.0"
+  coralogix_region                    = "EU1"
   default_application_name            = "Coralogix Application Name"
   default_subsystem_name              = "Coralogix Subsystem Name"
+  api_key                             = "cxtp_CoralogixSendYourDataAPIKey"
   # Parameter Store Configuration
   config_source                       = "parameter-store"
-  custom_config_parameter_store_name  = "NAME of the Parameter Store parameter containing the OTEL configuration"
-  # OPTIONAL
-  api_key                             = "cxtp_CoralogixSendYourDataAPIKey"
-  custom_domain                       = "custom.coralogix.domain"
-  use_api_key_secret                  = true|false
-  api_key_secret_arn                  = "ARN of the Secrets Manager secret containing the API key" 
-  task_execution_role_arn             = "ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume"
+  custom_config_parameter_store_name  = "otel-config"
+  task_execution_role_arn             = "ARN of the task execution role that have access to the parameter store"
 }
 ```
-<!-- To generate API docs below, delete below this line, and execute: ```terraform-docs markdown . >> README.md```-->
+
 ## Requirements
 
 | Name | Version |
@@ -166,9 +144,6 @@ module "ecs-ec2-parameter-store" {
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.24.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | >= 3.6.0 |
 
-## Modules
-
-No modules.
 
 ## Resources
 

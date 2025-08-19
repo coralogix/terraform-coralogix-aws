@@ -3,7 +3,7 @@ module "otel_ecs_ec2_coralogix" {
 
   # Required parameters
   ecs_cluster_name         = "test-lab-cluster"
-  image_version            = "v0.4.2"
+  image_version            = "v0.5.0"
   coralogix_region         = "EU1"
   default_application_name = "YOUR_APPLICATION_NAME"
   default_subsystem_name   = "YOUR_SUBSYSTEM_NAME"
