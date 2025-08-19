@@ -27,7 +27,7 @@ resource "random_string" "bucket_suffix" {
 # S3 Bucket for OpenTelemetry Configuration
 resource "aws_s3_bucket" "otel_config_bucket" {
   bucket = "coralogix-otel-config-tf-test-${random_string.bucket_suffix.result}"
-  
+
   tags = {
     Name        = "Coralogix OTEL Config Test Bucket"
     Environment = "test"
@@ -70,7 +70,7 @@ resource "aws_s3_object" "otel_config" {
 # ECS Task Execution Role for S3 Access
 resource "aws_iam_role" "ecs_task_execution_role_s3" {
   name = "coralogix-otel-s3-tf-test-execution-role"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -95,7 +95,7 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_s3_policy" {
 resource "aws_iam_policy" "ecs_task_s3_policy" {
   name        = "coralogix-otel-s3-tf-test-policy"
   description = "Policy allowing access to S3 bucket for OpenTelemetry configuration"
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [

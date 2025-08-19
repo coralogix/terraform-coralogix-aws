@@ -16,7 +16,7 @@ resource "aws_ssm_parameter" "otel_config" {
   name        = "cx_otel_config-tf-test"
   description = "Coralogix OpenTelemetry Collector Configuration"
   type        = "String"
-  tier        = "Advanced"  # Advanced tier for larger parameter values
+  tier        = "Advanced" # Advanced tier for larger parameter values
   value       = file("${path.module}/../../local_config.yaml")
 }
 
@@ -24,7 +24,7 @@ resource "aws_ssm_parameter" "otel_config" {
 resource "aws_secretsmanager_secret" "api_key_secret" {
   name        = "cx_otel_api_key-tf-test"
   description = "Coralogix API Key for OpenTelemetry Collector"
-  kms_key_id  = "alias/aws/secretsmanager"  # Default AWS managed key
+  kms_key_id  = "alias/aws/secretsmanager" # Default AWS managed key
 }
 
 resource "aws_secretsmanager_secret_version" "api_key_version" {
@@ -35,7 +35,7 @@ resource "aws_secretsmanager_secret_version" "api_key_version" {
 # ECS Task Execution Role
 resource "aws_iam_role" "ecs_task_execution_role" {
   name = "coralogix-otel-tf-test-execution-role"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -60,7 +60,7 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
 resource "aws_iam_policy" "ecs_task_custom_policy" {
   name        = "coralogix-otel-tf-test-custom-policy"
   description = "Policy allowing access to Coralogix OpenTelemetry config parameter and API key secret"
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [

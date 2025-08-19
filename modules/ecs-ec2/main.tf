@@ -18,10 +18,10 @@ locals {
   }
 
   otel_config = templatefile("${path.module}/otel_config.tftpl.yaml", local.otel_template_vars)
-  
+
   # Determine if we need execution role
   needs_execution_role = var.use_api_key_secret == true || var.config_source == "parameter-store" || var.config_source == "s3"
-  
+
   # Determine which execution role to use
   # Priority: 1. User-provided role, 2. Auto-created S3 role (only for S3), 3. null
   execution_role_arn = local.needs_execution_role ? (
@@ -29,7 +29,7 @@ locals {
       var.config_source == "s3" ? aws_iam_role.otel_task_execution_role_s3[0].arn : null
     )
   ) : null
-  
+
   # Determine command based on config source
   container_command = var.config_source == "s3" ? ["--config", "s3://${var.s3_config_bucket}.s3.${data.aws_region.current.name}.amazonaws.com/${var.s3_config_key}"] : ["--config", "env:OTEL_CONFIG"]
 }
