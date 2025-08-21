@@ -3,6 +3,33 @@ variable "ecs_cluster_name" {
   type        = string
 }
 
+variable "config_source" {
+  description = "Select the configuration source for OpenTelemetry Collector. Options: 'template' (default), 's3', 'parameter-store'"
+  type        = string
+  default     = "template"
+  validation {
+    condition     = contains(["template", "s3", "parameter-store"], var.config_source)
+    error_message = "Config source must be one of: template, s3, parameter-store."
+  }
+}
+
+variable "s3_config_bucket" {
+  description = "S3 bucket name containing the configuration file. Required when config_source is 's3'."
+  type        = string
+  default     = null
+}
+
+variable "s3_config_key" {
+  description = "S3 object key (file path) for the configuration file. Required when config_source is 's3'."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = (var.config_source == "s3") ? (var.s3_config_bucket != null && var.s3_config_key != null) : true
+    error_message = "Both s3_config_bucket and s3_config_key must be provided when config_source is 's3'."
+  }
+}
+
 variable "image_version" {
   description = "The Coralogix Open Telemetry Distribution Image Version/Tag. See: https://hub.docker.com/r/coralogixrepo/coralogix-otel-collector/tags"
   type        = string
@@ -89,13 +116,13 @@ variable "use_custom_config_parameter_store" {
 }
 
 variable "custom_config_parameter_store_name" {
-  description = "Name of the Parameter Store parameter containing the OTEL configuration. If not provided, default configuration will be used"
+  description = "Name of the Parameter Store parameter containing the OTEL configuration. Required when config_source is 'parameter-store'"
   type        = string
   default     = null
 
   validation {
-    condition     = var.use_custom_config_parameter_store ? var.custom_config_parameter_store_name != null : true
-    error_message = "Check custom_config_parameter_store_name variable. It must be provided if use_custom_config_parameter_store is true."
+    condition     = (var.config_source == "parameter-store") ? var.custom_config_parameter_store_name != null : true
+    error_message = "custom_config_parameter_store_name must be provided when config_source is 'parameter-store'."
   }
 }
 
@@ -105,19 +132,19 @@ variable "otel_config_file" {
   default     = null
 
   validation {
-    condition     = var.use_custom_config_parameter_store ? var.otel_config_file == null : true
-    error_message = "Check otel_config_file variable. It must be null if using a Custom Configuration from a Parameter Store"
+    condition     = (var.config_source == "parameter-store" || var.config_source == "s3") ? var.otel_config_file == null : true
+    error_message = "otel_config_file must be null when using parameter-store or s3 configuration sources."
   }
 }
 
 variable "task_execution_role_arn" {
-  description = "ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume"
+  description = "ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume. When using S3 configuration, if not provided, an auto-created role with S3 read permissions will be used."
   type        = string
   default     = null
 
   validation {
-    condition     = (var.api_key_secret_arn != null || var.custom_config_parameter_store_name != null) ? var.task_execution_role_arn != null : true
-    error_message = "task_execution_role_arn must be provided if using a API Key Secret or a Custom Configuration from a Parameter Store"
+    condition     = (var.use_api_key_secret == true || var.config_source == "parameter-store") ? var.task_execution_role_arn != null : true
+    error_message = "task_execution_role_arn must be provided if using API Key Secret or Parameter Store config"
   }
 }
 

@@ -1,4 +1,10 @@
 # Changelog
+## v3.10.0
+#### **ecs-ec2**
+### 💡 Enhancements 💡
+- **S3 Configuration Source**: Added support for using S3 as a configuration source for OpenTelemetry Collector
+- **Flexible Execution Role Management**: Added support for both auto-created and custom execution roles for S3 configuration
+
 ## v3.9.1
 #### **coralogix-aws-shipper**
 ### 🧰 Bug fixes 🧰

@@ -5,7 +5,7 @@ ecs_cluster_name = "ecs-ec2-testing-cluster"
 default_subsystem_name = "ecs-ec2-tf-base_vars-test"
 
 image = "coralogixrepo/coralogix-otel-collector"
-image_version    = "v0.4.0"
+image_version    = "v0.4.2"
 
 coralogix_region = "EU1"
 
