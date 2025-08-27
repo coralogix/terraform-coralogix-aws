@@ -77,6 +77,12 @@ variable "s3_bucket_kms_arn" {
   default     = null
 }
 
+variable "s3_notification" {
+  description = "Controls whether an aws_s3_bucket_notification resource should be created to send S3 events to the application-specific Lambda functions. Set to false to disable the notification."
+  type        = bool
+  default     = true
+}
+
 variable "cs_delimiter" {
   type        = string
   description = "The delimiter used in the CSV file to process This value is applied when the S3Csv integration type is selected"

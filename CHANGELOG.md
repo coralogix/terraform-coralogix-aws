@@ -4,6 +4,9 @@
 ### 💡 Enhancements 💡
 - **S3 Configuration Source**: Added support for using S3 as a configuration source for OpenTelemetry Collector
 - **Flexible Execution Role Management**: Added support for both auto-created and custom execution roles for S3 configuration
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 💡
+- Added variable to disable the creation of `aws_s3_bucket_notification` to manage it outside the module.
 
 ## v3.9.1
 #### **coralogix-aws-shipper**
