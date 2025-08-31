@@ -10,7 +10,6 @@ variable "ecs_cluster_name" {
 }
 
 
-
 variable "vpc_id" {
   description = "VPC ID"
   type        = string
@@ -53,6 +52,12 @@ variable "image_version" {
   description = "The Coralogix Distribution OpenTelemetry Image Version/Tag"
   type        = string
   default     = "v0.5.0"
+}
+
+variable "custom_image" {
+  description = "Custom OpenTelemetry Collector Image to use (e.g., 'my-registry.com/custom-otel-collector:latest'). If provided, this overrides image_version."
+  type        = string
+  default     = null
 }
 
 variable "coralogix_region" {
