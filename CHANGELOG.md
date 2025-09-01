@@ -1,4 +1,8 @@
 # Changelog
+## v3.10.1
+#### **ecs-ec2-tail-sampling**
+### 💡 Enhancements 💡
+- **ecs-ec2-tail-sampling**: Added new ecs-ec2 tail sampling module
 ## v3.10.0
 #### **ecs-ec2**
 ### 💡 Enhancements 💡

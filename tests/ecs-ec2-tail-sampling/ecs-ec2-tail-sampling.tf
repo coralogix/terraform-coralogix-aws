@@ -117,7 +117,7 @@ module "otel_external_role" {
   health_check_timeout      = var.health_check_timeout
   health_check_retries      = var.health_check_retries
   health_check_start_period = var.health_check_start_period
-  task_execution_role_arn = var.external_task_execution_role_arn
+  task_execution_role_arn = var.task_execution_role_arn
   tags = var.tags
 }
  
