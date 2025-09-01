@@ -1,0 +1,40 @@
+# AWS Configuration
+aws_region = "us-east-1"
+
+# ECS Cluster Configuration
+ecs_cluster_name = "new-cluster"
+
+# Network Configuration
+vpc_id             = "vpc-12345678"
+subnet_ids         = ["subnet-12345678", "subnet-87654321"]
+security_group_ids = ["sg-12345678"]
+
+# S3 Configuration
+s3_config_bucket      = "test-otel-configs"
+agent_s3_config_key   = "configs/agent-config.yaml"
+gateway_s3_config_key = "configs/gateway-config.yaml"
+receiver_s3_config_key = "configs/receiver-config.yaml"
+
+# Coralogix Configuration
+image_version    = "v0.5.0"
+coralogix_region = "EU2"
+api_key          = "test-api-key"
+
+# External IAM Role (optional)
+external_task_execution_role_arn = "arn:aws:iam::123456789012:role/test-ecs-task-execution-role"
+
+# Task Configuration
+gateway_task_count = 1
+receiver_task_count = 2
+memory            = 1024
+
+# Application Configuration
+default_application_name = "OTEL"
+default_subsystem_name   = "ECS-EC2"
+
+# Tags
+tags = {
+  Environment = "test"
+  Project     = "coralogix-otel"
+  Test        = "true"
+}

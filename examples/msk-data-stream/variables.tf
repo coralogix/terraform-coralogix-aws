@@ -41,5 +41,5 @@ variable "custom_coralogix_arn" {
   type        = string
   description = "The custom arn for the coralogix role"
   default     = null
-  
+
 }

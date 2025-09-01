@@ -15,8 +15,8 @@ provider "aws" {
 module "lambda-manager" {
   source = "../../modules/lambda-manager"
 
-  regex_pattern = ".*"
-  destination_arn = "arn:aws:lambda:us-east-1:12345678910:function:*"
-  logs_filter = "custome-test"
+  regex_pattern    = ".*"
+  destination_arn  = "arn:aws:lambda:us-east-1:12345678910:function:*"
+  logs_filter      = "custome-test"
   destination_type = "lambda"
 }
