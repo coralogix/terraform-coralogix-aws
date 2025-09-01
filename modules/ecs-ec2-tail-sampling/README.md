@@ -11,6 +11,7 @@ This Terraform module deploys OpenTelemetry Collector components for tail sampli
 - **External IAM Role Support**: Can use existing task execution roles or create new ones
 - **Custom Image Support**: Use Coralogix image with version or custom images from any registry
 - **Service Discovery**: Automatic CloudMap namespace and service registration
+- **Health Check Support**: Optional ECS container health checks for all OpenTelemetry components
 - **Conditional Resource Creation**: Only creates resources needed for the selected deployment type
 - **ECS EC2 Support**: Designed for EC2 launch type, not Fargate
 
@@ -117,6 +118,25 @@ module "otel_tail_sampling" {
 }
 ```
 
+### Enabling Health Checks
+
+Health checks can be enabled for all OpenTelemetry containers (requires OTEL collector image version v0.4.2 or later):
+
+```hcl
+module "otel_tail_sampling" {
+  source = "../../modules/ecs-ec2-tail-sampling"
+
+  # ... other parameters ...
+  
+  # Enable health checks with custom settings
+  health_check_enabled      = true
+  health_check_interval     = 30    # seconds
+  health_check_timeout      = 5     # seconds
+  health_check_retries      = 3     # attempts
+  health_check_start_period = 10    # seconds
+}
+```
+
 ## Requirements
 
 | Name | Version |
@@ -154,6 +174,11 @@ module "otel_tail_sampling" {
 | custom_domain | Coralogix custom domain | `string` | `null` | no |
 | default_application_name | The default Coralogix Application name | `string` | `"OTEL"` | no |
 | default_subsystem_name | The default Coralogix Subsystem name | `string` | `"ECS-EC2"` | no |
+| health_check_enabled | Enable ECS container health check for OTEL containers. Requires OTEL collector image version v0.4.2 or later | `bool` | `false` | no |
+| health_check_interval | Health check interval in seconds. Only used if health_check_enabled is true | `number` | `30` | no |
+| health_check_timeout | Health check timeout in seconds. Only used if health_check_enabled is true | `number` | `5` | no |
+| health_check_retries | Health check retries. Only used if health_check_enabled is true | `number` | `3` | no |
+| health_check_start_period | Health check start period in seconds. Only used if health_check_enabled is true | `number` | `10` | no |
 | tags | A map of tags to assign to the resources | `map(string)` | `{}` | no |
 
 ## Outputs
@@ -225,3 +250,4 @@ Services can be discovered using DNS names:
 - Docker socket access is required for the agent service
 - Either `image_version` or `custom_image` must be provided, but not both
 - When using `custom_image`, the `image_version` parameter is ignored
+- Health checks require OTEL collector image version v0.4.2 or later and use the `/healthcheck` endpoint

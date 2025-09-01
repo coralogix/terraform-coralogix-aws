@@ -1,138 +1,129 @@
-# ECS EC2 Tail Sampling Example
+# ecs-ec2-tail-sampling
 
-This example demonstrates how to deploy the Coralogix OpenTelemetry Tail Sampling solution on AWS ECS EC2 using Terraform.
-
-## Prerequisites
-
-1. **AWS ECS Cluster**: An existing ECS cluster with EC2 instances
-2. **S3 Bucket**: A bucket containing OpenTelemetry configuration files
-3. **VPC and Subnets**: Network infrastructure for the ECS services
-4. **Security Groups**: Security groups allowing necessary traffic
-5. **Coralogix API Key**: A valid Coralogix Send-Your-Data API key
-
-## Configuration Files
-
-Before deploying, ensure you have the following configuration files uploaded to your S3 bucket:
-
-### For Tail Sampling Deployment
-- `configs/agent-config.yaml` - Agent configuration for collecting telemetry
-- `configs/gateway-config.yaml` - Gateway configuration for tail sampling
-
-### For Central Cluster Deployment
-- `configs/receiver-config.yaml` - Receiver configuration for external telemetry
-- `configs/gateway-config.yaml` - Gateway configuration for tail sampling
+Coralogix provides a Terraform module to deploy OpenTelemetry Collector on AWS ECS EC2 with tail sampling capabilities.
 
 ## Usage
 
-### Basic Deployment
+To run this example you need to save this code in Terraform file, and change the values according to your settings.
 
-1. **Copy the example configuration**:
-   ```bash
-   cp terraform.tfvars.example terraform.tfvars
-   ```
+**Note**: Before deploying, ensure you have uploaded the required OpenTelemetry configuration files to your S3 bucket. Sample configuration files are available in the [CloudFormation repository](https://github.com/coralogix/cloudformation-coralogix-aws/tree/master/opentelemetry/ecs-ec2-tail-sampling/examples).
 
-2. **Update the configuration**:
-   Edit `terraform.tfvars` with your specific values:
-   - AWS region and ECS cluster name
-   - VPC, subnet, and security group IDs
-   - S3 bucket and configuration file keys
-   - Coralogix region and API key
+## Configuration examples
 
-3. **Initialize Terraform**:
-   ```bash
-   terraform init
-   ```
+### Tail Sampling (default)
+Deploys agent (daemon) and gateway services for distributed tail sampling across EC2 instances.
+```bash
+module "otel-ecs-ec2-tail-sampling" {
+  source = "coralogix/aws/coralogix//modules/ecs-ec2-tail-sampling"
 
-4. **Plan the deployment**:
-   ```bash
-   terraform plan
-   ```
+  # Required parameters
+  ecs_cluster_name      = "my-ecs-cluster"
+  vpc_id               = "vpc-12345678"
+  subnet_ids           = ["subnet-12345678", "subnet-87654321"]
+  security_group_ids   = ["sg-12345678"]
+  deployment_type      = "tail-sampling"
+  s3_config_bucket     = "my-otel-configs-bucket"
+  agent_s3_config_key  = "configs/agent-config.yaml"
+  gateway_s3_config_key = "configs/gateway-config.yaml"
+  image_version        = "v0.5.1"
+  coralogix_region     = "EU1"
+  api_key              = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+}
+```
 
-5. **Apply the configuration**:
-   ```bash
-   terraform apply
-   ```
+### Central Cluster
+Deploys receiver and gateway services for centralized telemetry collection from external agents.
+```bash
+module "otel-ecs-ec2-central-cluster" {
+  source = "coralogix/aws/coralogix//modules/ecs-ec2-tail-sampling"
+
+  # Required parameters
+  ecs_cluster_name      = "my-ecs-cluster"
+  vpc_id               = "vpc-12345678"
+  subnet_ids           = ["subnet-12345678", "subnet-87654321"]
+  security_group_ids   = ["sg-12345678"]
+  deployment_type      = "central-cluster"
+  s3_config_bucket     = "my-otel-configs-bucket"
+  gateway_s3_config_key = "configs/gateway-config.yaml"
+  receiver_s3_config_key = "configs/receiver-config.yaml"
+  image_version        = "v0.5.1"
+  coralogix_region     = "EU1"
+  api_key              = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+}
+```
 
 ### Using Custom Images
-
-You can specify a custom Docker image for the OpenTelemetry Collector using the `custom_image` variable:
-
-```hcl
-module "otel_ecs_ec2_tail_sampling" {
-  source = "coralogix/aws/coralogix//modules/ecs-ec2-tail-sampling"
-
-  # ... other parameters ...
-  
-  # Custom image configuration (overrides image_version)
-  custom_image        = "my-registry.com/custom-otel-collector:latest"
-  
-  # ... rest of configuration ...
-}
-```
-
-### Using Coralogix Image with Version
-
-To use the standard Coralogix image with a specific version:
-
-```hcl
-module "otel_ecs_ec2_tail_sampling" {
-  source = "coralogix/aws/coralogix//modules/ecs-ec2-tail-sampling"
-
-  # ... other parameters ...
-  
-  # Coralogix image with version
-  image_version       = "v0.5.0"
-  custom_image        = null  # or omit this line
-  
-  # ... rest of configuration ...
-}
-```
-
-### Using Custom Domain (Private Link)
-
-For environments with Private Link or custom domains, set the `coralogix_region` to "custom" and provide a `custom_domain`:
-
-```hcl
-module "otel_ecs_ec2_tail_sampling" {
-  source = "coralogix/aws/coralogix//modules/ecs-ec2-tail-sampling"
-
-  # ... other parameters ...
-  
-  coralogix_region     = "custom"
-  custom_domain        = "private.coralogix.com"
-  
-  # ... rest of configuration ...
-}
-```
-
-## Deployment Types
-
-### Tail Sampling Deployment (Default)
-The example deploys a tail sampling solution with:
-- **Agent Service**: Daemon service running on each EC2 instance
-- **Gateway Service**: Replica service for tail sampling decisions
-
-### Central Cluster Deployment
-To deploy a central cluster instead, uncomment the central cluster module in `main.tf` and comment out the tail sampling module.
-
-## Outputs
-
-After successful deployment, you'll get outputs including:
-- CloudMap namespace and service information
-- Task definition ARNs
-- ECS service names
-- IAM role information
-
-## Cleanup
-
-To remove all resources:
 ```bash
-terraform destroy
+module "otel-ecs-ec2-custom-image" {
+  source = "coralogix/aws/coralogix//modules/ecs-ec2-tail-sampling"
+
+  # Required parameters
+  ecs_cluster_name      = "my-ecs-cluster"
+  vpc_id               = "vpc-12345678"
+  subnet_ids           = ["subnet-12345678", "subnet-87654321"]
+  security_group_ids   = ["sg-12345678"]
+  deployment_type      = "tail-sampling"
+  s3_config_bucket     = "my-otel-configs-bucket"
+  agent_s3_config_key  = "configs/agent-config.yaml"
+  gateway_s3_config_key = "configs/gateway-config.yaml"
+  custom_image         = "my-registry.com/custom-otel-collector:latest"
+  coralogix_region     = "EU1"
+  api_key              = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+}
 ```
 
-## Notes
+### With Health Checks Enabled
+```bash
+module "otel-ecs-ec2-health-checks" {
+  source = "coralogix/aws/coralogix//modules/ecs-ec2-tail-sampling"
 
-- This example uses the default values for most optional parameters
-- The agent service requires Docker socket access for container metadata
-- All configurations must be stored in S3
-- The module supports external IAM roles if needed
+  # Required parameters
+  ecs_cluster_name      = "my-ecs-cluster"
+  vpc_id               = "vpc-12345678"
+  subnet_ids           = ["subnet-12345678", "subnet-87654321"]
+  security_group_ids   = ["sg-12345678"]
+  deployment_type      = "tail-sampling"
+  s3_config_bucket     = "my-otel-configs-bucket"
+  agent_s3_config_key  = "configs/agent-config.yaml"
+  gateway_s3_config_key = "configs/gateway-config.yaml"
+  image_version        = "v0.5.1"
+  coralogix_region     = "EU1"
+  api_key              = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+
+  # Optional parameters with sensible defaults
+  health_check_enabled = true
+  memory              = 2048
+  gateway_task_count  = 2
+}
+```
+
+### Using External Task Execution Role
+```bash
+module "otel-ecs-ec2-external-role" {
+  source = "coralogix/aws/coralogix//modules/ecs-ec2-tail-sampling"
+
+  # Required parameters
+  ecs_cluster_name      = "my-ecs-cluster"
+  vpc_id               = "vpc-12345678"
+  subnet_ids           = ["subnet-12345678", "subnet-87654321"]
+  security_group_ids   = ["sg-12345678"]
+  deployment_type      = "tail-sampling"
+  s3_config_bucket     = "my-otel-configs-bucket"
+  agent_s3_config_key  = "configs/agent-config.yaml"
+  gateway_s3_config_key = "configs/gateway-config.yaml"
+  image_version        = "v0.5.1"
+  coralogix_region     = "EU1"
+  api_key              = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+
+  # Use existing IAM role instead of creating new one
+  task_execution_role_arn = "arn:aws:iam::123456789012:role/my-existing-ecs-task-execution-role"
+}
+```
+
+now execute:
+```bash
+$ terraform init
+$ terraform plan
+$ terraform apply
+```
+Run `terraform destroy` when you don't need these resources.

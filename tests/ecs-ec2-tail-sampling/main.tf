@@ -46,6 +46,11 @@ module "otel_tail_sampling" {
   memory            = var.memory
   default_application_name = var.default_application_name
   default_subsystem_name   = var.default_subsystem_name
+  health_check_enabled      = var.health_check_enabled
+  health_check_interval     = var.health_check_interval
+  health_check_timeout      = var.health_check_timeout
+  health_check_retries      = var.health_check_retries
+  health_check_start_period = var.health_check_start_period
   tags = var.tags
 }
 
@@ -75,6 +80,11 @@ module "otel_central_cluster" {
   memory            = var.memory
   default_application_name = var.default_application_name
   default_subsystem_name   = var.default_subsystem_name
+  health_check_enabled      = var.health_check_enabled
+  health_check_interval     = var.health_check_interval
+  health_check_timeout      = var.health_check_timeout
+  health_check_retries      = var.health_check_retries
+  health_check_start_period = var.health_check_start_period
   tags = var.tags
 }
 
@@ -102,6 +112,11 @@ module "otel_external_role" {
   memory            = var.memory
   default_application_name = var.default_application_name
   default_subsystem_name   = var.default_subsystem_name
+  health_check_enabled      = var.health_check_enabled
+  health_check_interval     = var.health_check_interval
+  health_check_timeout      = var.health_check_timeout
+  health_check_retries      = var.health_check_retries
+  health_check_start_period = var.health_check_start_period
   task_execution_role_arn = var.external_task_execution_role_arn
   tags = var.tags
 }

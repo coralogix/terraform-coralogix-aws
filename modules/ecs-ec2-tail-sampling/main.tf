@@ -235,6 +235,13 @@ resource "aws_ecs_task_definition" "agent" {
       "--config",
       "s3://${var.s3_config_bucket}.s3.${data.aws_region.current.name}.amazonaws.com/${var.agent_s3_config_key}"
     ],
+    healthCheck : var.health_check_enabled ? {
+      command : ["/healthcheck"]
+      startPeriod : var.health_check_start_period
+      interval : var.health_check_interval
+      timeout : var.health_check_timeout
+      retries : var.health_check_retries
+    } : null,
     logConfiguration : {
       logDriver : "json-file"
     }
@@ -305,6 +312,14 @@ resource "aws_ecs_task_definition" "gateway" {
         Value : var.default_subsystem_name
       }
     ]
+
+    HealthCheck : var.health_check_enabled ? {
+      Command : ["/healthcheck"]
+      StartPeriod : var.health_check_start_period
+      Interval : var.health_check_interval
+      Timeout : var.health_check_timeout
+      Retries : var.health_check_retries
+    } : null
 
     LogConfiguration : {
       LogDriver : "awslogs"
@@ -385,6 +400,14 @@ resource "aws_ecs_task_definition" "receiver" {
         Value : var.default_subsystem_name
       }
     ]
+
+    HealthCheck : var.health_check_enabled ? {
+      Command : ["/healthcheck"]
+      StartPeriod : var.health_check_start_period
+      Interval : var.health_check_interval
+      Timeout : var.health_check_timeout
+      Retries : var.health_check_retries
+    } : null
 
     LogConfiguration : {
       LogDriver : "awslogs"

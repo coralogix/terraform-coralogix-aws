@@ -152,3 +152,33 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "health_check_enabled" {
+  description = "Enable ECS container health check for the OTEL agent container, Requires OTEL collector image version v0.4.2 or later."
+  type        = bool
+  default     = false
+}
+
+variable "health_check_interval" {
+  description = "Health check interval in seconds. Only used if health_check_enabled is true."
+  type        = number
+  default     = 30
+}
+
+variable "health_check_timeout" {
+  description = "Health check timeout in seconds. Only used if health_check_enabled is true."
+  type        = number
+  default     = 5
+}
+
+variable "health_check_retries" {
+  description = "Health check retries. Only used if health_check_enabled is true."
+  type        = number
+  default     = 3
+}
+
+variable "health_check_start_period" {
+  description = "Health check start period in seconds. Only used if health_check_enabled is true."
+  type        = number
+  default     = 10
+}

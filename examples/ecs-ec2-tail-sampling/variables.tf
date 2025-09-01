@@ -33,27 +33,41 @@ variable "s3_config_bucket" {
 }
 
 variable "agent_s3_config_key" {
-  description = "S3 object key for the Agent configuration file"
+  description = "S3 object key for the Agent configuration file (required for tail-sampling deployment)"
   type        = string
-  default     = "configs/agent-config.yaml"
+  default     = null
+
+  validation {
+    condition     = (var.deployment_type == "tail-sampling") ? (var.agent_s3_config_key != null) : true
+    error_message = "agent_s3_config_key is required when deployment_type is 'tail-sampling'."
+  }
 }
 
 variable "gateway_s3_config_key" {
   description = "S3 object key for the Gateway configuration file"
   type        = string
-  default     = "configs/gateway-config.yaml"
 }
 
 variable "receiver_s3_config_key" {
-  description = "S3 object key for the Receiver configuration file"
+  description = "S3 object key for the Receiver configuration file (required for central-cluster deployment)"
   type        = string
-  default     = "configs/receiver-config.yaml"
+  default     = null
+
+  validation {
+    condition     = (var.deployment_type == "central-cluster") ? (var.receiver_s3_config_key != null) : true
+    error_message = "receiver_s3_config_key is required when deployment_type is 'central-cluster'."
+  }
 }
 
 variable "image_version" {
-  description = "The Coralogix Open Telemetry Distribution Image Version/Tag. See: https://hub.docker.com/r/coralogixrepo/coralogix-otel-collector/tags. Required when custom_image is not provided."
+  description = "The Coralogix Distribution OpenTelemetry Image Version/Tag. See: https://hub.docker.com/r/coralogixrepo/coralogix-otel-collector/tags. Required when custom_image is not provided."
   type        = string
-  default     = "v0.5.0"
+  default     = null
+
+  validation {
+    condition     = var.custom_image != null || var.image_version != null
+    error_message = "Either image_version or custom_image must be provided."
+  }
 }
 
 variable "custom_image" {
@@ -63,7 +77,7 @@ variable "custom_image" {
 }
 
 variable "coralogix_region" {
-  description = "The region of the Coralogix endpoint domain"
+  description = "The region of the Coralogix endpoint domain: [EU1|EU2|AP1|AP2|AP3|US1|US2|custom]. If \"custom\" then __custom_domain__ parameter must be specified."
   type        = string
   validation {
     condition     = can(regex("^(EU1|EU2|AP1|AP2|AP3|US1|US2|custom)$", var.coralogix_region))
@@ -78,15 +92,15 @@ variable "custom_domain" {
 }
 
 variable "api_key" {
-  description = "The Send-Your-Data API key for your Coralogix account"
+  description = "The Send-Your-Data API key for your Coralogix account. See: https://coralogix.com/docs/send-your-data-api-key/"
   type        = string
   sensitive   = true
 }
 
 variable "name_prefix" {
-  description = "Prefix for resource names to avoid conflicts"
+  description = "Prefix to add to resource names to make them unique"
   type        = string
-  default     = "otel"
+  default     = ""
 }
 
 variable "gateway_task_count" {
@@ -102,29 +116,69 @@ variable "receiver_task_count" {
 }
 
 variable "memory" {
-  description = "The amount of memory (in MiB) used by the task"
+  description = "The amount of memory (in MiB) used by the task. Note that your cluster must have sufficient memory available to support the given value. Minimum __256__ MiB. CPU Units will be allocated directly proportional to Memory."
   type        = number
   default     = 1024
 }
 
 variable "default_application_name" {
-  description = "The default Coralogix Application name"
+  description = "The default Coralogix Application name."
   type        = string
+  default     = "OTEL"
+  validation {
+    condition     = length(var.default_application_name) >= 1 && length(var.default_application_name) <= 64
+    error_message = "The Default Application Name length should be within 1 and 64 characters"
+  }
 }
 
 variable "default_subsystem_name" {
-  description = "The default Coralogix Subsystem name"
+  description = "The default Coralogix Subsystem name."
   type        = string
+  default     = "ECS-EC2"
+  validation {
+    condition     = length(var.default_subsystem_name) >= 1 && length(var.default_subsystem_name) <= 64
+    error_message = "The Default Subsystem Name length should be within 1 and 64 characters"
+  }
 }
 
 variable "task_execution_role_arn" {
-  description = "ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume"
+  description = "External IAM role ARN for task execution. If provided, this role will be used instead of creating new roles."
   type        = string
   default     = null
 }
 
 variable "tags" {
+  description = "A map of tags to assign to the resources"
   type        = map(string)
-  description = "Resource tags"
   default     = {}
+}
+
+variable "health_check_enabled" {
+  description = "Enable ECS container health check for the OTEL agent container, Requires OTEL collector image version v0.4.2 or later."
+  type        = bool
+  default     = false
+}
+
+variable "health_check_interval" {
+  description = "Health check interval in seconds. Only used if health_check_enabled is true."
+  type        = number
+  default     = 30
+}
+
+variable "health_check_timeout" {
+  description = "Health check timeout in seconds. Only used if health_check_enabled is true."
+  type        = number
+  default     = 5
+}
+
+variable "health_check_retries" {
+  description = "Health check retries. Only used if health_check_enabled is true."
+  type        = number
+  default     = 3
+}
+
+variable "health_check_start_period" {
+  description = "Health check start period in seconds. Only used if health_check_enabled is true."
+  type        = number
+  default     = 10
 }

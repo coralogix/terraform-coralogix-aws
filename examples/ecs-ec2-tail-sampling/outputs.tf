@@ -1,29 +1,39 @@
-output "coralogix_otel_agent_service_id" {
-  description = "ID of the ECS Service for the OTEL Agent Daemon"
-  value       = module.otel_ecs_ec2_tail_sampling.agent_service_name
+output "cloudmap_namespace_id" {
+  description = "ID of the CloudMap namespace"
+  value       = module.otel_ecs_ec2_tail_sampling.cloudmap_namespace_id
 }
 
-output "coralogix_otel_agent_task_definition_arn" {
-  description = "ARN of the ECS Task Definition for the OTEL Agent Daemon"
-  value       = module.otel_ecs_ec2_tail_sampling.agent_task_definition_arn
-}
-
-output "coralogix_otel_gateway_service_id" {
-  description = "ID of the ECS Service for the OTEL Gateway"
+output "gateway_service_name" {
+  description = "Name of the Gateway ECS service"
   value       = module.otel_ecs_ec2_tail_sampling.gateway_service_name
 }
 
-output "coralogix_otel_gateway_task_definition_arn" {
-  description = "ARN of the ECS Task Definition for the OTEL Gateway"
+output "gateway_task_definition_arn" {
+  description = "ARN of the Gateway task definition"
   value       = module.otel_ecs_ec2_tail_sampling.gateway_task_definition_arn
 }
 
-output "coralogix_otel_receiver_service_id" {
-  description = "ID of the ECS Service for the OTEL Receiver (central-cluster deployment only)"
+output "agent_service_name" {
+  description = "Name of the Agent ECS service (only for tail-sampling deployment)"
+  value       = module.otel_ecs_ec2_tail_sampling.agent_service_name
+}
+
+output "agent_task_definition_arn" {
+  description = "ARN of the Agent task definition (only for tail-sampling deployment)"
+  value       = module.otel_ecs_ec2_tail_sampling.agent_task_definition_arn
+}
+
+output "receiver_service_name" {
+  description = "Name of the Receiver ECS service (only for central-cluster deployment)"
   value       = module.otel_ecs_ec2_tail_sampling.receiver_service_name
 }
 
-output "coralogix_otel_receiver_task_definition_arn" {
-  description = "ARN of the ECS Task Definition for the OTEL Receiver (central-cluster deployment only)"
+output "receiver_task_definition_arn" {
+  description = "ARN of the Receiver task definition (only for central-cluster deployment)"
   value       = module.otel_ecs_ec2_tail_sampling.receiver_task_definition_arn
+}
+
+output "deployment_type" {
+  description = "The deployment type that was used"
+  value       = module.otel_ecs_ec2_tail_sampling.deployment_type
 }
