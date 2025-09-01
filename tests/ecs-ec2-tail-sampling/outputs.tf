@@ -111,7 +111,7 @@ output "external_role_gateway_service_name" {
 output "deployment_type" {
   description = "The deployment type that was used"
   value = (
-    var.test_scenario == "tail-sampling" ? module.otel_tail_sampling[0].deployment_type : 
+    var.test_scenario == "tail-sampling" ? module.otel_tail_sampling[0].deployment_type :
     var.test_scenario == "central-cluster" ? module.otel_central_cluster[0].deployment_type :
     var.test_scenario == "external-role" ? module.otel_external_role[0].deployment_type : null
   )

@@ -29,29 +29,29 @@ module "otel_tail_sampling" {
 
   # Required parameters
   ecs_cluster_name      = var.ecs_cluster_name
-  vpc_id               = var.vpc_id
-  subnet_ids           = var.subnet_ids
-  security_group_ids   = var.security_group_ids
-  deployment_type      = "tail-sampling"
-  s3_config_bucket     = var.s3_config_bucket
-  agent_s3_config_key  = var.agent_s3_config_key
+  vpc_id                = var.vpc_id
+  subnet_ids            = var.subnet_ids
+  security_group_ids    = var.security_group_ids
+  deployment_type       = "tail-sampling"
+  s3_config_bucket      = var.s3_config_bucket
+  agent_s3_config_key   = var.agent_s3_config_key
   gateway_s3_config_key = var.gateway_s3_config_key
-  image_version        = var.image_version
-  coralogix_region     = var.coralogix_region
-  api_key              = var.api_key
+  image_version         = var.image_version
+  coralogix_region      = var.coralogix_region
+  api_key               = var.api_key
 
   # Optional parameters
-  name_prefix = "tail"
-  gateway_task_count = var.gateway_task_count
-  memory            = var.memory
-  default_application_name = var.default_application_name
-  default_subsystem_name   = var.default_subsystem_name
+  name_prefix               = "tail"
+  gateway_task_count        = var.gateway_task_count
+  memory                    = var.memory
+  default_application_name  = var.default_application_name
+  default_subsystem_name    = var.default_subsystem_name
   health_check_enabled      = var.health_check_enabled
   health_check_interval     = var.health_check_interval
   health_check_timeout      = var.health_check_timeout
   health_check_retries      = var.health_check_retries
   health_check_start_period = var.health_check_start_period
-  tags = var.tags
+  tags                      = var.tags
 }
 
 # Test: Central Cluster Deployment
@@ -60,32 +60,32 @@ module "otel_central_cluster" {
   source = "../../modules/ecs-ec2-tail-sampling"
 
   # Required parameters
-  ecs_cluster_name      = var.ecs_cluster_name
-  vpc_id               = var.vpc_id
-  subnet_ids           = var.subnet_ids
-  security_group_ids   = var.security_group_ids
-  deployment_type      = "central-cluster"
-  s3_config_bucket     = var.s3_config_bucket
-  agent_s3_config_key  = var.agent_s3_config_key
-  gateway_s3_config_key = var.gateway_s3_config_key
+  ecs_cluster_name       = var.ecs_cluster_name
+  vpc_id                 = var.vpc_id
+  subnet_ids             = var.subnet_ids
+  security_group_ids     = var.security_group_ids
+  deployment_type        = "central-cluster"
+  s3_config_bucket       = var.s3_config_bucket
+  agent_s3_config_key    = var.agent_s3_config_key
+  gateway_s3_config_key  = var.gateway_s3_config_key
   receiver_s3_config_key = var.receiver_s3_config_key
-  image_version        = var.image_version
-  coralogix_region     = var.coralogix_region
-  api_key              = var.api_key
+  image_version          = var.image_version
+  coralogix_region       = var.coralogix_region
+  api_key                = var.api_key
 
   # Optional parameters
-  name_prefix = "central"
-  gateway_task_count = var.gateway_task_count
-  receiver_task_count = var.receiver_task_count
-  memory            = var.memory
-  default_application_name = var.default_application_name
-  default_subsystem_name   = var.default_subsystem_name
+  name_prefix               = "central"
+  gateway_task_count        = var.gateway_task_count
+  receiver_task_count       = var.receiver_task_count
+  memory                    = var.memory
+  default_application_name  = var.default_application_name
+  default_subsystem_name    = var.default_subsystem_name
   health_check_enabled      = var.health_check_enabled
   health_check_interval     = var.health_check_interval
   health_check_timeout      = var.health_check_timeout
   health_check_retries      = var.health_check_retries
   health_check_start_period = var.health_check_start_period
-  tags = var.tags
+  tags                      = var.tags
 }
 
 # Test: External IAM Role Deployment
@@ -95,29 +95,29 @@ module "otel_external_role" {
 
   # Required parameters
   ecs_cluster_name      = var.ecs_cluster_name
-  vpc_id               = var.vpc_id
-  subnet_ids           = var.subnet_ids
-  security_group_ids   = var.security_group_ids
-  deployment_type      = "tail-sampling"
-  s3_config_bucket     = var.s3_config_bucket
-  agent_s3_config_key  = var.agent_s3_config_key
+  vpc_id                = var.vpc_id
+  subnet_ids            = var.subnet_ids
+  security_group_ids    = var.security_group_ids
+  deployment_type       = "tail-sampling"
+  s3_config_bucket      = var.s3_config_bucket
+  agent_s3_config_key   = var.agent_s3_config_key
   gateway_s3_config_key = var.gateway_s3_config_key
-  image_version        = var.image_version
-  coralogix_region     = var.coralogix_region
-  api_key              = var.api_key
+  image_version         = var.image_version
+  coralogix_region      = var.coralogix_region
+  api_key               = var.api_key
 
   # Optional parameters
-  name_prefix = "external"
-  gateway_task_count = var.gateway_task_count
-  memory            = var.memory
-  default_application_name = var.default_application_name
-  default_subsystem_name   = var.default_subsystem_name
+  name_prefix               = "external"
+  gateway_task_count        = var.gateway_task_count
+  memory                    = var.memory
+  default_application_name  = var.default_application_name
+  default_subsystem_name    = var.default_subsystem_name
   health_check_enabled      = var.health_check_enabled
   health_check_interval     = var.health_check_interval
   health_check_timeout      = var.health_check_timeout
   health_check_retries      = var.health_check_retries
   health_check_start_period = var.health_check_start_period
-  task_execution_role_arn = var.task_execution_role_arn
-  tags = var.tags
+  task_execution_role_arn   = var.task_execution_role_arn
+  tags                      = var.tags
 }
- 
+

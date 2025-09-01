@@ -1,5 +1,5 @@
 locals {
-  name = "coralogix-otel-tail-sampling"
+  name        = "coralogix-otel-tail-sampling"
   name_prefix = var.name_prefix != "" ? "${var.name_prefix}-" : ""
   tags = merge(
     {
@@ -427,12 +427,12 @@ resource "aws_ecs_task_definition" "receiver" {
 
 # Agent Service (only for tail sampling)
 resource "aws_ecs_service" "agent" {
-  count           = var.deployment_type == "tail-sampling" ? 1 : 0
-  name            = "${local.name_prefix}coralogix-otel-agent"
-  cluster         = var.ecs_cluster_name
-  task_definition = aws_ecs_task_definition.agent[0].arn
-  launch_type     = "EC2"
-  scheduling_strategy = "DAEMON"
+  count                              = var.deployment_type == "tail-sampling" ? 1 : 0
+  name                               = "${local.name_prefix}coralogix-otel-agent"
+  cluster                            = var.ecs_cluster_name
+  task_definition                    = aws_ecs_task_definition.agent[0].arn
+  launch_type                        = "EC2"
+  scheduling_strategy                = "DAEMON"
   deployment_maximum_percent         = 100
   deployment_minimum_healthy_percent = 0
   deployment_circuit_breaker {

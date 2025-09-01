@@ -92,16 +92,16 @@ variable "custom_csv_header" {
 variable "integration_info" {
   description = "Values of s3 integraion in case that you want to deploy more than one integration"
   type = map(object({
-    s3_key_prefix        = optional(string)
-    s3_key_suffix        = optional(string)
-    application_name     = string
-    subsystem_name       = string
-    integration_type     = string
-    lambda_name          = optional(string)
-    newline_pattern      = optional(string)
-    blocking_pattern     = optional(string)
-    lambda_log_retention = optional(number)
-    api_key              = string
+    s3_key_prefix                    = optional(string)
+    s3_key_suffix                    = optional(string)
+    application_name                 = string
+    subsystem_name                   = string
+    integration_type                 = string
+    lambda_name                      = optional(string)
+    newline_pattern                  = optional(string)
+    blocking_pattern                 = optional(string)
+    lambda_log_retention             = optional(number)
+    api_key                          = string
     store_api_key_in_secrets_manager = optional(bool)
   }))
   default = null
