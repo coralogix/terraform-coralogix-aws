@@ -17,6 +17,8 @@ The module can run only on the following regions eu-west-1,eu-north-1,ap-southea
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.15.1 |
 
+## Variables
+
 | Variable name | Description | Type | Default | Required | 
 |---------------|-------------|------|---------|:--------:|
 | aws_region | The AWS region that you want to create the S3 bucket, Must be the same as the AWS region where your [coralogix account](https://coralogix.com/docs/coralogix-domain/) is set. Allowd values: eu-west-1, eu-north-1, ap-southeast-1,ap-southeast-1, ap-south-1, us-east-2, us-west-2 | `string` | n/a | :heavy_check_mark: |
@@ -26,3 +28,13 @@ The module can run only on the following regions eu-west-1,eu-north-1,ap-southea
 | metrics_bucket_force_destroy | enable force destroy to the metrics S3 bucekt, to not allow delete if there is files in the bucket | `bool` | false | |
 | logs_kms_arn |  The arn of your kms for the logs bucket , Note: make sure that the kms is in the same region as your bucket | `string` | n/a | |
 | metrics_kms_arn | The arn of your kms for the metrics bucket , Note: make sure that the kms is in the same region as your bucket | `string` | n/a | |
+
+## Outputs
+
+| Output name | Description | Type |
+|-------------|-------------|------|
+| logs_bucket_id | ID of the created logs S3 bucket (null if not created). | `string` |
+| metrics_bucket_id | ID of the created metrics S3 bucket (null if not created). | `string` |
+| wrong_region | Validation message if an unsupported region is used | `string` |
+| logs_kms_problem | Validation message if the logs KMS key is not in the same region | `string` |
+| metrics_kms_problem | Validation message if the metrics KMS key is not in the same region | `string` |
