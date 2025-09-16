@@ -9,3 +9,14 @@ output "logs_kms_problem" {
 output "metrics_kms_problem" {
   value = var.metrics_kms_arn == "" || contains(split(":", var.metrics_kms_arn), var.aws_region) ? "" : "The KMS that you specified for metrics is not in the same region as your aws_region"
 }
+
+# Bucket outputs for external lifecycle configuration
+output "logs_bucket_id" {
+  value       = local.logs_validations ? aws_s3_bucket.logs_bucket_name[0].id : null
+  description = "ID of the created logs S3 bucket"
+}
+
+output "metrics_bucket_id" {
+  value       = local.metrics_validations ? aws_s3_bucket.metrics_bucket_name[0].id : null
+  description = "ID of the created metrics S3 bucket"
+}

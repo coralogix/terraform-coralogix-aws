@@ -19,3 +19,12 @@ module "s3-archive" {
   metrics_bucket_name = "<your bucket name>"
 }
 ```
+
+## Available Outputs
+
+The module provides bucket IDs as outputs for external configuration:
+
+- `logs_bucket_id` - ID of the created logs S3 bucket
+- `metrics_bucket_id` - ID of the created metrics S3 bucket
+
+These outputs can be used to configure S3 lifecycle policies, intelligent tiering, or other bucket-level configurations externally.
