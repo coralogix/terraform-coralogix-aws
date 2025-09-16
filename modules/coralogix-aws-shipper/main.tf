@@ -330,7 +330,7 @@ resource "aws_lambda_permission" "sns_lambda_permission" {
 }
 
 resource "aws_sns_topic_policy" "test" {
-  count  = local.sns_enable && var.integration_type != "Sns" ? 1 : 0
+  count  = local.sns_enable && var.integration_type != "Sns" && var.create_sns_topic_policy ? 1 : 0
   arn    = data.aws_sns_topic.sns_topic[count.index].arn
   policy = data.aws_iam_policy_document.topic[count.index].json
 }

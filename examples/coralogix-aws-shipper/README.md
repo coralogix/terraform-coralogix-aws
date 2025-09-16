@@ -41,6 +41,22 @@ module "coralogix-shipper-cloudtrail" {
 }
 ```
 
+### CloudTrail with Custom SNS Policy
+```bash
+module "coralogix-shipper-cloudtrail-custom-policy" {
+  source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
+
+  coralogix_region        = "EU1"
+  integration_type        = "CloudTrail"
+  api_key                 = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  application_name        = "cloudtrail-custom-policy"
+  subsystem_name          = "logs"
+  s3_bucket_name          = "test-bucket-name"
+  sns_topic_name          = "your-existing-sns-topic"
+  create_sns_topic_policy = false  # Preserve existing SNS topic policy
+}
+```
+
 ### S3Csv
 ```bash
 module "coralogix-shipper-S3Csv" {
@@ -374,6 +390,48 @@ module "coralogix_firehose_metrics_private_link" {
       namespace    = "AWS/S3"
       metric_names = ["BucketSizeBytes"]
     },
+  ]
+}
+```
+
+## Custom SNS Topic Policy Management
+
+When using SNS-based integrations (S3, CloudTrail, VpcFlow, CloudFront, S3Csv), the module creates a restrictive SNS topic policy by default. If you want to preserve your existing SNS topic policies, set `create_sns_topic_policy = false`:
+
+```bash
+module "coralogix-shipper-custom-policy" {
+  source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
+
+  coralogix_region        = "EU1"
+  integration_type        = "CloudTrail"
+  api_key                 = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  application_name        = "custom-policy-example"
+  subsystem_name          = "logs"
+  s3_bucket_name          = "test-bucket-name"
+  sns_topic_name          = "your-existing-sns-topic"
+  create_sns_topic_policy = false  # Preserve existing SNS topic policy
+}
+```
+
+**Important**: When using `create_sns_topic_policy = false`, ensure your SNS topic policy includes the required S3 service permission:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "s3.amazonaws.com"
+      },
+      "Action": "SNS:Publish",
+      "Resource": "arn:aws:sns:REGION:ACCOUNT-ID:TOPIC-NAME",
+      "Condition": {
+        "ArnLike": {
+          "aws:SourceArn": "arn:aws:s3:::YOUR-S3-BUCKET-NAME"
+        }
+      }
+    }
   ]
 }
 ```
