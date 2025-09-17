@@ -1,4 +1,9 @@
 # Changelog
+## v3.10.3
+#### **s3-archive**
+### 💡 Enhancements 💡
+- Added `logs_bucket_id` and `metrics_bucket_id` outputs.
+
 ## v3.10.2
 #### **coralogix-aws-shipper**
 ### 💡 Enhancements 💡
