@@ -1,4 +1,9 @@
 # Changelog
+## v3.10.4 
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 💡
+- Added `create_sns_topic_policy` variable to allow users to preserve existing SNS topic policies when using SNS-based integrations (S3, CloudTrail, VpcFlow, CloudFront, S3Csv). Set to `false` to prevent the module from overwriting custom SNS topic policies.
+
 ## v3.10.3
 #### **s3-archive**
 ### 💡 Enhancements 💡

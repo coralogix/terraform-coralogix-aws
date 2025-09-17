@@ -222,6 +222,12 @@ variable "sns_topic_filter_policy_scope" {
   default     = null
 }
 
+variable "create_sns_topic_policy" {
+  description = "Whether to create and manage the SNS topic policy. Set to false if you want to manage the policy yourself and preserve existing permissions. See README for required permissions when using custom policy."
+  type        = bool
+  default     = true
+}
+
 # vpc variables
 
 variable "subnet_ids" {

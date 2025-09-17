@@ -120,6 +120,7 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 | <a name="input_sns_topic_name"></a> [sns_topic_name](#input\_sns\_topic\_name) | The SNS topic containing the SNS subscription. You need this only when using the SNS integration. | `string` |  n/a | yes |
 | <a name="input_sns_topic_filter"></a> [sns_topic_filter](#input\_sns\_topic\_filter) | Map of filters to add to the SNS topic Lambda subscription. | `map(any)` |  n/a | no |
 | <a name="input_sns_topic_filter_policy_scope"></a> [sns_topic_filter_policy_scope](#input\_sns\_topic\_filter\_policy\_scope) | The scope of the filter policy for the SNS topic Lambda subscription, could be `MessageAttributes` or `MessageBody` | `string` |  n/a | no |
+| <a name="input_create_sns_topic_policy"></a> [create_sns_topic_policy](#input\_create\_sns\_topic\_policy) | Whether to create and manage the SNS topic policy. Set to false if you want to manage the policy yourself and preserve existing permissions. | `bool` | `true` | no |
 
 <!-- /description -->
 
@@ -359,6 +360,47 @@ module "coralogix_aws_shipper" "coralogix_firehose_metrics_private_link" {
   ]
 }
 ```
+
+## Custom SNS Topic Policy Management
+
+Set `create_sns_topic_policy = false` to preserve existing SNS topic policies:
+
+```hcl
+module "coralogix_shipper" {
+  source = "coralogix/coralogix-aws-shipper/aws"
+  
+  create_sns_topic_policy = false
+  sns_topic_name         = "your-existing-sns-topic"
+  # ... other configuration
+}
+```
+
+### Required Permissions
+
+When `create_sns_topic_policy = false`, include this permission in your SNS topic policy:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "s3.amazonaws.com"
+      },
+      "Action": "SNS:Publish",
+      "Resource": "arn:aws:sns:REGION:ACCOUNT-ID:TOPIC-NAME",
+      "Condition": {
+        "ArnLike": {
+          "aws:SourceArn": "arn:aws:s3:::YOUR-S3-BUCKET-NAME"
+        }
+      }
+    }
+  ]
+}
+```
+
+**Note**: This only applies to S3-based integrations (S3, CloudTrail, VpcFlow, CloudFront, S3Csv). Direct SNS integration (`integration_type = "Sns"`) does not create SNS topic policies.
 
 ## Outputs
 
