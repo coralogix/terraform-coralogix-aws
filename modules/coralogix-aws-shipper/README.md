@@ -120,6 +120,7 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 | <a name="input_sns_topic_name"></a> [sns_topic_name](#input\_sns\_topic\_name) | The SNS topic containing the SNS subscription. You need this only when using the SNS integration. | `string` |  n/a | yes |
 | <a name="input_sns_topic_filter"></a> [sns_topic_filter](#input\_sns\_topic\_filter) | Map of filters to add to the SNS topic Lambda subscription. | `map(any)` |  n/a | no |
 | <a name="input_sns_topic_filter_policy_scope"></a> [sns_topic_filter_policy_scope](#input\_sns\_topic\_filter\_policy\_scope) | The scope of the filter policy for the SNS topic Lambda subscription, could be `MessageAttributes` or `MessageBody` | `string` |  n/a | no |
+| <a name="input_sns_topic_kms_key_id"></a> [sns_topic_kms_key_id](#input\_sns\_topic\_kms\_key\_id) | The ID of the KMS key used to encrypt the SNS topic. If not specified, the default AWS managed KMS key will be used | `string` | `alias/aws/sns` | no |
 
 <!-- /description -->
 
