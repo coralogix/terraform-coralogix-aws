@@ -1,4 +1,10 @@
 # Changelog
+
+## v3.10.5 
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 💡
+- Added variable to disable the creation of `lambda_notification` and `sqs_notification` to manage it outside the module.
+
 ## v3.10.4 
 #### **coralogix-aws-shipper**
 ### 💡 Enhancements 💡
