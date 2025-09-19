@@ -2,24 +2,22 @@
   "preset": "conventionalcommits",
   "branches": ["master"],
   "plugins": [
-    "@semantic-release/commit-analyzer",
-    "@semantic-release/release-notes-generator",
-    ["@semantic-release/changelog", {"changelogTitle": "# Changelog"}],
-    "semantic-release-major-tag",
     [
-      "@semantic-release/github",
+      "@semantic-release/commit-analyzer",
       {
-        "failComment": false,
-        "failTitle": false,
-        "releasedLabels": false
+        "releaseRules": [
+          {"type": "fix", "release": "patch"},
+          {"type": "feat", "release": "minor"},
+          {"type": "major", "release": "major"},
+          {"type": "docs", "release": "false"},
+          {"type": "chore", "release": "false"},
+          {"type": "ci", "release": "false"},
+          {"type": "test", "release": "false"}
+        ]
       }
     ],
     [
-      "@semantic-release/git",
-      {
-        "assets": ["CHANGELOG.md"],
-        "message": "chore: Release ${nextRelease.version} [skip ci]"
-      }
+      "@semantic-release/github"
     ]
   ]
 }
