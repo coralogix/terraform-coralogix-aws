@@ -5,29 +5,18 @@ on:
   push:
     branches:
       - master
-    paths:
-      - '**/*.tpl'
-      - '**/*.py'
-      - '**/*.tf'
-      - '.github/workflows/release.yml'
-
 jobs:
   release:
     name: release
     runs-on: ubuntu-latest
     if: github.repository_owner == 'coralogix'
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
-          persist-credentials: false
-          fetch-depth: 0
+          cache: npm
+          node-version: lts/*
 
-      - name: Release
-        uses: cycjimmy/semantic-release-action@v3.4.2
-        with:
-          semantic_version: 19.0.5
-          extra_plugins: |
-            conventional-changelog-conventionalcommits@4.6.3
+      - run: npx semantic-release@21.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

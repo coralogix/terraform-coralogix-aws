@@ -1,22 +1,25 @@
 {
-  "branches": [
-    "master"
-  ],
-  "ci": false,
+  "preset": "conventionalcommits",
+  "branches": ["master"],
   "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    ["@semantic-release/changelog", {"changelogTitle": "# Changelog"}],
+    "semantic-release-major-tag",
     [
-      "@semantic-release/commit-analyzer",
+      "@semantic-release/github",
       {
-        "preset": "conventionalcommits",
-        "releaseRules": [
-          {"message": "fix:*", "release": "patch"},
-          {"message": "feat:*", "release": "minor"},
-          {"message": "major:*", "release": "major"}
-        ]
+        "failComment": false,
+        "failTitle": false,
+        "releasedLabels": false
       }
     ],
     [
-      "@semantic-release/github"
+      "@semantic-release/git",
+      {
+        "assets": ["CHANGELOG.md"],
+        "message": "chore: Release ${nextRelease.version} [skip ci]"
+      }
     ]
   ]
 }
