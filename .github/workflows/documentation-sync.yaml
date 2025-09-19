@@ -1,4 +1,4 @@
-name: trigger documentation sync
+name: Trigger Documentation Sync
 
 on:
   workflow_dispatch:
@@ -13,7 +13,7 @@ jobs:
   trigger_action:
     runs-on: ubuntu-latest
     steps:
-      - name: trigger  ci action in documentation repo
+      - name: trigger ci action in documentation repo
         run: |
           curl -X POST -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
                -H "Accept: application/vnd.github.v3+json" \
