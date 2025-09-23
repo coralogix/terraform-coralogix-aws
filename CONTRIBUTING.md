@@ -81,5 +81,18 @@ When you submit a change you will need to make sure that you made all of the nec
 - Update the CHANGELOG.md file
 - In case you add a variable make sure that you also add him to the example/<module name>/variable.tf and README files
 
-## Release Formate
-In order to release a new version the PR title and the commits needs to be in the following format : `release type: message`. Possible release types are: `fix` --> fixing a bug, `feat` --> adding a new feature, `major` --> apply major changes to a module for example breaking change.
+## Release Format
+
+In order to release a new version the PR title and the commits needs to be in the following format: `release type: message`. 
+
+### Possible Release Types:
+
+- **`fix`** - fixing a bug (creates patch release: 3.10.0 → 3.10.1)
+- **`feat`** - adding a new feature (creates minor release: 3.10.0 → 3.11.0)
+- **`major`** - apply major changes to a module, for example breaking change (creates major release: 3.10.0 → 4.0.0)
+
+### Release Process
+
+Releases are **automatically created** when PRs with proper release types are merged to the master branch. 
+
+**Note**: CHANGELOG.md updates and release notes are currently manual - please update the changelog as part of your PR. 

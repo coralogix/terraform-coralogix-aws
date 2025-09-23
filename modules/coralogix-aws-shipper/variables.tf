@@ -228,6 +228,12 @@ variable "sns_topic_kms_key_id" {
   default     = "alias/aws/sns"
 }
 
+variable "create_sns_topic_policy" {
+  description = "Whether to create and manage the SNS topic policy. Set to false if you want to manage the policy yourself and preserve existing permissions. See README for required permissions when using custom policy."
+  type        = bool
+  default     = true
+}
+
 # vpc variables
 variable "subnet_ids" {
   description = "ID of Subnet into which to deploy the integration"

@@ -4,13 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
       - master
-    paths:
-      - '**/*.tpl'
-      - '**/*.py'
-      - '**/*.tf'
-      - '.github/workflows/release.yml'
 
 jobs:
   release:
@@ -18,17 +12,13 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository_owner == 'coralogix'
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-          fetch-depth: 0
-
-      - name: Release
-        uses: cycjimmy/semantic-release-action@v3.4.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      
+      - name: Semantic Release
+        uses: cycjimmy/semantic-release-action@9cc899c47e6841430bbaedb43de1560a568dfd16 # v5.0.0
         with:
           semantic_version: 19.0.5
           extra_plugins: |
-            conventional-changelog-conventionalcommits@4.6.3
+            conventional-changelog-conventionalcommits@9.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

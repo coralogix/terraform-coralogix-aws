@@ -1,18 +1,18 @@
 {
-  "branches": [
-    "main",
-    "master"
-  ],
-  "ci": false,
+  "preset": "conventionalcommits",
+  "branches": ["master"],
   "plugins": [
     [
       "@semantic-release/commit-analyzer",
       {
-        "preset": "conventionalcommits",
         "releaseRules": [
-          {"message": "fix:*", "release": "patch"},
-          {"message": "feat:*", "release": "minor"},
-          {"message": "major:*", "release": "major"}
+          {"type": "fix", "release": "patch"},
+          {"type": "feat", "release": "minor"},
+          {"type": "major", "release": "major"},
+          {"type": "chore", "release": "minor"},
+          {"type": "docs", "release": false},
+          {"type": "ci", "release": false},
+          {"type": "test", "release": false}
         ]
       }
     ],
