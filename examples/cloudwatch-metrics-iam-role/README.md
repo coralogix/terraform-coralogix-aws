@@ -16,7 +16,7 @@
     source = ""coralogix/aws/coralogix//modules/cloudwatch-metrics-iam-role""
 
     coralogix_company_id = "01234567890"
-    coralogix_region     = "us-west-2"
+    coralogix_region     = "US2"
     role_name            = "coralogix-aws-metrics-integration-role"
-    external_id          = "c0r4l0g1x"
+    external_id_secret   = "c0r4l0g1x"
   }
