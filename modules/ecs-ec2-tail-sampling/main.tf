@@ -219,7 +219,7 @@ resource "aws_ecs_task_definition" "agent" {
         value : local.coralogix_domain
       },
       {
-        name : "PRIVATE_KEY"
+        name : "CORALOGIX_PRIVATE_KEY"
         value : var.api_key
       },
       {
@@ -229,6 +229,10 @@ resource "aws_ecs_task_definition" "agent" {
       {
         name : "SUB_SYS"
         value : var.default_subsystem_name
+      },
+      {
+        name : "MY_POD_IP"
+        value : "0.0.0.0"
       }
     ],
     command : [
@@ -300,7 +304,7 @@ resource "aws_ecs_task_definition" "gateway" {
         Value : local.coralogix_domain
       },
       {
-        Name : "PRIVATE_KEY"
+        Name : "CORALOGIX_PRIVATE_KEY"
         Value : var.api_key
       },
       {
@@ -310,6 +314,10 @@ resource "aws_ecs_task_definition" "gateway" {
       {
         Name : "SUB_SYS"
         Value : var.default_subsystem_name
+      },
+      {
+        Name : "MY_POD_IP"
+        Value : "0.0.0.0"
       }
     ]
 
@@ -388,7 +396,7 @@ resource "aws_ecs_task_definition" "receiver" {
         Value : local.coralogix_domain
       },
       {
-        Name : "PRIVATE_KEY"
+        Name : "CORALOGIX_PRIVATE_KEY"
         Value : var.api_key
       },
       {
@@ -398,6 +406,10 @@ resource "aws_ecs_task_definition" "receiver" {
       {
         Name : "SUB_SYS"
         Value : var.default_subsystem_name
+      },
+      {
+        Name : "MY_POD_IP"
+        Value : "0.0.0.0"
       }
     ]
 

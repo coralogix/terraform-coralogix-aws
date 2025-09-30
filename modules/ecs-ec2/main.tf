@@ -190,7 +190,7 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
         value : local.otel_config
       }] : [],
       var.use_api_key_secret != true ? [{
-        name : "PRIVATE_KEY"
+        name : "CORALOGIX_PRIVATE_KEY"
         value : var.api_key
     }] : []),
     secrets : concat(
@@ -199,7 +199,7 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
         valueFrom : var.custom_config_parameter_store_name
       }] : [],
       var.use_api_key_secret == true ? [{
-        name : "PRIVATE_KEY"
+        name : "CORALOGIX_PRIVATE_KEY"
         valueFrom : var.api_key_secret_arn
       }] : []
     ),
