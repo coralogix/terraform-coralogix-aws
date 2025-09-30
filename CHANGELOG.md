@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.10.6
+#### **ecs-ec2**
+### Update env variable name
+
 ## v3.10.5 
 #### **coralogix-aws-shipper**
 ### 💡 Enhancements 💡

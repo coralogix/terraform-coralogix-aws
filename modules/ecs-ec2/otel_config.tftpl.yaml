@@ -242,7 +242,7 @@ connectors:
 exporters:
   coralogix:
     domain: $${CORALOGIX_DOMAIN}
-    private_key: $${PRIVATE_KEY}
+    private_key: $${CORALOGIX_PRIVATE_KEY}
     application_name: $${APP_NAME}
     subsystem_name: $${SUB_SYS}
     application_name_attributes:
@@ -257,7 +257,7 @@ exporters:
   coralogix/resource_catalog:
     application_name: resource
     domain: $${CORALOGIX_DOMAIN}
-    private_key: $${PRIVATE_KEY}
+    private_key: $${CORALOGIX_PRIVATE_KEY}
     logs:
       headers:
         X-Coralogix-Distribution: ecs-ec2-integration/1.0.0
