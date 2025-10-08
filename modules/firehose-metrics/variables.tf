@@ -241,3 +241,9 @@ variable "server_side_encryption" {
     error_message = "Valid values for key_type are AWS_OWNED_CMK and CUSTOMER_MANAGED_CMK."
   }
 }
+
+variable "static_labels" {
+  description = "List of key-value pairs that will be added as labels to every metric in the integration."
+  type        = list(string)
+  default     = []
+}
