@@ -93,8 +93,8 @@ module "ecs-ec2" {
   ecs_cluster_name                    = "ecs-cluster-name"
   image_version                       = "v0.5.0"
   coralogix_region                    = "EU1"
-  default_application_name            = "Coralogix Application Name"
-  default_subsystem_name              = "Coralogix Subsystem Name"
+  # Optional: default_application_name = "Coralogix Application Name"  # defaults to "otel"
+  # Optional: default_subsystem_name   = "Coralogix Subsystem Name"    # defaults to "ecs-ec2"
   api_key                             = "cxtp_CoralogixSendYourDataAPIKey"=
 }
 
@@ -104,8 +104,8 @@ module "ecs-ec2-s3" {
   ecs_cluster_name                    = "ecs-cluster-name"
   image_version                       = "v0.5.0"
   coralogix_region                    = "EU1"
-  default_application_name            = "Coralogix Application Name"
-  default_subsystem_name              = "Coralogix Subsystem Name"
+  # Optional: default_application_name = "Coralogix Application Name"  # defaults to "otel"
+  # Optional: default_subsystem_name   = "Coralogix Subsystem Name"    # defaults to "ecs-ec2"
   api_key                             = "cxtp_CoralogixSendYourDataAPIKey"
   # S3 Configuration
   config_source                       = "s3"
@@ -119,8 +119,8 @@ module "ecs-ec2-parameter-store" {
   ecs_cluster_name                    = "ecs-cluster-name"
   image_version                       = "v0.5.0"
   coralogix_region                    = "EU1"
-  default_application_name            = "Coralogix Application Name"
-  default_subsystem_name              = "Coralogix Subsystem Name"
+  # Optional: default_application_name = "Coralogix Application Name"  # defaults to "otel"
+  # Optional: default_subsystem_name   = "Coralogix Subsystem Name"    # defaults to "ecs-ec2"
   api_key                             = "cxtp_CoralogixSendYourDataAPIKey"
   # Parameter Store Configuration
   config_source                       = "parameter-store"
@@ -163,8 +163,8 @@ module "ecs-ec2-parameter-store" {
 | <a name="input_memory"></a> [memory](#input\_memory) | The amount of memory (in MiB) used by the task. Note that your cluster must have sufficient memory available to support the given value. Minimum __256__ MiB. CPU Units will be allocated directly proportional to Memory. | `number` | `256` | no |
 | <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | The region of the Coralogix endpoint domain: [EU1\|EU2\|AP1\|AP2\|AP3\|US1\|US2\|custom]. If \"custom\" then __custom_domain__ parameter must be specified. | `string` | n/a | yes |
 | <a name="input_custom_domain"></a> [custom\_domain](#input\_custom\_domain) | [Optional] Coralogix custom domain, e.g. \"private.coralogix.com\" Private Link domain. If specified, overrides the public domain corresponding to the __coralogix_region__ parameter. | `string` | `null` | no |
-| <a name="input_default_application_name"></a> [default\_application\_name](#input\_default\_application\_name) | The default Coralogix Application name. | `string` | n/a | yes |
-| <a name="input_default_subsystem_name"></a> [default\_subsystem\_name](#input\_default\_subsystem\_name) | The default Coralogix Subsystem name. | `string` | n/a | yes |
+| <a name="input_default_application_name"></a> [default\_application\_name](#input\_default\_application\_name) | The default Coralogix Application name. | `string` | `"otel"` | no |
+| <a name="input_default_subsystem_name"></a> [default\_subsystem\_name](#input\_default\_subsystem\_name) | The default Coralogix Subsystem name. | `string` | `"ecs-ec2"` | no |
 | <a name="input_use_api_key_secret"></a> [use\_api\_key\_secret](#input\_use\_api\_key\_secret) | Whether to use API key stored in AWS Secrets Manager | `bool` | `false` | no |
 | <a name="input_api_key"></a> [api\_key](#input\_api\_key) | The Send-Your-Data API key for your Coralogix account. See: https://coralogix.com/docs/send-your-data-api-key/ | `string` | `null` | no |
 | <a name="input_api_key_secret_arn"></a> [api\_key\_secret\_arn](#input\_api\_key\_secret\_arn) | ARN of the Secrets Manager secret containing the API key | `string` | `null` | no |

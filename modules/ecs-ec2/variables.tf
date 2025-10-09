@@ -65,19 +65,13 @@ variable "custom_domain" {
 variable "default_application_name" {
   description = "The default Coralogix Application name."
   type        = string
-  validation {
-    condition     = length(var.default_application_name) >= 1 && length(var.default_application_name) <= 64
-    error_message = "The Default Application Name length should be within 1 and 64 characters"
-  }
+  default     = "otel"
 }
 
 variable "default_subsystem_name" {
   description = "The default Coralogix Subsystem name."
   type        = string
-  validation {
-    condition     = length(var.default_subsystem_name) >= 1 && length(var.default_subsystem_name) <= 64
-    error_message = "The Default Subsystem Name length should be within 1 and 64 characters"
-  }
+  default     = "ecs-ec2" 
 }
 
 variable "use_api_key_secret" {
