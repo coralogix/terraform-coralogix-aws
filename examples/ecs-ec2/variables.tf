@@ -33,11 +33,13 @@ variable "custom_domain" {
 variable "default_application_name" {
   description = "The default Coralogix Application name"
   type        = string
+  default     = "otel"
 }
 
 variable "default_subsystem_name" {
   description = "The default Coralogix Subsystem name"
   type        = string
+  default     = "ecs-ec2"
 }
 
 variable "use_api_key_secret" {
