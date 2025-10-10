@@ -11,10 +11,11 @@ resource "aws_s3_bucket_notification" "topic_notification" {
 }
 
 resource "aws_sns_topic" "this" {
-  for_each     = var.notification_email == null ? {} : var.integration_info != null ? var.integration_info : local.integration_info
-  name_prefix  = each.value.lambda_name == null ? "${module.locals[each.key].function_name}-Failure" : "${each.value.lambda_name}-Failure"
-  display_name = each.value.lambda_name == null ? "${module.locals[each.key].function_name}-Failure" : "${each.value.lambda_name}-Failure"
-  tags         = merge(var.tags, module.locals[each.key].tags)
+  for_each          = var.notification_email == null ? {} : var.integration_info != null ? var.integration_info : local.integration_info
+  name_prefix       = each.value.lambda_name == null ? "${module.locals[each.key].function_name}-Failure" : "${each.value.lambda_name}-Failure"
+  display_name      = each.value.lambda_name == null ? "${module.locals[each.key].function_name}-Failure" : "${each.value.lambda_name}-Failure"
+  kms_master_key_id = var.sns_topic_kms_key_id
+  tags              = merge(var.tags, module.locals[each.key].tags)
 }
 
 resource "aws_sns_topic_subscription" "lambda_sns_subscription" {

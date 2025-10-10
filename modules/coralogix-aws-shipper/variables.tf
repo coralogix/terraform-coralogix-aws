@@ -222,6 +222,12 @@ variable "sns_topic_filter_policy_scope" {
   default     = null
 }
 
+variable "sns_topic_kms_key_id" {
+  description = "The ID of the KMS key used to encrypt the SNS topic. If not specified, the default AWS managed KMS key will be used"
+  type        = string
+  default     = "alias/aws/sns"
+}
+
 variable "create_sns_topic_policy" {
   description = "Whether to create and manage the SNS topic policy. Set to false if you want to manage the policy yourself and preserve existing permissions. See README for required permissions when using custom policy."
   type        = bool
@@ -229,7 +235,6 @@ variable "create_sns_topic_policy" {
 }
 
 # vpc variables
-
 variable "subnet_ids" {
   description = "ID of Subnet into which to deploy the integration"
   type        = list(string)
