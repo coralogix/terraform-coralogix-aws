@@ -24,7 +24,7 @@ module "otel_ecs_ec2_coralogix" {
 
   # Required parameters
   ecs_cluster_name         = "your-ecs-cluster-name"
-  image_version            = "v0.4.2"
+  image_version            = "v0.5.1"
   coralogix_region         = "EU1"
   default_application_name = "MyApplication"
   default_subsystem_name   = "ECS-EC2"
@@ -48,7 +48,7 @@ module "ecs-ec2" {
   source = "coralogix/aws/coralogix//modules/ecs-ec2"
 
   ecs_cluster_name         = "my-cluster"
-  image_version            = "v0.4.2"
+  image_version            = "v0.5.1"
   memory                   = 2048
   coralogix_region         = "EU1"
   default_application_name = "MyApp"
@@ -78,11 +78,9 @@ module "ecs-ec2-s3" {
   source = "coralogix/aws/coralogix//modules/ecs-ec2"
 
   ecs_cluster_name         = "my-cluster"
-  image_version            = "v0.4.2"
+  image_version            = "v0.5.1"
   memory                   = 2048
   coralogix_region         = "EU1"
-  default_application_name = "MyApp"
-  default_subsystem_name   = "ECS-EC2"
   api_key                  = "your-api-key"
 
   # S3 Configuration
@@ -101,11 +99,9 @@ module "ecs-ec2-parameter-store" {
   source = "coralogix/aws/coralogix//modules/ecs-ec2"
 
   ecs_cluster_name         = "my-cluster"
-  image_version            = "v0.4.2"
+  image_version            = "v0.5.1"
   memory                   = 2048
   coralogix_region         = "EU1"
-  default_application_name = "MyApp"
-  default_subsystem_name   = "ECS-EC2"
   api_key                  = "your-api-key"
 
   # Parameter Store Configuration
@@ -125,8 +121,6 @@ module "ecs-ec2-secrets" {
   ecs_cluster_name         = "my-cluster"
   image_version            = "v0.4.2"
   memory                   = 2048
-  coralogix_region         = "EU1"
-  default_application_name = "MyApp"
   default_subsystem_name   = "ECS-EC2"
 
   # Secrets Manager Configuration
@@ -141,8 +135,6 @@ module "ecs-ec2-secrets" {
 1. Update the following variables in `ecs-ec2.tf`:
    - `ecs_cluster_name`: Your ECS cluster name
    - `coralogix_region`: Your Coralogix region (EU1, EU2, AP1, AP2, AP3, US1, US2, custom)
-   - `default_application_name`: Your application name
-   - `default_subsystem_name`: Your subsystem name
    - `api_key`: Your Coralogix API key
 
 2. Initialize Terraform:

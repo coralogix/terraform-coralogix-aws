@@ -37,7 +37,7 @@ variable "custom_domain" {
 variable "default_application_name" {
   description = "Default application name for Coralogix logs"
   type        = string
-  default     = "ecs-ec2-tf-test"
+  default     = "otel"
 }
 
 variable "default_subsystem_name" {
