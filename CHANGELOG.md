@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.10.8
+#### **firehose-metrics**
+### Support StaticLabels parameter to match coralogix-aws-metrics integration
+
 ## v3.10.7
 #### **ecs-ec2**
 ### Add default values to default_application_name and default_subsystem_name
