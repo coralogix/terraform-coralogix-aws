@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.10.10
+#### **firehose-metrics**
+### Support StaticLabels parameter to match coralogix-aws-metrics integration
+
 ## v3.10.9
 #### **coralogix-aws-shipper**
 ### 🔧 Maintenance 🔧
