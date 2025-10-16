@@ -31,7 +31,7 @@ locals {
   ) : null
 
   # Determine command based on config source
-  container_command = var.config_source == "s3" ? ["--config", "s3://${var.s3_config_bucket}.s3.${data.aws_region.current.name}.amazonaws.com/${var.s3_config_key}"] : ["--config", "env:OTEL_CONFIG"]
+  container_command = var.config_source == "s3" ? ["--config", "s3://${var.s3_config_bucket}.s3.${data.aws_region.current.id}.amazonaws.com/${var.s3_config_key}"] : ["--config", "env:OTEL_CONFIG"]
 }
 
 module "locals_variables" {
