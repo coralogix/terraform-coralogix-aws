@@ -104,7 +104,7 @@ module "lambda" {
   destination_on_failure = aws_sns_topic.this.arn
   environment_variables  = local.environment_variables
   s3_existing_package = {
-    bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
+    bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.id}" : var.custom_s3_bucket
     key    = "${var.package_name}.zip"
   }
   policy_path                             = "/coralogix/"
@@ -151,7 +151,7 @@ resource "aws_sns_topic" "this" {
 resource "aws_secretsmanager_secret" "private_key_secret" {
   count       = var.secret_manager_enabled && var.create_secret ? 1 : 0
   depends_on  = [module.lambda]
-  name        = "lambda/coralogix/${data.aws_region.this.name}/${local.function_name}"
+  name        = "lambda/coralogix/${data.aws_region.this.id}/${local.function_name}"
   description = "Coralogix Send Your Data key Secret"
 }
 
@@ -182,7 +182,7 @@ resource "aws_iam_policy" "secret_access_policy" {
           "secretsmanager:UpdateSecret"
         ]
         Resource = var.create_secret ? [aws_secretsmanager_secret.private_key_secret[0].arn] : [
-          startswith(var.private_key, "arn:${data.aws_partition.current.partition}:secretsmanager:") ? var.private_key : "arn:${data.aws_partition.current.partition}:secretsmanager:${data.aws_region.this.name}:${data.aws_caller_identity.current.account_id}:secret:${var.private_key}*"
+          startswith(var.private_key, "arn:${data.aws_partition.current.partition}:secretsmanager:") ? var.private_key : "arn:${data.aws_partition.current.partition}:secretsmanager:${data.aws_region.this.id}:${data.aws_caller_identity.current.account_id}:secret:${var.private_key}*"
         ]
       }
     ]

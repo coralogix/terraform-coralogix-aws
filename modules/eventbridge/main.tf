@@ -36,7 +36,7 @@ resource "aws_iam_policy" "eventbridge_policy" {
         Effect = "Allow",
         Action = ["events:InvokeApiDestination"],
         Resource = [
-          "arn:aws:events:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_identity.account_id}:api-destination/*"
+          "arn:aws:events:${data.aws_region.current_region.id}:${data.aws_caller_identity.current_identity.account_id}:api-destination/*"
         ]
       },
     ]

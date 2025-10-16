@@ -35,7 +35,7 @@ module "lambda" {
     ADD_PERMISSIONS_TO_ALL_LOG_GROUPS = var.add_permissions_to_all_log_groups
   }
   s3_existing_package = {
-    bucket = "coralogix-serverless-repo-${data.aws_region.this.name}"
+    bucket = "coralogix-serverless-repo-${data.aws_region.this.id}"
     key    = "lambda-manager.zip"
   }
   policy_path                             = "/coralogix/"
@@ -48,7 +48,7 @@ module "lambda" {
     CXLambdaUpdateConfig = {
       effect    = "Allow"
       actions   = ["lambda:UpdateFunctionConfiguration", "lambda:GetFunctionConfiguration", "lambda:AddPermission"]
-      resources = ["arn:aws:lambda:${data.aws_region.this.name}:${data.aws_caller_identity.current.account_id}:function:*"]
+      resources = ["arn:aws:lambda:${data.aws_region.this.id}:${data.aws_caller_identity.current.account_id}:function:*"]
     },
     CXLogConfig = {
       effect    = "Allow"

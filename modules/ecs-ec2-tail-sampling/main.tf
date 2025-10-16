@@ -237,7 +237,7 @@ resource "aws_ecs_task_definition" "agent" {
     ],
     command : [
       "--config",
-      "s3://${var.s3_config_bucket}.s3.${data.aws_region.current.name}.amazonaws.com/${var.agent_s3_config_key}"
+      "s3://${var.s3_config_bucket}.s3.${data.aws_region.current.id}.amazonaws.com/${var.agent_s3_config_key}"
     ],
     healthCheck : var.health_check_enabled ? {
       command : ["/healthcheck"]
@@ -267,7 +267,7 @@ resource "aws_ecs_task_definition" "gateway" {
     Image : local.container_image
     Command : [
       "--config",
-      "s3://${var.s3_config_bucket}.s3.${data.aws_region.current.name}.amazonaws.com/${var.gateway_s3_config_key}"
+      "s3://${var.s3_config_bucket}.s3.${data.aws_region.current.id}.amazonaws.com/${var.gateway_s3_config_key}"
     ]
     Cpu : 0
     Memory : var.memory
@@ -333,7 +333,7 @@ resource "aws_ecs_task_definition" "gateway" {
       LogDriver : "awslogs"
       Options : {
         "awslogs-group" : "/ecs/opentelemetry-gateway"
-        "awslogs-region" : data.aws_region.current.name
+        "awslogs-region" : data.aws_region.current.id
         "awslogs-stream-prefix" : "ecs"
         "mode" : "non-blocking"
         "awslogs-create-group" : "true"
@@ -359,7 +359,7 @@ resource "aws_ecs_task_definition" "receiver" {
     Image : local.container_image
     Command : [
       "--config",
-      "s3://${var.s3_config_bucket}.s3.${data.aws_region.current.name}.amazonaws.com/${var.receiver_s3_config_key}"
+      "s3://${var.s3_config_bucket}.s3.${data.aws_region.current.id}.amazonaws.com/${var.receiver_s3_config_key}"
     ]
     Cpu : 0
     Memory : var.memory
@@ -425,7 +425,7 @@ resource "aws_ecs_task_definition" "receiver" {
       LogDriver : "awslogs"
       Options : {
         "awslogs-group" : "/ecs/opentelemetry-receiver"
-        "awslogs-region" : data.aws_region.current.name
+        "awslogs-region" : data.aws_region.current.id
         "awslogs-stream-prefix" : "ecs"
         "mode" : "non-blocking"
         "awslogs-create-group" : "true"
