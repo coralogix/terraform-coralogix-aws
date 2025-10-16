@@ -171,7 +171,7 @@ data "aws_iam_policy_document" "new_firehose_policy" {
       "kinesis:ListShards",
     ]
     resources = [
-      "${local.arn_prefix}:kinesis:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_identity.account_id}:stream/*",
+      "${local.arn_prefix}:kinesis:${data.aws_region.current_region.id}:${data.aws_caller_identity.current_identity.account_id}:stream/*",
     ]
   }
 

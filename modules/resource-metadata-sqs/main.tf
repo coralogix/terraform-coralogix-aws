@@ -121,7 +121,7 @@ module "collector_lambda" {
   }
 
   s3_existing_package = {
-    bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
+    bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.id}" : var.custom_s3_bucket
     key    = "${var.package_name}-collector.zip"
   }
 
@@ -210,7 +210,7 @@ module "generator_lambda" {
   }
 
   s3_existing_package = {
-    bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
+    bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.id}" : var.custom_s3_bucket
     key    = "${var.package_name}-generator.zip"
   }
 
@@ -306,7 +306,7 @@ module "generator_lambda_sm" {
   }
 
   s3_existing_package = {
-    bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.name}" : var.custom_s3_bucket
+    bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.id}" : var.custom_s3_bucket
     key    = "${var.package_name}-generator.zip"
   }
 
@@ -387,7 +387,7 @@ resource "aws_sns_topic" "this" {
 
 resource "aws_secretsmanager_secret" "api_key_secret" {
   count       = var.secret_manager_enabled && var.create_secret ? 1 : 0
-  name        = "lambda/coralogix/${data.aws_region.this.name}/${local.function_name}"
+  name        = "lambda/coralogix/${data.aws_region.this.id}/${local.function_name}"
   description = "Coralogix Send Your Data key Secret"
 }
 

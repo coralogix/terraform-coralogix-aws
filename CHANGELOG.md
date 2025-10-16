@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.10.8
+#### **Multiple Modules**
+### 🔧 Maintenance 🔧
+- **Deprecated Attribute Update**: Replace deprecated `data.aws_region.*.name` with `data.aws_region.*.id` across all modules to eliminate deprecation warnings
+
 ## v3.10.7
 #### **ecs-ec2**
 ### Add default values to default_application_name and default_subsystem_name

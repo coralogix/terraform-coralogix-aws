@@ -61,7 +61,7 @@ resource "null_resource" "s3_bucket_copy" {
   provisioner "local-exec" {
     command = <<-EOF
       curl -o bootstrap.zip https://cx-cw-metrics-tags-lambda-processor-eu-west-1.s3.eu-west-1.amazonaws.com/bootstrap.zip
-      aws s3 cp --region ${data.aws_region.current_region.name} ./bootstrap.zip s3://${var.custom_s3_bucket}
+      aws s3 cp --region ${data.aws_region.current_region.id} ./bootstrap.zip s3://${var.custom_s3_bucket}
       if [ -f bootstrap.zip ]; then
         rm ./bootstrap.zip
       else
@@ -173,11 +173,11 @@ resource "aws_iam_policy" "new_firehose_iam" {
                "kms:GenerateDataKey"
            ],
            "Resource": [
-               "${local.arn_prefix}:kms:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_identity.account_id}:key/key-id"
+               "${local.arn_prefix}:kms:${data.aws_region.current_region.id}:${data.aws_caller_identity.current_identity.account_id}:key/key-id"
            ],
            "Condition": {
                "StringEquals": {
-                   "kms:ViaService": "s3.${data.aws_region.current_region.name}.amazonaws.com"
+                   "kms:ViaService": "s3.${data.aws_region.current_region.id}.amazonaws.com"
                },
                "StringLike": {
                    "kms:EncryptionContext:aws:s3:arn": "${local.s3_backup_bucket_arn}/prefix*"
@@ -192,7 +192,7 @@ resource "aws_iam_policy" "new_firehose_iam" {
                "kinesis:GetRecords",
                "kinesis:ListShards"
            ],
-           "Resource": "${local.arn_prefix}:kinesis:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_identity.account_id}:stream/*"
+           "Resource": "${local.arn_prefix}:kinesis:${data.aws_region.current_region.id}:${data.aws_caller_identity.current_identity.account_id}:stream/*"
         },
         {
            "Effect": "Allow",
@@ -304,7 +304,7 @@ resource "aws_cloudwatch_log_group" "loggroup" {
 resource "aws_lambda_function" "lambda_processor" {
   depends_on    = [null_resource.s3_bucket_copy]
   count         = var.lambda_processor_enable ? 1 : 0
-  s3_bucket     = coalesce(var.custom_s3_bucket, "cx-cw-metrics-tags-lambda-processor-${data.aws_region.current_region.name}")
+  s3_bucket     = coalesce(var.custom_s3_bucket, "cx-cw-metrics-tags-lambda-processor-${data.aws_region.current_region.id}")
   s3_key        = "bootstrap.zip"
   function_name = local.lambda_processor_name
   role          = local.lambda_processor_iam_role_arn
