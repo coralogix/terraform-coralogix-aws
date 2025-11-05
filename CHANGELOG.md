@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.10.9
+#### **coralogix-aws-shipper**
+### 🔧 Maintenance 🔧
+- Upgrade `terraform-aws-modules/lambda/aws` from v7.2.0 to v8.1.2 to eliminate remaining deprecated `data.aws_region.current.name` warnings from external dependency
+
 ## v3.10.8
 #### **Multiple Modules**
 ### 🔧 Maintenance 🔧
