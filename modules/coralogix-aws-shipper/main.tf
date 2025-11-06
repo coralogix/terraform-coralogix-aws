@@ -232,7 +232,7 @@ module "lambda" {
   source                         = "terraform-aws-modules/lambda/aws"
   function_name                  = each.value.lambda_name == null ? module.locals[each.key].function_name : each.value.lambda_name
   description                    = "Send logs to Coralogix."
-  version                        = "7.2.0"
+  version                        = "8.1.2"
   handler                        = "bootstrap"
   runtime                        = var.runtime
   architectures                  = [var.cpu_arch]
