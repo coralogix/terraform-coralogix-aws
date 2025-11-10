@@ -67,7 +67,7 @@ resource "null_resource" "s3_bucket_copy" {
       else
         echo "Couldn't find bootstrap.zip, skip deleting"
       fi
-      
+
     EOF
   }
 }
@@ -318,6 +318,7 @@ resource "aws_lambda_function" "lambda_processor" {
   environment {
     variables = {
       FILE_CACHE_PATH = "/tmp"
+      STATIC_LABELS   = jsonencode(var.static_labels)
     }
   }
 }
