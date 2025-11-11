@@ -419,6 +419,22 @@ variable "telemetry_mode" {
   }
 }
 
+variable "batch_metrics" {
+  description = "Enable batching of OpenTelemetry metric messages when telemetry_mode is set to metrics."
+  type        = bool
+  default     = false
+}
+
+variable "metrics_batch_max_size" {
+  description = "Maximum size in megabytes for the aggregated encoded protobuf payload before it is flushed and sent. Applies only when batch_metrics is true."
+  type        = number
+  default     = 4
+  validation {
+    condition     = var.metrics_batch_max_size > 0
+    error_message = "metrics_batch_max_size must be greater than 0."
+  }
+}
+
 variable "include_metric_stream_filter" {
   description = "List of inclusive metric filters. If you specify this parameter, the stream sends only the conditional metric names from the metric namespaces that you specify here. Leave empty to send all metrics"
   type = list(object({

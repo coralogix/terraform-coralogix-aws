@@ -326,6 +326,8 @@ To enable CloudWatch metrics streaming via Firehose (PrivateLink), you must prov
 | Parameter | Description | Default Value | Required |
 |-----------|-------------|---------------|--------------------|
 | telemetry_mode | Specify the telemetry collection modes, supported values (`metrics`, `logs`). Note that this value must be set to `metrics` for the Cloudwatch metric stream workflow | logs. | :heavy_check_mark: |
+| batch_metrics | Enable batching of OpenTelemetry metric messages before they are sent to Coralogix. Available only when `telemetry_mode = "metrics"`. | `false` | |
+| metrics_batch_max_size | Maximum size (in MB) of the aggregated metrics payload before the batch is flushed. Used only when `batch_metrics` is enabled. | `4` | |
 | api_key | The Coralogix Send Your Data - [API key](https://coralogix.com/docs/send-your-data-api-key/) validates your authenticity. This value can be a direct Coralogix API key or an AWS secret manager ARN containing the API key.| `string` | n/a | yes |
 | application_name | The name of the application for which the integration is configured. [Metadata](#metadata) specifies dynamic value retrieval options. | string | n\a | yes | 
 | subsystem_name | The name of your subsystem. For a dynamic value, refer to the [Metadata](#metadata) section. For CloudWatch, leave this field empty to use the log group name. | string | n\a | yes |
@@ -335,11 +337,15 @@ To enable CloudWatch metrics streaming via Firehose (PrivateLink), you must prov
 | security_group_ids | The ID of the security group for the integration deployment. | `list(string)` | n/a | :heavy_check_mark: |
 | include_metric_stream_filter | List of inclusive metric filters. If you specify this parameter, the stream sends only the conditional metric names from the specified metric namespaces. Leave empty to send all metrics | `llist(object({namespace=string, metric_names=list(string)})` | n/a | |
 
+When `batch_metrics = true`, the module sets the Lambda environment variables `BATCH_METRICS=1` and `METRICS_BATCH_MAX_SIZE` to the provided value so that the shipper batches each Firehose ingested payload into a single export request.
+
 The include_metric_stream_filter example:
 ```
 module "coralogix_aws_shipper" "coralogix_firehose_metrics_private_link" {
   source = "coralogix/aws-shipper/coralogix"
   telemetry_mode = "metrics"
+  batch_metrics = true
+  metrics_batch_max_size = 4
   api_key = <your private key>
   application_name = "application_name"
   subsystem_name = "subsystem_name"

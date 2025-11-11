@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.10.11
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 💡
+- Added `batch_metrics` and `metrics_batch_max_size` inputs to control the Lambda `BATCH_METRICS` and `METRICS_BATCH_MAX_SIZE` environment variables for Firehose metric batching.
+
 ## v3.10.10
 #### **firehose-metrics**
 ### Support StaticLabels parameter to match coralogix-aws-metrics integration
