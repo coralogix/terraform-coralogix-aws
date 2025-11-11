@@ -3,7 +3,8 @@
 ## v3.10.11
 #### **coralogix-aws-shipper, resource-metadata**
 ### 🔧 Maintenance 🔧
-- **BREAKING**: Update AWS provider requirement to `>= 6.0` for both modules
+### 🛑 Breaking changes 🛑
+- Update AWS provider requirement to `>= 6.0` for both modules
   - **coralogix-aws-shipper**: AWS provider requirement updated from `>= 5.32.0` to `>= 6.0`
   - **resource-metadata**: AWS provider requirement updated from `>= 4.15.1, < 6.0` to `>= 6.0`
 - **resource-metadata**: Update minimum Terraform version from `>= 0.13.1` to `>= 1.5.7`
