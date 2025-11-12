@@ -1,11 +1,21 @@
 # Changelog
 
-## v3.10.11
+## v3.12.0
 #### **coralogix-aws-shipper**
 ### 💡 Enhancements 💡
 - Added `batch_metrics` and `metrics_batch_max_size` inputs to control the Lambda `BATCH_METRICS` and `METRICS_BATCH_MAX_SIZE` environment variables for Firehose metric batching.
 
-## v3.10.10
+## v3.11.1
+#### **coralogix-aws-shipper, resource-metadata**
+### 🔧 Maintenance 🔧
+### 🛑 Breaking changes 🛑
+- Update AWS provider requirement to `>= 6.0` for both modules
+  - **coralogix-aws-shipper**: AWS provider requirement updated from `>= 5.32.0` to `>= 6.0`
+  - **resource-metadata**: AWS provider requirement updated from `>= 4.15.1, < 6.0` to `>= 6.0`
+- **resource-metadata**: Update minimum Terraform version from `>= 0.13.1` to `>= 1.5.7`
+- **resource-metadata**: Upgrade `terraform-aws-modules/eventbridge/aws` from v3.17.1 to v4.0.0
+
+## v3.11.0
 #### **firehose-metrics**
 ### Support StaticLabels parameter to match coralogix-aws-metrics integration
 
