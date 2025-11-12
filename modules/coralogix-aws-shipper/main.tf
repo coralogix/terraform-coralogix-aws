@@ -263,6 +263,8 @@ module "lambda" {
     DLQ_URL            = var.enable_dlq ? aws_sqs_queue.DLQ[0].url : null
     ASSUME_ROLE_ARN    = var.lambda_assume_role_arn
     TELEMETRY_MODE     = var.telemetry_mode
+    BATCH_METRICS      = var.telemetry_mode == "metrics" && var.batch_metrics ? "1" : null
+    METRICS_BATCH_MAX_SIZE = var.telemetry_mode == "metrics" && var.batch_metrics ? tostring(var.metrics_batch_max_size) : null
   }
   s3_existing_package = {
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.id}" : var.custom_s3_bucket
