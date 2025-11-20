@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.12.1
+#### **firehose-metrics**
+### 🔧 Maintenance 🔧
+- Migrate Lambda ZIP package to the common serverless repo bucket `coralogix-serverless-repo`
+
 ## v3.12.0
 #### **coralogix-aws-shipper**
 ### 💡 Enhancements 💡
