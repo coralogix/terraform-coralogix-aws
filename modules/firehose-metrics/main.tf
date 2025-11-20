@@ -60,7 +60,7 @@ resource "null_resource" "s3_bucket_copy" {
 
   provisioner "local-exec" {
     command = <<-EOF
-      curl -o bootstrap.zip https://cx-cw-metrics-tags-lambda-processor-eu-west-1.s3.eu-west-1.amazonaws.com/bootstrap.zip
+      curl -o bootstrap.zip https://coralogix-serverless-repo-eu-west-1.s3.eu-west-1.amazonaws.com/firehose-metrics-transformer.zip
       aws s3 cp --region ${data.aws_region.current_region.id} ./bootstrap.zip s3://${var.custom_s3_bucket}
       if [ -f bootstrap.zip ]; then
         rm ./bootstrap.zip
@@ -304,8 +304,8 @@ resource "aws_cloudwatch_log_group" "loggroup" {
 resource "aws_lambda_function" "lambda_processor" {
   depends_on    = [null_resource.s3_bucket_copy]
   count         = var.lambda_processor_enable ? 1 : 0
-  s3_bucket     = coalesce(var.custom_s3_bucket, "cx-cw-metrics-tags-lambda-processor-${data.aws_region.current_region.id}")
-  s3_key        = "bootstrap.zip"
+  s3_bucket     = coalesce(var.custom_s3_bucket, "coralogix-serverless-repo-${data.aws_region.current_region.id}")
+  s3_key        = "firehose-metrics-transformer.zip"
   function_name = local.lambda_processor_name
   role          = local.lambda_processor_iam_role_arn
   handler       = "bootstrap"
