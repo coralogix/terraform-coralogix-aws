@@ -1,6 +1,11 @@
 # Changelog
 
-## v3.12.1
+## v3.14.0
+#### **firehose-metrics, firehose-logs, cloudwatch-metrics-iam-role**
+### 🔧 Maintenance 🔧
+- Permit AWS provider v6 for these modules (v5 continues to work fine: there's no module change, just permitting v6)
+
+## v3.13.0
 #### **firehose-metrics**
 ### 🔧 Maintenance 🔧
 - Migrate Lambda ZIP package to the common serverless repo bucket `coralogix-serverless-repo`
