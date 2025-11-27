@@ -1,6 +1,12 @@
 # Changelog
 
-## v3.12.1
+## v3.14.0
+#### **Multiple Modules**
+### 🔧 Maintenance 🔧
+- Migrate AWS provider version to `6.x` for all supported modules.
+- Unify `random` provider version to `3.x` for all supported modules.
+
+## v3.13.0
 #### **firehose-metrics**
 ### 🔧 Maintenance 🔧
 - Migrate Lambda ZIP package to the common serverless repo bucket `coralogix-serverless-repo`
