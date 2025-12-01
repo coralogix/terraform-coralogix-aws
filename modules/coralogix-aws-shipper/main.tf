@@ -20,27 +20,11 @@ resource "random_string" "lambda_role" {
   special = false
 }
 
-resource "null_resource" "s3_bucket_copy" {
-  count = var.custom_s3_bucket == "" ? 0 : 1
-
-  provisioner "local-exec" {
-    # command = "curl -o coralogix-aws-shipper.zip https://coralogix-serverless-repo-eu-central-1.s3.eu-central-1.amazonaws.com/coralogix-aws-shipper.zip ; aws s3 cp ./coralogix-aws-shipper.zip s3://coralogix-aws-shipper.zip ; rm ./coralogix-aws-shipper.zip"
-    command = <<-EOF
-      if [[ "${var.cpu_arch}" == "x86_64" ]]; then
-        file_name="coralogix-aws-shipper-x86-64.zip"
-      else
-        file_name="coralogix-aws-shipper.zip"
-      fi
-      curl -o $file_name https://coralogix-serverless-repo-ap-east-1.s3.ap-east-1.amazonaws.com/$file_name
-      aws s3 cp ./$file_name s3://${var.custom_s3_bucket}
-      if [ -f $file_name ]; then
-        rm ./$file_name
-      else
-        echo "Couldn't find $file_name, skip deleting"
-      fi
-    EOF
-  }
-}
+# Removed null_resource that downloads Lambda artifact from Coralogix S3
+# The Lambda artifact should be pre-uploaded to your custom S3 bucket
+# Expected file names:
+#   - x86_64: coralogix-aws-shipper-x86-64.zip
+#   - arm64:  coralogix-aws-shipper.zip
 
 resource "aws_iam_policy" "lambda_policy" {
   for_each = var.integration_info != null ? var.integration_info : local.integration_info
@@ -228,7 +212,7 @@ resource "aws_iam_role_policy_attachment" "attach_msk_policy" {
 module "lambda" {
   for_each = var.integration_info != null ? var.integration_info : local.integration_info
 
-  depends_on                     = [null_resource.s3_bucket_copy, aws_sqs_queue.DLQ, aws_secretsmanager_secret.coralogix_secret]
+  depends_on                     = [aws_sqs_queue.DLQ, aws_secretsmanager_secret.coralogix_secret]
   source                         = "terraform-aws-modules/lambda/aws"
   function_name                  = each.value.lambda_name == null ? module.locals[each.key].function_name : each.value.lambda_name
   description                    = "Send logs to Coralogix."

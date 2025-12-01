@@ -329,7 +329,7 @@ variable "tags" {
 }
 
 variable "custom_s3_bucket" {
-  description = "The name of the s3 bucket to save the lambda zip code in"
+  description = "The name of the S3 bucket containing the Lambda deployment package."
   type        = string
   default     = ""
 }
