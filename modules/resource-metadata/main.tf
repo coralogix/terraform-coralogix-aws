@@ -96,7 +96,7 @@ module "lambda" {
   layers                 = var.secret_manager_enabled ? [var.layer_arn] : []
   description            = "Send metadata to Coralogix."
   handler                = "index.handler"
-  runtime                = "nodejs20.x"
+  runtime                = "nodejs22.x"
   architectures          = [var.architecture]
   memory_size            = var.memory_size
   timeout                = var.timeout

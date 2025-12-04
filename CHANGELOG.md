@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.14.1
+#### **resource-metadata**
+### 🔧 Maintenance 🔧
+- Update Node.js runtime version to 22.x.
+
 ## v3.14.0
 #### **Multiple Modules**
 ### 🔧 Maintenance 🔧
