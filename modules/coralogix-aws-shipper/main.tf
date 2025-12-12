@@ -20,11 +20,21 @@ resource "random_string" "lambda_role" {
   special = false
 }
 
-# Removed null_resource that downloads Lambda artifact from Coralogix S3
-# The Lambda artifact should be pre-uploaded to your custom S3 bucket
-# Expected file names:
-#   - x86_64: coralogix-aws-shipper-x86-64.zip
-#   - arm64:  coralogix-aws-shipper.zip
+resource "null_resource" "s3_bucket_copy" {
+  count = var.custom_s3_bucket != "" && var.source_s3_bucket != "" ? 1 : 0
+
+  provisioner "local-exec" {
+    command = <<-EOF
+      aws s3 cp s3://${var.source_s3_bucket}/coralogix-aws-shipper.zip s3://${var.custom_s3_bucket}/coralogix-aws-shipper.zip --region ${var.source_s3_region}
+    EOF
+  }
+
+  triggers = {
+    source_bucket      = var.source_s3_bucket
+    destination_bucket = var.custom_s3_bucket
+    source_region      = var.source_s3_region
+  }
+}
 
 resource "aws_iam_policy" "lambda_policy" {
   for_each = var.integration_info != null ? var.integration_info : local.integration_info
@@ -212,7 +222,7 @@ resource "aws_iam_role_policy_attachment" "attach_msk_policy" {
 module "lambda" {
   for_each = var.integration_info != null ? var.integration_info : local.integration_info
 
-  depends_on                     = [aws_sqs_queue.DLQ, aws_secretsmanager_secret.coralogix_secret]
+  depends_on                     = [aws_sqs_queue.DLQ, aws_secretsmanager_secret.coralogix_secret, null_resource.s3_bucket_copy]
   source                         = "terraform-aws-modules/lambda/aws"
   function_name                  = each.value.lambda_name == null ? module.locals[each.key].function_name : each.value.lambda_name
   description                    = "Send logs to Coralogix."

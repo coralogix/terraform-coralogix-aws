@@ -306,6 +306,10 @@ variable "cpu_arch" {
     condition     = contains(["arm64", "x86_64"], var.cpu_arch)
     error_message = "The CPU architecture must be one of these values: [arm64, x86_64]."
   }
+  validation {
+    condition     = var.source_s3_bucket == "" || var.cpu_arch == "arm64"
+    error_message = "When using a private source_s3_bucket, only arm64 architecture is supported. Set cpu_arch to 'arm64' or leave source_s3_bucket empty to use Coralogix public repository."
+  }
 }
 
 variable "source_code_version" {
@@ -330,6 +334,18 @@ variable "tags" {
 
 variable "custom_s3_bucket" {
   description = "The name of the S3 bucket containing the Lambda deployment package."
+  type        = string
+  default     = ""
+}
+
+variable "source_s3_bucket" {
+  description = "The name of your private S3 bucket containing the Lambda deployment artifacts. This is the source bucket from which artifacts will be copied to the custom_s3_bucket."
+  type        = string
+  default     = ""
+}
+
+variable "source_s3_region" {
+  description = "The AWS region of your private source S3 bucket containing the Lambda deployment artifacts."
   type        = string
   default     = ""
 }
