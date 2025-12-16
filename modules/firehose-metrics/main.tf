@@ -272,8 +272,10 @@ resource "aws_iam_role_policy" "new_lambda_iam" {
               "dms:DescribeReplicationTasks",
               "ec2:DescribeTransitGatewayAttachments",
               "ec2:DescribeSpotFleetRequests",
+              "shield:ListProtections",
               "storagegateway:ListGateways",
-              "storagegateway:ListTagsForResource"
+              "storagegateway:ListTagsForResource",
+              "iam:ListAccountAliases"
           ],
           "Effect": "Allow",
           "Resource": "*",
