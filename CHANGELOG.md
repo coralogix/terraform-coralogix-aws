@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.15.0
+#### **firehose-metrics**
+### 💡 Enhancements 💡
+- Update IAM permissions accordingly to the latest version, featuring "Static Labels"
+
 ## v3.14.1
 #### **resource-metadata**
 ### 🔧 Maintenance 🔧
