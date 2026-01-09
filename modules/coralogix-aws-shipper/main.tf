@@ -1,5 +1,7 @@
 module "locals" {
-  source   = "../locals_variables"
+  # Use absolute path to the locals_variables module
+  # This works when the module is used from a local file path
+  source   = "/Users/juangimenez/workspace/terraform-coralogix-aws/modules/locals_variables"
   for_each = var.integration_info != null ? var.integration_info : local.integration_info
 
   integration_type = each.value.integration_type
@@ -58,6 +60,15 @@ resource "aws_iam_policy" "lambda_policy" {
           Resource = ["*"]
         }
       ],
+
+      # CloudWatch Log Group Tags Policy (only when enabled)
+      var.enable_log_group_tags ? [
+        {
+          Effect   = "Allow"
+          Action   = ["logs:ListTagsLogGroup"]
+          Resource = ["*"]
+        }
+      ] : [],
 
       # Secrets Access Policy
       each.value.store_api_key_in_secrets_manager == null || each.value.store_api_key_in_secrets_manager == true || local.api_key_is_arn ? [
@@ -265,6 +276,8 @@ module "lambda" {
     TELEMETRY_MODE     = var.telemetry_mode
     BATCH_METRICS      = var.telemetry_mode == "metrics" && var.batch_metrics ? "1" : null
     METRICS_BATCH_MAX_SIZE = var.telemetry_mode == "metrics" && var.batch_metrics ? tostring(var.metrics_batch_max_size) : null
+    ENABLE_LOG_GROUP_TAGS = var.enable_log_group_tags ? "true" : "false"
+    LOG_GROUP_TAGS_CACHE_TTL_SECONDS = tostring(var.log_group_tags_cache_ttl_seconds)
   }
   s3_existing_package = {
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.id}" : var.custom_s3_bucket
