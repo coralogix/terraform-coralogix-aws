@@ -1,4 +1,8 @@
 # Changelog
+## v3.`6.0
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 💡
+- Added `loggroup tags` support
 
 ## v3.15.0
 #### **firehose-metrics**
@@ -6,7 +10,7 @@
 - Update IAM permissions accordingly to the latest version, featuring "Static Labels"
 
 ## v3.14.1
-#### **resource-metadata**
+#### **resource-metadata** 
 ### 🔧 Maintenance 🔧
 - Update Node.js runtime version to 22.x.
 
