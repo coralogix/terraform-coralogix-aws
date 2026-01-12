@@ -1,7 +1,7 @@
 module "locals" {
   # Use absolute path to the locals_variables module
   # This works when the module is used from a local file path
-  source   = "/Users/juangimenez/workspace/terraform-coralogix-aws/modules/locals_variables"
+  source   = "../locals_variables"
   for_each = var.integration_info != null ? var.integration_info : local.integration_info
 
   integration_type = each.value.integration_type
