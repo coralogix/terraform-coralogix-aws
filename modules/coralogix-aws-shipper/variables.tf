@@ -128,6 +128,12 @@ variable "log_group_prefix" {
   default     = null
 }
 
+variable "log_group_filter_pattern" {
+  description = "The filter pattern to use for the CloudWatch log subscription filter. Use this to filter which logs are sent to Coralogix. An empty string matches all log events."
+  type        = string
+  default     = ""
+}
+
 # kinesis variables
 
 variable "kinesis_stream_name" {

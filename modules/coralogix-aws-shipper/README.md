@@ -101,6 +101,7 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 |------|-------------|------|---------|:--------:|
 | <a name="input_log_groups"></a> [log\_groups](#input\_log\_groups) | A comma-separated list of CloudWatch log group names to monitor. For example, (log-group1, log-group2, log-group3). | `list(string)` | n/a | yes |
 | <a name="input_log_group_prefix"></a> [log\_group\_prefix](#input\_log\_group\_prefix) |  list of strings of log group prefixes. The code will use these prefixes to create permissions for the Lambda instead of creating for each log group permission it will use the prefix with a wild card to give the Lambda access for all of the log groups that start with these prefix. This parameter doesn't replace the `log_groups` parameter.  For more information, refer to the Note below. | `list(string)` | n/a | no |
+| <a name="input_log_group_filter_pattern"></a> [log\_group\_filter\_pattern](#input\_log\_group\_filter\_pattern) | The filter pattern to use for the CloudWatch log subscription filter. Use this to filter which logs are sent to Coralogix. An empty string matches all log events. For filter pattern syntax, see [AWS documentation](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntax.html). | `string` | `""` | no |
 
 > [!NOTE]
 > The `log_group` variable will get a list of log groups and then add them to the Lambda as triggers, each log group will also add permission to the Lambda, in some cases when there are a lot of log groups this will cause an error because the code 

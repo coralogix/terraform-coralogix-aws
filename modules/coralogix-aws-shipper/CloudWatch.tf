@@ -13,5 +13,5 @@ resource "aws_cloudwatch_log_subscription_filter" "this" {
   name            = "${module.lambda.integration.lambda_function_name}-Subscription-${each.key}"
   log_group_name  = data.aws_cloudwatch_log_group.this[each.key].name
   destination_arn = module.lambda.integration.lambda_function_arn
-  filter_pattern  = ""
+  filter_pattern  = var.log_group_filter_pattern
 }

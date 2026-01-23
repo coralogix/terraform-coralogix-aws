@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.15.1
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 💡
+- Added `log_group_filter_pattern` variable to allow customers to specify a filter pattern for CloudWatch log subscription filters. This enables filtering which logs are sent to Coralogix instead of forwarding all log events.
+
 ## v3.15.0
 #### **firehose-metrics**
 ### 💡 Enhancements 💡
