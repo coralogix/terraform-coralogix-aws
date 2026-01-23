@@ -245,25 +245,25 @@ module "lambda" {
   vpc_security_group_ids         = var.security_group_ids
   dead_letter_target_arn         = var.enable_dlq ? aws_sqs_queue.DLQ[0].arn : null
   environment_variables = {
-    CORALOGIX_ENDPOINT = var.custom_domain != "" ? "https://ingress.${var.custom_domain}" : var.subnet_ids == null ? "https://ingress.${lookup(module.locals[each.key].coralogix_domains, var.coralogix_region, "EU1")}" : "https://ingress.private.${lookup(module.locals[each.key].coralogix_domains, var.coralogix_region, "EU1")}"
-    INTEGRATION_TYPE   = each.value.integration_type
-    RUST_LOG           = var.log_level
-    CORALOGIX_API_KEY  = !local.api_key_is_arn && (each.value.store_api_key_in_secrets_manager == null || each.value.store_api_key_in_secrets_manager == true) ? aws_secretsmanager_secret.coralogix_secret[each.key].arn : each.value.api_key
-    APP_NAME           = each.value.application_name
-    SUB_NAME           = each.value.subsystem_name
-    NEWLINE_PATTERN    = each.value.newline_pattern != null ? each.value.newline_pattern : null
-    BLOCKING_PATTERN   = var.blocking_pattern
-    SAMPLING           = tostring(var.sampling_rate)
-    ADD_METADATA       = var.add_metadata
-    CUSTOM_METADATA    = var.custom_metadata
-    CUSTOM_CSV_HEADER  = var.custom_csv_header
-    DLQ_ARN            = var.enable_dlq ? aws_sqs_queue.DLQ[0].arn : null
-    DLQ_RETRY_LIMIT    = var.enable_dlq ? var.dlq_retry_limit : null
-    DLQ_S3_BUCKET      = var.enable_dlq ? var.dlq_s3_bucket : null
-    DLQ_URL            = var.enable_dlq ? aws_sqs_queue.DLQ[0].url : null
-    ASSUME_ROLE_ARN    = var.lambda_assume_role_arn
-    TELEMETRY_MODE     = var.telemetry_mode
-    BATCH_METRICS      = var.telemetry_mode == "metrics" && var.batch_metrics ? "1" : null
+    CORALOGIX_ENDPOINT     = var.custom_domain != "" ? "https://ingress.${var.custom_domain}" : var.subnet_ids == null ? "https://ingress.${lookup(module.locals[each.key].coralogix_domains, var.coralogix_region, "EU1")}" : "https://ingress.private.${lookup(module.locals[each.key].coralogix_domains, var.coralogix_region, "EU1")}"
+    INTEGRATION_TYPE       = each.value.integration_type
+    RUST_LOG               = var.log_level
+    CORALOGIX_API_KEY      = !local.api_key_is_arn && (each.value.store_api_key_in_secrets_manager == null || each.value.store_api_key_in_secrets_manager == true) ? aws_secretsmanager_secret.coralogix_secret[each.key].arn : each.value.api_key
+    APP_NAME               = each.value.application_name
+    SUB_NAME               = each.value.subsystem_name
+    NEWLINE_PATTERN        = each.value.newline_pattern != null ? each.value.newline_pattern : null
+    BLOCKING_PATTERN       = var.blocking_pattern
+    SAMPLING               = tostring(var.sampling_rate)
+    ADD_METADATA           = var.add_metadata
+    CUSTOM_METADATA        = var.custom_metadata
+    CUSTOM_CSV_HEADER      = var.custom_csv_header
+    DLQ_ARN                = var.enable_dlq ? aws_sqs_queue.DLQ[0].arn : null
+    DLQ_RETRY_LIMIT        = var.enable_dlq ? var.dlq_retry_limit : null
+    DLQ_S3_BUCKET          = var.enable_dlq ? var.dlq_s3_bucket : null
+    DLQ_URL                = var.enable_dlq ? aws_sqs_queue.DLQ[0].url : null
+    ASSUME_ROLE_ARN        = var.lambda_assume_role_arn
+    TELEMETRY_MODE         = var.telemetry_mode
+    BATCH_METRICS          = var.telemetry_mode == "metrics" && var.batch_metrics ? "1" : null
     METRICS_BATCH_MAX_SIZE = var.telemetry_mode == "metrics" && var.batch_metrics ? tostring(var.metrics_batch_max_size) : null
   }
   s3_existing_package = {
