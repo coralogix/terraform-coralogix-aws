@@ -170,7 +170,6 @@ module "ecs-ec2-parameter-store" {
 | <a name="input_api_key_secret_arn"></a> [api\_key\_secret\_arn](#input\_api\_key\_secret\_arn) | ARN of the Secrets Manager secret containing the API key | `string` | `null` | no |
 | <a name="input_use_custom_config_parameter_store"></a> [use\_custom\_config\_parameter\_store](#input\_use\_custom\_config\_parameter\_store) | Whether to use a custom config from Parameter Store | `bool` | `false` | no |
 | <a name="input_custom_config_parameter_store_name"></a> [custom\_config\_parameter\_store\_name](#input\_custom\_config\_parameter\_store\_name) | Name of the Parameter Store parameter containing the OTEL configuration. If not provided, default configuration will be used | `string` | `null` | no |
-| <a name="input_otel_config_file"></a> [otel\_config\_file](#input\_otel\_config\_file) | File path to a custom opentelemetry configuration file. Defaults to an embedded configuration. | `string` | `null` | no |
 | <a name="input_task_execution_role_arn"></a> [task\_execution\_role\_arn](#input\_task\_execution\_role\_arn) | ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume. When using S3 configuration, if not provided, an auto-created role with S3 read permissions will be used. | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Resource tags | `map(string)` | `null` | no |
 | <a name="input_task_definition_arn"></a> [task\_definition\_arn](#input\_task\_definition\_arn) | Existing Coralogix OTEL task definition ARN | `string` | `null` | no |

@@ -35,7 +35,6 @@ module "ecs-ec2" {
   s3_config_bucket                   = var.s3_config_bucket
   s3_config_key                      = var.s3_config_key
   custom_config_parameter_store_name = var.custom_config_parameter_store_name
-  otel_config_file                   = var.otel_config_file
 
   task_execution_role_arn = var.task_execution_role_arn
   task_role_arn           = var.task_role_arn

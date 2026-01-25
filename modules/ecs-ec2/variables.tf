@@ -120,17 +120,6 @@ variable "custom_config_parameter_store_name" {
   }
 }
 
-variable "otel_config_file" {
-  type        = string
-  description = "File path to a custom opentelemetry configuration file. Defaults to an embedded configuration."
-  default     = null
-
-  validation {
-    condition     = (var.config_source == "parameter-store" || var.config_source == "s3") ? var.otel_config_file == null : true
-    error_message = "otel_config_file must be null when using parameter-store or s3 configuration sources."
-  }
-}
-
 variable "task_execution_role_arn" {
   description = "ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume. When using S3 configuration, if not provided, an auto-created role with S3 read permissions will be used."
   type        = string

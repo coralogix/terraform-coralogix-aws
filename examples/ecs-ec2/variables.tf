@@ -73,12 +73,6 @@ variable "custom_config_parameter_store_name" {
   default     = null
 }
 
-variable "otel_config_file" {
-  type        = string
-  description = "File path to a custom opentelemetry configuration file. Defaults to an embedded configuration"
-  default     = null
-}
-
 variable "task_execution_role_arn" {
   description = "ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume"
   type        = string

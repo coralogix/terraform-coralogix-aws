@@ -95,12 +95,6 @@ variable "custom_config_parameter_store_name" {
   default     = null
 }
 
-variable "otel_config_file" {
-  description = "Path to a custom OpenTelemetry collector config file"
-  type        = string
-  default     = null
-}
-
 variable "task_execution_role_arn" {
   description = "ARN of the IAM role that the Amazon ECS container agent assumes"
   type        = string

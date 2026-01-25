@@ -24,18 +24,6 @@ Expected results:
 * ECS Service ```coralogix-otel-agent-<UUID>``` runs as a Daemon on every EC2 cluster node.
 * Logs, traces, and metrics, are captured at your Coralogix endpoint.
 
-## Test using local custom config file.
-
-To test with an optional local custom config file, e.g. [./local_config.yaml](./local_config.yaml):
-
-```
-terraform plan -var="otel_config_file=local_config.yaml"
-terraform apply -var="otel_config_file=local_config.yaml"
-```
-
-Expected results:
-* OTEL_CONFIG environment variable is set to the contents of the local configuration file.
-
 ## Test using S3 configuration source.
 
 To test with configuration stored in S3:
