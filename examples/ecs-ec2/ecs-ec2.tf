@@ -3,7 +3,7 @@ module "otel_ecs_ec2_coralogix" {
 
   # Required parameters
   ecs_cluster_name = "test-lab-cluster"
-  image_version    = "v0.5.1"
+  image_version    = "v0.5.7"
   coralogix_region = "EU1"
   api_key          = "1234567890_DUMMY_API_KEY"
 

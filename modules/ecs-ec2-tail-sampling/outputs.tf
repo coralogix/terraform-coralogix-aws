@@ -38,6 +38,16 @@ output "task_execution_role_name" {
   value       = local.create_iam_role ? aws_iam_role.task_execution_role[0].name : null
 }
 
+output "task_role_arn" {
+  description = "ARN of the task role (either created or provided)"
+  value       = local.task_role_arn
+}
+
+output "task_role_name" {
+  description = "Name of the task role (only if created by module)"
+  value       = var.task_role_arn == null ? aws_iam_role.otel_task_role_s3[0].name : null
+}
+
 output "agent_task_definition_arn" {
   description = "ARN of the Agent task definition (only for tail-sampling deployment)"
   value       = var.deployment_type == "tail-sampling" ? aws_ecs_task_definition.agent[0].arn : null

@@ -135,6 +135,12 @@ variable "task_execution_role_arn" {
   default     = null
 }
 
+variable "task_role_arn" {
+  description = "ARN of the task role (IAM role) that the container can assume. If not provided, a minimal task role with S3 read permissions will be auto-created. This is separate from the execution role which is used by ECS to pull images and retrieve secrets."
+  type        = string
+  default     = null
+}
+
 variable "gateway_task_count" {
   description = "Number of Gateway tasks to run"
   type        = number

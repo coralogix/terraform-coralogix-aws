@@ -106,3 +106,9 @@ variable "task_execution_role_arn" {
   type        = string
   default     = null
 }
+
+variable "task_role_arn" {
+  description = "ARN of the task role (IAM role) that the container can assume at runtime"
+  type        = string
+  default     = null
+}

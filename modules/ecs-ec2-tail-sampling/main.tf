@@ -16,6 +16,13 @@ locals {
   # Determine if we need to create IAM role
   create_iam_role = var.task_execution_role_arn == null
 
+  # Determine which task role to use
+  # Priority: 1. User-provided role, 2. Auto-created S3 task role
+  # A minimal task role with S3 read permissions is auto-created if no custom role is provided
+  task_role_arn = var.task_role_arn != null ? var.task_role_arn : (
+    aws_iam_role.otel_task_role_s3[0].arn
+  )
+
   # Determine which image to use (custom image or Coralogix image with version)
   use_custom_image = var.custom_image != null
   container_image  = local.use_custom_image ? var.custom_image : "coralogixrepo/coralogix-otel-collector:${var.image_version}"
@@ -156,6 +163,47 @@ resource "aws_iam_role_policy" "task_execution_role_cloudmap_policy" {
   })
 }
 
+# IAM Role for task runtime S3 access (only created when no custom task role provided)
+# This is a minimal role with only S3 read permissions for the container runtime
+resource "aws_iam_role" "otel_task_role_s3" {
+  count = var.task_role_arn == null ? 1 : 0
+  name  = "${local.name}-${random_string.id.result}-task-role-s3"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        }
+      }
+    ]
+  })
+  tags = local.tags
+}
+
+resource "aws_iam_role_policy" "otel_task_role_s3_s3_policy" {
+  count = var.task_role_arn == null ? 1 : 0
+  name  = "S3ReadAccess"
+  role  = aws_iam_role.otel_task_role_s3[0].id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:GetObjectVersion"
+        ]
+        Resource = "arn:aws:s3:::${var.s3_config_bucket}/*"
+      }
+    ]
+  })
+}
+
 # Agent Task Definition (only for tail sampling)
 resource "aws_ecs_task_definition" "agent" {
   count                    = var.deployment_type == "tail-sampling" ? 1 : 0
@@ -165,7 +213,7 @@ resource "aws_ecs_task_definition" "agent" {
   requires_compatibilities = ["EC2"]
   network_mode             = "host"
   execution_role_arn       = local.execution_role_arn
-  task_role_arn            = local.execution_role_arn
+  task_role_arn            = local.task_role_arn
 
   volume {
     name      = "hostfs"
@@ -260,7 +308,7 @@ resource "aws_ecs_task_definition" "gateway" {
   requires_compatibilities = ["EC2"]
   network_mode             = "awsvpc"
   execution_role_arn       = local.execution_role_arn
-  task_role_arn            = local.execution_role_arn
+  task_role_arn            = local.task_role_arn
 
   container_definitions = jsonencode([{
     Name : "coralogix-otel-gateway"
@@ -352,7 +400,7 @@ resource "aws_ecs_task_definition" "receiver" {
   requires_compatibilities = ["EC2"]
   network_mode             = "awsvpc"
   execution_role_arn       = local.execution_role_arn
-  task_role_arn            = local.execution_role_arn
+  task_role_arn            = local.task_role_arn
 
   container_definitions = jsonencode([{
     Name : "coralogix-otel-receiver"

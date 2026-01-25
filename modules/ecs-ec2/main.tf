@@ -32,6 +32,13 @@ locals {
 
   # Determine command based on config source
   container_command = var.config_source == "s3" ? ["--config", "s3://${var.s3_config_bucket}.s3.${data.aws_region.current.id}.amazonaws.com/${var.s3_config_key}"] : ["--config", "env:OTEL_CONFIG"]
+
+  # Determine which task role to use
+  # Priority: 1. User-provided role, 2. Auto-created S3 task role (only for S3), 3. null
+  # Note: When using S3 config, the container needs S3 read permissions at runtime
+  task_role_arn = var.task_role_arn != null ? var.task_role_arn : (
+    var.config_source == "s3" ? aws_iam_role.otel_task_role_s3[0].arn : null
+  )
 }
 
 module "locals_variables" {
@@ -97,6 +104,48 @@ resource "aws_iam_role_policy" "otel_task_execution_role_s3_s3_policy" {
   })
 }
 
+# IAM Role for task runtime S3 access (only created when config_source=s3 AND no custom task role provided)
+# This is a minimal role with only S3 read permissions for the container runtime
+resource "aws_iam_role" "otel_task_role_s3" {
+  count = (var.config_source == "s3" && var.task_role_arn == null) ? 1 : 0
+  name  = "${local.name}-${random_string.id.result}-task-role-s3"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        }
+      }
+    ]
+  })
+
+  tags = local.tags
+}
+
+resource "aws_iam_role_policy" "otel_task_role_s3_s3_policy" {
+  count = (var.config_source == "s3" && var.task_role_arn == null) ? 1 : 0
+  name  = "S3ReadAccess"
+  role  = aws_iam_role.otel_task_role_s3[0].id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:GetObjectVersion"
+        ]
+        Resource = "arn:aws:s3:::${var.s3_config_bucket}/*"
+      }
+    ]
+  })
+}
+
 resource "aws_ecs_task_definition" "coralogix_otel_agent" {
   count                    = var.task_definition_arn == null ? 1 : 0
   family                   = "${local.name}-${random_string.id.result}"
@@ -104,7 +153,7 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
   memory                   = var.memory
   requires_compatibilities = ["EC2"]
   execution_role_arn       = local.execution_role_arn
-  task_role_arn            = local.execution_role_arn
+  task_role_arn            = local.task_role_arn
   volume {
     name      = "hostfs"
     host_path = "/var/lib/docker/"

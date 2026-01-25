@@ -38,6 +38,7 @@ module "ecs-ec2" {
   otel_config_file                   = var.otel_config_file
 
   task_execution_role_arn = var.task_execution_role_arn
+  task_role_arn           = var.task_role_arn
 
   tags = {
     Environment = "test"

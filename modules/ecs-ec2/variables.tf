@@ -142,6 +142,12 @@ variable "task_execution_role_arn" {
   }
 }
 
+variable "task_role_arn" {
+  description = "ARN of the task role (IAM role) that the container can assume. If not provided, the task will run without a task role (null). This is separate from the execution role which is used by ECS to pull images and retrieve secrets."
+  type        = string
+  default     = null
+}
+
 variable "tags" {
   type        = map(string)
   description = "Resource tags"

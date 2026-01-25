@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.16.0
+#### **ecs-ec2**
+### 🔒 Security Enhancements 🔒
+- **Separated Execution and Task Roles**: Added `task_role_arn` variable to allow users to specify a dedicated task role separate from the execution role, following the principle of least privilege. This addresses security concerns where using the same IAM role for both execution and task operations could expose broader permissions than necessary at runtime.
+- **Auto-created Minimal Task Role for S3**: When using S3 configuration source, the module now automatically creates a minimal task role with S3 read-only permissions if no custom `task_role_arn` is provided. This ensures the container can access the S3 configuration file at runtime while maintaining minimal permissions.
+### 💡 Enhancements 💡
+- Updated examples and documentation to demonstrate proper separation of execution and task roles for enhanced security.
+
 ## v3.15.1
 #### **coralogix-aws-shipper**
 ### 💡 Enhancements 💡

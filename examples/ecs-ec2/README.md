@@ -89,7 +89,11 @@ module "ecs-ec2-s3" {
   s3_config_key    = "configs/otel-config.yaml"
 
   # Optional: Custom execution role (auto-created if not provided)
-  task_execution_role_arn = "arn:aws:iam::123456789012:role/my-custom-role"
+  task_execution_role_arn = "arn:aws:iam::123456789012:role/my-custom-execution-role"
+  
+  # Optional: Custom task role (auto-created minimal role for S3 if not provided)
+  # This role should have minimal permissions for container runtime operations
+  task_role_arn = "arn:aws:iam::123456789012:role/my-custom-task-role"
 }
 ```
 
@@ -109,7 +113,10 @@ module "ecs-ec2-parameter-store" {
   custom_config_parameter_store_name = "/my-app/otel-config"
 
   # Required: Custom execution role for parameter store access
-  task_execution_role_arn = "arn:aws:iam::123456789012:role/my-custom-role"
+  task_execution_role_arn = "arn:aws:iam::123456789012:role/my-custom-execution-role"
+  
+  # Optional: Custom task role for container runtime operations
+  task_role_arn = "arn:aws:iam::123456789012:role/my-custom-task-role"
 }
 ```
 
@@ -126,7 +133,10 @@ module "ecs-ec2-secrets" {
   # Secrets Manager Configuration
   use_api_key_secret      = true
   api_key_secret_arn      = "arn:aws:secretsmanager:region:account:secret:name"
-  task_execution_role_arn = "arn:aws:iam::123456789012:role/my-custom-role"
+  task_execution_role_arn = "arn:aws:iam::123456789012:role/my-custom-execution-role"
+  
+  # Optional: Custom task role for container runtime operations
+  task_role_arn = "arn:aws:iam::123456789012:role/my-custom-task-role"
 }
 ```
 
@@ -167,16 +177,26 @@ Use configuration stored in AWS Systems Manager Parameter Store. This allows for
 - Integration with AWS Secrets Manager
 - Centralized configuration management
 
-## Execution Role Management
+## IAM Role Management
 
 The module provides flexible execution role management:
 
+### Execution Role
+Used by ECS for infrastructure operations (pulling images, retrieving secrets, etc.):
 - **Template Configuration**: No execution role required
 - **S3 Configuration**: Auto-created role with S3 permissions (if no custom role provided)
 - **Parameter Store Configuration**: Custom execution role required
 - **Secrets Manager**: Custom execution role required
 
 Users can always override with their own execution role for any configuration source.
+
+### Task Role
+Used by the running container at runtime for AWS API access:
+- **Optional**: If not provided, the task runs without a task role (null)
+- **S3 Configuration**: Auto-created minimal task role with only S3 read permissions (if no custom role provided)
+- **Custom Task Role**: Users can provide a dedicated task role with minimal permissions for their specific use case
+
+**Security Best Practice**: Always use separate execution and task roles. The execution role has broader permissions for ECS operations, while the task role should have minimal permissions only for what the container needs at runtime.
 
 
 ## Quick Start
