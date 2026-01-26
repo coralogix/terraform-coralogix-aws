@@ -73,14 +73,14 @@ variable "custom_config_parameter_store_name" {
   default     = null
 }
 
-variable "otel_config_file" {
+variable "task_execution_role_arn" {
+  description = "ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume"
   type        = string
-  description = "File path to a custom opentelemetry configuration file. Defaults to an embedded configuration"
   default     = null
 }
 
-variable "task_execution_role_arn" {
-  description = "ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume"
+variable "task_role_arn" {
+  description = "ARN of the task role (IAM role) that the container can assume at runtime. This role is used by the running container and should follow the principle of least privilege. If not provided, the task will run without a task role (null). This is separate from the execution role which is used by ECS to pull images and retrieve secrets."
   type        = string
   default     = null
 }

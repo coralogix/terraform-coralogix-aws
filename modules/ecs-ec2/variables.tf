@@ -120,17 +120,6 @@ variable "custom_config_parameter_store_name" {
   }
 }
 
-variable "otel_config_file" {
-  type        = string
-  description = "File path to a custom opentelemetry configuration file. Defaults to an embedded configuration."
-  default     = null
-
-  validation {
-    condition     = (var.config_source == "parameter-store" || var.config_source == "s3") ? var.otel_config_file == null : true
-    error_message = "otel_config_file must be null when using parameter-store or s3 configuration sources."
-  }
-}
-
 variable "task_execution_role_arn" {
   description = "ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume. When using S3 configuration, if not provided, an auto-created role with S3 read permissions will be used."
   type        = string
@@ -140,6 +129,12 @@ variable "task_execution_role_arn" {
     condition     = (var.use_api_key_secret == true || var.config_source == "parameter-store") ? var.task_execution_role_arn != null : true
     error_message = "task_execution_role_arn must be provided if using API Key Secret or Parameter Store config"
   }
+}
+
+variable "task_role_arn" {
+  description = "ARN of the task role (IAM role) that the container can assume. If not provided, the task will run without a task role (null). This is separate from the execution role which is used by ECS to pull images and retrieve secrets."
+  type        = string
+  default     = null
 }
 
 variable "tags" {

@@ -76,7 +76,9 @@ module "otel_central_cluster" {
 }
 ```
 
-### Using External IAM Role
+### Using External IAM Roles
+
+You can provide custom execution and task roles for enhanced security and control:
 
 ```hcl
 module "otel_tail_sampling" {
@@ -84,10 +86,15 @@ module "otel_tail_sampling" {
 
   # ... other parameters ...
 
-  # Use existing IAM role
+  # Use existing execution role
   task_execution_role_arn = "arn:aws:iam::123456789012:role/my-existing-ecs-task-execution-role"
+  
+  # Use existing task role (must have S3 read permissions for config bucket)
+  task_role_arn = "arn:aws:iam::123456789012:role/my-existing-ecs-task-role"
 }
 ```
+
+**Note**: When providing a custom `task_role_arn`, ensure it has at minimum S3 read permissions (`s3:GetObject`, `s3:GetObjectVersion`) for the configuration bucket, as containers need to access S3 at runtime to read their configuration files.
 
 ### Using Custom Images
 
@@ -168,6 +175,7 @@ module "otel_tail_sampling" {
 | coralogix_region | The region of the Coralogix endpoint domain | `string` | n/a | yes |
 | api_key | The Send-Your-Data API key for your Coralogix account | `string` | n/a | yes |
 | task_execution_role_arn | External IAM role ARN for task execution | `string` | `null` | no |
+| task_role_arn | ARN of the task role (IAM role) that the container can assume. If not provided, a minimal task role with S3 read permissions will be auto-created | `string` | `null` | no |
 | gateway_task_count | Number of Gateway tasks to run | `number` | `1` | no |
 | receiver_task_count | Number of Receiver tasks to run (only for central-cluster deployment) | `number` | `2` | no |
 | memory | The amount of memory (in MiB) used by the task | `number` | `1024` | no |
@@ -193,6 +201,8 @@ module "otel_tail_sampling" {
 | receiver_service_arn | ARN of the Receiver CloudMap service (only for central-cluster deployment) |
 | task_execution_role_arn | ARN of the task execution role (either created or provided) |
 | task_execution_role_name | Name of the task execution role (only if created by module) |
+| task_role_arn | ARN of the task role (either created or provided) |
+| task_role_name | Name of the task role (only if created by module) |
 | agent_task_definition_arn | ARN of the Agent task definition (only for tail-sampling deployment) |
 | gateway_task_definition_arn | ARN of the Gateway task definition |
 | receiver_task_definition_arn | ARN of the Receiver task definition (only for central-cluster deployment) |
@@ -222,13 +232,31 @@ module "otel_tail_sampling" {
   - Performs tail sampling decisions
   - Sends sampled data to Coralogix
 
-## IAM Permissions
+## IAM Role Management
 
-The module creates or uses a task execution role with the following permissions:
+The module separates execution roles and task roles for better security following the principle of least privilege:
 
+### Execution Role
+Used by ECS for infrastructure operations (pulling images, retrieving secrets, etc.):
+- **Auto-created Role**: Created with S3 read permissions for configuration files and CloudMap discovery permissions (if no custom role provided)
+- **Custom Role**: Users can provide their own execution role via `task_execution_role_arn`
+
+### Task Role
+Used by the running container at runtime for AWS API access:
+- **Auto-created Role**: A minimal task role with S3 read-only permissions is automatically created if no custom `task_role_arn` is provided. This ensures containers can access S3 configuration files at runtime while maintaining minimal permissions.
+- **Custom Role**: Users can provide their own task role via `task_role_arn` for additional AWS service access if needed
+
+### IAM Permissions
+
+**Execution Role Permissions:**
 - **ECS Task Execution**: Standard ECS task execution permissions
-- **S3 Read Access**: Read access to the specified S3 bucket for configuration files
+- **S3 Read Access**: Read access to the specified S3 bucket for configuration files (used during task startup)
 - **CloudMap Discovery**: Service discovery permissions for load balancing
+
+**Task Role Permissions (Auto-created):**
+- **S3 Read Access**: Read-only access to the specified S3 bucket for configuration files (used at container runtime)
+
+**Note**: When using a custom `task_role_arn`, ensure it has at minimum S3 read permissions for the configuration bucket, as the containers need to access S3 at runtime to read their configuration files.
 
 ## Service Discovery
 

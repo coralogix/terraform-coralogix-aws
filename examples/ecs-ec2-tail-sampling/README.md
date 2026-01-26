@@ -97,9 +97,9 @@ module "otel-ecs-ec2-health-checks" {
 }
 ```
 
-### Using External Task Execution Role
+### Using External IAM Roles
 ```bash
-module "otel-ecs-ec2-external-role" {
+module "otel-ecs-ec2-external-roles" {
   source = "coralogix/aws/coralogix//modules/ecs-ec2-tail-sampling"
 
   # Required parameters
@@ -115,10 +115,29 @@ module "otel-ecs-ec2-external-role" {
   coralogix_region     = "EU1"
   api_key              = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
 
-  # Use existing IAM role instead of creating new one
+  # Use existing execution role instead of creating new one
   task_execution_role_arn = "arn:aws:iam::123456789012:role/my-existing-ecs-task-execution-role"
+  
+  # Use existing task role (must have S3 read permissions for config bucket)
+  task_role_arn = "arn:aws:iam::123456789012:role/my-existing-ecs-task-role"
 }
 ```
+
+**Note**: When providing a custom `task_role_arn`, ensure it has at minimum S3 read permissions (`s3:GetObject`, `s3:GetObjectVersion`) for the configuration bucket, as containers need to access S3 at runtime to read their configuration files.
+
+## IAM Role Management
+
+The module separates execution roles and task roles for better security following the principle of least privilege:
+
+### Execution Role
+Used by ECS for infrastructure operations (pulling images, retrieving secrets, etc.):
+- **Auto-created Role**: Created with S3 read permissions for configuration files and CloudMap discovery permissions (if no custom role provided)
+- **Custom Role**: Users can provide their own execution role via `task_execution_role_arn`
+
+### Task Role
+Used by the running container at runtime for AWS API access:
+- **Auto-created Role**: A minimal task role with S3 read-only permissions is automatically created if no custom `task_role_arn` is provided. This ensures containers can access S3 configuration files at runtime while maintaining minimal permissions.
+- **Custom Role**: Users can provide their own task role via `task_role_arn` for additional AWS service access if needed
 
 now execute:
 ```bash
