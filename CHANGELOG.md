@@ -1,6 +1,6 @@
 # Changelog
 
-## v3.17.0
+## v3.18.0
 #### **coralogix-aws-shipper**
 ### 💡 Enhancements 💡
 - Added `execution_role_arn` variable to allow providing a custom execution role by ARN (must be a literal string known at plan time).
