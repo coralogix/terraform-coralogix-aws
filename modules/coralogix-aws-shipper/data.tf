@@ -64,7 +64,7 @@ data "aws_iam_policy" "AWSLambdaMSKExecutionRole" {
 }
 
 data "aws_iam_role" "LambdaExecutionRole" {
-  count = local.use_execution_role_name ? 1 : 0
+  count = var.execution_role_name != null ? 1 : 0
   name  = var.execution_role_name
 }
 

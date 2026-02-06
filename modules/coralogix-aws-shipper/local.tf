@@ -60,12 +60,22 @@ locals {
   s3_bucket_names = var.s3_bucket_name != null ? toset(split(",", var.s3_bucket_name)) : toset([])
 
   # Execution role resolution
-  # If execution_role_arn or execution_role_name is provided, use it instead of creating a new role
-  # Precedence: ARN > name > create
-  use_execution_role_arn     = var.execution_role_arn != null
-  use_execution_role_name    = var.execution_role_name != null && var.execution_role_arn == null
-  create_execution_role      = !local.use_execution_role_arn && !local.use_execution_role_name
+  # Single && expression enables cty short-circuit (unknown && false = false) for plan-time decidability.
+  create_execution_role = var.execution_role_arn == null && var.execution_role_name == null
 
-  lambda_execution_role_arn  = local.use_execution_role_arn ? var.execution_role_arn : (local.use_execution_role_name ? data.aws_iam_role.LambdaExecutionRole[0].arn : aws_iam_role.lambda_role[0].arn)
-  lambda_execution_role_name = local.use_execution_role_arn ? element(split("/", var.execution_role_arn), length(split("/", var.execution_role_arn)) - 1) : (local.use_execution_role_name ? data.aws_iam_role.LambdaExecutionRole[0].name : aws_iam_role.lambda_role[0].name)
+  lambda_execution_role_arn = (
+    local.create_execution_role
+    ? aws_iam_role.lambda_role[0].arn
+    : (var.execution_role_arn != null
+       ? var.execution_role_arn
+       : data.aws_iam_role.LambdaExecutionRole[0].arn)
+  )
+
+  lambda_execution_role_name = (
+    local.create_execution_role
+    ? aws_iam_role.lambda_role[0].name
+    : (var.execution_role_name != null
+       ? var.execution_role_name
+       : element(split("/", var.execution_role_arn), length(split("/", var.execution_role_arn)) - 1))
+  )
 }

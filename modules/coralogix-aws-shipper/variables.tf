@@ -404,13 +404,13 @@ variable "lambda_assume_role_arn" {
 
 variable "execution_role_arn" {
   default     = null
-  description = "The ARN of an existing IAM role to use as the Lambda execution role. When provided, the module will not create its own role. IMPORTANT: The ARN value must be known at plan time (use a literal string). For roles created in the same Terraform configuration, use execution_role_name instead, as the role name is typically known at plan time even when the ARN is computed. This variable and execution_role_name are mutually exclusive (use one OR the other, not both). If both are provided, execution_role_arn takes priority."
+  description = "The ARN of an existing IAM role to use as the Lambda execution role. When providing a computed ARN (e.g. from a role created in the same Terraform configuration), also set execution_role_name so the module can determine role-creation at plan time. If both are provided, execution_role_arn is used directly and the data-source lookup is skipped."
   type        = string
 }
 
 variable "execution_role_name" {
   default     = null
-  description = "The name of an existing IAM role to use as the Lambda execution role (looked up via data source). When provided, the module will not create its own role. This is the recommended approach when referencing a role created in the same Terraform configuration, as the name is typically known at plan time even when the ARN is computed. This variable and execution_role_arn are mutually exclusive (use one OR the other, not both). If both are provided, execution_role_arn takes priority."
+  description = "The name of an existing IAM role to use as the Lambda execution role. When provided alone, the module looks up the role via a data source. When provided alongside execution_role_arn, the data-source lookup is skipped and the ARN is used directly -- this is the recommended approach for roles created in the same Terraform configuration."
   type        = string
 }
 
