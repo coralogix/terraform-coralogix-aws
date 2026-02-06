@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.18.1
+#### **coralogix-aws-shipper**
+### 🐛 Bug Fixes 🐛
+- Added `create_execution_role` variable to fix "Invalid count argument" error when `execution_role_arn` is a computed value (unknown at plan time). Set `create_execution_role = false` when passing a computed ARN from a resource in the same configuration.
+
 ## v3.18.0
 #### **coralogix-aws-shipper**
 ### 💡 Enhancements 💡

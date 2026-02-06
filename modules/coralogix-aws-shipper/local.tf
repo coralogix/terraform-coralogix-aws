@@ -59,9 +59,9 @@ locals {
   arn_prefix      = "arn:${data.aws_partition.current.partition}"
   s3_bucket_names = var.s3_bucket_name != null ? toset(split(",", var.s3_bucket_name)) : toset([])
 
-  # Execution role resolution
-  # Single && expression enables cty short-circuit (unknown && false = false) for plan-time decidability.
-  create_execution_role = var.execution_role_arn == null && var.execution_role_name == null
+  # Execution role: explicit flag overrides auto-detect (null = neither ARN nor name provided).
+  # Set create_execution_role = false when passing a computed ARN to avoid plan-time errors.
+  create_execution_role = var.create_execution_role != null ? var.create_execution_role : (var.execution_role_name == null && var.execution_role_arn == null)
 
   lambda_execution_role_arn = (
     local.create_execution_role

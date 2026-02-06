@@ -402,15 +402,21 @@ variable "lambda_assume_role_arn" {
   type        = string
 }
 
+variable "create_execution_role" {
+  default     = null
+  type        = bool
+  description = "Explicitly control whether the module creates its own IAM execution role. When null (default), the module auto-detects based on execution_role_arn and execution_role_name. Set to false when providing a computed execution_role_arn (e.g. from a resource in the same Terraform configuration) to avoid plan-time errors."
+}
+
 variable "execution_role_arn" {
   default     = null
-  description = "The ARN of an existing IAM role to use as the Lambda execution role. When providing a computed ARN (e.g. from a role created in the same Terraform configuration), also set execution_role_name so the module can determine role-creation at plan time. If both are provided, execution_role_arn is used directly and the data-source lookup is skipped."
+  description = "The ARN of an existing IAM role to use as the Lambda execution role. When providing a computed ARN (e.g. from a role created in the same Terraform configuration), also set create_execution_role = false so the module can determine role-creation at plan time. If both execution_role_arn and execution_role_name are provided, the ARN is used directly and the data-source lookup is skipped."
   type        = string
 }
 
 variable "execution_role_name" {
   default     = null
-  description = "The name of an existing IAM role to use as the Lambda execution role. When provided alone, the module looks up the role via a data source. When provided alongside execution_role_arn, the data-source lookup is skipped and the ARN is used directly -- this is the recommended approach for roles created in the same Terraform configuration."
+  description = "The name of an existing IAM role to use as the Lambda execution role. When provided alone, the module looks up the role via a data source. When provided alongside execution_role_arn, the data-source lookup is skipped and the ARN is used directly."
   type        = string
 }
 
