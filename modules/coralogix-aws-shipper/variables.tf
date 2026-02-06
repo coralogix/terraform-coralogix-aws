@@ -406,10 +406,6 @@ variable "execution_role_arn" {
   default     = null
   description = "(Optional) The ARN of a user-defined IAM role to use as the execution role for the Lambda function. When provided, this avoids data source lookups and preserves Terraform's dependency graph. Recommended over execution_role_name when the role is created in the same configuration."
   type        = string
-  validation {
-    condition     = var.execution_role_arn == null || can(regex("^arn:aws(-[a-z]+)?:iam::[0-9]{12}:role/", var.execution_role_arn))
-    error_message = "execution_role_arn must be a valid IAM role ARN (e.g., arn:aws:iam::123456789012:role/my-role)."
-  }
 }
 
 variable "execution_role_name" {
@@ -419,7 +415,7 @@ variable "execution_role_name" {
 }
 
 variable "create_execution_role" {
-  description = "Whether the module should create its own IAM role for the Lambda function. Set to false when providing your own role via execution_role_arn or execution_role_name."
+  description = "Whether the module should create its own IAM role for the Lambda function. Automatically set to false when execution_role_arn or execution_role_name is provided."
   type        = bool
   default     = true
 }

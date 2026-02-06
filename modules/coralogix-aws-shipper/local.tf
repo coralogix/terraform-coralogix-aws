@@ -60,12 +60,16 @@ locals {
   s3_bucket_names = var.s3_bucket_name != null ? toset(split(",", var.s3_bucket_name)) : toset([])
 
   # IAM role resolution logic
-  # Precedence: create_execution_role (if true) > execution_role_arn > execution_role_name
-  lambda_role_arn = var.create_execution_role ? aws_iam_role.lambda_role[0].arn : (
-    var.execution_role_arn != null ? var.execution_role_arn : data.aws_iam_role.LambdaExecutionRole[0].arn
+  # If the user supplies their own role, it takes precedence even when
+  # create_execution_role keeps its default value of true.
+  effective_create_role = var.create_execution_role && var.execution_role_arn == null && var.execution_role_name == null
+
+  # Precedence: execution_role_arn > execution_role_name > module-created role
+  lambda_role_arn = var.execution_role_arn != null ? var.execution_role_arn : (
+    var.execution_role_name != null ? data.aws_iam_role.LambdaExecutionRole[0].arn : aws_iam_role.lambda_role[0].arn
   )
 
-  lambda_role_name = var.create_execution_role ? aws_iam_role.lambda_role[0].name : (
-    var.execution_role_arn != null ? element(split("/", var.execution_role_arn), length(split("/", var.execution_role_arn)) - 1) : data.aws_iam_role.LambdaExecutionRole[0].name
+  lambda_role_name = var.execution_role_arn != null ? element(split("/", var.execution_role_arn), length(split("/", var.execution_role_arn)) - 1) : (
+    var.execution_role_name != null ? data.aws_iam_role.LambdaExecutionRole[0].name : aws_iam_role.lambda_role[0].name
   )
 }
