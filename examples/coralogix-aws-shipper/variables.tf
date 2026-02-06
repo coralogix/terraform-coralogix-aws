@@ -372,9 +372,15 @@ variable "lambda_assume_role_arn" {
   type        = string
 }
 
+variable "execution_role_arn" {
+  default     = null
+  description = "(Optional) The ARN of a user-defined IAM role to use as the execution role for the Lambda function. When provided, this avoids data source lookups and preserves Terraform's dependency graph. Recommended over execution_role_name when the role is created in the same configuration."
+  type        = string
+}
+
 variable "execution_role_name" {
   default     = null
-  description = "The arn of a user defined role that will be used as the execution role for the lambda function. "
+  description = "(Deprecated) The name of a user-defined role that will be used as the execution role for the Lambda function. Use execution_role_arn instead to avoid dependency chain issues. This variable is deprecated and will be removed in a future version."
   type        = string
 }
 

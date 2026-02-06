@@ -58,4 +58,16 @@ locals {
 
   arn_prefix      = "arn:${data.aws_partition.current.partition}"
   s3_bucket_names = var.s3_bucket_name != null ? toset(split(",", var.s3_bucket_name)) : toset([])
+
+  # IAM role resolution logic
+  # Precedence: execution_role_arn > execution_role_name > auto-created role
+  user_provided_role = var.execution_role_arn != null || var.execution_role_name != null
+
+  lambda_role_arn = var.execution_role_arn != null ? var.execution_role_arn : (
+    var.execution_role_name != null ? data.aws_iam_role.LambdaExecutionRole[0].arn : aws_iam_role.lambda_role[0].arn
+  )
+
+  lambda_role_name = var.execution_role_arn != null ? element(split("/", var.execution_role_arn), length(split("/", var.execution_role_arn)) - 1) : (
+    var.execution_role_name != null ? data.aws_iam_role.LambdaExecutionRole[0].name : aws_iam_role.lambda_role[0].name
+  )
 }
