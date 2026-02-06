@@ -59,15 +59,12 @@ locals {
   arn_prefix      = "arn:${data.aws_partition.current.partition}"
   s3_bucket_names = var.s3_bucket_name != null ? toset(split(",", var.s3_bucket_name)) : toset([])
 
-  # Count condition helpers - evaluate null checks
-  # Pattern: check if ARN is NOT null; if unknown, default to true (assume set)
-  execution_role_arn_set  = try(var.execution_role_arn != null, true) # If unknown, assume set (takes precedence)
-  execution_role_name_set = try(var.execution_role_name != null && var.execution_role_name != "", false)
-  use_execution_role_arn  = local.execution_role_arn_set
-  use_execution_role_name = local.execution_role_name_set && !local.execution_role_arn_set
-  create_default_role     = !local.execution_role_arn_set && !local.execution_role_name_set
+  # Execution role resolution
+  # When create_execution_role is false, user must provide execution_role_arn or execution_role_name
+  # Precedence: ARN > name
+  use_execution_role_arn  = !var.create_execution_role && var.execution_role_arn != ""
+  use_execution_role_name = !var.create_execution_role && var.execution_role_name != null && var.execution_role_arn == ""
 
-  # Lambda execution role resolution with precedence: execution_role_arn > execution_role_name > default role
   lambda_execution_role_arn  = local.use_execution_role_arn ? var.execution_role_arn : (local.use_execution_role_name ? data.aws_iam_role.LambdaExecutionRole[0].arn : aws_iam_role.lambda_role[0].arn)
   lambda_execution_role_name = local.use_execution_role_arn ? element(split("/", var.execution_role_arn), length(split("/", var.execution_role_arn)) - 1) : (local.use_execution_role_name ? data.aws_iam_role.LambdaExecutionRole[0].name : aws_iam_role.lambda_role[0].name)
 }
