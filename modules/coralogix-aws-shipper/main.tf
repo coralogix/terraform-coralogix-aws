@@ -14,7 +14,7 @@ resource "random_string" "this" {
 }
 
 resource "random_string" "lambda_role" {
-  count = var.create_execution_role ? 1 : 0
+  count = local.create_execution_role ? 1 : 0
 
   length  = 6
   special = false
@@ -195,7 +195,7 @@ resource "aws_iam_policy" "lambda_policy" {
 }
 
 resource "aws_iam_role" "lambda_role" {
-  count = var.create_execution_role ? 1 : 0
+  count = local.create_execution_role ? 1 : 0
   name  = "Coralogix-lambda-role-${random_string.lambda_role[0].result}"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"

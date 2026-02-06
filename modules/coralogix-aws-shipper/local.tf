@@ -60,10 +60,11 @@ locals {
   s3_bucket_names = var.s3_bucket_name != null ? toset(split(",", var.s3_bucket_name)) : toset([])
 
   # Execution role resolution
-  # When create_execution_role is false, user must provide execution_role_arn or execution_role_name
-  # Precedence: ARN > name
-  use_execution_role_arn  = !var.create_execution_role && var.execution_role_arn != ""
-  use_execution_role_name = !var.create_execution_role && var.execution_role_name != null && var.execution_role_arn == ""
+  # If execution_role_arn or execution_role_name is provided, use it instead of creating a new role
+  # Precedence: ARN > name > create
+  use_execution_role_arn     = var.execution_role_arn != null
+  use_execution_role_name    = var.execution_role_name != null && var.execution_role_arn == null
+  create_execution_role      = !local.use_execution_role_arn && !local.use_execution_role_name
 
   lambda_execution_role_arn  = local.use_execution_role_arn ? var.execution_role_arn : (local.use_execution_role_name ? data.aws_iam_role.LambdaExecutionRole[0].arn : aws_iam_role.lambda_role[0].arn)
   lambda_execution_role_name = local.use_execution_role_arn ? element(split("/", var.execution_role_arn), length(split("/", var.execution_role_arn)) - 1) : (local.use_execution_role_name ? data.aws_iam_role.LambdaExecutionRole[0].name : aws_iam_role.lambda_role[0].name)

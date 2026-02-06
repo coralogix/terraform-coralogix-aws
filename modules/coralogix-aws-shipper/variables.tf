@@ -402,22 +402,15 @@ variable "lambda_assume_role_arn" {
   type        = string
 }
 
-variable "create_execution_role" {
-  default     = true
-  description = "Whether to create a default IAM execution role. Set to false when providing execution_role_arn or execution_role_name."
-  type        = bool
-}
-
 variable "execution_role_arn" {
-  default     = ""
-  nullable    = false
-  description = "The ARN of the IAM role to use as the Lambda execution role. Requires create_execution_role = false. This variable and execution_role_name are mutually exclusive (use one OR the other, not both). If both are provided, execution_role_arn takes priority. Prefer this over execution_role_name so Terraform maintains the dependency graph (e.g. aws_iam_role.foo.arn)."
+  default     = null
+  description = "The ARN of an existing IAM role to use as the Lambda execution role. When provided, the module will not create its own role. This variable and execution_role_name are mutually exclusive (use one OR the other, not both). If both are provided, execution_role_arn takes priority. Prefer this over execution_role_name so Terraform maintains the dependency graph (e.g. aws_iam_role.foo.arn)."
   type        = string
 }
 
 variable "execution_role_name" {
   default     = null
-  description = "The name of a user defined role that will be used as the execution role for the lambda function. Requires create_execution_role = false. This triggers a data lookup by name. This variable and execution_role_arn are mutually exclusive (use one OR the other, not both). If both are provided, execution_role_arn takes priority. Prefer execution_role_arn when the role is managed in the same Terraform configuration."
+  description = "The name of an existing IAM role to use as the Lambda execution role (looked up via data source). When provided, the module will not create its own role. This variable and execution_role_arn are mutually exclusive (use one OR the other, not both). If both are provided, execution_role_arn takes priority. Prefer execution_role_arn when the role is managed in the same Terraform configuration."
   type        = string
 }
 
