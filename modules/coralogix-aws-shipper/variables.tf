@@ -404,13 +404,13 @@ variable "lambda_assume_role_arn" {
 
 variable "execution_role_arn" {
   default     = null
-  description = "The ARN of an existing IAM role to use as the Lambda execution role. When provided, the module will not create its own role. This variable and execution_role_name are mutually exclusive (use one OR the other, not both). If both are provided, execution_role_arn takes priority. Prefer this over execution_role_name so Terraform maintains the dependency graph (e.g. aws_iam_role.foo.arn)."
+  description = "The ARN of an existing IAM role to use as the Lambda execution role. When provided, the module will not create its own role. IMPORTANT: The ARN value must be known at plan time (use a literal string). For roles created in the same Terraform configuration, use execution_role_name instead, as the role name is typically known at plan time even when the ARN is computed. This variable and execution_role_name are mutually exclusive (use one OR the other, not both). If both are provided, execution_role_arn takes priority."
   type        = string
 }
 
 variable "execution_role_name" {
   default     = null
-  description = "The name of an existing IAM role to use as the Lambda execution role (looked up via data source). When provided, the module will not create its own role. This variable and execution_role_arn are mutually exclusive (use one OR the other, not both). If both are provided, execution_role_arn takes priority. Prefer execution_role_arn when the role is managed in the same Terraform configuration."
+  description = "The name of an existing IAM role to use as the Lambda execution role (looked up via data source). When provided, the module will not create its own role. This is the recommended approach when referencing a role created in the same Terraform configuration, as the name is typically known at plan time even when the ARN is computed. This variable and execution_role_arn are mutually exclusive (use one OR the other, not both). If both are provided, execution_role_arn takes priority."
   type        = string
 }
 
