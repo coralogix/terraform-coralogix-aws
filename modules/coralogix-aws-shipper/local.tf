@@ -74,8 +74,8 @@ locals {
   lambda_execution_role_name = (
     local.create_execution_role
     ? aws_iam_role.lambda_role[0].name
-    : (var.execution_role_name != null
-       ? var.execution_role_name
-       : element(split("/", var.execution_role_arn), length(split("/", var.execution_role_arn)) - 1))
+    : (var.execution_role_arn != null
+       ? element(split("/", var.execution_role_arn), length(split("/", var.execution_role_arn)) - 1)
+       : var.execution_role_name)
   )
 }
