@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.17.0
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 💡
+- Added `execution_role_arn` variable to allow providing a custom execution role by ARN (must be a literal string known at plan time).
+- Added centralized execution role resolution logic in `local.tf` — the module now automatically determines whether to create its own IAM role based on whether `execution_role_arn` or `execution_role_name` is provided, with ARN taking priority when both are set.
+- Replaced scattered inline role resolution ternaries across `main.tf`, `outputs.tf`, and `data.tf` with centralized `local.lambda_execution_role_arn` and `local.lambda_execution_role_name` locals.
+- Updated `execution_role_name` description to clarify it accepts a role **name** (not ARN) and is the recommended approach for roles created in the same Terraform configuration.
+
 ## v3.16.0
 #### **ecs-ec2**
 ### 🔒 Security Enhancements 🔒
