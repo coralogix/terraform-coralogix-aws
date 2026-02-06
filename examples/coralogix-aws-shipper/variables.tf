@@ -384,6 +384,12 @@ variable "execution_role_name" {
   type        = string
 }
 
+variable "create_execution_role" {
+  description = "Whether the module should create its own IAM role for the Lambda function. Set to false when providing your own role via execution_role_arn or execution_role_name."
+  type        = bool
+  default     = true
+}
+
 variable "reserved_concurrent_executions" {
   default     = 0
   description = "The number of concurrent executions that are reserved for this function, leave as default to use unreserved account concurrency"
