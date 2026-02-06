@@ -1,5 +1,14 @@
 # Changelog
 
+## v3.18.0
+#### **coralogix-aws-shipper**
+### 🐛 Bug Fix 🐛
+- Fixed "Invalid count argument" error when providing a custom execution role created in the same Terraform configuration (#294).
+
+### 💡 Enhancements 💡
+- Added `execution_role_arn` and `create_execution_role` variables for providing a custom Lambda execution role without breaking Terraform's plan-time dependency graph.
+- Deprecated `execution_role_name` in favor of `execution_role_arn`.
+
 ## v3.16.0
 #### **ecs-ec2**
 ### 🔒 Security Enhancements 🔒
