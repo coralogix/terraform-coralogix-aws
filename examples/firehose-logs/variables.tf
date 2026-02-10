@@ -75,3 +75,14 @@ variable "server_side_encryption" {
     key_type = "AWS_OWNED_CMK"
   }
 }
+
+variable "content_encoding" {
+  description = "Content encoding for the firehose delivery stream"
+  type        = string
+  default     = "GZIP"
+
+  validation {
+    condition     = contains(["NONE", "GZIP"], var.content_encoding)
+    error_message = "Allowed values are NONE and GZIP"
+  }
+}
