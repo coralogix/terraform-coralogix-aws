@@ -52,6 +52,11 @@
 - Added `execution_role_arn` and `create_execution_role` variables for providing a custom Lambda execution role without breaking Terraform's plan-time dependency graph.
 - Deprecated `execution_role_name` in favor of `execution_role_arn`.
 
+## v3.17.0
+#### **firehose-logs**
+### 💡 Enhancements 💡
+- Allow control of content-encoding via variable.
+
 ## v3.16.0
 #### **ecs-ec2**
 ### 🔒 Security Enhancements 🔒

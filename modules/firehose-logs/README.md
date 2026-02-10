@@ -105,6 +105,7 @@ It is possible to pass a custom coralogix domain by using the `custom_domain` va
 | <a name="input_user_supplied_tags"></a> [user_supplied_tags](#input\_user_supplied_tags) | Tags supplied by the user to populate to all generated resources | `map(string)` | n/a | no |
 | <a name="input_override_default_tags"></a> [override_default_tags](#input\_override_default_tags) | Override and remove the default tags by setting to true | `bool` | `false` | no |
 | <a name="s3_enable_secure_transport"></a> [s3\_enable\_secure\_transport](variables.tf#L105) | Disable if you dont want bucket policy that complies with s3-bucket-ssl-requests-only rule | `bool` | `true` | no |
+| <a name="content_encoding"></a> [content\_encoding](variables.tf#L129) | Set encoding of data in firehose to GZIP or NONE | `string` | `GZIP` | no |
 
 ## Coralgoix regions
 
