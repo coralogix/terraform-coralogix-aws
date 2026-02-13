@@ -59,10 +59,11 @@ locals {
   arn_prefix      = "arn:${data.aws_partition.current.partition}"
   s3_bucket_names = var.s3_bucket_name != null ? toset(split(",", var.s3_bucket_name)) : toset([])
 
-  # IAM role resolution logic
-  # try() ensures the count is always known at plan time when execution_role_arn
-  # comes from a resource created in the same apply (unknown until apply).
-  effective_create_role = var.create_execution_role && try(var.execution_role_arn == null, false) && try(var.execution_role_name == null, false)
+  # Whether the module should create its own IAM role.
+  # The create_execution_role flag lets callers short-circuit the &&
+  # chain so count stays known at plan time even when execution_role_arn
+  # is computed from another resource (unknown until apply).
+  effective_create_role = var.create_execution_role && var.execution_role_arn == null && var.execution_role_name == null
 
   # Precedence: execution_role_arn > execution_role_name > module-created role
   lambda_role_arn = var.execution_role_arn != null ? var.execution_role_arn : (
