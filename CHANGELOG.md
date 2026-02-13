@@ -5,6 +5,12 @@
 ### 🐛 Bug Fix 🐛
 - Fixed "Invalid count argument" error when providing a custom execution role created in the same Terraform configuration (#294).
 
+### ⚠️ Breaking Change ⚠️
+- The `random_string.lambda_role` resource has been renamed to `random_string.id` and no longer uses `count`. On upgrade, Terraform will plan to destroy the old resource and create a new one with a different suffix, triggering replacement of the IAM role (`Coralogix-lambda-role-*`), the DLQ (`coralogix-aws-shipper-dlq-*`), and firehose-related resources if `telemetry_mode = "metrics"`. To preserve the existing suffix and avoid resource churn, run the following state migration **before** applying:
+  ```
+  terraform state mv 'module.<name>.random_string.lambda_role[0]' 'module.<name>.random_string.id'
+  ```
+
 ### 💡 Enhancements 💡
 - Added `execution_role_arn` and `create_execution_role` variables for providing a custom Lambda execution role without breaking Terraform's plan-time dependency graph.
 - Deprecated `execution_role_name` in favor of `execution_role_arn`.

@@ -13,7 +13,7 @@ resource "random_string" "this" {
   special = false
 }
 
-resource "random_string" "lambda_role" {
+resource "random_string" "id" {
   length  = 6
   special = false
 }
@@ -194,7 +194,7 @@ resource "aws_iam_policy" "lambda_policy" {
 
 resource "aws_iam_role" "lambda_role" {
   count = local.effective_create_role ? 1 : 0
-  name  = "Coralogix-lambda-role-${random_string.lambda_role.result}"
+  name  = "Coralogix-lambda-role-${random_string.id.result}"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -371,7 +371,7 @@ resource "aws_vpc_endpoint" "secretsmanager" {
 
 resource "aws_sqs_queue" "DLQ" {
   count                      = var.enable_dlq ? 1 : 0
-  name                       = "coralogix-aws-shipper-dlq-${random_string.lambda_role.result}"
+  name                       = "coralogix-aws-shipper-dlq-${random_string.id.result}"
   message_retention_seconds  = 1209600
   delay_seconds              = var.dlq_retry_delay
   visibility_timeout_seconds = var.timeout
