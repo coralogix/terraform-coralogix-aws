@@ -60,9 +60,9 @@ locals {
   s3_bucket_names = var.s3_bucket_name != null ? toset(split(",", var.s3_bucket_name)) : toset([])
 
   # IAM role resolution logic
-  # If the user supplies their own role, it takes precedence even when
-  # create_execution_role keeps its default value of true.
-  effective_create_role = var.create_execution_role && var.execution_role_arn == null && var.execution_role_name == null
+  # try() ensures the count is always known at plan time when execution_role_arn
+  # comes from a resource created in the same apply (unknown until apply).
+  effective_create_role = var.create_execution_role && try(var.execution_role_arn == null, false) && try(var.execution_role_name == null, false)
 
   # Precedence: execution_role_arn > execution_role_name > module-created role
   lambda_role_arn = var.execution_role_arn != null ? var.execution_role_arn : (

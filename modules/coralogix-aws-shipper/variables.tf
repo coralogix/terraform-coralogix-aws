@@ -415,7 +415,7 @@ variable "execution_role_name" {
 }
 
 variable "create_execution_role" {
-  description = "Whether the module should create its own IAM role for the Lambda function. Set to false when providing execution_role_arn or execution_role_name."
+  description = "Whether the module should create its own IAM role for the Lambda function. Automatically set to false when execution_role_arn or execution_role_name is provided."
   type        = bool
   default     = true
 }
