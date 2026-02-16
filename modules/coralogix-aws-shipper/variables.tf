@@ -53,6 +53,12 @@ variable "sampling_rate" {
   default     = 1
 }
 
+variable "starlark_script" {
+  description = "Starlark transformation script. Accepts raw script content (use heredoc), S3 path (s3://bucket/key), HTTP/HTTPS URL, base64-encoded script, or use file() for local files. Must define a transform(event) function. Leave empty to disable."
+  type        = string
+  default     = ""
+}
+
 variable "s3_bucket_name" {
   description = "The name of the S3 bucket to watch, this accepts also a comma separated list of bucket names."
   type        = string

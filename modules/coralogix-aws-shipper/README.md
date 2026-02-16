@@ -175,6 +175,7 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 | <a name="input_add_metadata"></a> [add\_metadata](#input\_add\_metadata) | Custom metadata to be added to the log message in the comma-separated format. The S3 options are: `bucket_name`,`key_name`. For CloudWatch `stream_name`, `loggroup_name`. For Kafka/MSK, use `topic_name` | `string` | n/a | no |
 | <a name="input_lambda_name"></a> [lambda\_name](#input\_lambda\_name) | The name the Lambda function to create. | `string` | n/a | no |
 | <a name="input_blocking_pattern"></a> [blocking\_pattern](#input\_blocking\_pattern) | A regular expression to identify lines excluded from being sent to Coralogix. For example, use `MainActivity.java:\d{3}` to match log lines with MainActivity followed by exactly three digits. | `string` | n/a | no |
+| <a name="input_starlark_script"></a> [starlark\_script](#input\_starlark\_script) | Starlark transformation script. Accepts raw content (heredoc), S3 path, HTTP URL, base64, or file() for local files. See [Log Transformation (Starlark)](#log-transformation-starlark). | `string` | `""` | no |
 | <a name="input_sampling_rate"></a> [sampling\_rate](#input\_sampling\_rate) | A message rate, such as 1 out of every N logs. For example, if your value is 10, a message will be sent for every 10th log. | `number` | `1` | no |
 | <a name="input_notification_email"></a> [notification_email](#input\_notification\_email) | A failure notification to be sent to the email address. | `string` |  n/a | no |
 | <a name="input_custom_s3_bucket"></a> [custom\_s3\_bucket](#input\_custom\_s3\_bucket) | The name of an existing S3 bucket in your region, in which the Lambda zip code will be uploaded to. | `string` | n/a | no |
@@ -367,6 +368,77 @@ module "coralogix_aws_shipper" "coralogix_firehose_metrics_private_link" {
   ]
 }
 ```
+
+## Log Transformation (Starlark)
+
+The AWS Shipper supports custom log transformation using [Starlark](https://github.com/bazelbuild/starlark) scripts. You can unnest JSON arrays, filter logs, transform structure, and enrich logs with extra fields.
+
+The `starlark_script` variable accepts several formats. The shipper auto-detects the type:
+
+| Method | When to Use | Example |
+|--------|-------------|---------|
+| Inline (heredoc) | Short scripts, quick testing | `<<-EOF ... EOF` |
+| Local file | Version-controlled scripts, complex logic | `file("${path.module}/transform.star")` |
+| S3 path | Shared scripts across deployments | `s3://bucket/transform.star` |
+| HTTP/HTTPS URL | Public scripts, GitHub raw URLs | `https://...` |
+| Base64 | CI/CD pipelines, programmatic generation | `ZGVmIHRyYW5z...` |
+
+**Example: inline script (heredoc) – best for short scripts**
+```hcl
+starlark_script = <<-EOF
+  def transform(event):
+      if event.get("level") == "DEBUG":
+          return []
+      return [event]
+EOF
+```
+
+**Example: local file – best for version-controlled scripts**
+```hcl
+starlark_script = file("${path.module}/scripts/transform.star")
+```
+
+**Example: S3 – best for shared scripts across deployments**
+```hcl
+starlark_script = "s3://my-config-bucket/starlark/transform.star"
+```
+
+**Example: HTTP URL – best for public/shared scripts**
+```hcl
+starlark_script = "https://raw.githubusercontent.com/myorg/scripts/main/transform.star"
+```
+
+**Example: Base64 – best for CI/CD or programmatic generation**
+```hcl
+starlark_script = "ZGVmIHRyYW5zZm9ybShldmVudCk6CiAgICByZXR1cm4gW2V2ZW50XQ=="
+```
+
+Your script must define a `transform(event)` function that takes one argument (JSON object or string) and returns a list of events (can be empty).
+
+**Example: passthrough**
+```python
+def transform(event):
+    return [event]
+```
+
+**Example: filter out debug logs**
+```python
+def transform(event):
+    if event.get("level") == "DEBUG":
+        return []
+    return [event]
+```
+
+**Example: enrich with metadata**
+```python
+def transform(event):
+    event["source"] = "aws-shipper"
+    return [event]
+```
+
+**Built-in functions:** `parse_json(str)`, `to_json(value)`, `print(msg)` (visible when LogLevel=DEBUG).
+
+When `starlark_script` is empty, logs pass through unchanged.
 
 ## Custom SNS Topic Policy Management
 
