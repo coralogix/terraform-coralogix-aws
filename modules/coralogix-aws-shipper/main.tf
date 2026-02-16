@@ -13,9 +13,7 @@ resource "random_string" "this" {
   special = false
 }
 
-resource "random_string" "lambda_role" {
-  count = var.execution_role_name == null ? 1 : 0
-
+resource "random_string" "id" {
   length  = 6
   special = false
 }
@@ -204,8 +202,8 @@ resource "aws_iam_policy" "lambda_policy" {
 }
 
 resource "aws_iam_role" "lambda_role" {
-  count = var.execution_role_name == null ? 1 : 0
-  name  = "Coralogix-lambda-role-${random_string.lambda_role[0].result}"
+  count = local.effective_create_role ? 1 : 0
+  name  = "Coralogix-lambda-role-${random_string.id.result}"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -224,13 +222,13 @@ resource "aws_iam_role" "lambda_role" {
 resource "aws_iam_role_policy_attachment" "attach_to_existing_role" {
   for_each = var.integration_info != null ? var.integration_info : local.integration_info
 
-  role       = var.execution_role_name != null ? var.execution_role_name : aws_iam_role.lambda_role[0].name
+  role       = local.lambda_role_name
   policy_arn = aws_iam_policy.lambda_policy[each.key].arn
 }
 
 resource "aws_iam_role_policy_attachment" "attach_msk_policy" {
   count      = var.msk_cluster_arn != null ? 1 : 0
-  role       = var.execution_role_name != null ? var.execution_role_name : aws_iam_role.lambda_role[0].name
+  role       = local.lambda_role_name
   policy_arn = data.aws_iam_policy.AWSLambdaMSKExecutionRole[0].arn
 }
 
@@ -284,7 +282,7 @@ module "lambda" {
   create_current_version_allowed_triggers = false
   attach_policy_statements                = false
   create_role                             = false
-  lambda_role                             = var.execution_role_name != null ? data.aws_iam_role.LambdaExecutionRole[0].arn : aws_iam_role.lambda_role[0].arn
+  lambda_role                             = local.lambda_role_arn
   allowed_triggers = local.s3_bucket_names != toset([]) && local.sns_enable != true ? {
     for bucket in data.aws_s3_bucket.this : "AllowExecutionFromS3_${replace(bucket.bucket, ".", "_")}" => {
       principal  = "s3.amazonaws.com"
@@ -383,7 +381,7 @@ resource "aws_vpc_endpoint" "secretsmanager" {
 
 resource "aws_sqs_queue" "DLQ" {
   count                      = var.enable_dlq ? 1 : 0
-  name                       = "coralogix-aws-shipper-dlq-${random_string.lambda_role[0].result}"
+  name                       = "coralogix-aws-shipper-dlq-${random_string.id.result}"
   message_retention_seconds  = 1209600
   delay_seconds              = var.dlq_retry_delay
   visibility_timeout_seconds = var.timeout
