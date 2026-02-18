@@ -462,3 +462,20 @@ variable "include_metric_stream_filter" {
   )
   default = []
 }
+
+# CloudWatch Log Group Tags support
+variable "enable_log_group_tags" {
+  description = "Enable CloudWatch Log Group tags support. When enabled, the Lambda will fetch and include log group tags in the metadata."
+  type        = bool
+  default     = false
+}
+
+variable "log_group_tags_cache_ttl_seconds" {
+  description = "TTL in seconds for the CloudWatch Log Group tags cache. Set to 0 to disable caching. Default is 300 seconds (5 minutes)."
+  type        = number
+  default     = 300
+  validation {
+    condition     = var.log_group_tags_cache_ttl_seconds >= 0
+    error_message = "log_group_tags_cache_ttl_seconds must be greater than or equal to 0."
+  }
+}
