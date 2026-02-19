@@ -73,4 +73,7 @@ locals {
   lambda_role_name = var.execution_role_arn != null ? element(split("/", var.execution_role_arn), length(split("/", var.execution_role_arn)) - 1) : (
     var.execution_role_name != null ? data.aws_iam_role.LambdaExecutionRole[0].name : aws_iam_role.lambda_role[0].name
   )
+
+  # Parse Starlark S3 script bucket when using s3:// format
+  starlark_s3_bucket = startswith(var.starlark_script, "s3://") ? regex("^s3://([^/]+)", var.starlark_script)[0] : null
 }

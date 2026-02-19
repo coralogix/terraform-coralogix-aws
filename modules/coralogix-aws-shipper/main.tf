@@ -194,7 +194,7 @@ resource "aws_iam_policy" "lambda_policy" {
         {
           Effect   = "Allow",
           Action   = ["s3:GetObject"],
-          Resource = ["${local.arn_prefix}:s3:::*/*"]
+          Resource = ["${local.arn_prefix}:s3:::${local.starlark_s3_bucket}/*"]
         }
       ] : []
     )
