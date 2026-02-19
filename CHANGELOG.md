@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.19.0
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 💡
+- Added `starlark_script` variable for custom log transformation using Starlark scripts. Supports inline scripts (heredoc), local files via `file()`, S3 paths, HTTP/HTTPS URLs, and base64-encoded scripts.
+
 ## v3.18.0
 #### **coralogix-aws-shipper**
 ### 🐛 Bug Fix 🐛

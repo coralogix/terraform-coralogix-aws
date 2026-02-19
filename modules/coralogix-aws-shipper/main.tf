@@ -187,6 +187,15 @@ resource "aws_iam_policy" "lambda_policy" {
           Action   = ["kms:Decrypt"],
           Resource = [var.s3_bucket_kms_arn]
         }
+      ] : [],
+
+      # Starlark S3 Script Policy
+      startswith(var.starlark_script, "s3://") ? [
+        {
+          Effect   = "Allow",
+          Action   = ["s3:GetObject"],
+          Resource = ["${local.arn_prefix}:s3:::${local.starlark_s3_bucket}/*"]
+        }
       ] : []
     )
   })
@@ -263,6 +272,7 @@ module "lambda" {
     TELEMETRY_MODE         = var.telemetry_mode
     BATCH_METRICS          = var.telemetry_mode == "metrics" && var.batch_metrics ? "1" : null
     METRICS_BATCH_MAX_SIZE = var.telemetry_mode == "metrics" && var.batch_metrics ? tostring(var.metrics_batch_max_size) : null
+    STARLARK_SCRIPT        = var.starlark_script != "" ? var.starlark_script : null
   }
   s3_existing_package = {
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.id}" : var.custom_s3_bucket
