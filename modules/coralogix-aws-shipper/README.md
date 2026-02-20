@@ -375,6 +375,10 @@ module "coralogix_aws_shipper" "coralogix_firehose_metrics_private_link" {
 
 The AWS Shipper supports custom log transformation using [Starlark](https://github.com/bazelbuild/starlark) scripts. You can unnest JSON arrays, filter logs, transform structure, and enrich logs with extra fields.
 
+> [!NOTE]
+> The full Starlark language specification — including syntax, data types, built-in functions, and operators — is available at:
+> **https://github.com/bazelbuild/starlark/blob/master/spec.md**
+
 The `starlark_script` variable accepts several formats. The shipper auto-detects the type:
 
 | Method | When to Use | Example |
@@ -438,7 +442,9 @@ def transform(event):
     return [event]
 ```
 
-**Built-in functions:** `parse_json(str)`, `to_json(value)`, `print(msg)` (visible when LogLevel=DEBUG).
+**Shipper built-in functions:** `parse_json(str)`, `to_json(value)`, `print(msg)` (visible when LogLevel=DEBUG).
+
+For the complete Starlark language reference — including all built-in functions, operators, data types, and control flow — see the [Starlark language specification](https://github.com/bazelbuild/starlark/blob/master/spec.md).
 
 When `starlark_script` is empty, logs pass through unchanged.
 
