@@ -113,6 +113,7 @@ module "collector_lambda" {
     CROSSACCOUNT_IAM_ACCOUNTIDS          = length(var.crossaccount_account_ids) > 0 ? join(",", var.crossaccount_account_ids) : null
     CROSSACCOUNT_IAM_ROLENAME            = length(var.crossaccount_iam_role_name) > 0 ? var.crossaccount_iam_role_name : null
     CROSSACCOUNT_CONFIG_AGGREGATOR       = length(var.crossaccount_config_aggregator) > 0 ? var.crossaccount_config_aggregator : null
+    CROSSACCOUNT_CONFIG_ASSUME_ROLE      = length(var.crossaccount_config_assume_role) > 0 ? var.crossaccount_config_assume_role : null
     AWS_RETRY_MODE                       = "adaptive"
     AWS_MAX_ATTEMPTS                     = 10
     IS_EC2_RESOURCE_TYPE_EXCLUDED        = var.excluded_ec2_resource_type
@@ -168,6 +169,13 @@ module "collector_lambda" {
         "config:SelectAggregateResourceConfig"
       ]
       resources = ["*"]
+    } : null
+    assume_config_role = length(var.crossaccount_config_assume_role) > 0 ? {
+      effect = "Allow"
+      actions = [
+        "sts:AssumeRole"
+      ]
+      resources = [var.crossaccount_config_assume_role]
     } : null
   }
 

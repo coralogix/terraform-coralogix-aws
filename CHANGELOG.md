@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.19.1
+#### **resource-metadata-sqs**
+### 💡 Enhancements 💡
+- Added `crossaccount_config_assume_role` variable to assume cross-account IAM role when querying AWS Config aggregator in a different account (CDS-2750).
+
 ## v3.19.0
 #### **coralogix-aws-shipper**
 ### 💡 Enhancements 💡
