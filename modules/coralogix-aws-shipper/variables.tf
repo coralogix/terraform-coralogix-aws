@@ -54,7 +54,7 @@ variable "sampling_rate" {
 }
 
 variable "starlark_script" {
-  description = "Starlark transformation script. Accepts raw script content (use heredoc), S3 path (s3://bucket/key), HTTP/HTTPS URL, base64-encoded script, or use file() for local files. Must define a transform(event) function. Leave empty to disable."
+  description = "Starlark transformation script. Accepts raw script content (use heredoc), S3 path (s3://bucket/key), HTTP/HTTPS URL, base64-encoded script, or use file() for local files. Must define a transform(event) function. Leave empty to disable. For the Starlark language specification, see https://github.com/bazelbuild/starlark/blob/master/spec.md"
   type        = string
   default     = ""
 }
