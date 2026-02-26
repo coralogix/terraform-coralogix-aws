@@ -247,3 +247,33 @@ variable "static_labels" {
   type        = list(string)
   default     = []
 }
+
+variable "lambda_file_cache_enabled" {
+  description = "Enable file cache for resource enrichment in the Lambda processor."
+  type        = bool
+  default     = true
+}
+
+variable "lambda_file_cache_expiration" {
+  description = "File cache expiration duration for resource enrichment (for example: 1h, 10m)."
+  type        = string
+  default     = "1h"
+}
+
+variable "lambda_file_cache_path" {
+  description = "Directory path used for Lambda file cache. The directory must already exist."
+  type        = string
+  default     = "/tmp"
+}
+
+variable "cross_account_enabled" {
+  description = "Enable cross-account resource tag enrichment for OAM. When true, the Lambda will assume roles in linked accounts to fetch resource tags. Requires cross_account_roles to be set."
+  type        = bool
+  default     = false
+}
+
+variable "cross_account_roles" {
+  description = "Map of AWS account IDs to IAM role ARNs for cross-account tag enrichment. Example: {\"123456789012\" = \"arn:aws:iam::123456789012:role/CoralogixMetricsReader\"}"
+  type        = map(string)
+  default     = {}
+}

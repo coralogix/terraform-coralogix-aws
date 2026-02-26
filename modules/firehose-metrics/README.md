@@ -118,6 +118,30 @@ additional_metric_statistics = [
 ]
 ```
 
+### Cross-account Tag Enrichment (OAM)
+
+When using OAM linked accounts, enable Lambda cross-account tag enrichment to fetch tags from source accounts:
+
+```terraform
+# Enable cross-account tag enrichment
+cross_account_enabled = true
+
+# Map each source account ID to the role to assume in that account
+cross_account_roles = {
+  "597078901540" = "arn:aws:iam::597078901540:role/CoralogixMetricsReader"
+}
+
+# Optional cache tuning (defaults shown)
+lambda_file_cache_enabled    = true
+lambda_file_cache_expiration = "1h"
+lambda_file_cache_path       = "/tmp"
+```
+
+Required permissions:
+- Monitoring account Lambda role must allow `sts:AssumeRole` on each role in `cross_account_roles`.
+- Each linked account role trust policy must allow the monitoring account Lambda processor role to assume it.
+- Linked account role policy should include at least `tag:GetResources` and service-specific read actions used for resource discovery.
+
 ### Removal of CloudWatch Metric Streams Lambda transformation
 By default, a [Coralogix Lambda Transformation Function](https://github.com/coralogix/cloudwatch-metric-streams-lambda-transformation) has been added to the [Kinesis Firehose Data Transformation](https://docs.aws.amazon.com/firehose/latest/dev/data-transformation.html) as a `processing_configuration`. This is done, to enrich the metrics from CloudWatch Metric Streams with AWS resource tags. The optional lambda function is deployed as part of the module, and can be removed by setting the variable `lambda_processor_enable` to `false`.
 

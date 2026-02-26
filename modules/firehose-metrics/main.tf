@@ -281,6 +281,16 @@ resource "aws_iam_role_policy" "new_lambda_iam" {
           "Resource": "*",
           "Sid": ""
       },
+      %{if var.cross_account_enabled && length(var.cross_account_roles) > 0}
+      {
+          "Action": [
+              "sts:AssumeRole"
+          ],
+          "Effect": "Allow",
+          "Resource": ${jsonencode(values(var.cross_account_roles))},
+          "Sid": ""
+      },
+      %{endif}
       {
           "Action": [
               "logs:PutLogEvents",
@@ -318,10 +328,18 @@ resource "aws_lambda_function" "lambda_processor" {
   tags          = local.tags
 
   environment {
-    variables = {
-      FILE_CACHE_PATH = "/tmp"
-      STATIC_LABELS   = jsonencode(var.static_labels)
-    }
+    variables = merge(
+      {
+        FILE_CACHE_ENABLED    = tostring(var.lambda_file_cache_enabled)
+        FILE_CACHE_EXPIRATION = var.lambda_file_cache_expiration
+        FILE_CACHE_PATH       = var.lambda_file_cache_path
+        STATIC_LABELS         = jsonencode(var.static_labels)
+      },
+      var.cross_account_enabled && length(var.cross_account_roles) > 0 ? {
+        CROSS_ACCOUNT_ENABLED = "true"
+        CROSS_ACCOUNT_ROLES   = jsonencode(var.cross_account_roles)
+      } : {}
+    )
   }
 }
 
