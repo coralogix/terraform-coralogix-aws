@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.19.2
+#### **firehose-metrics**
+### 🔧 Maintenance 🔧
+- Change Lambda runtime from `provided.al2` to `provided.al2023` to avoid AWS AL2 runtime deprecation deadlines.
+
 ## v3.19.1
 #### **resource-metadata-sqs**
 ### 💡 Enhancements 💡
