@@ -263,4 +263,9 @@ variable "cross_account_roles" {
     condition     = length(var.cross_account_roles) == 0 || var.cross_account_enabled
     error_message = "cross_account_roles can only be set when cross_account_enabled is true."
   }
+
+  validation {
+    condition     = !var.cross_account_enabled || length(var.cross_account_roles) > 0
+    error_message = "cross_account_roles must be set when cross_account_enabled is true."
+  }
 }

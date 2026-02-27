@@ -281,7 +281,7 @@ resource "aws_iam_role_policy" "new_lambda_iam" {
           "Resource": "*",
           "Sid": ""
       },
-      %{if var.cross_account_enabled && length(var.cross_account_roles) > 0}
+      %{if var.cross_account_enabled}
       {
           "Action": [
               "sts:AssumeRole"
@@ -334,7 +334,7 @@ resource "aws_lambda_function" "lambda_processor" {
         STATIC_LABELS         = jsonencode(var.static_labels)
         CROSS_ACCOUNT_ENABLED = tostring(var.cross_account_enabled)
       },
-      var.cross_account_enabled && length(var.cross_account_roles) > 0 ? {
+      var.cross_account_enabled ? {
         CROSS_ACCOUNT_ROLES = jsonencode(var.cross_account_roles)
       } : {}
     )
