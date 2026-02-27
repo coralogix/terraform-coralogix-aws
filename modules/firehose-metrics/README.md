@@ -131,10 +131,6 @@ cross_account_roles = {
   "597078901540" = "arn:aws:iam::597078901540:role/CoralogixMetricsReader"
 }
 
-# Optional cache tuning (defaults shown)
-lambda_file_cache_enabled    = true
-lambda_file_cache_expiration = "1h"
-lambda_file_cache_path       = "/tmp"
 ```
 
 Required permissions:

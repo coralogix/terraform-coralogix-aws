@@ -330,14 +330,12 @@ resource "aws_lambda_function" "lambda_processor" {
   environment {
     variables = merge(
       {
-        FILE_CACHE_ENABLED    = tostring(var.lambda_file_cache_enabled)
-        FILE_CACHE_EXPIRATION = var.lambda_file_cache_expiration
-        FILE_CACHE_PATH       = var.lambda_file_cache_path
+        FILE_CACHE_PATH       = "/tmp"
         STATIC_LABELS         = jsonencode(var.static_labels)
+        CROSS_ACCOUNT_ENABLED = tostring(var.cross_account_enabled)
       },
       var.cross_account_enabled && length(var.cross_account_roles) > 0 ? {
-        CROSS_ACCOUNT_ENABLED = "true"
-        CROSS_ACCOUNT_ROLES   = jsonencode(var.cross_account_roles)
+        CROSS_ACCOUNT_ROLES = jsonencode(var.cross_account_roles)
       } : {}
     )
   }
