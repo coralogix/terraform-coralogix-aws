@@ -68,6 +68,12 @@ variable "crossaccount_config_aggregator" {
   default     = ""
 }
 
+variable "crossaccount_config_assume_role" {
+  description = "IAM role ARN in the account where AWS Config aggregator lives. If set, the collector will assume this role when querying Config (use when aggregator is in a different account)."
+  type        = string
+  default     = ""
+}
+
 variable "crossaccount_account_ids" {
   description = "The account IDs to collect metadata from, separated by commas (e.g. 123456789012,123456789013). Used only when crossaccount_mode is StaticIAM."
   type        = list(string)

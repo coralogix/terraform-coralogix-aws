@@ -67,7 +67,7 @@ resource "aws_cloudwatch_log_stream" "firehose_log_stream" {
 # cloudwatch metrics log group access role to firehose
 resource "aws_iam_role_policy" "cloudwatch_metrics_policy" {
   count = var.telemetry_mode == "metrics" ? 1 : 0
-  name  = "firehose_access_policy_${random_string.lambda_role[0].result}"
+  name  = "firehose_access_policy_${random_string.id.result}"
   role  = aws_iam_role.cloudwatch_metrics_role[0].id
   policy = jsonencode({
     Version = "2012-10-17"
@@ -84,7 +84,7 @@ resource "aws_iam_role_policy" "cloudwatch_metrics_policy" {
 # cloudwatch metrics stream
 resource "aws_cloudwatch_metric_stream" "cloudWatch_metric_stream" {
   count         = var.telemetry_mode == "metrics" ? 1 : 0
-  name          = "metrics-firehose-shipper-test-coralogix-metric-stream-${random_string.lambda_role[0].result}"
+  name          = "metrics-firehose-shipper-test-coralogix-metric-stream-${random_string.id.result}"
   role_arn      = aws_iam_role.cloudwatch_metrics_role[0].arn
   firehose_arn  = aws_kinesis_firehose_delivery_stream.extended_s3_stream[0].arn
   output_format = "opentelemetry1.0"
@@ -101,7 +101,7 @@ resource "aws_cloudwatch_metric_stream" "cloudWatch_metric_stream" {
 resource "aws_iam_role" "cloudwatch_metrics_role" {
   count = var.telemetry_mode == "metrics" ? 1 : 0
 
-  name = "metrics-firehose-shipper-test-FirehoseAccessRole-${random_string.lambda_role[0].result}"
+  name = "metrics-firehose-shipper-test-FirehoseAccessRole-${random_string.id.result}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"

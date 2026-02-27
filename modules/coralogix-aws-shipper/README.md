@@ -175,6 +175,7 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 | <a name="input_add_metadata"></a> [add\_metadata](#input\_add\_metadata) | Custom metadata to be added to the log message in the comma-separated format. The S3 options are: `bucket_name`,`key_name`. For CloudWatch `stream_name`, `loggroup_name`. For Kafka/MSK, use `topic_name` | `string` | n/a | no |
 | <a name="input_lambda_name"></a> [lambda\_name](#input\_lambda\_name) | The name the Lambda function to create. | `string` | n/a | no |
 | <a name="input_blocking_pattern"></a> [blocking\_pattern](#input\_blocking\_pattern) | A regular expression to identify lines excluded from being sent to Coralogix. For example, use `MainActivity.java:\d{3}` to match log lines with MainActivity followed by exactly three digits. | `string` | n/a | no |
+| <a name="input_starlark_script"></a> [starlark\_script](#input\_starlark\_script) | Starlark transformation script. Accepts raw content (heredoc), S3 path, HTTP URL, base64, or file() for local files. See [Log Transformation (Starlark)](#log-transformation-starlark). | `string` | `""` | no |
 | <a name="input_sampling_rate"></a> [sampling\_rate](#input\_sampling\_rate) | A message rate, such as 1 out of every N logs. For example, if your value is 10, a message will be sent for every 10th log. | `number` | `1` | no |
 | <a name="input_notification_email"></a> [notification_email](#input\_notification\_email) | A failure notification to be sent to the email address. | `string` |  n/a | no |
 | <a name="input_custom_s3_bucket"></a> [custom\_s3\_bucket](#input\_custom\_s3\_bucket) | The name of an existing S3 bucket in your region, in which the Lambda zip code will be uploaded to. | `string` | n/a | no |
@@ -198,7 +199,9 @@ When using this variable you will need to create an S3 bucket in the region wher
 | <a name="cpu_arch"></a> [cpu_arch](#input\_cpu\_arch) | Lambda function CPU architecture: arm64 or x86_64. | `string` | arm64 | no |
 | <a name="runtime"></a> [runtime](#input\_runtime) | Lambda function runtime. For example, 'provided.al2023', 'provided.al2'. | `string` | provided.al2023 | no |
 | <a name="reserved_concurrent_executions"></a> [reserved_concurrent_executions](#input\_reserved_concurrent_executions) | The number of concurrent executions reserved for the function. Leave empty to let Lambda use unreserved account concurrency.	 | `number` | n/a | no |
-| <a name="execution_role_name"></a> [execution_role_name](#input\_execution_role_name) | The ARN of a user defined role be used as the execution role for the Lambda function. | `string` | n/a | no |
+| <a name="execution_role_arn"></a> [execution_role_arn](#input\_execution_role_arn) | ARN of a custom IAM execution role for the Lambda function. Preferred over `execution_role_name`. | `string` | n/a | no |
+| <a name="execution_role_name"></a> [execution_role_name](#input\_execution_role_name) | **(Deprecated)** Name of a custom IAM execution role. Use `execution_role_arn` instead. | `string` | n/a | no |
+| <a name="create_execution_role"></a> [create_execution_role](#input\_create_execution_role) | Whether the module should create its own IAM role for the Lambda function. Defaults to `true`. When supplying a custom role via `execution_role_arn` or `execution_role_name`, you must explicitly set `create_execution_role = false`. | `bool` | `true` | no |
 | <a name="lambda_assume_role_arn"></a> [lambda_assume_role_arn](#input\_lambda_assume_role_arn) | A role that the Lambda will assume. Leave empty to use the default permissions. Note that if this parameter is used, all S3 and ECR API calls from the Lambda will be made with the permissions of the assumed role. | `string` | n/a | no |
 | <a name="source_code_version"></a> [source_code_version](#input\_source_code_version) | The version of the source code that the Lambda will use. Must be in `x.x.x` format. The oldest supported version is `1.0.8`. For more information about each version changes, see [Changelog](https://github.com/coralogix/coralogix-aws-shipper/blob/master/CHANGELOG.md). By default, the Lambda will use the latest version. | `string` | n/a | no |
 
@@ -367,6 +370,83 @@ module "coralogix_aws_shipper" "coralogix_firehose_metrics_private_link" {
   ]
 }
 ```
+
+## Log Transformation (Starlark)
+
+The AWS Shipper supports custom log transformation using [Starlark](https://github.com/bazelbuild/starlark) scripts. You can unnest JSON arrays, filter logs, transform structure, and enrich logs with extra fields.
+
+> [!NOTE]
+> The full Starlark language specification — including syntax, data types, built-in functions, and operators — is available at:
+> **https://github.com/bazelbuild/starlark/blob/master/spec.md**
+
+The `starlark_script` variable accepts several formats. The shipper auto-detects the type:
+
+| Method | When to Use | Example |
+|--------|-------------|---------|
+| Inline (heredoc) | Short scripts, quick testing | `<<-EOF ... EOF` |
+| Local file | Version-controlled scripts, complex logic | `file("${path.module}/transform.star")` |
+| S3 path | Shared scripts across deployments | `s3://bucket/transform.star` |
+| HTTP/HTTPS URL | Public scripts, GitHub raw URLs | `https://...` |
+| Base64 | CI/CD pipelines, programmatic generation | `ZGVmIHRyYW5z...` |
+
+**Example: inline script (heredoc) – best for short scripts**
+```hcl
+starlark_script = <<-EOF
+  def transform(event):
+      if event.get("level") == "DEBUG":
+          return []
+      return [event]
+EOF
+```
+
+**Example: local file – best for version-controlled scripts**
+```hcl
+starlark_script = file("${path.module}/scripts/transform.star")
+```
+
+**Example: S3 – best for shared scripts across deployments**
+```hcl
+starlark_script = "s3://my-config-bucket/starlark/transform.star"
+```
+
+**Example: HTTP URL – best for public/shared scripts**
+```hcl
+starlark_script = "https://raw.githubusercontent.com/myorg/scripts/main/transform.star"
+```
+
+**Example: Base64 – best for CI/CD or programmatic generation**
+```hcl
+starlark_script = "ZGVmIHRyYW5zZm9ybShldmVudCk6CiAgICByZXR1cm4gW2V2ZW50XQ=="
+```
+
+Your script must define a `transform(event)` function that takes one argument (JSON object or string) and returns a list of events (can be empty).
+
+**Example: passthrough**
+```python
+def transform(event):
+    return [event]
+```
+
+**Example: filter out debug logs**
+```python
+def transform(event):
+    if event.get("level") == "DEBUG":
+        return []
+    return [event]
+```
+
+**Example: enrich with metadata**
+```python
+def transform(event):
+    event["source"] = "aws-shipper"
+    return [event]
+```
+
+**Shipper built-in functions:** `parse_json(str)`, `to_json(value)`, `print(msg)` (visible when LogLevel=DEBUG).
+
+For the complete Starlark language reference — including all built-in functions, operators, data types, and control flow — see the [Starlark language specification](https://github.com/bazelbuild/starlark/blob/master/spec.md).
+
+When `starlark_script` is empty, logs pass through unchanged.
 
 ## Custom SNS Topic Policy Management
 

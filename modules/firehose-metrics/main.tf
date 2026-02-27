@@ -321,7 +321,7 @@ resource "aws_lambda_function" "lambda_processor" {
   function_name = local.lambda_processor_name
   role          = local.lambda_processor_iam_role_arn
   handler       = "bootstrap"
-  runtime       = "provided.al2"
+  runtime       = "provided.al2023"
   timeout       = "60"
   memory_size   = 512
   architectures = ["arm64"]

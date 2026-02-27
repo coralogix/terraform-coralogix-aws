@@ -1,9 +1,39 @@
 # Changelog
 
-## v3.16.1
+## v3.20.0
 #### **firehose-metrics**
 ### 💡 Enhancements 💡
 - Add cross-account tag enrichment support via new `cross_account_enabled` and `cross_account_roles` variables. When enabled, the Lambda processor assumes roles in OAM-linked accounts to fetch and enrich metrics with resource tags.
+
+## v3.19.2
+#### **firehose-metrics**
+### 🔧 Maintenance 🔧
+- Change Lambda runtime from `provided.al2` to `provided.al2023` to avoid AWS AL2 runtime deprecation deadlines.
+
+## v3.19.1
+#### **resource-metadata-sqs**
+### 💡 Enhancements 💡
+- Added `crossaccount_config_assume_role` variable to assume cross-account IAM role when querying AWS Config aggregator in a different account (CDS-2750).
+
+## v3.19.0
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 💡
+- Added `starlark_script` variable for custom log transformation using Starlark scripts. Supports inline scripts (heredoc), local files via `file()`, S3 paths, HTTP/HTTPS URLs, and base64-encoded scripts.
+
+## v3.18.0
+#### **coralogix-aws-shipper**
+### 🐛 Bug Fix 🐛
+- Fixed "Invalid count argument" error when providing a custom execution role created in the same Terraform configuration (#294).
+
+### ⚠️ Breaking Change ⚠️
+- The `random_string.lambda_role` resource has been renamed to `random_string.id` and no longer uses `count`. On upgrade, Terraform will plan to destroy the old resource and create a new one with a different suffix, triggering replacement of the IAM role (`Coralogix-lambda-role-*`), the DLQ (`coralogix-aws-shipper-dlq-*`), and firehose-related resources if `telemetry_mode = "metrics"`. To preserve the existing suffix and avoid resource churn, run the following state migration **before** applying:
+  ```
+  terraform state mv 'module.<name>.random_string.lambda_role[0]' 'module.<name>.random_string.id'
+  ```
+
+### 💡 Enhancements 💡
+- Added `execution_role_arn` and `create_execution_role` variables for providing a custom Lambda execution role without breaking Terraform's plan-time dependency graph.
+- Deprecated `execution_role_name` in favor of `execution_role_arn`.
 
 ## v3.16.0
 #### **ecs-ec2**
