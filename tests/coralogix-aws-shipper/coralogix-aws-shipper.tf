@@ -36,12 +36,12 @@ module "cloudwatch" {
 module "metrics" {
   source = "../../modules/coralogix-aws-shipper"
 
-  coralogix_region        = "EU1"
-  api_key                 = "{{ secrets.TESTING_PRIVATE_KEY }}"
-  application_name        = "metrics"
-  subsystem_name          = "metrics"
-  s3_bucket_name          = "github-action-bucket-testing"
-  telemetry_mode          = "metrics"
-  batch_metrics           = true
-  metrics_batch_max_size  = 2
+  coralogix_region       = "EU1"
+  api_key                = "{{ secrets.TESTING_PRIVATE_KEY }}"
+  application_name       = "metrics"
+  subsystem_name         = "metrics"
+  s3_bucket_name         = "github-action-bucket-testing"
+  telemetry_mode         = "metrics"
+  batch_metrics          = true
+  metrics_batch_max_size = 2
 }
