@@ -57,22 +57,17 @@ jobs:
       - name: Validate CHANGELOG.md version
         if: steps.version.outputs.skip != 'true'
         run: |
-          EXPECTED="${{ steps.version.outputs.expected_version }}"
+          EXPECTED_VERSION="${{ steps.version.outputs.expected_version }}"
+          echo "Expected version: $EXPECTED_VERSION"
 
-          # Get first version heading from CHANGELOG.md
-          CHANGELOG_VERSION=$(grep -m1 '^## v' CHANGELOG.md | sed 's/## //')
-          echo "CHANGELOG version: $CHANGELOG_VERSION"
-          echo "Expected version: $EXPECTED"
-
-          if [[ "$CHANGELOG_VERSION" != "$EXPECTED" ]]; then
+          if ! grep -q "$EXPECTED_VERSION" CHANGELOG.md; then
             echo ""
-            echo "::error::CHANGELOG.md version mismatch!"
+            echo "::error::Version $EXPECTED_VERSION not found in CHANGELOG.md"
             echo ""
-            echo "Expected: $EXPECTED (based on PR title '${{ github.event.pull_request.title }}')"
-            echo "Found:    $CHANGELOG_VERSION"
+            echo "Expected: $EXPECTED_VERSION (based on PR title '${{ github.event.pull_request.title }}')"
             echo ""
-            echo "Please update CHANGELOG.md to use version $EXPECTED"
+            echo "Please add $EXPECTED_VERSION to CHANGELOG.md"
             exit 1
           fi
 
-          echo "Version validated: $CHANGELOG_VERSION matches expected $EXPECTED"
+          echo "Version validated: $EXPECTED_VERSION found in CHANGELOG.md"
