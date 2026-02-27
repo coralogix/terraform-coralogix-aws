@@ -99,8 +99,7 @@ The CHANGELOG.md version at the top must match the expected version based on you
 
 **Note**: Branch protection requires the following checks to pass before merge:
 
-- **Check PR title follows release format** (semantic-pull-request)
-- **validate-version** (Version Validation)
+- **semantic-pull-request** (PR title format and CHANGELOG version validation)
 - **Check Changelog Update**
 
 **For repository administrators**: To prevent tag mutation (which breaks downstream consumers), enable tag protection rules in GitHub Settings -> Tags -> Add rule with pattern `v*`. This prevents deletion or overwriting of published version tags. 
