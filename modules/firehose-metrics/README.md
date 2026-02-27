@@ -128,7 +128,7 @@ cross_account_enabled = true
 
 # Map each source account ID to the role to assume in that account
 cross_account_roles = {
-  "597078901540" = "arn:aws:iam::597078901540:role/CoralogixMetricsReader"
+  "123456789012" = "arn:aws:iam::123456789012:role/CoralogixMetricsReader"
 }
 
 ```
