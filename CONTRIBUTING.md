@@ -93,6 +93,14 @@ In order to release a new version the PR title and the commits needs to be in th
 
 ### Release Process
 
-Releases are **automatically created** when PRs with proper release types are merged to the master branch. 
+Releases are **automatically created** when PRs with proper release types are merged to the master branch.
 
-**Note**: CHANGELOG.md updates and release notes are currently manual - please update the changelog as part of your PR. 
+The CHANGELOG.md version at the top must match the expected version based on your PR type (e.g., a `fix:` PR after v3.19.2 should add `## v3.19.3`). CI will validate this and suggest the correct version if it does not match.
+
+**Note**: Branch protection requires the following checks to pass before merge:
+
+- **Check PR title follows release format** (semantic-pull-request)
+- **validate-version** (Version Validation)
+- **Check Changelog Update**
+
+**For repository administrators**: To prevent tag mutation (which breaks downstream consumers), enable tag protection rules in GitHub Settings -> Tags -> Add rule with pattern `v*`. This prevents deletion or overwriting of published version tags. 
