@@ -46,21 +46,30 @@ jobs:
 
           echo "PR title: $PR_TITLE"
 
-          if [[ "$PR_TITLE" =~ ^major: ]]; then
+          RE_BREAKING='^[a-z]+(\([^)]*\))?!:'
+          RE_MAJOR='^major(\([^)]*\))?:'
+          RE_MINOR='^(feat|chore)(\([^)]*\))?:'
+          RE_PATCH='^fix(\([^)]*\))?:'
+          RE_SKIP='^(docs|ci|test)(\([^)]*\))?:'
+
+          if [[ "$PR_TITLE" =~ $RE_BREAKING ]]; then
             NEXT_VERSION="v$((MAJOR + 1)).0.0"
             BUMP_TYPE="major"
-          elif [[ "$PR_TITLE" =~ ^(feat|chore): ]]; then
+          elif [[ "$PR_TITLE" =~ $RE_MAJOR ]]; then
+            NEXT_VERSION="v$((MAJOR + 1)).0.0"
+            BUMP_TYPE="major"
+          elif [[ "$PR_TITLE" =~ $RE_MINOR ]]; then
             NEXT_VERSION="v${MAJOR}.$((MINOR + 1)).0"
             BUMP_TYPE="minor"
-          elif [[ "$PR_TITLE" =~ ^fix: ]]; then
+          elif [[ "$PR_TITLE" =~ $RE_PATCH ]]; then
             NEXT_VERSION="v${MAJOR}.${MINOR}.$((PATCH + 1))"
             BUMP_TYPE="patch"
-          elif [[ "$PR_TITLE" =~ ^(docs|ci|test): ]]; then
+          elif [[ "$PR_TITLE" =~ $RE_SKIP ]]; then
             echo "skip=true" >> $GITHUB_OUTPUT
             echo "PR type does not trigger a release, skipping version check"
             exit 0
           else
-            echo "::error::PR title must start with fix:, feat:, major:, chore:, docs:, ci:, or test:"
+            echo "::error::PR title must follow conventional commits format: type(optional-scope): description (e.g., fix:, feat(module):, fix!:)"
             exit 1
           fi
 
