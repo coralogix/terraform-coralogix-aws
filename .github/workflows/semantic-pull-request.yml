@@ -84,7 +84,7 @@ jobs:
         run: |
           echo "Expected version: $EXPECTED_VERSION"
 
-          if ! grep -qF "## $EXPECTED_VERSION" CHANGELOG.md; then
+          if ! grep -qxF "## $EXPECTED_VERSION" CHANGELOG.md; then
             echo ""
             echo "::error::Version $EXPECTED_VERSION not found in CHANGELOG.md"
             echo ""
