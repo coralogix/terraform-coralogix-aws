@@ -119,6 +119,7 @@ module "collector_lambda" {
     IS_EC2_RESOURCE_TYPE_EXCLUDED        = var.excluded_ec2_resource_type
     IS_LAMBDA_RESOURCE_TYPE_EXCLUDED     = var.excluded_lambda_resource_type
     METADATA_QUEUE_URL                   = aws_sqs_queue.metadata_queue.url
+    EC2_CHUNK_SIZE                       = tostring(var.ec2_chunk_size)
   }
 
   s3_existing_package = {
@@ -214,6 +215,7 @@ module "generator_lambda" {
     RESOURCE_TTL_MINUTES         = var.resource_ttl_minutes
     AWS_RETRY_MODE               = "adaptive"
     AWS_MAX_ATTEMPTS             = 10
+    EC2_CHUNK_SIZE               = tostring(var.ec2_chunk_size)
   }
 
   s3_existing_package = {
@@ -314,6 +316,7 @@ module "generator_lambda_sm" {
     RESOURCE_TTL_MINUTES         = var.resource_ttl_minutes
     AWS_RETRY_MODE               = "adaptive"
     AWS_MAX_ATTEMPTS             = 10
+    EC2_CHUNK_SIZE               = tostring(var.ec2_chunk_size)
   }
 
   s3_existing_package = {
