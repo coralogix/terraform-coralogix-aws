@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.6.0"
+  required_version = ">= 1.9.0"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -335,6 +335,7 @@ resource "aws_lambda_function" "lambda_processor" {
       CROSS_ACCOUNT_ROLES   = jsonencode(var.cross_account_roles)
     }
   }
+
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_metrics" {
