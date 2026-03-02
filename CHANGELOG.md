@@ -5,6 +5,16 @@
 ### 💡 Enhancements 💡
 - Add cross-account tag enrichment support via new `cross_account_enabled` and `cross_account_roles` variables. When enabled, the Lambda processor assumes roles in OAM-linked accounts to fetch and enrich metrics with resource tags.
 
+## v3.19.4
+#### **resource-metadata-sqs**
+### 🐛 Bug Fix 🔧
+- Add missing env var `EC2_CHUNK_SIZE`
+- Add inline policy to assume cross-account AWS Config role
+
+#### **resource-metadata-sqs**
+### 🐛 Bug Fix 🔧
+- `policy_statements` was updated so that optional statements are only added when needed, instead of being set to null when disabled. 
+
 ## v3.19.2
 #### **firehose-metrics**
 ### 🔧 Maintenance 🔧

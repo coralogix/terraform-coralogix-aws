@@ -7,8 +7,8 @@
   * [Pull Request Lifecycle](#pull-request-lifecycle)
   * [Sign Your Commits](#sign-your-commits)
   * [Pull Request Checklist](#pull-request-checklist)
-  * [Requried Changes](#requried-changes)
-  * [Release Formate](#release-formate)
+  * [Required Changes](#required-changes)
+  * [Release Format](#release-format)
 
 Welcome! We are glad that you want to contribute to our project! 💖
 
@@ -75,7 +75,7 @@ before you submit your code:
 - passing CI
 - resolved discussions
 
-## Requried Changes
+## Required Changes
 
 When you submit a change you will need to make sure that you made all of the necessary changes:
 - Update the CHANGELOG.md file
@@ -93,6 +93,16 @@ In order to release a new version the PR title and the commits needs to be in th
 
 ### Release Process
 
-Releases are **automatically created** when PRs with proper release types are merged to the master branch. 
+Releases are **automatically created** when PRs with proper release types are merged to the master branch.
 
-**Note**: CHANGELOG.md updates and release notes are currently manual - please update the changelog as part of your PR. 
+The CHANGELOG.md version at the top must match the expected version based on your PR type (e.g., a `fix:` PR after v3.19.2 should add `## v3.19.3`). CI will validate this and suggest the correct version if it does not match.
+
+**Note**: Branch protection requires the following checks to pass before merge:
+
+- **semantic-pull-request** (PR title format and CHANGELOG version validation)
+- **Check Changelog Update**
+
+**For repository administrators**:
+
+- **Require branches to be up to date before merging**: In Settings → Branches, edit the `master` branch protection rule and enable "Require branches to be up to date before merging" under the status checks section. This ensures version validation re-runs when the base branch advances, preventing stale CHANGELOG headings when multiple release PRs are open.
+- **Tag protection**: To prevent tag mutation (which breaks downstream consumers), enable tag protection rules in Settings → Tags → Add rule with pattern `v*`. This prevents deletion or overwriting of published version tags. 
