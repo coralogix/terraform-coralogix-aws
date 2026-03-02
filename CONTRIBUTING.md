@@ -102,4 +102,7 @@ The CHANGELOG.md version at the top must match the expected version based on you
 - **semantic-pull-request** (PR title format and CHANGELOG version validation)
 - **Check Changelog Update**
 
-**For repository administrators**: To prevent tag mutation (which breaks downstream consumers), enable tag protection rules in GitHub Settings -> Tags -> Add rule with pattern `v*`. This prevents deletion or overwriting of published version tags. 
+**For repository administrators**:
+
+- **Require branches to be up to date before merging**: In Settings → Branches, edit the `master` branch protection rule and enable "Require branches to be up to date before merging" under the status checks section. This ensures version validation re-runs when the base branch advances, preventing stale CHANGELOG headings when multiple release PRs are open.
+- **Tag protection**: To prevent tag mutation (which breaks downstream consumers), enable tag protection rules in Settings → Tags → Add rule with pattern `v*`. This prevents deletion or overwriting of published version tags. 
