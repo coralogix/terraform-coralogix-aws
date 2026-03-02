@@ -127,57 +127,56 @@ module "collector_lambda" {
   }
 
   attach_policy_statements = true
-  policy_statements = {
-    ec2 = {
-      effect = "Allow"
-      actions = [
-        "ec2:DescribeInstances"
-      ]
-      resources = ["*"]
-    }
-    lambda = {
-      effect = "Allow"
-      actions = [
-        "lambda:ListFunctions"
-      ]
-      resources = ["*"]
-    }
-    tags = {
-      effect = "Allow"
-      actions = [
-        "tag:GetResources"
-      ]
-      resources = ["*"]
-    }
-    sqs = {
-      effect = "Allow"
-      actions = [
-        "sqs:SendMessage"
-      ]
-      resources = [aws_sqs_queue.metadata_queue.arn]
-    }
-    assume_role = var.crossaccount_mode == "StaticIAM" ? {
-      effect = "Allow"
-      actions = [
-        "sts:AssumeRole"
-      ]
-      resources = ["arn:aws:iam::*:role/${var.crossaccount_iam_role_name}"]
-    } : null
-    config = var.crossaccount_mode == "Config" ? {
-      effect = "Allow"
-      actions = [
-        "config:SelectAggregateResourceConfig"
-      ]
-      resources = ["*"]
-    } : null
-    assume_config_role = length(var.crossaccount_config_assume_role) > 0 ? {
-      effect = "Allow"
-      actions = [
-        "sts:AssumeRole"
-      ]
-      resources = [var.crossaccount_config_assume_role]
-    } : null
-  }
+  policy_statements = merge(
+    {
+      ec2 = {
+        effect = "Allow"
+        actions = [
+          "ec2:DescribeInstances"
+        ]
+        resources = ["*"]
+      }
+      lambda = {
+        effect = "Allow"
+        actions = [
+          "lambda:ListFunctions"
+        ]
+        resources = ["*"]
+      }
+      tags = {
+        effect = "Allow"
+        actions = [
+          "tag:GetResources"
+        ]
+        resources = ["*"]
+      }
+      sqs = {
+        effect = "Allow"
+        actions = [
+          "sqs:SendMessage"
+        ]
+        resources = [aws_sqs_queue.metadata_queue.arn]
+      }
+    },
+    var.crossaccount_mode == "StaticIAM" ? {
+      assume_role = {
+        effect = "Allow"
+        actions = [
+          "sts:AssumeRole"
+        ]
+        resources = ["arn:aws:iam::*:role/${var.crossaccount_iam_role_name}"]
+      }
+    } : {},
+    var.crossaccount_mode == "Config" ? {
+      config = {
+        effect = "Allow"
+        actions = [
+          "config:SelectAggregateResourceConfig"
+        ]
+        resources = ["*"]
+      }
+    } : {}
+  )
 
   allowed_triggers = {
     EventBridge = {
@@ -223,44 +222,48 @@ module "generator_lambda" {
   }
 
   attach_policy_statements = true
-  policy_statements = {
-    ec2 = {
-      effect = "Allow"
-      actions = [
-        "ec2:DescribeInstances"
-      ]
-      resources = ["*"]
-    }
-    lambda = {
-      effect = "Allow"
-      actions = [
-        "lambda:ListVersionsByFunction",
-        "lambda:GetFunctionConfiguration",
-        "lambda:GetFunctionConcurrency",
-        "lambda:ListTags",
-        "lambda:ListAliases",
-        "lambda:ListEventSourceMappings",
-        "lambda:GetPolicy"
-      ]
-      resources = ["*"]
-    }
-    sqs = {
-      effect = "Allow"
-      actions = [
-        "sqs:ReceiveMessage",
-        "sqs:DeleteMessage",
-        "sqs:GetQueueAttributes"
-      ]
-      resources = [aws_sqs_queue.metadata_queue.arn]
-    }
-    assume_role = var.crossaccount_mode == "Disabled" ? null : {
-      effect = "Allow"
-      actions = [
-        "sts:AssumeRole"
-      ]
-      resources = ["arn:aws:iam::*:role/${var.crossaccount_iam_role_name}"]
-    }
-  }
+  policy_statements = merge(
+    {
+      ec2 = {
+        effect = "Allow"
+        actions = [
+          "ec2:DescribeInstances"
+        ]
+        resources = ["*"]
+      }
+      lambda = {
+        effect = "Allow"
+        actions = [
+          "lambda:ListVersionsByFunction",
+          "lambda:GetFunctionConfiguration",
+          "lambda:GetFunctionConcurrency",
+          "lambda:ListTags",
+          "lambda:ListAliases",
+          "lambda:ListEventSourceMappings",
+          "lambda:GetPolicy"
+        ]
+        resources = ["*"]
+      }
+      sqs = {
+        effect = "Allow"
+        actions = [
+          "sqs:ReceiveMessage",
+          "sqs:DeleteMessage",
+          "sqs:GetQueueAttributes"
+        ]
+        resources = [aws_sqs_queue.metadata_queue.arn]
+      }
+    },
+    var.crossaccount_mode != "Disabled" ? {
+      assume_role = {
+        effect = "Allow"
+        actions = [
+          "sts:AssumeRole"
+        ]
+        resources = ["arn:aws:iam::*:role/${var.crossaccount_iam_role_name}"]
+      }
+    } : {}
+  )
 
   allowed_triggers = {
     SQS = {
@@ -319,54 +322,58 @@ module "generator_lambda_sm" {
   }
 
   attach_policy_statements = true
-  policy_statements = {
-    ec2 = {
-      effect = "Allow"
-      actions = [
-        "ec2:DescribeInstances"
-      ]
-      resources = ["*"]
-    }
-    lambda = {
-      effect = "Allow"
-      actions = [
-        "lambda:ListVersionsByFunction",
-        "lambda:GetFunctionConfiguration",
-        "lambda:GetFunctionConcurrency",
-        "lambda:ListTags",
-        "lambda:ListAliases",
-        "lambda:ListEventSourceMappings",
-        "lambda:GetPolicy"
-      ]
-      resources = ["*"]
-    }
-    sqs = {
-      effect = "Allow"
-      actions = [
-        "sqs:ReceiveMessage",
-        "sqs:DeleteMessage",
-        "sqs:GetQueueAttributes"
-      ]
-      resources = [aws_sqs_queue.metadata_queue.arn]
-    }
-    assume_role = var.crossaccount_mode == "Disabled" ? null : {
-      effect = "Allow"
-      actions = [
-        "sts:AssumeRole"
-      ]
-      resources = ["arn:aws:iam::*:role/${var.crossaccount_iam_role_name}"]
-    }
-    secrets = {
-      effect = "Allow"
-      actions = [
-        "secretsmanager:DescribeSecret",
-        "secretsmanager:GetSecretValue",
-        "secretsmanager:PutSecretValue",
-        "secretsmanager:UpdateSecret"
-      ]
-      resources = ["*"]
-    }
-  }
+  policy_statements = merge(
+    {
+      ec2 = {
+        effect = "Allow"
+        actions = [
+          "ec2:DescribeInstances"
+        ]
+        resources = ["*"]
+      }
+      lambda = {
+        effect = "Allow"
+        actions = [
+          "lambda:ListVersionsByFunction",
+          "lambda:GetFunctionConfiguration",
+          "lambda:GetFunctionConcurrency",
+          "lambda:ListTags",
+          "lambda:ListAliases",
+          "lambda:ListEventSourceMappings",
+          "lambda:GetPolicy"
+        ]
+        resources = ["*"]
+      }
+      sqs = {
+        effect = "Allow"
+        actions = [
+          "sqs:ReceiveMessage",
+          "sqs:DeleteMessage",
+          "sqs:GetQueueAttributes"
+        ]
+        resources = [aws_sqs_queue.metadata_queue.arn]
+      }
+      secrets = {
+        effect = "Allow"
+        actions = [
+          "secretsmanager:DescribeSecret",
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:PutSecretValue",
+          "secretsmanager:UpdateSecret"
+        ]
+        resources = ["*"]
+      }
+    },
+    var.crossaccount_mode != "Disabled" ? {
+      assume_role = {
+        effect = "Allow"
+        actions = [
+          "sts:AssumeRole"
+        ]
+        resources = ["arn:aws:iam::*:role/${var.crossaccount_iam_role_name}"]
+      }
+    } : {}
+  )
 
   allowed_triggers = {
     SQS = {
