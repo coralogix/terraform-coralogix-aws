@@ -176,6 +176,15 @@ module "collector_lambda" {
         ]
         resources = ["*"]
       }
+    } : {},
+    var.crossaccount_mode == "Config" && length(var.crossaccount_config_assume_role) > 0 ? {
+      assume_config_role = {
+        effect = "Allow"
+        actions = [
+          "sts:AssumeRole"
+        ]
+        resources = [var.crossaccount_config_assume_role]
+      }
     } : {}
   )
 

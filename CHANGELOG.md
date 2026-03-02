@@ -4,6 +4,7 @@
 #### **resource-metadata-sqs**
 ### 🐛 Bug Fix 🔧
 - Add missing env var `EC2_CHUNK_SIZE`
+- Add inline policy to assume cross-config AWS Config role
 
 ## v3.19.3
 #### **resource-metadata-sqs**
