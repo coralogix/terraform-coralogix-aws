@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.19.3
+#### **resource-metadata-sqs**
+### 🐛 Bug Fix 🔧
+- `policy_statements` was updated so that optional statements are only added when needed, instead of being set to null when disabled. 
+
 ## v3.19.2
 #### **firehose-metrics**
 ### 🔧 Maintenance 🔧
