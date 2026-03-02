@@ -176,6 +176,16 @@ variable "excluded_ec2_resource_type" {
   default     = false
 }
 
+variable "ec2_chunk_size" {
+  description = "Number of EC2 instances to process per batch when collecting metadata. Required by the collector Lambda."
+  type        = number
+  default     = 25
+  validation {
+    condition     = var.ec2_chunk_size >= 10 && var.ec2_chunk_size <= 40
+    error_message = "EC2 chunk size must be between 10 and 40."
+  }
+}
+
 variable "excluded_lambda_resource_type" {
   description = "Is Lambda Resource Type Excluded?"
   type        = bool
