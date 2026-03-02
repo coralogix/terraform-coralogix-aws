@@ -7,8 +7,8 @@
   * [Pull Request Lifecycle](#pull-request-lifecycle)
   * [Sign Your Commits](#sign-your-commits)
   * [Pull Request Checklist](#pull-request-checklist)
-  * [Requried Changes](#requried-changes)
-  * [Release Formate](#release-formate)
+  * [Required Changes](#required-changes)
+  * [Release Format](#release-format)
 
 Welcome! We are glad that you want to contribute to our project! 💖
 
@@ -75,7 +75,7 @@ before you submit your code:
 - passing CI
 - resolved discussions
 
-## Requried Changes
+## Required Changes
 
 When you submit a change you will need to make sure that you made all of the necessary changes:
 - Update the CHANGELOG.md file
