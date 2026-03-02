@@ -99,12 +99,19 @@ jobs:
         env:
           EXPECTED_VERSION: ${{ steps.version.outputs.expected_version }}
         run: |
+          set -euo pipefail
+
           VERSION_NUM="${EXPECTED_VERSION#v}"
           REGISTRY_URL="https://registry.terraform.io/v1/modules/coralogix/aws/coralogix/versions"
 
           echo "Checking if $VERSION_NUM exists in Terraform Registry..."
 
-          EXISTING=$(curl -sf "$REGISTRY_URL" | jq -r --arg v "$VERSION_NUM" \
+          RESPONSE=$(curl -sf "$REGISTRY_URL") || {
+            echo "::warning::Could not reach Terraform Registry API - skipping version check"
+            exit 0
+          }
+
+          EXISTING=$(echo "$RESPONSE" | jq -r --arg v "$VERSION_NUM" \
             '.modules[0].versions | map(.version) | map(select(. == $v)) | .[0] // empty')
 
           if [ -n "$EXISTING" ]; then
