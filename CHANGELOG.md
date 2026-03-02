@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.19.4
+#### **resource-metadata-sqs**
+### 🐛 Bug Fix 🔧
+- Add missing env var `EC2_CHUNK_SIZE`
+
 ## v3.19.3
 #### **resource-metadata-sqs**
 ### 🐛 Bug Fix 🔧
