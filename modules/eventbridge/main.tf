@@ -15,7 +15,8 @@ module "locals" {
 }
 
 locals {
-  endpoint_url = var.coralogix_region == "Custom" ? "https://ingress.${var.custom_url}/aws/event-bridge" : "https://ingress.${lookup(module.locals.coralogix_domains, var.coralogix_region, "eu1.coralogix.com")}/aws/event-bridge"
+  validate_custom_url = var.coralogix_region == "Custom" && (var.custom_url == null || var.custom_url == "") ? tobool("custom_url must be set when coralogix_region is 'Custom'") : true
+  endpoint_url        = var.coralogix_region == "Custom" ? "https://ingress.${var.custom_url}/aws/event-bridge" : "https://ingress.${lookup(module.locals.coralogix_domains, var.coralogix_region, "eu1.coralogix.com")}/aws/event-bridge"
   tags = {
     terraform-module         = "eventbridge-to-coralogix"
     terraform-module-version = "v0.0.3"
