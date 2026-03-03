@@ -43,8 +43,6 @@ The coralogix region variable accepts one of the following regions:
 | US2       | `https://ingress.us2.coralogix.com/aws/event-bridge`                  |
 | Custom    | `https://ingress.<custom_domain>/aws/event-bridge`                    |
 
-> **Note for Custom domains**: If your Coralogix team URL uses a cluster-specific domain (e.g. `cx498.coralogix.com`), set `coralogix_region = "Custom"` and `custom_url = "<your-cluster>.coralogix.com"`. This applies to US2 accounts whose team hostname is `team.app.cx498.coralogix.com` — use `custom_url = "cx498.coralogix.com"` instead of `coralogix_region = "US2"`.
-
 
 ## Requirements
 
