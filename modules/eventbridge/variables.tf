@@ -24,7 +24,7 @@ variable "coralogix_region" {
 }
 
 variable "custom_url" {
-  description = "Custom Coralogix domain (e.g. 'cx498.coralogix.com'). Required when coralogix_region is set to 'Custom'."
+  description = "Custom Coralogix domain. Required when coralogix_region is set to 'Custom'."
   type        = string
   default     = null
   validation {
