@@ -17,6 +17,7 @@
 - Add missing env var `EC2_CHUNK_SIZE`
 - Add inline policy to assume cross-account AWS Config role
 
+## v3.19.3
 #### **resource-metadata-sqs**
 ### 🐛 Bug Fix 🔧
 - `policy_statements` was updated so that optional statements are only added when needed, instead of being set to null when disabled. 
