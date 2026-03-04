@@ -30,33 +30,32 @@ The coralogix region variable accepts one of the following regions:
 * US2
 * Custom
 
-*** All of the regions must be written with lower-case letters. 
-
 ### Endpoints
 
-| Region    | Logs Endpoint
-|-----------|-----------------------------------------------------------------|
-| EU1       | `https://aws-events.coralogix.com/aws/event`                |
-| EU2       | `https://aws-events.eu2.coralogix.com/aws/event`           |
-| AP1       | `https://aws-events.ap1.coralogix.com/aws/event`             |
-| AP2       | `https://aws-events.ap2.coralogix.com/aws/event`             |
-| AP3       | `https://aws-events.ap3.coralogix.com/aws/event`           |
-| US1       | `https://aws-events.us1.coralogix.com/aws/event`                |
-| US2       | `https://aws-events.us2.coralogix.com/aws/event`          |
-| Custom    | `https://aws-events.<custom_domain>/aws/event`             |
+| Region    | Logs Endpoint                                                          |
+|-----------|------------------------------------------------------------------------|
+| EU1       | `https://ingress.eu1.coralogix.com/aws/event-bridge`                  |
+| EU2       | `https://ingress.eu2.coralogix.com/aws/event-bridge`                  |
+| AP1       | `https://ingress.ap1.coralogix.com/aws/event-bridge`                  |
+| AP2       | `https://ingress.ap2.coralogix.com/aws/event-bridge`                  |
+| AP3       | `https://ingress.ap3.coralogix.com/aws/event-bridge`                  |
+| US1       | `https://ingress.us1.coralogix.com/aws/event-bridge`                  |
+| US2       | `https://ingress.us2.coralogix.com/aws/event-bridge`                  |
+| Custom    | `https://ingress.<custom_domain>/aws/event-bridge`                    |
 
 
 ## Requirements
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 4.17.1 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.9 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 4.17.1 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.0 |
 
 ## Resources
 
@@ -77,7 +76,7 @@ The coralogix region variable accepts one of the following regions:
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_application_name"></a> [application\_name](#input\_application\_name) | Coralogix application name | `string` | n/a | yes |
-| <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | Coralogix account region: us, us2, singapore, ireland, india, stockholm [in lower-case letters] | `any` | n/a | yes |
+| <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | Coralogix account region. Accepted values: `EU1`, `EU2`, `AP1`, `AP2`, `AP3`, `US1`, `US2`, `Custom` | `string` | n/a | yes |
 | <a name="input_custom_url"></a> [custom_url](#input\_custom\_url) | Custom coralogix url | `string` | `null` | no |
 | <a name="input_eventbridge_stream"></a> [eventbridge\_stream](#input\_eventbridge\_stream) | AWS eventbridge delivery stream name | `string` | n/a | yes |
 | <a name="input_private_key"></a> [private\_key](#input\_private\_key) | Your Coralogix private key | `string` | n/a | yes |

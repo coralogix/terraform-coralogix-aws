@@ -1,4 +1,5 @@
 terraform {
+  required_version = ">= 1.9"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -15,10 +16,10 @@ module "locals" {
 }
 
 locals {
-  endpoint_url = "https://aws-events.${lookup(module.locals.coralogix_domains, var.coralogix_region, "EU1")}/aws/event"
+  endpoint_url = var.coralogix_region == "Custom" ? "https://ingress.${var.custom_url}/aws/event-bridge" : "https://ingress.${lookup(module.locals.coralogix_domains, var.coralogix_region, "eu1.coralogix.com")}/aws/event-bridge"
   tags = {
     terraform-module         = "eventbridge-to-coralogix"
-    terraform-module-version = "v0.0.3"
+    terraform-module-version = "v0.0.4"
     managed-by               = "coralogix-terraform"
   }
   application_name = var.application_name == null ? "coralogix-${var.eventbridge_stream}" : var.application_name
