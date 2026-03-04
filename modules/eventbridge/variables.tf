@@ -24,9 +24,13 @@ variable "coralogix_region" {
 }
 
 variable "custom_url" {
-  description = "Custom coralogix url"
+  description = "Custom Coralogix domain. Required when coralogix_region is set to 'Custom'."
   type        = string
-  default     = ""
+  default     = null
+  validation {
+    condition     = var.coralogix_region != "Custom" || (var.custom_url != null && var.custom_url != "")
+    error_message = "custom_url must be set when coralogix_region is 'Custom'."
+  }
 }
 
 variable "sources" {

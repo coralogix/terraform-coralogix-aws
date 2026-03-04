@@ -5,6 +5,12 @@
 ### 💡 Enhancements 💡
 - Add cross-account tag enrichment support via new `cross_account_enabled` and `cross_account_roles` variables. When enabled, the Lambda processor assumes roles in OAM-linked accounts to fetch and enrich metrics with resource tags.
 
+## v3.19.5
+#### **eventbridge**
+### 🐛 Bug Fix 🔧
+- Updated endpoint format from the legacy `https://aws-events.<domain>/aws/event` to the current Coralogix standard `https://ingress.<domain>/aws/event-bridge` for all regions.
+- Fixed `custom_url` variable being silently ignored when `coralogix_region = "Custom"`. The `endpoint_url` local now correctly uses `custom_url` for custom region deployments instead of falling back to `EU1`.
+
 ## v3.19.4
 #### **resource-metadata-sqs**
 ### 🐛 Bug Fix 🔧
