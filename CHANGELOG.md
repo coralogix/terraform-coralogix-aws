@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.20.0
+#### **firehose-metrics**
+### 💡 Enhancements 💡
+- Add cross-account tag enrichment support via new `cross_account_enabled` and `cross_account_roles` variables. When enabled, the Lambda processor assumes roles in OAM-linked accounts to fetch and enrich metrics with resource tags.
+
 ## v3.19.5
 #### **eventbridge**
 ### 🐛 Bug Fix 🔧

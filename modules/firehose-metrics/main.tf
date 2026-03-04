@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.6.0"
+  required_version = ">= 1.9.0"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -281,6 +281,16 @@ resource "aws_iam_role_policy" "new_lambda_iam" {
           "Resource": "*",
           "Sid": ""
       },
+      %{if var.cross_account_enabled}
+      {
+          "Action": [
+              "sts:AssumeRole"
+          ],
+          "Effect": "Allow",
+          "Resource": ${jsonencode(values(var.cross_account_roles))},
+          "Sid": ""
+      },
+      %{endif}
       {
           "Action": [
               "logs:PutLogEvents",
@@ -319,10 +329,13 @@ resource "aws_lambda_function" "lambda_processor" {
 
   environment {
     variables = {
-      FILE_CACHE_PATH = "/tmp"
-      STATIC_LABELS   = jsonencode(var.static_labels)
+      FILE_CACHE_PATH       = "/tmp"
+      STATIC_LABELS         = jsonencode(var.static_labels)
+      CROSS_ACCOUNT_ENABLED = tostring(var.cross_account_enabled)
+      CROSS_ACCOUNT_ROLES   = jsonencode(var.cross_account_roles)
     }
   }
+
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_metrics" {

@@ -247,3 +247,25 @@ variable "static_labels" {
   type        = list(string)
   default     = []
 }
+
+variable "cross_account_enabled" {
+  description = "Enable cross-account resource tag enrichment for OAM. When true, the Lambda will assume roles in linked accounts to fetch resource tags. Requires cross_account_roles to be set."
+  type        = bool
+  default     = false
+}
+
+variable "cross_account_roles" {
+  description = "Map of AWS account IDs to IAM role ARNs for cross-account tag enrichment. Example: {\"123456789012\" = \"arn:aws:iam::123456789012:role/CoralogixMetricsReader\"}"
+  type        = map(string)
+  default     = {}
+
+  validation {
+    condition     = length(var.cross_account_roles) == 0 || var.cross_account_enabled
+    error_message = "cross_account_roles can only be set when cross_account_enabled is true."
+  }
+
+  validation {
+    condition     = !var.cross_account_enabled || length(var.cross_account_roles) > 0
+    error_message = "cross_account_roles must be set when cross_account_enabled is true."
+  }
+}
