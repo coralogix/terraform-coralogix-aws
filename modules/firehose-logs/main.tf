@@ -250,7 +250,7 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs" {
     }
 
     request_configuration {
-      content_encoding = "GZIP"
+      content_encoding = var.content_encoding
 
       dynamic "common_attributes" {
         for_each = var.integration_type_logs == null ? [] : [1]

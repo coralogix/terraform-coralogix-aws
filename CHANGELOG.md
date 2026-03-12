@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.21.0
+#### **firehose-logs**
+### 💡 Enhancements 💡
+- Allow control of content-encoding via variable.
+
 ## v3.20.0
 #### **firehose-metrics**
 ### 💡 Enhancements 💡
