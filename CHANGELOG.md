@@ -5,6 +5,10 @@
 ### 💡 Enhancements 💡
 - Allow control of content-encoding via variable.
 
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 💡
+- Added `log_stream_filter` variable to filter CloudWatch log events by log stream name using regex patterns. Useful for AWS Amplify or similar services where multiple branches write to a single log group with distinct log streams.
+
 ## v3.20.0
 #### **firehose-metrics**
 ### 💡 Enhancements 💡

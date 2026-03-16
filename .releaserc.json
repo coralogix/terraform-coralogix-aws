@@ -9,7 +9,7 @@
           {"type": "fix", "release": "patch"},
           {"type": "feat", "release": "minor"},
           {"type": "major", "release": "major"},
-          {"type": "chore", "release": "minor"},
+          {"type": "chore", "release": false},
           {"type": "docs", "release": false},
           {"type": "ci", "release": false},
           {"type": "test", "release": false}
