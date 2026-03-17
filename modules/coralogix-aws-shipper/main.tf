@@ -273,6 +273,7 @@ module "lambda" {
     BATCH_METRICS          = var.telemetry_mode == "metrics" && var.batch_metrics ? "1" : null
     METRICS_BATCH_MAX_SIZE = var.telemetry_mode == "metrics" && var.batch_metrics ? tostring(var.metrics_batch_max_size) : null
     STARLARK_SCRIPT        = var.starlark_script != "" ? var.starlark_script : null
+    LOG_STREAM_FILTER      = var.log_stream_filter != "" ? var.log_stream_filter : null
   }
   s3_existing_package = {
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.id}" : var.custom_s3_bucket

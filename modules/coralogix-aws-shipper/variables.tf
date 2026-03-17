@@ -140,6 +140,12 @@ variable "log_group_filter_pattern" {
   default     = ""
 }
 
+variable "log_stream_filter" {
+  description = "A regex pattern to filter CloudWatch log streams by name. Only events from log streams matching this pattern will be shipped. Leave empty to ship all streams. Example: '^main/' to only ship logs from streams starting with 'main/'."
+  type        = string
+  default     = ""
+}
+
 # kinesis variables
 
 variable "kinesis_stream_name" {
