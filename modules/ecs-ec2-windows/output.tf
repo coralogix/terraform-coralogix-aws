@@ -7,3 +7,8 @@ output "coralogix_otel_agent_service_id" {
   value       = aws_ecs_service.coralogix_otel_agent.id
   description = "ID of the ECS Service for the OTEL Agent Daemon"
 }
+
+output "cloudwatch_log_group_name" {
+  value       = local.log_group_name
+  description = "Name of the CloudWatch log group used by the OTEL agent"
+}

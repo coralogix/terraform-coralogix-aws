@@ -1,6 +1,28 @@
 variable "ecs_cluster_name" {
-  description = "Name of the AWS ECS Cluster to deploy the Coralogix OTEL Collector. Supports Amazon EC2 instances only, not Fargate."
+  description = "Name of the AWS ECS Cluster to deploy the Coralogix OTEL Collector. Must be a Windows EC2 cluster (WINDOWS_SERVER_2022_CORE)."
   type        = string
+}
+
+variable "subnet_ids" {
+  description = "List of subnet IDs for the ECS service (awsvpc network mode). Use private subnets where your Windows ECS container instances run."
+  type        = list(string)
+}
+
+variable "security_group_ids" {
+  description = "List of security group IDs for the ECS service (awsvpc network mode). Must allow outbound traffic and any required agent ports (e.g. OTLP 4317)."
+  type        = list(string)
+}
+
+variable "cloudwatch_log_group_name" {
+  description = "Name of the CloudWatch log group for the OTEL agent. If null, a log group is created automatically."
+  type        = string
+  default     = null
+}
+
+variable "cloudwatch_log_retention_days" {
+  description = "Retention in days for the created CloudWatch log group. Only used when cloudwatch_log_group_name is null."
+  type        = number
+  default     = 7
 }
 
 variable "config_source" {
@@ -30,21 +52,27 @@ variable "s3_config_key" {
   }
 }
 
-variable "image_version" {
-  description = "The Coralogix Open Telemetry Distribution Image Version/Tag. See: https://hub.docker.com/r/coralogixrepo/coralogix-otel-collector/tags"
-  type        = string
-}
-
 variable "image" {
-  description = "The OpenTelemetry Collector Image to use. Should accept default unless advised by Coralogix support."
+  description = "The OpenTelemetry Collector image repository. For Windows use the Windows image; default is coralogixrepo/coralogix-otel-collector (set image_version to a Windows tag, e.g. v0.5.10-windowsserver-2022)."
   type        = string
   default     = "coralogixrepo/coralogix-otel-collector"
 }
 
-variable "memory" {
-  description = "The amount of memory (in MiB) used by the task. Note that your cluster must have sufficient memory available to support the given value. Minimum __256__ MiB. CPU Units will be allocated directly proportional to Memory."
+variable "image_version" {
+  description = "The Coralogix OTEL Collector image tag. For Windows ECS use a Windows Server tag, e.g. v0.5.10-windowsserver-2022. See: https://hub.docker.com/r/coralogixrepo/coralogix-otel-collector/tags"
+  type        = string
+}
+
+variable "cpu" {
+  description = "CPU units for the task (1024 = 1 vCPU). Windows tasks typically use 1024 or more."
   type        = number
-  default     = 256
+  default     = 1024
+}
+
+variable "memory" {
+  description = "Memory (MiB) for the task. Windows OTEL agent typically uses 2048."
+  type        = number
+  default     = 2048
 }
 
 variable "coralogix_region" {
