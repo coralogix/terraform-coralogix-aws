@@ -17,7 +17,7 @@ variable "security_group_ids" {
 }
 
 variable "service_discovery_registry_arn" {
-  description = "Cloud Map service ARN so the agent registers (e.g. agent.otel.local). Required for telemetrygen to reach the agent. From telemetry-shippers: terraform -chdir=path/to/telemetry-shippers/otel-ecs-ec2-windows/terraform output -raw service_discovery_agent_arn"
+  description = "Cloud Map service ARN so the agent registers (e.g. agent.otel.local). Required for other tasks to reach the agent. From telemetry-shippers: terraform -chdir=path/to/telemetry-shippers/otel-ecs-ec2-windows/terraform output -raw service_discovery_agent_arn"
   type        = string
   default     = null
 }

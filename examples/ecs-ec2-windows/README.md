@@ -58,9 +58,9 @@ module "otel_ecs_ec2_windows_coralogix" {
 - `coralogix_otel_agent_task_definition_arn` – Task definition ARN
 - `cloudwatch_log_group_name` – CloudWatch log group used by the agent
 
-## Telemetrygen connectivity
+## Other tasks connectivity
 
-If you run **telemetrygen** from [telemetry-shippers/otel-ecs-ec2-windows](https://github.com/coralogix/telemetry-shippers/tree/main/otel-ecs-ec2-windows) (or any task that uses `agent.otel.local:4317`), the agent must register with the same Cloud Map service. Set:
+If you run other tasks that use `agent.otel.local:4317` (e.g. from [telemetry-shippers/otel-ecs-ec2-windows](https://github.com/coralogix/telemetry-shippers/tree/main/otel-ecs-ec2-windows)), the agent must register with the same Cloud Map service. Set:
 
 ```bash
 terraform apply -var="service_discovery_registry_arn=$(terraform -chdir=path/to/telemetry-shippers/otel-ecs-ec2-windows/terraform output -raw service_discovery_agent_arn)"

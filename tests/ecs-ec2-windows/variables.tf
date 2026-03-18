@@ -23,7 +23,7 @@ variable "security_group_ids" {
 }
 
 variable "service_discovery_registry_arn" {
-  description = "Cloud Map service ARN so the agent registers (e.g. agent.otel.local). Optional; set so telemetrygen can reach the agent."
+  description = "Cloud Map service ARN so the agent registers (e.g. agent.otel.local). Optional; set so other tasks can reach the agent."
   type        = string
   default     = null
 }

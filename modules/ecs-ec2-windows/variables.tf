@@ -14,7 +14,7 @@ variable "security_group_ids" {
 }
 
 variable "service_discovery_registry_arn" {
-  description = "ARN of an AWS Cloud Map service for service discovery. When set, the ECS service registers with it so other tasks (e.g. telemetrygen) can reach the agent via DNS (e.g. agent.otel.local:4317). Use the same namespace/service as in telemetry-shippers (otel.local / agent) so telemetrygen can connect."
+  description = "ARN of an AWS Cloud Map service for service discovery. When set, the ECS service registers with it so other tasks can reach the agent via DNS (e.g. agent.otel.local:4317). Use the same namespace/service as in telemetry-shippers (otel.local / agent) so those tasks can connect."
   type        = string
   default     = null
 }

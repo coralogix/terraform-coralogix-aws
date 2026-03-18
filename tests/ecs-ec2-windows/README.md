@@ -42,7 +42,7 @@ terraform plan
 
 Without a Windows cluster you can still validate and plan; the test uses default VPC subnets and default security group when `subnet_ids` and `security_group_ids` are not set.
 
-For **apply** you must have a Windows ECS cluster. Set `subnet_ids` and `security_group_ids` in `terraform.tfvars` to match your Windows container instances. Set `service_discovery_registry_arn` (e.g. from telemetry-shippers `output -raw service_discovery_agent_arn`) if telemetrygen should reach the agent via agent.otel.local:4317.
+For **apply** you must have a Windows ECS cluster. Set `subnet_ids` and `security_group_ids` in `terraform.tfvars` to match your Windows container instances. Set `service_discovery_registry_arn` (e.g. from telemetry-shippers `output -raw service_discovery_agent_arn`) if other tasks should reach the agent via agent.otel.local:4317.
 
 ## Apply (requires Windows ECS cluster)
 
