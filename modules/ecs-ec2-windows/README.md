@@ -9,6 +9,36 @@ The agent runs one task per Windows EC2 instance, uses **awsvpc** network mode, 
 - Existing ECS cluster with **Windows** EC2 capacity (e.g. `WINDOWS_SERVER_2022_CORE`).
 - Subnets and security groups where the Daemon service will run (private subnets recommended; outbound allowed for Coralogix and optional S3/Secrets).
 
+## Comparison: ecs-ec2 (Linux) vs ecs-ec2-windows
+
+How this module differs from the Linux agent module [ecs-ec2](../ecs-ec2):
+
+### Terraform / infrastructure
+
+| Aspect | ecs-ec2 (Linux) | ecs-ec2-windows |
+|--------|------------------|------------------|
+| **OS / cluster** | Amazon Linux 2 (EC2 ECS-optimized) | Windows Server 2022 Core (EC2 ECS-optimized) |
+| **Network mode** | `host` (agent shares instance network) | `awsvpc` (agent gets its own ENI) |
+| **Subnets / security groups** | Not required (host mode); optional for application tasks | Required (`subnet_ids`, `security_group_ids`) |
+| **Agent task** | Privileged; host mounts (`/var/lib/docker`, `/var/run/docker.sock`) | Not privileged; mounts `C:\`, `C:\ProgramData\Amazon\ECS` |
+| **Agent image** | Linux tags (e.g. `v0.5.0`) | Windows tags (e.g. `v0.5.10-windowsserver-2022`) |
+| **Service discovery** | — | Optional `service_discovery_registry_arn` so other tasks reach agent via DNS (e.g. `agent.otel.local:4317`) |
+| **Logging** | `json-file` (host) | `awslogs` (CloudWatch); module can create log group |
+| **Task execution role** | Created only when using S3, Parameter Store, or Secrets Manager | Always required (ECR, CloudWatch Logs); created by module if not provided |
+
+### OTEL config (template)
+
+| Aspect | ecs-ec2 (Linux) | ecs-ec2-windows |
+|--------|------------------|------------------|
+| **Logs receivers** | `filelog` (Docker container logs under `/hostfs/var/lib/docker/containers/`) + `otlp` | `otlp` only (no filelog; Windows containers don’t expose logs as host files) |
+| **Logs pipeline** | `filelog` + `otlp` → `ecsattributes/container-logs` | `otlp` only; `ecsattributes/container-logs` disabled (no Docker daemon on Windows) |
+| **ECS container metrics** | `awsecscontainermetricsd` (daemon: Docker API + ECS metadata) | `awsecscontainermetricsd` with **`sidecar: true`** (ECS Task Metadata only) |
+| **hostmetrics** | `root_path: /` (Linux paths); Linux-specific exclusions | No `root_path`; Windows-specific filesystem exclusions |
+| **resourcedetection** | `system` + `env` (host.id from OS) | `env` only (system detector fails in Windows container); `host.id` from ec2 detector |
+| **opamp** | Enabled (Fleet Management) | Disabled (extension fails on Windows container) |
+| **Agent feature gate** | Not set | `--feature-gates=service.profilesSupport` |
+| **Health check** | `/healthcheck` binary | `CMD /C exit 0` (Windows) |
+
 ## Usage
 
 ```hcl
