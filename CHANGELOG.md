@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.23.0
+#### **ecs-ec2-windows**
+### 🚀 New components 🚀
+- Add new module to implement ECS-EC2 integration on Windows
+
 ## v3.22.0
 #### **coralogix-aws-shipper**
 ### 💡 Enhancements 💡
