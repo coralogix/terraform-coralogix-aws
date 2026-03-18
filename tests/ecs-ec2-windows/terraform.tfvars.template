@@ -6,6 +6,9 @@ ecs_cluster_name = "ecs-ec2-windows-testing-cluster"
 # subnet_ids         = ["subnet-xxx", "subnet-yyy"]
 # security_group_ids = ["sg-xxx"]
 
+# Optional: Cloud Map service ARN so agent registers (agent.otel.local).
+# service_discovery_registry_arn = "arn:aws:servicediscovery:REGION:ACCOUNT:service/srv-xxxx"
+
 default_subsystem_name = "ecs-ec2-windows-tf-base_vars-test"
 
 image         = "coralogixrepo/coralogix-otel-collector"

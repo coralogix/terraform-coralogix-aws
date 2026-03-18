@@ -4,15 +4,35 @@
 
 * An existing ECS cluster with **Windows** EC2 capacity (e.g. `WINDOWS_SERVER_2022_CORE`).
 * AWS profile or environment variables (e.g. `AWS_DEFAULT_REGION`) set.
-* Copy and configure tfvars:
+* Copy and configure tfvars (optional for CI; required for apply with real cluster):
   ```bash
   cp terraform.tfvars.template terraform.tfvars
-  # Edit terraform.tfvars with your values (ecs_cluster_name, api_key, optional subnet_ids/security_group_ids)
+  # Edit terraform.tfvars with your values (ecs_cluster_name, api_key, optional subnet_ids/security_group_ids, service_discovery_registry_arn)
   ```
 
-## Validate and plan
+## Run the test (same as GitHub Action)
 
-Without a Windows cluster you can still validate and plan; the test uses default VPC subnets and default security group when `subnet_ids` and `security_group_ids` are not set:
+From the **repository root** (not from this directory), with AWS credentials set if running plan:
+
+```bash
+# 1) Ensure test dir exists for module (compare_directories_test.sh)
+tests/compare_directories_test.sh
+
+# 2) Ensure test passes variable check (all required module vars present in test)
+chmod +x tests/test_variables_script.sh
+tests/test_variables_script.sh modules/ecs-ec2-windows/variables.tf tests/ecs-ec2-windows/ecs-ec2-windows.tf
+
+# 3) Format check (in module)
+cd modules/ecs-ec2-windows && terraform fmt -check -recursive && cd ../..
+
+# 4) Init, validate, plan (in test)
+cd tests/ecs-ec2-windows
+terraform init
+terraform validate
+terraform plan
+```
+
+Or from **this directory** for a quick local run:
 
 ```bash
 terraform init
@@ -20,7 +40,9 @@ terraform validate
 terraform plan
 ```
 
-For **apply** you must have a Windows ECS cluster. Optionally set `subnet_ids` and `security_group_ids` in `terraform.tfvars` to match the subnets and security group used by your Windows container instances.
+Without a Windows cluster you can still validate and plan; the test uses default VPC subnets and default security group when `subnet_ids` and `security_group_ids` are not set.
+
+For **apply** you must have a Windows ECS cluster. Set `subnet_ids` and `security_group_ids` in `terraform.tfvars` to match your Windows container instances. Set `service_discovery_registry_arn` (e.g. from telemetry-shippers `output -raw service_discovery_agent_arn`) if telemetrygen should reach the agent via agent.otel.local:4317.
 
 ## Apply (requires Windows ECS cluster)
 

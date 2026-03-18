@@ -71,6 +71,7 @@ module "ecs_ec2_windows_s3" {
 | ecs_cluster_name | Name of the existing Windows ECS cluster | `string` | n/a | yes |
 | subnet_ids | Subnet IDs for the ECS service (awsvpc) | `list(string)` | n/a | yes |
 | security_group_ids | Security group IDs for the ECS service | `list(string)` | n/a | yes |
+| service_discovery_registry_arn | Cloud Map service ARN; when set, the agent registers so other tasks (e.g. telemetrygen) can reach it via DNS (agent.otel.local:4317) | `string` | `null` | no |
 | image_version | OTEL Collector image tag (use a Windows tag, e.g. v0.5.10-windowsserver-2022) | `string` | n/a | yes |
 | coralogix_region | Coralogix region (EU1, EU2, AP1, AP2, AP3, US1, US2, custom) | `string` | n/a | yes |
 | api_key | Send-Your-Data API key (required unless use_api_key_secret is true) | `string` | `null` | no |
@@ -118,6 +119,16 @@ module "ecs_ec2_windows_s3" {
 | terraform | >= 1.9.0 |
 | aws | >= 6.0 |
 | random | >= 3.0 |
+
+## Service discovery (telemetrygen)
+
+To have **telemetrygen** or other tasks in the same VPC reach the agent via DNS (`agent.otel.local:4317`), the agent ECS service must register with the same AWS Cloud Map service. In the [telemetry-shippers otel-ecs-ec2-windows](https://github.com/coralogix/telemetry-shippers/tree/main/otel-ecs-ec2-windows) stack, that service is created (namespace `otel.local`, service `agent`). Pass its ARN into the module:
+
+```hcl
+service_discovery_registry_arn = "arn:aws:servicediscovery:REGION:ACCOUNT:service/srv-xxxx"
+```
+
+Get the ARN from the telemetry-shippers stack: `terraform -chdir=path/to/telemetry-shippers/otel-ecs-ec2-windows/terraform output -raw service_discovery_agent_arn`. Ensure the agent runs in the same VPC and security group (or one that allows TCP 4317 from telemetrygen) so discovery and connectivity work.
 
 ## Notes
 

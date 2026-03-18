@@ -43,7 +43,7 @@ module "ecs-ec2-windows" {
   memory = var.memory
 
   coralogix_region = var.coralogix_region
-  custom_domain   = var.custom_domain
+  custom_domain    = var.custom_domain
 
   default_application_name = var.default_application_name
   default_subsystem_name   = var.default_subsystem_name
@@ -59,6 +59,8 @@ module "ecs-ec2-windows" {
 
   task_execution_role_arn = var.task_execution_role_arn
   task_role_arn           = var.task_role_arn
+
+  service_discovery_registry_arn = var.service_discovery_registry_arn
 
   health_check_enabled = var.health_check_enabled
 

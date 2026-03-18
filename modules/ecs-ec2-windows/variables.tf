@@ -13,6 +13,12 @@ variable "security_group_ids" {
   type        = list(string)
 }
 
+variable "service_discovery_registry_arn" {
+  description = "ARN of an AWS Cloud Map service for service discovery. When set, the ECS service registers with it so other tasks (e.g. telemetrygen) can reach the agent via DNS (e.g. agent.otel.local:4317). Use the same namespace/service as in telemetry-shippers (otel.local / agent) so telemetrygen can connect."
+  type        = string
+  default     = null
+}
+
 variable "cloudwatch_log_group_name" {
   description = "Name of the CloudWatch log group for the OTEL agent. If null, a log group is created automatically."
   type        = string

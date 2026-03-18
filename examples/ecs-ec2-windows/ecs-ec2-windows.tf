@@ -3,9 +3,10 @@ module "otel_ecs_ec2_windows_coralogix" {
   source = "../../modules/ecs-ec2-windows"
 
   # Required: existing Windows ECS cluster and networking
-  ecs_cluster_name   = var.ecs_cluster_name
-  subnet_ids         = var.subnet_ids
-  security_group_ids = var.security_group_ids
+  ecs_cluster_name               = var.ecs_cluster_name
+  subnet_ids                     = var.subnet_ids
+  security_group_ids             = var.security_group_ids
+  service_discovery_registry_arn = var.service_discovery_registry_arn
 
   # Required: Windows image tag and Coralogix
   image_version    = var.image_version

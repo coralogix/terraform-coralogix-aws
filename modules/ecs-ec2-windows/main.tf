@@ -244,6 +244,14 @@ resource "aws_ecs_service" "coralogix_otel_agent" {
     security_groups = var.security_group_ids
   }
 
+  dynamic "service_registries" {
+    for_each = var.service_discovery_registry_arn != null ? [1] : []
+    content {
+      registry_arn   = var.service_discovery_registry_arn
+      container_name = local.name
+    }
+  }
+
   enable_ecs_managed_tags = true
 
   tags = merge(

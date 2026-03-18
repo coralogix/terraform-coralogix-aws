@@ -22,6 +22,12 @@ variable "security_group_ids" {
   default     = []
 }
 
+variable "service_discovery_registry_arn" {
+  description = "Cloud Map service ARN so the agent registers (e.g. agent.otel.local). Optional; set so telemetrygen can reach the agent."
+  type        = string
+  default     = null
+}
+
 variable "image" {
   description = "Docker image for the coralogix-otel-collector (Windows)"
   type        = string
