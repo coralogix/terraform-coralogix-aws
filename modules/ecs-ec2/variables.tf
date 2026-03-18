@@ -4,35 +4,46 @@ variable "ecs_cluster_name" {
 }
 
 variable "config_source" {
-  description = "Select the configuration source for OpenTelemetry Collector. Options: 'template' (default), 's3', 'parameter-store'"
+  description = "Reserved for UI compatibility. Only 's3' is supported. Omit when using the module directly."
   type        = string
-  default     = "template"
+  default     = "s3"
   validation {
-    condition     = contains(["template", "s3", "parameter-store"], var.config_source)
-    error_message = "Config source must be one of: template, s3, parameter-store."
+    condition     = var.config_source == "s3"
+    error_message = "config_source must be 's3'. Use config from Coralogix UI or the integration chart."
   }
 }
 
 variable "s3_config_bucket" {
-  description = "S3 bucket name containing the configuration file. Required when config_source is 's3'."
-  type        = string
-  default     = null
-}
-
-variable "s3_config_key" {
-  description = "S3 object key (file path) for the configuration file. Required when config_source is 's3'."
+  description = "S3 bucket name containing the OpenTelemetry configuration file. Required when the module creates the task definition (task_definition_arn is null). Ignored in service-only mode (task_definition_arn set)."
   type        = string
   default     = null
 
   validation {
-    condition     = (var.config_source == "s3") ? (var.s3_config_bucket != null && var.s3_config_key != null) : true
-    error_message = "Both s3_config_bucket and s3_config_key must be provided when config_source is 's3'."
+    condition     = var.task_definition_arn != null || var.s3_config_bucket != null
+    error_message = "s3_config_bucket is required when task_definition_arn is null (module creates the task definition)."
+  }
+}
+
+variable "s3_config_key" {
+  description = "S3 object key (file path) for the configuration file. Example: configs/otel-config.yaml. Required when the module creates the task definition. Ignored in service-only mode."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.task_definition_arn != null || var.s3_config_key != null
+    error_message = "s3_config_key is required when task_definition_arn is null (module creates the task definition)."
   }
 }
 
 variable "image_version" {
-  description = "The Coralogix Open Telemetry Distribution Image Version/Tag. See: https://hub.docker.com/r/coralogixrepo/coralogix-otel-collector/tags"
+  description = "The Coralogix Open Telemetry Distribution Image Version/Tag. Required when module creates the task definition. Ignored in service-only mode."
   type        = string
+  default     = null
+
+  validation {
+    condition     = var.task_definition_arn != null || var.image_version != null
+    error_message = "image_version is required when task_definition_arn is null (module creates the task definition)."
+  }
 }
 
 variable "image" {
@@ -48,11 +59,13 @@ variable "memory" {
 }
 
 variable "coralogix_region" {
-  description = "The region of the Coralogix endpoint domain: [EU1|EU2|AP1|AP2|AP3|US1|US2|custom]. If \"custom\" then __custom_domain__ parameter must be specified."
+  description = "The region of the Coralogix endpoint domain: [EU1|EU2|AP1|AP2|AP3|US1|US2|custom]. Required when module creates the task definition. Ignored in service-only mode."
   type        = string
+  default     = null
+
   validation {
-    condition     = can(regex("^(EU1|EU2|AP1|AP2|AP3|US1|US2|custom)$", var.coralogix_region))
-    error_message = "Must be one of [EU1|EU2|AP1|AP2|AP3|US1|US2|custom]."
+    condition     = var.task_definition_arn != null || (var.coralogix_region != null && can(regex("^(EU1|EU2|AP1|AP2|AP3|US1|US2|custom)$", var.coralogix_region)))
+    error_message = "coralogix_region is required when task_definition_arn is null. Must be one of [EU1|EU2|AP1|AP2|AP3|US1|US2|custom]."
   }
 }
 
@@ -60,18 +73,6 @@ variable "custom_domain" {
   description = "[Optional] Coralogix custom domain, e.g. \"private.coralogix.com\" Private Link domain. If specified, overrides the public domain corresponding to the __coralogix_region__ parameter."
   type        = string
   default     = null
-}
-
-variable "default_application_name" {
-  description = "The default Coralogix Application name."
-  type        = string
-  default     = "otel"
-}
-
-variable "default_subsystem_name" {
-  description = "The default Coralogix Subsystem name."
-  type        = string
-  default     = "ecs-ec2"
 }
 
 variable "use_api_key_secret" {
@@ -87,8 +88,8 @@ variable "api_key" {
   default     = null
 
   validation {
-    condition     = var.use_api_key_secret ? var.api_key == null : var.api_key != null
-    error_message = "Check api_key variable. It must be provided unless use_api_key_secret is true."
+    condition     = var.task_definition_arn != null || (var.use_api_key_secret ? var.api_key == null : var.api_key != null)
+    error_message = "api_key must be provided unless use_api_key_secret is true (when module creates the task definition)."
   }
 }
 
@@ -98,43 +99,31 @@ variable "api_key_secret_arn" {
   default     = null
 
   validation {
-    condition     = var.use_api_key_secret ? var.api_key_secret_arn != null : var.api_key_secret_arn == null
-    error_message = "Check api_key_secret_arn variable. If use_api_key_secret is true, it must be populated. If not, it must be null"
-  }
-}
-
-variable "use_custom_config_parameter_store" {
-  description = "Whether to use a custom configuration from a Parameter Store"
-  type        = bool
-  default     = false
-}
-
-variable "custom_config_parameter_store_name" {
-  description = "Name of the Parameter Store parameter containing the OTEL configuration. Required when config_source is 'parameter-store'"
-  type        = string
-  default     = null
-
-  validation {
-    condition     = (var.config_source == "parameter-store") ? var.custom_config_parameter_store_name != null : true
-    error_message = "custom_config_parameter_store_name must be provided when config_source is 'parameter-store'."
+    condition     = var.task_definition_arn != null || (var.use_api_key_secret ? var.api_key_secret_arn != null : var.api_key_secret_arn == null)
+    error_message = "api_key_secret_arn must be set when use_api_key_secret is true (when module creates the task definition)."
   }
 }
 
 variable "task_execution_role_arn" {
-  description = "ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume. When using S3 configuration, if not provided, an auto-created role with S3 read permissions will be used."
+  description = "ARN of the task execution role. When not provided and the module creates the task definition, an auto-created role with S3 and optional Secrets Manager access is used. In service-only mode (task_definition_arn set), this must be explicitly null—roles live on the task definition, not the service."
   type        = string
   default     = null
 
   validation {
-    condition     = (var.use_api_key_secret == true || var.config_source == "parameter-store") ? var.task_execution_role_arn != null : true
-    error_message = "task_execution_role_arn must be provided if using API Key Secret or Parameter Store config"
+    condition     = var.task_definition_arn == null || var.task_execution_role_arn == null
+    error_message = "In service-only mode (task_definition_arn set), task_execution_role_arn must be null. Roles are defined on the task definition; the service does not accept role ARNs. Set task_execution_role_arn = null explicitly."
   }
 }
 
 variable "task_role_arn" {
-  description = "ARN of the task role (IAM role) that the container can assume. If not provided, the task will run without a task role (null). This is separate from the execution role which is used by ECS to pull images and retrieve secrets."
+  description = "ARN of the task role (IAM role) that the container can assume. When not provided and the module creates the task definition, an auto-created role with S3 read permissions is used. In service-only mode (task_definition_arn set), this must be explicitly null—roles live on the task definition, not the service."
   type        = string
   default     = null
+
+  validation {
+    condition     = var.task_definition_arn == null || var.task_role_arn == null
+    error_message = "In service-only mode (task_definition_arn set), task_role_arn must be null. Roles are defined on the task definition; the service does not accept role ARNs. Set task_role_arn = null explicitly."
+  }
 }
 
 variable "tags" {
@@ -145,50 +134,12 @@ variable "tags" {
 
 variable "task_definition_arn" {
   type        = string
-  description = "Existing Coralogix OTEL task definition ARN"
+  description = "Existing Coralogix OTEL task definition ARN. When set, the module operates in service-only mode: it creates only the ECS service and does not manage config, command, or IAM. S3 inputs are ignored; task_execution_role_arn and task_role_arn must be null."
   default     = null
 }
 
-variable "enable_head_sampler" {
-  description = "Enable or disable head sampling for traces. When enabled, sampling decisions are made at the collection point before any processing occurs."
-  type        = bool
-  default     = true
-}
-
-variable "sampling_percentage" {
-  description = "The percentage of traces to sample (0-100). A value of 100 means all traces will be sampled."
-  type        = number
-  default     = 10
-  validation {
-    condition     = var.sampling_percentage >= 0 && var.sampling_percentage <= 100
-    error_message = "Sampling percentage must be between 0 and 100."
-  }
-}
-
-variable "sampler_mode" {
-  description = "The sampling mode to use (proportional, equalizing, or hash_seed)."
-  type        = string
-  default     = "proportional"
-  validation {
-    condition     = contains(["proportional", "equalizing", "hash_seed"], var.sampler_mode)
-    error_message = "Sampler mode must be one of: proportional, equalizing, hash_seed."
-  }
-}
-
-variable "enable_span_metrics" {
-  description = "Enable or disable the spanmetrics processor and pipeline. When enabled (default), span metrics will be generated from traces."
-  type        = bool
-  default     = true
-}
-
-variable "enable_traces_db" {
-  description = "Enable or disable the traces/db pipeline for database operation metrics. When enabled, database operation metrics will be generated. Note: This feature requires spanmetrics to be enabled."
-  type        = bool
-  default     = false
-}
-
 variable "health_check_enabled" {
-  description = "Enable ECS container health check for the OTEL agent container, Requires OTEL collector image version v0.4.2 or later."
+  description = "Enable ECS container health check for the OTEL agent container. Requires OTEL collector image version v0.4.2 or later."
   type        = bool
   default     = false
 }

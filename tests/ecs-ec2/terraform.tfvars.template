@@ -1,13 +1,17 @@
+# Copy this file to terraform.tfvars and fill in the values.
+# Prerequisite: Run resources/s3 first to create the S3 bucket and upload config.
+#   cd resources/s3 && terraform init && terraform apply
+# Then use the outputs (s3_config_bucket, s3_config_key) below.
+
 aws_region       = "us-east-1"
+ecs_cluster_name = "otel-test-cluster"
 
-ecs_cluster_name = "ecs-ec2-testing-cluster"
-
-default_subsystem_name = "ecs-ec2-tf-base_vars-test"
-
-image = "coralogixrepo/coralogix-otel-collector"
-image_version    = "v0.4.2"
+image         = "coralogixrepo/coralogix-otel-collector"
+image_version = "v0.5.10"
 
 coralogix_region = "EU1"
+api_key          = "cxtp_CoralogixSendYourDataApiKey"
 
-api_key = "cxtp_CoralogixSendYourDataApiKey"
-
+# S3 config (use your bucket or resources/s3 output)
+s3_config_bucket = "otel-config-dm"
+s3_config_key    = "coralogix-otel-ecs.yaml"

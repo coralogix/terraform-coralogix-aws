@@ -19,7 +19,7 @@ variable "image" {
 variable "image_version" {
   description = "Version tag for the coralogix-otel-collector image"
   type        = string
-  default     = "v0.4.2"
+  default     = "v0.5.10"
 }
 
 variable "coralogix_region" {
@@ -32,18 +32,6 @@ variable "custom_domain" {
   description = "Optional custom domain for Coralogix endpoint"
   type        = string
   default     = null
-}
-
-variable "default_application_name" {
-  description = "Default application name for Coralogix logs"
-  type        = string
-  default     = "otel"
-}
-
-variable "default_subsystem_name" {
-  description = "Default subsystem name for Coralogix logs"
-  type        = string
-  default     = "ecs-ec2-tf-test"
 }
 
 variable "use_api_key_secret" {
@@ -65,32 +53,20 @@ variable "api_key" {
   default     = "cxtp_CoralogixSendYourDataKey"
 }
 
-variable "config_source" {
-  description = "Configuration source for OpenTelemetry Collector. Options: 'template', 's3', 'parameter-store'"
-  type        = string
-  default     = "template"
-}
-
 variable "s3_config_bucket" {
-  description = "S3 bucket name containing the configuration file. Required when config_source is 's3'."
+  description = "S3 bucket name containing the configuration file. Required when task_definition_arn is null."
   type        = string
   default     = null
 }
 
 variable "s3_config_key" {
-  description = "S3 object key (file path) for the configuration file. Required when config_source is 's3'."
+  description = "S3 object key (file path) for the configuration file. Required when task_definition_arn is null."
   type        = string
   default     = null
 }
 
-variable "use_custom_config_parameter_store" {
-  description = "Whether to use a custom config from Parameter Store"
-  type        = bool
-  default     = false
-}
-
-variable "custom_config_parameter_store_name" {
-  description = "Name of the Parameter Store parameter containing the custom config"
+variable "task_definition_arn" {
+  description = "Existing task definition ARN. When set, service-only mode: module creates only the ECS service."
   type        = string
   default     = null
 }
@@ -104,5 +80,41 @@ variable "task_execution_role_arn" {
 variable "task_role_arn" {
   description = "ARN of the task role (IAM role) that the container can assume at runtime"
   type        = string
+  default     = null
+}
+
+variable "health_check_enabled" {
+  description = "Enable ECS container health check for the OTEL agent"
+  type        = bool
+  default     = false
+}
+
+variable "health_check_interval" {
+  description = "Health check interval in seconds"
+  type        = number
+  default     = 30
+}
+
+variable "health_check_timeout" {
+  description = "Health check timeout in seconds"
+  type        = number
+  default     = 5
+}
+
+variable "health_check_retries" {
+  description = "Health check retries"
+  type        = number
+  default     = 3
+}
+
+variable "memory" {
+  description = "Task memory in MiB"
+  type        = number
+  default     = 256
+}
+
+variable "tags" {
+  description = "Additional resource tags"
+  type        = map(string)
   default     = null
 }

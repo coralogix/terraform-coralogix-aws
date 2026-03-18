@@ -9,9 +9,9 @@ receivers:
 exporters:
   coralogix:
     domain: "${CORALOGIX_DOMAIN}"
-    private_key: "${PRIVATE_KEY}"
-    application_name: "${APP_NAME}"
-    subsystem_name: "${SUB_SYS}"
+    private_key: "${CORALOGIX_PRIVATE_KEY}"
+    application_name: "ecs-ec2"
+    subsystem_name: "otel-collector"
     timeout: 30s
 
 extensions:
