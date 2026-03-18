@@ -1,5 +1,8 @@
 locals {
   name = "coralogix-otel-agent"
+  # KMS key ARN for Secrets Manager secret (when customer-managed). Null for default aws/secretsmanager key.
+  _secret_kms_key_id = try(data.aws_secretsmanager_secret.api_key[0].kms_key_id, null)
+  secrets_kms_key_arn = local._secret_kms_key_id != null && local._secret_kms_key_id != "" && !startswith(local._secret_kms_key_id, "alias/aws/secretsmanager") ? (startswith(local._secret_kms_key_id, "arn:") ? local._secret_kms_key_id : "arn:aws:kms:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:key/${local._secret_kms_key_id}") : null
   tags = merge(
     {
       "ecs:taskDefinition:createdFrom" = "terraform"
@@ -20,6 +23,12 @@ module "locals_variables" {
 }
 
 data "aws_region" "current" {}
+data "aws_caller_identity" "current" {}
+
+data "aws_secretsmanager_secret" "api_key" {
+  count = var.task_definition_arn == null && var.task_execution_role_arn == null && var.use_api_key_secret && var.api_key_secret_arn != null ? 1 : 0
+  arn   = var.api_key_secret_arn
+}
 
 resource "random_string" "id" {
   length  = 7
@@ -77,6 +86,7 @@ resource "aws_iam_role_policy" "otel_task_execution_role_s3_s3_policy" {
 }
 
 # Secrets Manager access for API key (when use_api_key_secret, api_key_secret_arn set, and module creates execution role)
+# Includes kms:Decrypt when secret uses customer-managed KMS key (required for ECS to resolve the secret)
 resource "aws_iam_role_policy" "otel_task_execution_role_secrets" {
   count = var.task_definition_arn == null && var.task_execution_role_arn == null && var.use_api_key_secret && var.api_key_secret_arn != null ? 1 : 0
   name  = "SecretsManagerAccess"
@@ -84,13 +94,23 @@ resource "aws_iam_role_policy" "otel_task_execution_role_secrets" {
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [
-      {
-        Effect   = "Allow"
-        Action   = ["secretsmanager:GetSecretValue"]
-        Resource = var.api_key_secret_arn
-      }
-    ]
+    Statement = concat(
+      [
+        {
+          Effect   = "Allow"
+          Action   = ["secretsmanager:GetSecretValue"]
+          Resource = var.api_key_secret_arn
+        }
+      ],
+      # kms:Decrypt required when secret uses customer-managed KMS key
+      local.secrets_kms_key_arn != null ? [
+        {
+          Effect   = "Allow"
+          Action   = ["kms:Decrypt"]
+          Resource = local.secrets_kms_key_arn
+        }
+      ] : []
+    )
   })
 }
 

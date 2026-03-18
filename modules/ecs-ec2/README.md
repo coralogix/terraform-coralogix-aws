@@ -35,6 +35,17 @@ module "ecs-ec2" {
 }
 ```
 
+**Migrating from full mode to service-only:** When switching from full mode (module creates task definition and IAM roles) to service-only mode, Terraform will plan to destroy the auto-created IAM roles. The existing task definition still references those roles—if they are destroyed, ECS cannot start new tasks. Before applying, remove the task definition and IAM roles from Terraform state so they remain in AWS:
+
+```bash
+terraform state rm 'module.ecs_ec2.aws_ecs_task_definition.coralogix_otel_agent[0]'
+terraform state rm 'module.ecs_ec2.aws_iam_role.otel_task_execution_role_s3[0]'
+terraform state rm 'module.ecs_ec2.aws_iam_role.otel_task_role_s3[0]'
+# Plus any attached policies (aws_iam_role_policy.*, aws_iam_role_policy_attachment.*)
+```
+
+Then apply with `task_definition_arn` set. The service will continue using the existing task definition and roles.
+
 ## Usage
 
 ```terraform

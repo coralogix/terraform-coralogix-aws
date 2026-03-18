@@ -12,6 +12,7 @@
 
 ### 🐛 Bug Fixes 🐛
 - **Secrets Manager policy**: The auto-created execution role's Secrets Manager policy is now conditional on both `use_api_key_secret` and `api_key_secret_arn != null`, preventing invalid policy documents when `api_key_secret_arn` is null.
+- **Secrets Manager + KMS**: When the API key secret uses a customer-managed KMS key, the auto-created execution role now includes `kms:Decrypt` permission so ECS can resolve the secret at task start.
 
 ### 💡 Enhancements 💡
 - **Secrets Manager self-contained**: When `use_api_key_secret = true`, the module now auto-creates an execution role with both S3 read and `secretsmanager:GetSecretValue` permissions. `task_execution_role_arn` is no longer required in that case.
@@ -23,6 +24,7 @@
 3. Remove any removed variables from your configuration.
 4. If using `use_api_key_secret = true`, you may remove `task_execution_role_arn`—the module now auto-creates a role with Secrets Manager access.
 5. **Service-only mode**: When using `task_definition_arn`, explicitly set `task_execution_role_arn = null` and `task_role_arn = null` to avoid validation errors.
+6. **Migrating to service-only**: Before switching from full mode to `task_definition_arn`, remove the task definition and IAM roles from Terraform state (`terraform state rm`) so they remain in AWS. Otherwise Terraform will destroy them and ECS cannot start new tasks.
 
 ## v3.22.0
 #### **coralogix-aws-shipper**
