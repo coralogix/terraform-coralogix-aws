@@ -14,4 +14,4 @@ api_key          = "cxtp_CoralogixSendYourDataApiKey"
 
 # S3 config (use your bucket or resources/s3 output)
 s3_config_bucket = "otel-config-dm"
-s3_config_key    = "coralogix-otel-ecs.yaml"
+s3_config_key    = "configs/otel-config.yaml"

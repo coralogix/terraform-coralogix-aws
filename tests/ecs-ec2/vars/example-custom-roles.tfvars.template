@@ -1,6 +1,7 @@
 # Custom IAM roles test
 # Copy to example-custom-roles.tfvars and fill values.
 # Prerequisite: cd resources/roles-for-bucket && terraform apply -var="bucket_name=YOUR_BUCKET"
+# Then use the outputs (task_execution_role_arn, task_role_arn) below.
 
 aws_region       = "us-east-1"
 ecs_cluster_name = "ecs-cluster"
@@ -14,5 +15,5 @@ api_key          = "cxtp_YOUR_API_KEY"
 s3_config_bucket = "YOUR_BUCKET"
 s3_config_key    = "configs/otel-config.yaml"
 
-task_execution_role_arn = "arn:aws:iam::ACCOUNT_ID:role/coralogix-otel-tf-test-execution-role-YOUR_BUCKET"
-task_role_arn           = "arn:aws:iam::ACCOUNT_ID:role/coralogix-otel-tf-test-task-role-YOUR_BUCKET"
+task_execution_role_arn = "arn:aws:iam::ACCOUNT_ID:role/cx-otel-exec-XXXXXXXXXXXX"
+task_role_arn           = "arn:aws:iam::ACCOUNT_ID:role/cx-otel-task-XXXXXXXXXXXX"

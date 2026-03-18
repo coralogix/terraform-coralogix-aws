@@ -33,7 +33,7 @@ locals {
 }
 
 resource "aws_iam_role" "execution_role" {
-  name = "coralogix-otel-tf-test-execution-role-${replace(var.bucket_name, ".", "-")}"
+  name = "cx-otel-exec-${substr(md5(var.bucket_name), 0, 12)}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -65,7 +65,7 @@ resource "aws_iam_role_policy" "execution_s3" {
 }
 
 resource "aws_iam_role" "task_role" {
-  name = "coralogix-otel-tf-test-task-role-${replace(var.bucket_name, ".", "-")}"
+  name = "cx-otel-task-${substr(md5(var.bucket_name), 0, 12)}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"

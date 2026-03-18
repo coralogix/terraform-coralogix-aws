@@ -36,8 +36,7 @@ CREATES=$(terraform show -json "$PLAN_FILE" | jq -r '
   .resource_changes[]?
   | select(.change.actions[]? == "create")
   | select(
-      .type == "aws_ecs_task_definition" or
-      .type | startswith("aws_iam_role")
+      (.type == "aws_ecs_task_definition") or (.type | startswith("aws_iam_role"))
   )
   | "\(.type): \(.name)"
 ')
