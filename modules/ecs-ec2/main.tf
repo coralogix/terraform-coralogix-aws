@@ -1,9 +1,9 @@
 locals {
   name = "coralogix-otel-agent"
-  # KMS key ID from Secrets Manager secret (when customer-managed). Null for default aws/secretsmanager key.
+  # KMS key ID from Secrets Manager secret (when customer-managed). Null when api_key_secret_kms_key_arn provided (skips lookup).
   _secret_kms_key_id = try(data.aws_secretsmanager_secret.api_key[0].kms_key_id, null)
-  # Resolve to key ARN via aws_kms_key data source (handles aliases; IAM kms:Decrypt requires key ARN, not alias)
-  secrets_kms_key_arn = try(data.aws_kms_key.secret_key[0].arn, null)
+  # Use provided ARN or resolve via aws_kms_key data source (handles aliases; IAM kms:Decrypt requires key ARN, not alias)
+  secrets_kms_key_arn = (var.api_key_secret_kms_key_arn != null && var.api_key_secret_kms_key_arn != "") ? var.api_key_secret_kms_key_arn : try(data.aws_kms_key.secret_key[0].arn, null)
   tags = merge(
     {
       "ecs:taskDefinition:createdFrom" = "terraform"
@@ -26,14 +26,15 @@ module "locals_variables" {
 data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
+# Lookup secret metadata for KMS key ID. Skipped when api_key_secret_kms_key_arn is set (avoids DescribeSecret on deploy role).
 data "aws_secretsmanager_secret" "api_key" {
-  count = var.task_definition_arn == null && var.task_execution_role_arn == null && var.use_api_key_secret && var.api_key_secret_arn != null ? 1 : 0
-  arn   = var.api_key_secret_arn
+  count  = var.task_definition_arn == null && var.task_execution_role_arn == null && var.use_api_key_secret && var.api_key_secret_arn != null && (var.api_key_secret_kms_key_arn == null || var.api_key_secret_kms_key_arn == "") ? 1 : 0
+  arn    = var.api_key_secret_arn
 }
 
-# Resolve KMS key ID or alias to key ARN (IAM kms:Decrypt requires key ARN, not alias)
+# Resolve KMS key ID or alias to key ARN (IAM kms:Decrypt requires key ARN, not alias). Skipped when api_key_secret_kms_key_arn is set (avoids DescribeKey on deploy role).
 data "aws_kms_key" "secret_key" {
-  count  = var.task_definition_arn == null && var.task_execution_role_arn == null && var.use_api_key_secret && var.api_key_secret_arn != null && (local._secret_kms_key_id == null ? false : (local._secret_kms_key_id != "" && !startswith(local._secret_kms_key_id, "alias/aws/secretsmanager"))) ? 1 : 0
+  count  = var.task_definition_arn == null && var.task_execution_role_arn == null && var.use_api_key_secret && var.api_key_secret_arn != null && (var.api_key_secret_kms_key_arn == null || var.api_key_secret_kms_key_arn == "") && (local._secret_kms_key_id == null ? false : (local._secret_kms_key_id != "" && !startswith(local._secret_kms_key_id, "alias/aws/secretsmanager"))) ? 1 : 0
   key_id = local._secret_kms_key_id
 }
 

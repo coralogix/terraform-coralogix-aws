@@ -104,6 +104,17 @@ variable "api_key_secret_arn" {
   }
 }
 
+variable "api_key_secret_kms_key_arn" {
+  description = "KMS key ARN used to encrypt the Secrets Manager secret. When set, the module skips DescribeSecret/DescribeKey lookups—use this when the deploy role cannot access secret metadata (e.g. restricted IAM). Omit when the secret uses the default aws/secretsmanager key."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.api_key_secret_kms_key_arn == null || var.api_key_secret_kms_key_arn != ""
+    error_message = "api_key_secret_kms_key_arn must be null or a non-empty KMS key ARN."
+  }
+}
+
 variable "task_execution_role_arn" {
   description = "ARN of the task execution role. When not provided and the module creates the task definition, an auto-created role with S3 and optional Secrets Manager access is used. In service-only mode (task_definition_arn set), this must be explicitly null—roles live on the task definition, not the service."
   type        = string

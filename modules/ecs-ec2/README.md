@@ -100,6 +100,7 @@ You can control health checks using:
 | custom_domain | Custom Coralogix domain (e.g. Private Link) | `string` | `null` | no |
 | use_api_key_secret | Use API key from Secrets Manager | `bool` | `false` | no |
 | api_key_secret_arn | ARN of Secrets Manager secret | `string` | `null` | no |
+| api_key_secret_kms_key_arn | KMS key ARN for the secret. When set, skips DescribeSecret/DescribeKey (use when deploy role cannot access secret metadata). | `string` | `null` | no |
 | task_execution_role_arn | Custom execution role. When null, module auto-creates one (S3 + optional Secrets Manager). Must be null in service-only mode. | `string` | `null` | no |
 | task_role_arn | Custom task role. When null, module auto-creates one with S3 read. Must be null in service-only mode. | `string` | `null` | no |
 | health_check_enabled | Enable ECS container health check | `bool` | `false` | no |
