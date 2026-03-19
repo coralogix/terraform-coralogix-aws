@@ -1,8 +1,9 @@
 locals {
   name = "coralogix-otel-agent"
-  # KMS key ARN for Secrets Manager secret (when customer-managed). Null for default aws/secretsmanager key.
+  # KMS key ID from Secrets Manager secret (when customer-managed). Null for default aws/secretsmanager key.
   _secret_kms_key_id = try(data.aws_secretsmanager_secret.api_key[0].kms_key_id, null)
-  secrets_kms_key_arn = local._secret_kms_key_id != null && local._secret_kms_key_id != "" && !startswith(local._secret_kms_key_id, "alias/aws/secretsmanager") ? (startswith(local._secret_kms_key_id, "arn:") ? local._secret_kms_key_id : "arn:aws:kms:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:key/${local._secret_kms_key_id}") : null
+  # Resolve to key ARN via aws_kms_key data source (handles aliases; IAM kms:Decrypt requires key ARN, not alias)
+  secrets_kms_key_arn = try(data.aws_kms_key.secret_key[0].arn, null)
   tags = merge(
     {
       "ecs:taskDefinition:createdFrom" = "terraform"
@@ -28,6 +29,12 @@ data "aws_caller_identity" "current" {}
 data "aws_secretsmanager_secret" "api_key" {
   count = var.task_definition_arn == null && var.task_execution_role_arn == null && var.use_api_key_secret && var.api_key_secret_arn != null ? 1 : 0
   arn   = var.api_key_secret_arn
+}
+
+# Resolve KMS key ID or alias to key ARN (IAM kms:Decrypt requires key ARN, not alias)
+data "aws_kms_key" "secret_key" {
+  count  = var.task_definition_arn == null && var.task_execution_role_arn == null && var.use_api_key_secret && var.api_key_secret_arn != null && (local._secret_kms_key_id == null ? false : (local._secret_kms_key_id != "" && !startswith(local._secret_kms_key_id, "alias/aws/secretsmanager"))) ? 1 : 0
+  key_id = local._secret_kms_key_id
 }
 
 resource "random_string" "id" {

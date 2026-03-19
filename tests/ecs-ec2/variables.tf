@@ -56,13 +56,13 @@ variable "api_key" {
 variable "s3_config_bucket" {
   description = "S3 bucket name containing the configuration file. Required when task_definition_arn is null."
   type        = string
-  default     = null
+  default     = "placeholder-bucket"
 }
 
 variable "s3_config_key" {
   description = "S3 object key (file path) for the configuration file. Required when task_definition_arn is null."
   type        = string
-  default     = null
+  default     = "configs/otel-config.yaml"
 }
 
 variable "task_definition_arn" {
