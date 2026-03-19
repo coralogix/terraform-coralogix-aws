@@ -1,5 +1,5 @@
 output "coralogix_otel_agent_task_definition_arn" {
-  value       = one(aws_ecs_task_definition.coralogix_otel_agent[*].arn)
+  value       = coalesce(one(aws_ecs_task_definition.coralogix_otel_agent[*].arn), var.task_definition_arn)
   description = "ARN of the ECS Task Definition for the OTEL Agent Daemon"
 }
 

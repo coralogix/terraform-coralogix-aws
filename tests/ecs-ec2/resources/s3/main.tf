@@ -11,8 +11,18 @@ terraform {
   }
 }
 
+variable "config_file" {
+  description = "Path to the OTEL config file to upload. Defaults to local_config.yaml."
+  type        = string
+  default     = null
+}
+
 provider "aws" {
   region = var.aws_region
+}
+
+locals {
+  config_source = coalesce(var.config_file, "${path.module}/../../local_config.yaml")
 }
 
 # Random string for unique bucket name
@@ -57,8 +67,8 @@ resource "aws_s3_bucket_public_access_block" "otel_config_bucket_public_access_b
 resource "aws_s3_object" "otel_config" {
   bucket = aws_s3_bucket.otel_config_bucket.id
   key    = "configs/otel-config.yaml"
-  source = "${path.module}/../../local_config.yaml"
-  etag   = filemd5("${path.module}/../../local_config.yaml")
+  source = local.config_source
+  etag   = filemd5(local.config_source)
 
   tags = {
     Name        = "Coralogix OTEL Config"
@@ -117,6 +127,43 @@ resource "aws_iam_role_policy_attachment" "ecs_task_s3_policy_attachment" {
   policy_arn = aws_iam_policy.ecs_task_s3_policy.arn
 }
 
+# Task role for S3 config access at runtime (used by custom roles test)
+resource "aws_iam_role" "ecs_task_role_s3" {
+  name = "coralogix-otel-s3-tf-test-task-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "ecs_task_role_s3_policy" {
+  name = "S3ReadAccess"
+  role = aws_iam_role.ecs_task_role_s3.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:GetObjectVersion"
+        ]
+        Resource = "${aws_s3_bucket.otel_config_bucket.arn}/*"
+      }
+    ]
+  })
+}
+
 # Outputs to reference in your tests
 output "s3_config_bucket" {
   value = aws_s3_bucket.otel_config_bucket.bucket
@@ -128,4 +175,8 @@ output "s3_config_key" {
 
 output "s3_task_execution_role_arn" {
   value = aws_iam_role.ecs_task_execution_role_s3.arn
+}
+
+output "s3_task_role_arn" {
+  value = aws_iam_role.ecs_task_role_s3.arn
 } 

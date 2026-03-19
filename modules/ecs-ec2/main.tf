@@ -1,5 +1,9 @@
 locals {
   name = "coralogix-otel-agent"
+  # KMS key ID from Secrets Manager secret (when customer-managed). Null when api_key_secret_kms_key_arn provided (skips lookup).
+  _secret_kms_key_id = try(data.aws_secretsmanager_secret.api_key[0].kms_key_id, null)
+  # Use provided ARN or resolve via aws_kms_key data source (handles aliases; IAM kms:Decrypt requires key ARN, not alias)
+  secrets_kms_key_arn = (var.api_key_secret_kms_key_arn != null && var.api_key_secret_kms_key_arn != "") ? var.api_key_secret_kms_key_arn : try(data.aws_kms_key.secret_key[0].arn, null)
   tags = merge(
     {
       "ecs:taskDefinition:createdFrom" = "terraform"
@@ -7,38 +11,10 @@ locals {
     var.tags
   )
   coralogix_region_domain_map = module.locals_variables.coralogix_domains
-  coralogix_domain            = coalesce(var.custom_domain, local.coralogix_region_domain_map[var.coralogix_region])
+  coralogix_domain            = var.task_definition_arn == null ? coalesce(var.custom_domain, local.coralogix_region_domain_map[var.coralogix_region]) : null
 
-  otel_template_vars = {
-    EnableHeadSampler  = tostring(var.enable_head_sampler)
-    EnableSpanMetrics  = tostring(var.enable_span_metrics)
-    EnableTracesDB     = tostring(var.enable_traces_db)
-    SamplingPercentage = var.sampling_percentage
-    SamplerMode        = var.sampler_mode
-  }
-
-  otel_config = templatefile("${path.module}/otel_config.tftpl.yaml", local.otel_template_vars)
-
-  # Determine if we need execution role
-  needs_execution_role = var.use_api_key_secret == true || var.config_source == "parameter-store" || var.config_source == "s3"
-
-  # Determine which execution role to use
-  # Priority: 1. User-provided role, 2. Auto-created S3 role (only for S3), 3. null
-  execution_role_arn = local.needs_execution_role ? (
-    var.task_execution_role_arn != null ? var.task_execution_role_arn : (
-      var.config_source == "s3" ? aws_iam_role.otel_task_execution_role_s3[0].arn : null
-    )
-  ) : null
-
-  # Determine command based on config source
-  container_command = var.config_source == "s3" ? ["--config", "s3://${var.s3_config_bucket}.s3.${data.aws_region.current.id}.amazonaws.com/${var.s3_config_key}"] : ["--config", "env:OTEL_CONFIG"]
-
-  # Determine which task role to use
-  # Priority: 1. User-provided role, 2. Auto-created S3 task role (only for S3), 3. null
-  # Note: When using S3 config, the container needs S3 read permissions at runtime
-  task_role_arn = var.task_role_arn != null ? var.task_role_arn : (
-    var.config_source == "s3" ? aws_iam_role.otel_task_role_s3[0].arn : null
-  )
+  execution_role_arn = var.task_execution_role_arn != null ? var.task_execution_role_arn : try(aws_iam_role.otel_task_execution_role_s3[0].arn, null)
+  task_role_arn      = var.task_role_arn != null ? var.task_role_arn : try(aws_iam_role.otel_task_role_s3[0].arn, null)
 }
 
 module "locals_variables" {
@@ -48,6 +24,19 @@ module "locals_variables" {
 }
 
 data "aws_region" "current" {}
+data "aws_caller_identity" "current" {}
+
+# Lookup secret metadata for KMS key ID. Skipped when api_key_secret_kms_key_arn is set (avoids DescribeSecret on deploy role).
+data "aws_secretsmanager_secret" "api_key" {
+  count  = var.task_definition_arn == null && var.task_execution_role_arn == null && var.use_api_key_secret && var.api_key_secret_arn != null && (var.api_key_secret_kms_key_arn == null || var.api_key_secret_kms_key_arn == "") ? 1 : 0
+  arn    = var.api_key_secret_arn
+}
+
+# Resolve KMS key ID or alias to key ARN (IAM kms:Decrypt requires key ARN, not alias). Skipped when api_key_secret_kms_key_arn is set (avoids DescribeKey on deploy role).
+data "aws_kms_key" "secret_key" {
+  count  = var.task_definition_arn == null && var.task_execution_role_arn == null && var.use_api_key_secret && var.api_key_secret_arn != null && (var.api_key_secret_kms_key_arn == null || var.api_key_secret_kms_key_arn == "") && (local._secret_kms_key_id == null ? false : (local._secret_kms_key_id != "" && !startswith(local._secret_kms_key_id, "alias/aws/secretsmanager"))) ? 1 : 0
+  key_id = local._secret_kms_key_id
+}
 
 resource "random_string" "id" {
   length  = 7
@@ -57,9 +46,9 @@ resource "random_string" "id" {
   special = false
 }
 
-# IAM Role for S3 access (only created when config_source=s3 AND no custom role provided)
+# IAM Role for S3 access (created when module creates task definition and no custom execution role provided)
 resource "aws_iam_role" "otel_task_execution_role_s3" {
-  count = (var.config_source == "s3" && var.task_execution_role_arn == null) ? 1 : 0
+  count = var.task_definition_arn == null && var.task_execution_role_arn == null ? 1 : 0
   name  = "${local.name}-${random_string.id.result}-task-execution-role-s3"
 
   assume_role_policy = jsonencode({
@@ -79,13 +68,13 @@ resource "aws_iam_role" "otel_task_execution_role_s3" {
 }
 
 resource "aws_iam_role_policy_attachment" "otel_task_execution_role_s3_policy" {
-  count      = (var.config_source == "s3" && var.task_execution_role_arn == null) ? 1 : 0
+  count      = var.task_definition_arn == null && var.task_execution_role_arn == null ? 1 : 0
   role       = aws_iam_role.otel_task_execution_role_s3[0].name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
 resource "aws_iam_role_policy" "otel_task_execution_role_s3_s3_policy" {
-  count = (var.config_source == "s3" && var.task_execution_role_arn == null) ? 1 : 0
+  count = var.task_definition_arn == null && var.task_execution_role_arn == null ? 1 : 0
   name  = "S3ReadAccess"
   role  = aws_iam_role.otel_task_execution_role_s3[0].id
 
@@ -104,10 +93,38 @@ resource "aws_iam_role_policy" "otel_task_execution_role_s3_s3_policy" {
   })
 }
 
-# IAM Role for task runtime S3 access (only created when config_source=s3 AND no custom task role provided)
-# This is a minimal role with only S3 read permissions for the container runtime
+# Secrets Manager access for API key (when use_api_key_secret, api_key_secret_arn set, and module creates execution role)
+# Includes kms:Decrypt when secret uses customer-managed KMS key (required for ECS to resolve the secret)
+resource "aws_iam_role_policy" "otel_task_execution_role_secrets" {
+  count = var.task_definition_arn == null && var.task_execution_role_arn == null && var.use_api_key_secret && var.api_key_secret_arn != null ? 1 : 0
+  name  = "SecretsManagerAccess"
+  role  = aws_iam_role.otel_task_execution_role_s3[0].id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = concat(
+      [
+        {
+          Effect   = "Allow"
+          Action   = ["secretsmanager:GetSecretValue"]
+          Resource = var.api_key_secret_arn
+        }
+      ],
+      # kms:Decrypt required when secret uses customer-managed KMS key
+      local.secrets_kms_key_arn != null ? [
+        {
+          Effect   = "Allow"
+          Action   = ["kms:Decrypt"]
+          Resource = local.secrets_kms_key_arn
+        }
+      ] : []
+    )
+  })
+}
+
+# IAM Role for task runtime S3 access (created when module creates task definition and no custom task role provided)
 resource "aws_iam_role" "otel_task_role_s3" {
-  count = (var.config_source == "s3" && var.task_role_arn == null) ? 1 : 0
+  count = var.task_definition_arn == null && var.task_role_arn == null ? 1 : 0
   name  = "${local.name}-${random_string.id.result}-task-role-s3"
 
   assume_role_policy = jsonencode({
@@ -127,7 +144,7 @@ resource "aws_iam_role" "otel_task_role_s3" {
 }
 
 resource "aws_iam_role_policy" "otel_task_role_s3_s3_policy" {
-  count = (var.config_source == "s3" && var.task_role_arn == null) ? 1 : 0
+  count = var.task_definition_arn == null && var.task_role_arn == null ? 1 : 0
   name  = "S3ReadAccess"
   role  = aws_iam_role.otel_task_role_s3[0].id
 
@@ -171,7 +188,7 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
   container_definitions = jsonencode([{
     name : local.name
     networkMode : "host"
-    image : "${var.image}:${var.image_version}"
+    image : "${var.image}:${coalesce(var.image_version, "v0.5.10")}"
     essential : true
     portMappings : [
       {
@@ -210,55 +227,25 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
         value : local.coralogix_domain
       },
       {
-        name : "APP_NAME"
-        value : var.default_application_name
-      },
-      {
-        name : "SUB_SYS"
-        value : var.default_subsystem_name
-      },
-      {
-        name : "SAMPLING_PERCENTAGE"
-        value : tostring(var.sampling_percentage)
-      },
-      {
-        name : "SAMPLER_MODE"
-        value : var.sampler_mode
-      },
-      {
-        name : "ENABLE_SPAN_METRICS"
-        value : tostring(var.enable_span_metrics)
-      },
-      {
-        name : "ENABLE_TRACES_DB"
-        value : tostring(var.enable_traces_db)
+        name : "MY_POD_IP"
+        value : "0.0.0.0"
       }
       ],
-      var.config_source == "template" ? [{
-        name : "OTEL_CONFIG"
-        value : local.otel_config
-      }] : [],
       var.use_api_key_secret != true ? [{
         name : "CORALOGIX_PRIVATE_KEY"
         value : var.api_key
     }] : []),
-    secrets : concat(
-      var.config_source == "parameter-store" ? [{
-        name : "OTEL_CONFIG"
-        valueFrom : var.custom_config_parameter_store_name
-      }] : [],
-      var.use_api_key_secret == true ? [{
-        name : "CORALOGIX_PRIVATE_KEY"
-        valueFrom : var.api_key_secret_arn
-      }] : []
-    ),
-    command : local.container_command,
+    secrets : var.use_api_key_secret == true ? [{
+      name      : "CORALOGIX_PRIVATE_KEY"
+      valueFrom : var.api_key_secret_arn
+    }] : [],
+    command : ["--config", "s3://${var.s3_config_bucket}.s3.${data.aws_region.current.id}.amazonaws.com/${var.s3_config_key}"],
     healthCheck : var.health_check_enabled ? {
-      command : ["/healthcheck"]
+      command     : ["/healthcheck"]
       startPeriod : var.health_check_start_period
-      interval : var.health_check_interval
-      timeout : var.health_check_timeout
-      retries : var.health_check_retries
+      interval    : var.health_check_interval
+      timeout     : var.health_check_timeout
+      retries     : var.health_check_retries
     } : null,
     logConfiguration : {
       logDriver : "json-file"
@@ -273,7 +260,7 @@ resource "aws_ecs_service" "coralogix_otel_agent" {
   task_definition                    = var.task_definition_arn == null ? aws_ecs_task_definition.coralogix_otel_agent[0].arn : var.task_definition_arn
   scheduling_strategy                = "DAEMON"
   deployment_maximum_percent         = 100
-  deployment_minimum_healthy_percent = 0
+  deployment_minimum_healthy_percent  = 0
   deployment_circuit_breaker {
     enable   = true
     rollback = true
