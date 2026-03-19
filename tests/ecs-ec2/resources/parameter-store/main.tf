@@ -11,15 +11,6 @@ provider "aws" {
   region = var.aws_region
 }
 
-# Parameter Store Parameter for OpenTelemetry Config
-resource "aws_ssm_parameter" "otel_config" {
-  name        = "cx_otel_config-tf-test"
-  description = "Coralogix OpenTelemetry Collector Configuration"
-  type        = "String"
-  tier        = "Advanced" # Advanced tier for larger parameter values
-  value       = file("${path.module}/../../local_config.yaml")
-}
-
 # Secrets Manager Secret for API Key
 resource "aws_secretsmanager_secret" "api_key_secret" {
   name        = "cx_otel_api_key-tf-test"
@@ -56,30 +47,34 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
-# Custom policy for Parameter Store and Secrets Manager access
+# Custom policy for Secrets Manager and S3 config access
 resource "aws_iam_policy" "ecs_task_custom_policy" {
   name        = "coralogix-otel-tf-test-custom-policy"
-  description = "Policy allowing access to Coralogix OpenTelemetry config parameter and API key secret"
+  description = "Policy allowing access to API key secret and S3 config (module is S3-only)"
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "ssm:GetParameters",
-          "ssm:GetParameter"
-        ]
-        Resource = aws_ssm_parameter.otel_config.arn
-      },
-      {
-        Effect = "Allow"
-        Action = [
-          "secretsmanager:GetSecretValue"
-        ]
-        Resource = aws_secretsmanager_secret.api_key_secret.arn
-      }
-    ]
+    Statement = concat(
+      [
+        {
+          Effect = "Allow"
+          Action = [
+            "secretsmanager:GetSecretValue"
+          ]
+          Resource = aws_secretsmanager_secret.api_key_secret.arn
+        }
+      ],
+      var.s3_config_bucket_arn != null ? [
+        {
+          Effect = "Allow"
+          Action = [
+            "s3:GetObject",
+            "s3:GetObjectVersion"
+          ]
+          Resource = "${var.s3_config_bucket_arn}/*"
+        }
+      ] : []
+    )
   })
 }
 
@@ -90,10 +85,6 @@ resource "aws_iam_role_policy_attachment" "ecs_task_custom_policy_attachment" {
 }
 
 # Outputs to reference in your tests
-output "parameter_store_name" {
-  value = aws_ssm_parameter.otel_config.name
-}
-
 output "api_key_secret_arn" {
   value = aws_secretsmanager_secret.api_key_secret.arn
 }

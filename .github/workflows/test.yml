@@ -103,4 +103,10 @@ jobs:
             terraform plan
           fi
 
-        
+      - if: ${{ github.event.pull_request.head.repo.full_name == github.repository && matrix.package == 'ecs-ec2' }}
+        name: Verify service-only mode (no task def / IAM creates)
+        run: |
+          cd "tests/ecs-ec2"
+          chmod +x verify-service-only-mode.sh
+          ./verify-service-only-mode.sh
+

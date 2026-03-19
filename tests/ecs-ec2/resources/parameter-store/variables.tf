@@ -9,4 +9,10 @@ variable "api_key" {
   type        = string
   sensitive   = true
   default     = "cxtp_CoralogixSendYourDataKey"
+}
+
+variable "s3_config_bucket_arn" {
+  description = "ARN of the S3 bucket containing OTEL config (for execution role S3 access)"
+  type        = string
+  default     = null
 } 

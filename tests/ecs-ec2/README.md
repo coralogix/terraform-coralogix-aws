@@ -1,140 +1,57 @@
 # Test ECS/EC2 OTEL collector
 
-## Prereqs
+## Prerequisites
 
-* Setup ECS cluster on EC2.
-* Setup AWS profile, or AWS session environment variables including ```AWS_DEFAULT_REGION```.
-* Copy and configure the terraform.tfvars file:
-  ```bash
-  cp terraform.tfvars.template terraform.tfvars
-  # Edit terraform.tfvars with your actual values
-  ```
+* ECS cluster on EC2
+* AWS profile or `AWS_DEFAULT_REGION`
+* S3 bucket with OTEL config (create via `resources/s3`)
 
-## Test provisioning ECS/EC2 OTEL collector
+## Setup
 
-```
+1. Create S3 resources:
+   ```bash
+   cd resources/s3
+   terraform init
+   terraform apply
+   ```
+2. Copy template and fill values:
+   ```bash
+   cd ../..
+   cp terraform.tfvars.template terraform.tfvars
+   # Edit terraform.tfvars: s3_config_bucket, s3_config_key, api_key
+   ```
+
+## Run
+
+```bash
 terraform init
 terraform plan
 terraform apply
 ```
 
-**Note**: This uses the values from `terraform.tfvars` file. Make sure you've copied and configured it from the template.
+Expected: ECS Service `coralogix-otel-agent-<UUID>` runs as a Daemon; logs/traces/metrics sent to Coralogix.
 
-Expected results:
-* ECS Service ```coralogix-otel-agent-<UUID>``` runs as a Daemon on every EC2 cluster node.
-* Logs, traces, and metrics, are captured at your Coralogix endpoint.
+## Scenarios
 
-## Test using S3 configuration source.
+| Scenario | Var file | Prerequisite |
+|----------|----------|--------------|
+| 1. S3 + inline API key | `terraform.tfvars` | `resources/s3` |
+| 2. S3 + Secrets Manager (module auto-creates execution role) | `vars/example-secrets-manager.tfvars.template` | `resources/s3`, `resources/parameter-store` |
+| 3. Service-only (existing task definition) | `vars/example-service-only.tfvars.template` | Existing task definition ARN. Run `./verify-service-only-mode.sh` to assert no task definition or IAM resources are planned. |
+| Custom IAM roles | `vars/example-custom-roles.tfvars.template` | `resources/roles-for-bucket` |
 
-To test with configuration stored in S3:
-
-### Option 1: Auto-created execution role (recommended)
-1. First, create the S3 example resources:
-   ```bash
-   cd resources/s3
-   terraform init
-   terraform apply
-   ```
-2. Note the outputs: `s3_config_bucket` and `s3_config_key`
-3. Update [s3_config.vars](./s3_config.vars) with the actual bucket name
-4. Test the module:
-   ```bash
-   cd ../..
-   terraform init
-   terraform plan -var-file="s3_config.vars"
-   terraform apply -var-file="s3_config.vars"
-   ```
-
-### Option 2: Custom execution role
-1. First, create the S3 example resources:
-   ```bash
-   cd resources/s3
-   terraform init
-   terraform apply
-   ```
-2. Note the outputs: `s3_config_bucket`, `s3_config_key`, and `s3_task_execution_role_arn`
-3. Update [s3_config_custom_role.vars](./s3_config_custom_role.vars) with the actual values
-4. Test the module:
-   ```bash
-   cd ../..
-   terraform init
-   terraform plan -var-file="s3_config_custom_role.vars"
-   terraform apply -var-file="s3_config_custom_role.vars"
-   ```
-
-Expected results:
-* OpenTelemetry Collector uses S3 URI for configuration: `s3://bucket-name.s3.region.amazonaws.com/configs/otel-config.yaml`
-* Auto-created IAM role with S3 read permissions (if no custom role provided)
-* Custom IAM role used (if provided)
-
-## Test using custom config file from Parameter Store.
-
-To test with configuration stored in Parameter Store:
-
-1. First, create the Parameter Store example resources:
-   ```bash
-   cd resources/parameter-store
-   terraform init
-   terraform apply
-   ```
-2. Note the outputs: `parameter_store_name` and `task_execution_role_arn`
-3. Update [ps_config.vars](./ps_config.vars) with the actual actual values
-4. Test the module:
-   ```bash
-   cd ../..
-   terraform init
-   terraform plan -var-file="ps_config.vars"
-   terraform apply -var-file="ps_config.vars"
-   ```
-
-Expected results:
-* OTEL_CONFIG environment variable is set to the Parameter Store defined above.
-* Custom execution role required for parameter store access.
-
-## Test using Secret API Key.
-
-To test with a Secret API Key:
-1. First, create the Secrets Manager example resources:
-   ```bash
-   cd resources/parameter-store
-   terraform init
-   terraform apply
-   ```
-2. Note the outputs: `api_key_secret_arn` and `task_execution_role_arn`
-3. Update [secret_api_key.vars](./secret_api_key.vars) with the actual secret ARN
-4. Test the module:
-   ```bash
-   cd ../..
-   terraform init
-   terraform plan -var-file="secret_api_key.vars"
-   terraform apply -var-file="secret_api_key.vars"
-   ```
-
-Expected results:
-* PRIVATE_KEY environment variable is set to the Secret defined above.
-* Custom execution role required for secrets manager access.
-
-
-## Example Resource Cleanup
-
-To clean up example resources:
-
-### S3 Resources
+Copy a template to `.tfvars`, fill values, then run:
 ```bash
-cd resources/s3
-terraform destroy
+cp vars/example-secrets-manager.tfvars.template vars/example-secrets-manager.tfvars
+# Edit vars/example-secrets-manager.tfvars
+terraform apply -var-file="vars/example-secrets-manager.tfvars"
 ```
 
-### Parameter Store and Secrets Manager Resources
+## Cleanup
+
 ```bash
-cd resources/parameter-store
 terraform destroy
+cd resources/s3 && terraform destroy
+# If used: cd resources/parameter-store && terraform destroy
+# If used: cd resources/roles-for-bucket && terraform destroy
 ```
-
-This will remove:
-* S3 bucket and configuration file
-* Parameter Store parameter
-* Secrets Manager secret
-* IAM roles and policies
-
-**Note**: These are example resources created for testing purposes. In production, you would create your own resources with appropriate security configurations.

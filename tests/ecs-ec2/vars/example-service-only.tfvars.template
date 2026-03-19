@@ -1,0 +1,9 @@
+# Scenario 3: Service-only mode with existing task definition
+# Copy to example-service-only.tfvars and fill task_definition_arn.
+# Prerequisite: An existing ECS task definition ARN (e.g. from a prior apply of scenario 1).
+# No S3 inputs required; task_execution_role_arn and task_role_arn must be null.
+
+aws_region       = "us-east-1"
+ecs_cluster_name = "ecs-cluster"
+
+task_definition_arn = "arn:aws:ecs:us-east-1:ACCOUNT_ID:task-definition/coralogix-otel-agent-XXXXXXX:REVISION"
