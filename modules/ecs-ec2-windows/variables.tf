@@ -105,7 +105,7 @@ variable "default_application_name" {
 variable "default_subsystem_name" {
   description = "The default Coralogix Subsystem name."
   type        = string
-  default     = "ecs-ec2"
+  default     = "ecs-ec2-windows"
 }
 
 variable "use_api_key_secret" {

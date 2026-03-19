@@ -115,7 +115,7 @@ module "ecs_ec2_windows_s3" {
 | custom_config_parameter_store_name | Parameter Store name (required when config_source=parameter-store) | `string` | `null` | no |
 | custom_domain | Override Coralogix domain (e.g. private link) | `string` | `null` | no |
 | default_application_name | Default Coralogix application name | `string` | `"otel"` | no |
-| default_subsystem_name | Default Coralogix subsystem name | `string` | `"ecs-ec2"` | no |
+| default_subsystem_name | Default Coralogix subsystem name | `string` | `"ecs-ec2-windows"` | no |
 | image | OTEL Collector image repository | `string` | `"coralogixrepo/coralogix-otel-collector"` | no |
 | cpu | Task CPU units (1024 = 1 vCPU) | `number` | `1024` | no |
 | memory | Task memory (MiB) | `number` | `2048` | no |

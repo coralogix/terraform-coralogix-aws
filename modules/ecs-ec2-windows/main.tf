@@ -7,7 +7,7 @@ locals {
     var.tags
   )
   coralogix_region_domain_map = module.locals_variables.coralogix_domains
-  coralogix_domain            = coalesce(var.custom_domain, local.coralogix_region_domain_map[var.coralogix_region])
+  coralogix_domain            = var.coralogix_region == "custom" ? var.custom_domain : coalesce(var.custom_domain, local.coralogix_region_domain_map[var.coralogix_region])
 
   otel_template_vars = {
     coralogix_domain   = local.coralogix_domain
@@ -203,7 +203,7 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
     command = local.container_command
 
     healthCheck = var.health_check_enabled ? {
-      command     = ["CMD", "/C", "exit", "0"]
+      command     = ["CMD-SHELL", "exit 0"]
       startPeriod = var.health_check_start_period
       interval    = var.health_check_interval
       timeout     = var.health_check_timeout
