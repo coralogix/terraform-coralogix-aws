@@ -1,5 +1,11 @@
 # Changelog
 
+
+## v4.1.0
+#### **ecs-ec2-windows**
+### 🚀 New components 🚀
+- Add new module to implement ECS-EC2 integration on Windows
+
 ## v4.0.0
 
 #### **ecs-ec2**
