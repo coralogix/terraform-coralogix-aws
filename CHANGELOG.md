@@ -1,6 +1,11 @@
 # Changelog
 
 
+## v4.2.0
+#### **S3-archive**
+### 💡 Enhancements 💡
+- Add a tag to the archive buckets to allow tracking the existing coralogix resource.
+
 ## v4.1.0
 #### **ecs-ec2-windows**
 ### 🚀 New components 🚀
