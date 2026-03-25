@@ -19,12 +19,20 @@ resource "aws_s3_bucket" "logs_bucket_name" {
   count         = local.logs_validations ? 1 : 0
   bucket        = var.logs_bucket_name
   force_destroy = var.logs_bucket_force_destroy
+
+  tags = {
+    "aws-apn-id" = "pc:d69qgozzky3nktjixw65qcret"
+  }
 }
 
 resource "aws_s3_bucket" "metrics_bucket_name" {
   count         = local.metrics_validations ? 1 : 0
   bucket        = var.metrics_bucket_name
   force_destroy = var.metrics_bucket_force_destroy
+
+  tags = {
+    "aws-apn-id" = "pc:d69qgozzky3nktjixw65qcret"
+  }
 }
 
 resource "aws_s3_bucket_policy" "logs_bucket_policy" {
