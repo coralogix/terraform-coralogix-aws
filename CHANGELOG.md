@@ -1,5 +1,15 @@
 # Changelog
 
+## v4.2.1
+
+#### **lambda-manager**
+### 🐛 Bug Fixes 🐛
+- Allow the lambda-manager to catch all standard CreateLogGroup API events
+– Resolve deprecated `aws_region.name` warnings coming from pinned child module `terraform-aws-modules/lambda/aws`.
+
+#### **resource-metadata / resource-metadata-sqs**
+### 🐛 Bug Fixes 🐛
+– Resolve deprecated `aws_region.name` warnings coming from pinned child module `terraform-aws-modules/lambda/aws`.
 
 ## v4.2.0
 #### **S3-archive**
