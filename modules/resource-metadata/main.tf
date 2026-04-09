@@ -91,7 +91,7 @@ resource "null_resource" "s3_bucket" {
 module "lambda" {
   depends_on             = [null_resource.s3_bucket]
   source                 = "terraform-aws-modules/lambda/aws"
-  version                = "3.2.1"
+  version                = "8.1.2"
   function_name          = local.function_name
   layers                 = var.secret_manager_enabled ? [var.layer_arn] : []
   description            = "Send metadata to Coralogix."
@@ -107,7 +107,6 @@ module "lambda" {
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.id}" : var.custom_s3_bucket
     key    = "${var.package_name}.zip"
   }
-  policy_path                             = "/coralogix/"
   role_path                               = "/coralogix/"
   role_name                               = "${local.function_name}-Role"
   role_description                        = "Role for ${local.function_name} Lambda Function."

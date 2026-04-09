@@ -13,7 +13,7 @@ resource "random_string" "this" {
 
 module "lambda" {
   source                 = "terraform-aws-modules/lambda/aws"
-  version                = "6.5.0"
+  version                = "8.1.2"
   function_name          = "serverlessrepo-Coralogix-Lambda-Man-LambdaFunction-${random_string.this.result}"
   description            = "Send CloudWatch logs to Coralogix."
   handler                = "lambda_function.lambda_handler"
@@ -38,7 +38,6 @@ module "lambda" {
     bucket = "coralogix-serverless-repo-${data.aws_region.this.id}"
     key    = "lambda-manager.zip"
   }
-  policy_path                             = "/coralogix/"
   role_path                               = "/coralogix/"
   role_name                               = "serverlessrepo-Coralogix-Lambda-Man-${random_string.this.result}-Role"
   role_description                        = "Role for serverlessrepo-Coralogix-Lambda-Man-${random_string.this.result} Lambda Function."
@@ -78,7 +77,10 @@ resource "aws_cloudwatch_event_rule" "EventBridgeRule" {
       eventSource = ["logs.amazonaws.com"],
       eventName   = ["CreateLogGroup"],
       requestParameters = {
-        logGroupClass = ["STANDARD"]
+        logGroupClass = [
+          { exists = false },
+          "STANDARD"
+        ]
       }
     }
   })
