@@ -92,7 +92,7 @@ resource "null_resource" "s3_bucket" {
 module "collector_lambda" {
   source                 = "terraform-aws-modules/lambda/aws"
   depends_on             = [null_resource.s3_bucket]
-  version                = "7.20.1"
+  version                = "8.1.2"
   publish                = true
   function_name          = "${local.function_name}-collector"
   description            = "Collect AWS resource metadata for Coralogix."
@@ -201,7 +201,7 @@ module "collector_lambda" {
 module "generator_lambda" {
   source                 = "terraform-aws-modules/lambda/aws"
   depends_on             = [null_resource.s3_bucket]
-  version                = "7.20.1"
+  version                = "8.1.2"
   publish                = true
   create                 = var.secret_manager_enabled == false ? true : false
   function_name          = "${local.function_name}-generator"
@@ -300,7 +300,7 @@ module "generator_lambda" {
 module "generator_lambda_sm" {
   source                 = "terraform-aws-modules/lambda/aws"
   depends_on             = [null_resource.s3_bucket]
-  version                = "7.20.1"
+  version                = "8.1.2"
   publish                = true
   create                 = var.secret_manager_enabled ? true : false
   function_name          = "${local.function_name}-generator"
