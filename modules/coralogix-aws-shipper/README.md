@@ -172,7 +172,7 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
-| <a name="input_custom_metadata"></a> [custom\_metadata](#input\_custom\_metadata) | Custom metadata to be added to the log message in the comma-separated format. Options are: `key1=value1,key2=value2` | `string` | n/a | no |
+| <a name="input_custom_metadata"></a> [custom\_metadata](#input\_custom\_metadata) | Custom metadata added to **logs or metrics** as comma-separated `key=value` pairs (only the first `=` splits key and value). Same behavior as `CustomMetadata` in the CloudFormation template. | `string` | n/a | no |
 | <a name="input_add_metadata"></a> [add\_metadata](#input\_add\_metadata) | Custom metadata to be added to the log message in the comma-separated format. The S3 options are: `bucket_name`,`key_name`. For CloudWatch `stream_name`, `loggroup_name`. For Kafka/MSK, use `topic_name` | `string` | n/a | no |
 | <a name="input_lambda_name"></a> [lambda\_name](#input\_lambda\_name) | The name the Lambda function to create. | `string` | n/a | no |
 | <a name="input_blocking_pattern"></a> [blocking\_pattern](#input\_blocking\_pattern) | A regular expression to identify lines excluded from being sent to Coralogix. For example, use `MainActivity.java:\d{3}` to match log lines with MainActivity followed by exactly three digits. | `string` | n/a | no |
@@ -340,9 +340,18 @@ To enable CloudWatch metrics streaming via Firehose (PrivateLink), you must prov
 | s3_bucket_name | The S3 bucket to be used to store records that have failed processing. | | :heavy_check_mark: |
 | subnet_ids | The ID of the subnet for the integration deployment. | `list(string)` | n/a | :heavy_check_mark: |
 | security_group_ids | The ID of the security group for the integration deployment. | `list(string)` | n/a | :heavy_check_mark: |
-| include_metric_stream_filter | List of inclusive metric filters. If you specify this parameter, the stream sends only the conditional metric names from the specified metric namespaces. Leave empty to send all metrics | `llist(object({namespace=string, metric_names=list(string)})` | n/a | |
+| include_metric_stream_filter | List of inclusive metric filters. If you specify this parameter, the stream sends only the conditional metric names from the specified metric namespaces. Leave empty to send all metrics | `list(object({namespace=string, metric_names=list(string)}))` | n/a | |
+| metrics_tag_enrichment_enabled | When `telemetry_mode = "metrics"`, resolve AWS resource tags via the Resource Groups Tagging API and attach them to streamed metric datapoints. When `true`, the module adds the required IAM permissions to the Lambda role. Set `false` if the function cannot reach the tagging API (for example from a restrictive VPC). | `bool` | `true` | |
+| metrics_continue_on_resource_failure | When `telemetry_mode = "metrics"`, if `true`, tagging or resource-discovery errors cause the shipper to omit AWS tags for affected data and still deliver metrics. If `false`, the invocation fails instead. | `bool` | `true` | |
+| metrics_file_cache_enabled | When `telemetry_mode = "metrics"`, cache discovered resources on the Lambda filesystem between invocations to reduce `GetResources` calls. | `bool` | `true` | |
+| metrics_file_cache_path | Directory for the metrics resource-tag cache files (typically Lambda ephemeral storage). | `string` | `/tmp` | |
+| metrics_file_cache_expiration | Maximum age of cache files before refresh. Go-style duration (e.g. `1h`, `30m`). | `string` | `1h` | |
 
 When `batch_metrics = true`, the module sets the Lambda environment variables `BATCH_METRICS=1` and `METRICS_BATCH_MAX_SIZE` to the provided value so that the shipper batches each Firehose ingested payload into a single export request.
+
+When `telemetry_mode = "metrics"`, the module also passes `METRICS_TAG_ENRICHMENT_ENABLED`, `CONTINUE_ON_RESOURCE_FAILURE`, `FILE_CACHE_ENABLED`, `FILE_CACHE_PATH`, and `FILE_CACHE_EXPIRATION` to the Lambda, matching the [coralogix-aws-shipper](https://github.com/coralogix/coralogix-aws-shipper) CloudFormation template. Tag enrichment and static labels on metrics require a shipper release that includes those features; pin `source_code_version` to an appropriate version when needed.
+
+For metrics shipped through this Firehose workflow, optional static labels use the same `custom_metadata` variable as logs (comma-separated `key=value` pairs).
 
 The include_metric_stream_filter example:
 ```
