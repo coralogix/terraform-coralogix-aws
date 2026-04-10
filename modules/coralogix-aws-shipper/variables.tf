@@ -474,3 +474,33 @@ variable "include_metric_stream_filter" {
   )
   default = []
 }
+
+variable "metrics_tag_enrichment_enabled" {
+  description = "When telemetry_mode is metrics, call the AWS Resource Groups Tagging API to attach resource tags to streamed CloudWatch metrics. When true, the Lambda execution policy includes the required IAM actions. Set false if the function cannot reach the tagging API (for example from a restrictive VPC)."
+  type        = bool
+  default     = true
+}
+
+variable "metrics_continue_on_resource_failure" {
+  description = "When telemetry_mode is metrics, if true, tagging or resource-discovery errors cause the shipper to skip AWS tags for affected data and still deliver metrics. If false, the invocation fails instead."
+  type        = bool
+  default     = true
+}
+
+variable "metrics_file_cache_enabled" {
+  description = "When telemetry_mode is metrics, persist a per-namespace cache of discovered resources under metrics_file_cache_path on the Lambda filesystem between invocations to reduce GetResources traffic."
+  type        = bool
+  default     = true
+}
+
+variable "metrics_file_cache_path" {
+  description = "Directory for metrics tag-enrichment resource cache files (typically Lambda ephemeral storage, e.g. /tmp)."
+  type        = string
+  default     = "/tmp"
+}
+
+variable "metrics_file_cache_expiration" {
+  description = "Maximum age of metrics resource cache files before refresh. Go-style duration (e.g. 1h, 30m), matching the shipper's ParseDuration."
+  type        = string
+  default     = "1h"
+}
