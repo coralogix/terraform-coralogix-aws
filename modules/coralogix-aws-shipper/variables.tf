@@ -478,7 +478,7 @@ variable "include_metric_stream_filter" {
 variable "metrics_tag_enrichment_enabled" {
   description = "When telemetry_mode is metrics, call the AWS Resource Groups Tagging API to attach resource tags to streamed CloudWatch metrics. When true, the Lambda execution policy includes the required IAM actions. Set false if the function cannot reach the tagging API (for example from a restrictive VPC)."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "metrics_continue_on_resource_failure" {
