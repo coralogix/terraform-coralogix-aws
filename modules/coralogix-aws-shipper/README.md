@@ -172,7 +172,7 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
-| <a name="input_custom_metadata"></a> [custom\_metadata](#input\_custom\_metadata) | Custom metadata added to **logs or metrics** as comma-separated `key=value` pairs (only the first `=` splits key and value). Same behavior as `CustomMetadata` in the CloudFormation template. | `string` | n/a | no |
+| <a name="input_custom_metadata"></a> [custom\_metadata](#input\_custom\_metadata) | Custom metadata to be added to the log message in the comma-separated format. Options are: `key1=value1,key2=value2` | `string` | n/a | no |
 | <a name="input_add_metadata"></a> [add\_metadata](#input\_add\_metadata) | Custom metadata to be added to the log message in the comma-separated format. The S3 options are: `bucket_name`,`key_name`. For CloudWatch `stream_name`, `loggroup_name`. For Kafka/MSK, use `topic_name` | `string` | n/a | no |
 | <a name="input_lambda_name"></a> [lambda\_name](#input\_lambda\_name) | The name the Lambda function to create. | `string` | n/a | no |
 | <a name="input_blocking_pattern"></a> [blocking\_pattern](#input\_blocking\_pattern) | A regular expression to identify lines excluded from being sent to Coralogix. For example, use `MainActivity.java:\d{3}` to match log lines with MainActivity followed by exactly three digits. | `string` | n/a | no |

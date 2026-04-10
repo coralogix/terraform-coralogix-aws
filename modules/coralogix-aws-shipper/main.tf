@@ -214,8 +214,10 @@ resource "aws_iam_policy" "lambda_policy" {
             "dms:DescribeReplicationTasks",
             "ec2:DescribeTransitGatewayAttachments",
             "ec2:DescribeSpotFleetRequests",
+            "shield:ListProtections",
             "storagegateway:ListGateways",
             "storagegateway:ListTagsForResource",
+            "iam:ListAccountAliases",
           ]
           Resource = ["*"]
         }
