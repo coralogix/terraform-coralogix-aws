@@ -1,5 +1,12 @@
 # Changelog
 
+## v4.3.0
+
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 💡
+- Added AWS tags enrichment to `firehose-metrics` with the possibility to cache the API output.
+- Added custom attributes to `firehose-metrics`.
+
 ## v4.2.1
 
 #### **lambda-manager**
