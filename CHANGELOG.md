@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.3.1
+
+#### **ecs-ec2-windows**
+### 💡 Enhancements 💡
+- Added `ecsattributesprocessor`
+
 ## v4.3.0
 
 #### **coralogix-aws-shipper**
