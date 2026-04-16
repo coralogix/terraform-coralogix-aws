@@ -59,13 +59,13 @@ variable "s3_config_key" {
 }
 
 variable "image" {
-  description = "The OpenTelemetry Collector image repository. For Windows use the Windows image; default is coralogixrepo/coralogix-otel-collector (set image_version to a Windows tag, e.g. v0.5.10-windowsserver-2022)."
+  description = "The OpenTelemetry Collector image repository. For Windows use the Windows image; default is coralogixrepo/coralogix-otel-collector (set image_version to a Windows tag, e.g. v0.5.11-windowsserver-2022)."
   type        = string
   default     = "coralogixrepo/coralogix-otel-collector"
 }
 
 variable "image_version" {
-  description = "The Coralogix OTEL Collector image tag. For Windows ECS use a Windows Server tag, e.g. v0.5.10-windowsserver-2022. See: https://hub.docker.com/r/coralogixrepo/coralogix-otel-collector/tags"
+  description = "The Coralogix OTEL Collector image tag. For Windows ECS use a Windows Server tag, e.g. v0.5.11-windowsserver-2022. See: https://hub.docker.com/r/coralogixrepo/coralogix-otel-collector/tags"
   type        = string
 }
 

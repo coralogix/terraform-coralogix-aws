@@ -23,9 +23,9 @@ variable "service_discovery_registry_arn" {
 }
 
 variable "image_version" {
-  description = "OTEL Collector Windows image tag (e.g. v0.5.10-windowsserver-2022)."
+  description = "OTEL Collector Windows image tag (e.g. v0.5.11-windowsserver-2022)."
   type        = string
-  default     = "v0.5.10-windowsserver-2022"
+  default     = "v0.5.11-windowsserver-2022"
 }
 
 variable "coralogix_region" {

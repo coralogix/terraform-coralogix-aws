@@ -31,7 +31,7 @@ How this module differs from the Linux agent module [ecs-ec2](../ecs-ec2):
 | Aspect | ecs-ec2 (Linux) | ecs-ec2-windows |
 |--------|------------------|------------------|
 | **Logs receivers** | `filelog` (Docker container logs under `/hostfs/var/lib/docker/containers/`) + `otlp` | `otlp` only (no filelog; Windows containers don’t expose logs as host files) |
-| **Logs pipeline** | `filelog` + `otlp` → `ecsattributes/container-logs` | `otlp` only; `ecsattributes/container-logs` disabled (no Docker daemon on Windows) |
+| **Logs pipeline** | `filelog` + `otlp` → `ecsattributes/container-logs` | `otlp` → `ecsattributes/container-logs` |
 | **ECS container metrics** | `awsecscontainermetricsd` (daemon: Docker API + ECS metadata) | `awsecscontainermetricsd` with **`sidecar: true`** (ECS Task Metadata only) |
 | **hostmetrics** | `root_path: /` (Linux paths); Linux-specific exclusions | No `root_path`; Windows-specific filesystem exclusions |
 | **resourcedetection** | `system` + `env` (host.id from OS) | `env` only (system detector fails in Windows container); `host.id` from ec2 detector |

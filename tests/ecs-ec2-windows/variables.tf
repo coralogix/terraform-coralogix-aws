@@ -37,7 +37,7 @@ variable "image" {
 variable "image_version" {
   description = "Version tag for the Windows coralogix-otel-collector image"
   type        = string
-  default     = "v0.5.10-windowsserver-2022"
+  default     = "v0.5.11-windowsserver-2022"
 }
 
 variable "cpu" {
