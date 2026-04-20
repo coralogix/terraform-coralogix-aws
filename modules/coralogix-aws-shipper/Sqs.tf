@@ -19,7 +19,7 @@ resource "aws_lambda_event_source_mapping" "sqs" {
 }
 
 resource "aws_sqs_queue_policy" "sqs_policy" {
-  count     = local.is_s3_integration && var.sqs_name != null ? 1 : 0
+  count     = var.create_sqs_queue_policy && local.is_s3_integration && var.sqs_name != null ? 1 : 0
   queue_url = data.aws_sqs_queue.name[count.index].id
   policy    = data.aws_iam_policy_document.topic[count.index].json
 }
