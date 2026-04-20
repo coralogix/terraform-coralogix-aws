@@ -11,4 +11,5 @@ module "coralogix-shipper" {
   s3_bucket_name   = "test-bucket-name"
   integration_type = "S3"
   # create_sns_topic_policy = true  # Default: module manages SNS topic policy
+  # create_sqs_queue_policy = true  # Default: module manages SQS queue policy
 }

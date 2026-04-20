@@ -22,6 +22,19 @@ module "s3" {
   s3_bucket_name   = "github-action-bucket-testing"
   integration_type = "S3"
 }
+
+module "s3-sqs-external-policy" {
+  source = "../../modules/coralogix-aws-shipper"
+
+  coralogix_region        = "EU1"
+  api_key                 = "{{ secrets.TESTING_PRIVATE_KEY }}"
+  application_name        = "s3-sqs"
+  subsystem_name          = "logs"
+  s3_bucket_name          = "github-action-bucket-testing"
+  sqs_name                = "github-action-sqs-testing"
+  integration_type        = "S3"
+  create_sqs_queue_policy = false
+}
 module "cloudwatch" {
   source = "../../modules/coralogix-aws-shipper"
 
