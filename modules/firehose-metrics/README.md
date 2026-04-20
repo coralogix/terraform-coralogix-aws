@@ -23,7 +23,7 @@ By default, the metric stream includes all namespaces [AWS/EC2, AWS/EBS, etc..] 
 Provision a firehose delivery stream with [CloudWatch metric stream](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html).
 The metric stream includes only selected namespaces and sends the metrics to Coralogix:
 When including specific namespaces, the variable 'include_metric_stream_namespaces' needs to include a list of the desired namespaces,
-which are case-sensitive. please see the [AWS namespaces list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html). 
+which are case-sensitive. See the [AWS namespaces list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html). 
 
 ```terraform
 module "cloudwatch_firehose_metrics_coralogix" {
@@ -39,11 +39,11 @@ module "cloudwatch_firehose_metrics_coralogix" {
 Provision a firehose delivery stream with [CloudWatch metric stream](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html).
 For more granular inclusive filters of metric names belonging to an included namespace:
 
-The variable `include_metric_stream_filter` can be used to send only conditional metric names belonging to a selected metric namespace. For any selected namespace where the metric names list is empty or not specified, all metrics in that namespace is included.
+The variable `include_metric_stream_filter` can be used to send only conditional metric names belonging to a selected metric namespace. For any selected namespace where the metric names list is empty or not specified, all metrics in that namespace are included.
 
-**Note**: `include_metric_stream_namespaces` and `include_metric_stream_filter` are independent but related the same metric stream include filter and may conflict. If error or metrics do not show, check console _CloudWatch_ -> _Metrics_ -> _Streams_ -> _Selected Metrics_ table on result.
+**Note**: `include_metric_stream_namespaces` and `include_metric_stream_filter` are independent but related the same metric stream include filter and may conflict. If you see errors or metrics don't appear, verify your selections in the CloudWatch console under **Metrics** then **Streams** then **Selected Metrics**.
 
-Metric namespaces are also case-sensitive, please see the [AWS namespaces list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html). For case-sensitive metric names belonging to a namespace, please see the [AWS View available metrics guide](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/viewing_metrics_with_cloudwatch.html)
+Metric namespaces are also case-sensitive. See the [AWS namespaces list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html). For case-sensitive metric names belonging to a namespace, see the [AWS View available metrics guide](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/viewing_metrics_with_cloudwatch.html).
 
 ```terraform
 module "cloudwatch_firehose_metrics_coralogix" {
@@ -67,7 +67,7 @@ module "cloudwatch_firehose_metrics_coralogix" {
 ```
 
 ### Additional Statistics
-Also, `additional_metric_statistics` provide a means to configure additional statistics to a given metric. This is done by specifying the metric_name and namespace and corresponding list of additional statistics. Read [metric streams](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html) for more infomation. Set `additional_metric_statistics_enable` to true to enable this featurem, 
+Also, `additional_metric_statistics` provide a means to configure additional statistics to a given metric. This is done by specifying the metric_name and namespace and corresponding list of additional statistics. Read [metric streams](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html) for more infomation. Set `additional_metric_statistics_enable` to true to enable this feature.
 
 Depending on the `output_format` variable configured (default opentelemetry0.7). The `json` format would support streaming of statistics provided by CloudWatch and the `opentelemetry0.7` (default) supports streaming percentile statistics (p99.). 
 
@@ -161,11 +161,11 @@ Read more about the following:
 ### Examples
 Examples can be found under the [firehose-metrics examples directory](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/firehose-metrics)
 
-## Override Coralogix applicationName and subsystemName
+## Override Coralogix `applicationName` and `subsystemName`
 The application name and subsystem name by default is the firehose delivery stream arn and name, but it can be overriden by setting an environment variable called `application_name` and `subsystem_name`. 
 
-# Coralogix account region
-The coralogix region variable accepts one of the following regions:
+## Coralogix account region
+The Coralogix region variable accepts one of the following regions:
 * EU1
 * EU2
 * AP1
@@ -174,7 +174,7 @@ The coralogix region variable accepts one of the following regions:
 * US1
 * US2
 
-### Coralogix Regions & Description. 
+### Coralogix regions and endpoints
 
 | Region    | Domain                 |  Endpoint                                          |
 |-----------|------------------------|----------------------------------------------------|
@@ -189,10 +189,10 @@ The coralogix region variable accepts one of the following regions:
 ### Custom endpoints
 It is possible to pass a custom firehose ingress endpoint with by using the `coralogix_firehose_custom_endpoint` variable.
 
-# Metrics Output Format
-Coralogix suppots both `JSON` format and `OpenTelemtry` format. 
-The default format configured here is `OpenTelemtry`. 
-if using `Json` in the firehose output format, which is configured via the `integration_type_metrics` variable,
+## Metrics output format
+Coralogix supports both `JSON` format and `OpenTelemetry` format. 
+The default format configured here is `OpenTelemetry`. 
+If using `Json` in the firehose output format, which is configured via the `integration_type_metrics` variable,
 then the CloudWatch metric stream must be configured with the same format, configured via the `output_format` variable.
 
 
@@ -245,7 +245,7 @@ then the CloudWatch metric stream must be configured with the same format, confi
 | <a name="input_user_supplied_tags"></a> [user\_supplied\_tags](variables.tf#L203) | Tags supplied by the user to populate to all generated resources | `map(string)` | n/a | no |
 | <a name="input_override_default_tags"></a> [override\_default\_tags](variables.tf#L209) | Override and remove the default tags by setting to true | `bool` | `false` | no |
 
-## Coralgoix regions
+## Region name mapping
 
 | Coralogix region | AWS Region | Coralogix Domain |
 |------------------|------------|------------------|
