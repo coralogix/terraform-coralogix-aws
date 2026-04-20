@@ -246,6 +246,12 @@ variable "create_sns_topic_policy" {
   default     = true
 }
 
+variable "create_sqs_queue_policy" {
+  description = "Whether to create and manage the SQS queue policy. Set to false if you want to manage the policy yourself and preserve existing permissions. See README for required permissions when using custom policy."
+  type        = bool
+  default     = true
+}
+
 # vpc variables
 
 variable "subnet_ids" {

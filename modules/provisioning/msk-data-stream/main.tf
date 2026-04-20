@@ -90,7 +90,7 @@ resource "aws_security_group" "sg" {
     from_port   = 9198
     to_port     = 9198
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = var.coralogix_cidr_blocks != null ? var.coralogix_cidr_blocks : lookup(var.coralogix_cidr_mapping, var.aws_region, ["0.0.0.0/0"])
   }
 
   egress {

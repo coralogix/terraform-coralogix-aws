@@ -132,6 +132,7 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 | Name | Description | Type | Default | Required | 
 |------|-------------|------|---------|:--------:|
 | <a name="input_sqs_name"></a> [sqs_name](#input\_sqs\_name) | The name of the SQS queue to which you want to subscribe for retrieving messages.| `string` |  n/a | yes |
+| <a name="input_create_sqs_queue_policy"></a> [create_sqs_queue_policy](#input\_create\_sqs\_queue\_policy) | Whether to create and manage the SQS queue policy. Set to false if you want to manage the policy yourself and preserve existing permissions. | `bool` | `true` | no |
 
 <!-- /description -->
 
@@ -498,6 +499,47 @@ When `create_sns_topic_policy = false`, include this permission in your SNS topi
 ```
 
 **Note**: This only applies to S3-based integrations (S3, CloudTrail, VpcFlow, CloudFront, S3Csv). Direct SNS integration (`integration_type = "Sns"`) does not create SNS topic policies.
+
+## Custom SQS Queue Policy Management
+
+Set `create_sqs_queue_policy = false` to preserve existing SQS queue policies:
+
+```hcl
+module "coralogix_shipper" {
+  source = "coralogix/coralogix-aws-shipper/aws"
+
+  create_sqs_queue_policy = false
+  sqs_name               = "your-existing-sqs-queue"
+  # ... other configuration
+}
+```
+
+### Required Permissions
+
+When `create_sqs_queue_policy = false`, include this permission in your SQS queue policy:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "s3.amazonaws.com"
+      },
+      "Action": "SQS:SendMessage",
+      "Resource": "arn:aws:sqs:REGION:ACCOUNT-ID:QUEUE-NAME",
+      "Condition": {
+        "ArnLike": {
+          "aws:SourceArn": "arn:aws:s3:::YOUR-S3-BUCKET-NAME"
+        }
+      }
+    }
+  ]
+}
+```
+
+**Note**: This only applies to S3-based integrations (S3, CloudTrail, VpcFlow, CloudFront, S3Csv) when using SQS.
 
 ## Outputs
 

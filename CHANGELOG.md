@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.3.2
+
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 💡
+- Added `create_sqs_queue_policy` variable to allow users to preserve existing SQS queue policies when using SQS-based integrations (S3, CloudTrail, VpcFlow, CloudFront, S3Csv). Set to `false` to prevent the module from overwriting custom SQS queue policies.
+
 ## v4.3.1
 
 #### **ecs-ec2-windows**

@@ -57,3 +57,23 @@ variable "coraloigx_roles_arn_mapping" {
     "custom"         = ""
   }
 }
+
+variable "coralogix_cidr_blocks" {
+  type        = list(string)
+  description = "The CIDR blocks to allow ingress from Coralogix to the MSK cluster. If not set, defaults to the Coralogix CIDR for the selected region."
+  default     = null
+}
+
+variable "coralogix_cidr_mapping" {
+  type = map(list(string))
+  default = {
+    "eu-west-1"      = ["18.97.198.64/26"]
+    "eu-north-1"     = ["18.99.99.64/26"]
+    "ap-southeast-1" = ["18.99.41.64/26"]
+    "ap-southeast-3" = ["18.98.97.0/26"]
+    "ap-south-1"     = ["18.96.228.0/26"]
+    "us-east-2"      = ["18.97.138.64/26"]
+    "us-west-2"      = ["18.98.18.192/26"]
+    "custom"         = ["0.0.0.0/0"]
+  }
+}

@@ -311,6 +311,22 @@ module "coralogix-shipper-Sqs" {
 }
 ```
 
+### SQS with Custom SQS Policy
+```bash
+module "coralogix-shipper-sqs-custom-policy" {
+  source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
+
+  coralogix_region        = "EU1"
+  integration_type        = "S3"
+  api_key                 = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  application_name        = "s3-sqs-custom-policy"
+  subsystem_name          = "logs"
+  s3_bucket_name          = "test-bucket-name"
+  sqs_name                = "your-existing-sqs-queue"
+  create_sqs_queue_policy = false  # Preserve existing SQS queue policy
+}
+```
+
 <!-- /example -->
 
 <!-- example id="SNS-integration" -->
@@ -426,6 +442,48 @@ module "coralogix-shipper-custom-policy" {
       },
       "Action": "SNS:Publish",
       "Resource": "arn:aws:sns:REGION:ACCOUNT-ID:TOPIC-NAME",
+      "Condition": {
+        "ArnLike": {
+          "aws:SourceArn": "arn:aws:s3:::YOUR-S3-BUCKET-NAME"
+        }
+      }
+    }
+  ]
+}
+```
+
+## Custom SQS Queue Policy Management
+
+When using SQS-based integrations (S3, CloudTrail), the module creates a restrictive SQS queue policy by default. If you want to preserve your existing SQS queue policies, set `create_sqs_queue_policy = false`:
+
+```bash
+module "coralogix-shipper-custom-sqs-policy" {
+  source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
+
+  coralogix_region        = "EU1"
+  integration_type        = "S3"
+  api_key                 = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXX"
+  application_name        = "custom-sqs-policy-example"
+  subsystem_name          = "logs"
+  s3_bucket_name          = "test-bucket-name"
+  sqs_name                = "your-existing-sqs-queue"
+  create_sqs_queue_policy = false  # Preserve existing SQS queue policy
+}
+```
+
+**Important**: When using `create_sqs_queue_policy = false`, ensure your SQS queue policy includes the required S3 service permission:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "s3.amazonaws.com"
+      },
+      "Action": "SQS:SendMessage",
+      "Resource": "arn:aws:sqs:REGION:ACCOUNT-ID:QUEUE-NAME",
       "Condition": {
         "ArnLike": {
           "aws:SourceArn": "arn:aws:s3:::YOUR-S3-BUCKET-NAME"
