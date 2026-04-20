@@ -34,6 +34,7 @@ module "s3-sqs-external-policy" {
   sqs_name                = "github-action-sqs-testing"
   integration_type        = "S3"
   create_sqs_queue_policy = false
+  s3_notification         = false
 }
 module "cloudwatch" {
   source = "../../modules/coralogix-aws-shipper"
