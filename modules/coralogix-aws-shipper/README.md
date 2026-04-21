@@ -347,6 +347,7 @@ To enable CloudWatch metrics streaming via Firehose (PrivateLink), you must prov
 | metrics_file_cache_enabled | When `telemetry_mode = "metrics"`, cache discovered resources on the Lambda filesystem between invocations to reduce `GetResources` calls. | `bool` | `true` | |
 | metrics_file_cache_path | Directory for the metrics resource-tag cache files (typically Lambda ephemeral storage). | `string` | `/tmp` | |
 | metrics_file_cache_expiration | Maximum age of cache files before refresh. Go-style duration (e.g. `1h`, `30m`). | `string` | `1h` | |
+| tracing_mode | X-Ray tracing mode for the Lambda function. Valid values: `PassThrough`, `Active`. | `string` | `null` | |
 
 When `batch_metrics = true`, the module sets the Lambda environment variables `BATCH_METRICS=1` and `METRICS_BATCH_MAX_SIZE` to the provided value so that the shipper batches each Firehose ingested payload into a single export request.
 

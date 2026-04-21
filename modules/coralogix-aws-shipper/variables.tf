@@ -512,7 +512,11 @@ variable "metrics_file_cache_expiration" {
 }
 
 variable "tracing_mode" {
-  description = "X-Ray tracing mode for the Lambda function. Valid values: PassThrough, Active."
+  description = "X-Ray tracing mode for the Lambda function. Valid values: PassThrough, Active. Defaults to null (no explicit tracing config, AWS default applies)."
   type        = string
-  default     = "PassThrough"
+  default     = null
+  validation {
+    condition     = var.tracing_mode == null || contains(["PassThrough", "Active"], var.tracing_mode)
+    error_message = "Valid values for tracing_mode are: [PassThrough, Active]."
+  }
 }
