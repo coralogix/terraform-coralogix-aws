@@ -275,6 +275,7 @@ module "lambda" {
   destination_on_failure         = var.notification_email != null ? aws_sns_topic.this[each.key].arn : null
   vpc_subnet_ids                 = var.subnet_ids
   vpc_security_group_ids         = var.security_group_ids
+  tracing_mode                   = var.tracing_mode
   dead_letter_target_arn         = var.enable_dlq ? aws_sqs_queue.DLQ[0].arn : null
   environment_variables = {
     CORALOGIX_ENDPOINT             = var.custom_domain != "" ? "https://ingress.${var.custom_domain}" : var.subnet_ids == null ? "https://ingress.${lookup(module.locals[each.key].coralogix_domains, var.coralogix_region, "EU1")}" : "https://ingress.private.${lookup(module.locals[each.key].coralogix_domains, var.coralogix_region, "EU1")}"

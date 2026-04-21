@@ -510,3 +510,9 @@ variable "metrics_file_cache_expiration" {
   type        = string
   default     = "1h"
 }
+
+variable "tracing_mode" {
+  description = "X-Ray tracing mode for the Lambda function. Valid values: PassThrough, Active."
+  type        = string
+  default     = "PassThrough"
+}
