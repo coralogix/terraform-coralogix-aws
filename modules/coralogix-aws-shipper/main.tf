@@ -198,6 +198,15 @@ resource "aws_iam_policy" "lambda_policy" {
         }
       ] : [],
 
+      # X-Ray tracing permissions (required when Active tracing is enabled)
+      var.tracing_mode == "Active" ? [
+        {
+          Effect   = "Allow"
+          Action   = ["xray:PutTraceSegments", "xray:PutTelemetryRecords", "xray:GetSamplingRules", "xray:GetSamplingTargets"]
+          Resource = ["*"]
+        }
+      ] : [],
+
       # Metrics stream tag enrichment (Resource Groups Tagging API + service reads used by YACE-style associator)
       var.telemetry_mode == "metrics" && var.metrics_tag_enrichment_enabled ? [
         {
