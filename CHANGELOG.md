@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.3.3
+
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 💡
+- Added `tracing_mode` variable to configure AWS X-Ray tracing on the Lambda function (`PassThrough` or `Active`). Defaults to `null` (no change for existing deployments).
+
 ## v4.3.2
 
 #### **coralogix-aws-shipper**
