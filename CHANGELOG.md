@@ -1,6 +1,6 @@
 # Changelog
 
-## v4.3.3
+## v4.4.0
 
 #### **coralogix-aws-shipper**
 ### 💡 Enhancements 💡
