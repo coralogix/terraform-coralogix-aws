@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.3.4
+
+#### **coralogix-aws-shipper**
+### 💡 bug fix 💡
+- Fix bug with new variable `tracing_mode` condition 
+
 ## v4.3.3
 
 #### **coralogix-aws-shipper**
