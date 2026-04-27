@@ -516,7 +516,7 @@ variable "tracing_mode" {
   type        = string
   default     = null
   validation {
-    condition     = var.tracing_mode == null || contains(["PassThrough", "Active"], var.tracing_mode)
+    condition     = var.tracing_mode == null ? true : contains(["PassThrough", "Active"], var.tracing_mode)
     error_message = "Valid values for tracing_mode are: [PassThrough, Active]."
   }
 }
