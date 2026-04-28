@@ -8,6 +8,8 @@ on:
     paths:
       - 'examples/coralogix-aws-shipper/README.md'
       - 'modules/coralogix-aws-shipper/README.md'
+      - 'modules/firehose-logs/README.md'
+      - 'modules/firehose-metrics/README.md'
 
 jobs:
   trigger_action:
