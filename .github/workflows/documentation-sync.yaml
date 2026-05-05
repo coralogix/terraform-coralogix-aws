@@ -10,6 +10,8 @@ on:
       - 'modules/coralogix-aws-shipper/README.md'
       - 'modules/firehose-logs/README.md'
       - 'modules/firehose-metrics/README.md'
+      - 'modules/eventbridge/README.md'
+      - 'modules/ecs-ec2/README.md'
 
 jobs:
   trigger_action:
