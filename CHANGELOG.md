@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.3.5
+
+#### **firehose-metrics**
+### 💡 bug fix 💡
+- Fix lambda processor `NoSuchKey` error when using `custom_s3_bucket` (e.g. GovCloud deployments). The local-exec was uploading the zip with key `bootstrap.zip` while the Lambda resource expected `firehose-metrics-transformer.zip`.
+
 ## v4.3.4
 
 #### **coralogix-aws-shipper**

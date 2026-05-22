@@ -60,12 +60,12 @@ resource "null_resource" "s3_bucket_copy" {
 
   provisioner "local-exec" {
     command = <<-EOF
-      curl -o bootstrap.zip https://coralogix-serverless-repo-eu-west-1.s3.eu-west-1.amazonaws.com/firehose-metrics-transformer.zip
-      aws s3 cp --region ${data.aws_region.current_region.id} ./bootstrap.zip s3://${var.custom_s3_bucket}
-      if [ -f bootstrap.zip ]; then
-        rm ./bootstrap.zip
+      curl -o firehose-metrics-transformer.zip https://coralogix-serverless-repo-eu-west-1.s3.eu-west-1.amazonaws.com/firehose-metrics-transformer.zip
+      aws s3 cp --region ${data.aws_region.current_region.id} ./firehose-metrics-transformer.zip s3://${var.custom_s3_bucket}/firehose-metrics-transformer.zip
+      if [ -f firehose-metrics-transformer.zip ]; then
+        rm ./firehose-metrics-transformer.zip
       else
-        echo "Couldn't find bootstrap.zip, skip deleting"
+        echo "Couldn't find firehose-metrics-transformer.zip, skip deleting"
       fi
 
     EOF
