@@ -314,6 +314,8 @@ module "lambda" {
     FILE_CACHE_EXPIRATION          = var.telemetry_mode == "metrics" ? var.metrics_file_cache_expiration : null
     STARLARK_SCRIPT                = var.starlark_script != "" ? var.starlark_script : null
     LOG_STREAM_FILTER              = var.log_stream_filter != "" ? var.log_stream_filter : null
+    ENABLE_AWS_FIPS                = var.govcloud_deployment ? (var.enable_aws_fips == null ? "true" : tostring(var.enable_aws_fips)) : null
+    AWS_USE_FIPS_ENDPOINT          = var.govcloud_deployment ? (var.aws_use_fips_endpoint == null ? "true" : tostring(var.aws_use_fips_endpoint)) : null
   }
   s3_existing_package = {
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.id}" : var.custom_s3_bucket

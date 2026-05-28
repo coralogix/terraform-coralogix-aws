@@ -182,12 +182,33 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 | <a name="input_notification_email"></a> [notification_email](#input\_notification\_email) | A failure notification to be sent to the email address. | `string` |  n/a | no |
 | <a name="input_custom_s3_bucket"></a> [custom\_s3\_bucket](#input\_custom\_s3\_bucket) | The name of an existing S3 bucket in your region, in which the Lambda zip code will be uploaded to. | `string` | n/a | no |
 | <a name="input_govcloud_deployment"></a> [govcloud\_deployment](#input\_govcloud\_deployment) | Enable if you deploy the integration in govcloud | `bool` | false | no |
+| <a name="input_enable_aws_fips"></a> [enable\_aws\_fips](#input\_enable\_aws\_fips) | Controls the `ENABLE_AWS_FIPS` environment variable on the shipper Lambda, switching the AWS SDK HTTP client to the AWS-LC FIPS-validated TLS provider. When `govcloud_deployment = true`, this defaults to `true` (FIPS 140-3 enabled). Set to `false` to explicitly disable. Has no effect when `govcloud_deployment = false`. | `bool` | `null` | no |
+| <a name="input_aws_use_fips_endpoint"></a> [aws\_use\_fips\_endpoint](#input\_aws\_use\_fips\_endpoint) | Controls the `AWS_USE_FIPS_ENDPOINT` environment variable on the shipper Lambda, routing AWS SDK calls to FIPS service endpoints. When `govcloud_deployment = true`, this defaults to `true`. Set to `false` to explicitly disable. Has no effect when `govcloud_deployment = false`. | `bool` | `null` | no |
 
 **Custom S3 bucket**
 
 Use the `custom_s3_bucket` variable only when deploying the integration in an AWS region where CX does not provide a public bucket (e.g., GovCloud). When using this variable, you must create an S3 bucket in the desired region for the integration. After that, pass the bucket name as `custom_s3_bucket`. The module will download the integration file to your local workspace, upload it to the custom_s3_bucket, and then remove the file from your local workspace once the process is complete.
 
-When using this variable you will need to create an S3 bucket in the region where you want to run the integration. Then, pass this bucket name as `custom_s3_bucket`. The module will download the integration file to your local workspace, and then upload these files to the `custom_s3_bucket`. At the end, remove the file from your local workspace once the process is complete. 
+When using this variable you will need to create an S3 bucket in the region where you want to run the integration. Then, pass this bucket name as `custom_s3_bucket`. The module will download the integration file to your local workspace, and then upload these files to the `custom_s3_bucket`. At the end, remove the file from your local workspace once the process is complete.
+
+**AWS GovCloud and FIPS**
+
+A single shipper artifact supports both commercial and GovCloud deployments; FIPS is toggled at runtime via Lambda environment variables. When `govcloud_deployment = true`, the module sets both `ENABLE_AWS_FIPS=true` and `AWS_USE_FIPS_ENDPOINT=true` on the Lambda by default, which routes all AWS SDK calls to FIPS service endpoints and uses the AWS-LC FIPS-validated TLS provider.
+
+If you need to disable FIPS in a GovCloud deployment, set the corresponding variable explicitly:
+
+```hcl
+module "coralogix-shipper" {
+  source = "coralogix/aws/coralogix//modules/coralogix-aws-shipper"
+
+  govcloud_deployment   = true
+  enable_aws_fips       = false  # disable AWS-LC FIPS TLS provider
+  aws_use_fips_endpoint = false  # disable FIPS service endpoints
+  # ...
+}
+```
+
+When `govcloud_deployment = false`, these variables are ignored and the env vars are not set on the Lambda.
 
 ### Lambda configuration (optional)
 

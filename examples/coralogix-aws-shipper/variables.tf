@@ -408,6 +408,18 @@ variable "govcloud_deployment" {
   default     = false
 }
 
+variable "enable_aws_fips" {
+  description = "Controls the ENABLE_AWS_FIPS environment variable on the shipper Lambda, which switches the AWS SDK HTTP client to the AWS-LC FIPS-validated TLS provider. When govcloud_deployment is true, this defaults to true (FIPS 140-3 enabled). Set to false to explicitly disable. Has no effect when govcloud_deployment is false."
+  type        = bool
+  default     = null
+}
+
+variable "aws_use_fips_endpoint" {
+  description = "Controls the AWS_USE_FIPS_ENDPOINT environment variable on the shipper Lambda, routing AWS SDK calls to FIPS service endpoints. When govcloud_deployment is true, this defaults to true. Set to false to explicitly disable. Has no effect when govcloud_deployment is false."
+  type        = bool
+  default     = null
+}
+
 variable "telemetry_mode" {
   description = "The telemetry mode for the shipper, i.e metrics or logs"
   type        = string

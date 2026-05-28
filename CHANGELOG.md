@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.3.6
+
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 💡
+- Added `enable_aws_fips` and `aws_use_fips_endpoint` variables to control the shipper Lambda's FIPS environment variables (`ENABLE_AWS_FIPS`, `AWS_USE_FIPS_ENDPOINT`). When `govcloud_deployment = true`, both default to `true` (FIPS 140-3 enabled) and can be explicitly set to `false` to disable. No effect when `govcloud_deployment = false`.
+
 ## v4.3.5
 
 #### **firehose-metrics**
