@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v4.5.0
 
 #### **ecs-ec2**
 ### 💡 Enhancements 💡
