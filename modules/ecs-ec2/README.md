@@ -37,14 +37,14 @@ module "ecs-ec2" {
 }
 ```
 
-For supervised mode with embedded configs:
+For Supervisor mode with embedded configs:
 
 ```terraform
 module "ecs-ec2" {
   source = "coralogix/aws/coralogix//modules/ecs-ec2"
 
   ecs_cluster_name     = "my-cluster"
-  image_mode          = "supervised"
+  supervisor_enabled = true
   coralogix_region     = "EU1"
   api_key              = "your-coralogix-api-key"
 }
@@ -104,7 +104,7 @@ You can control health checks using:
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | ecs_cluster_name | Name of the AWS ECS Cluster | `string` | n/a | yes |
-| image_mode | Image mode: `collector` or `supervised` | `string` | `"collector"` | no |
+| supervisor_enabled | Run the Collector through the Supervisor | `bool` | `false` | no |
 | image_version | Standard Coralogix Otel Collector image version/tag used in collector mode | `string` | `null` | yes* |
 | supervised_image_repository | Supervised Coralogix Otel Collector image repository | `string` | `"cgx.jfrog.io/coralogix-docker-images/coralogix-otel-supervised-cdot"` | no |
 | supervised_image_version | Supervised Coralogix Otel Collector image version/tag | `string` | `"v0.10.0"` | no |

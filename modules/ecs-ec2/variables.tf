@@ -13,15 +13,10 @@ variable "config_source" {
   }
 }
 
-variable "image_mode" {
-  description = "Image mode. Collector mode uses the standard CDOT image and requires an S3 collector config. Supervised mode uses the supervised CDOT image and embedded configs unless S3 paths are provided."
-  type        = string
-  default     = "collector"
-
-  validation {
-    condition     = contains(["collector", "supervised"], var.image_mode)
-    error_message = "image_mode must be either 'collector' or 'supervised'."
-  }
+variable "supervisor_enabled" {
+  description = "Whether to run the Collector through the Supervisor. When enabled, the supervised CDOT image and embedded configs are used unless S3 paths are provided."
+  type        = bool
+  default     = false
 }
 
 variable "s3_config_bucket" {
@@ -30,7 +25,7 @@ variable "s3_config_bucket" {
   default     = null
 
   validation {
-    condition     = var.task_definition_arn != null || var.image_mode == "supervised" || try(trimspace(var.s3_config_bucket) != "", false)
+    condition     = var.task_definition_arn != null || var.supervisor_enabled || try(trimspace(var.s3_config_bucket) != "", false)
     error_message = "s3_config_bucket is required in collector mode when the module creates the task definition."
   }
 }
@@ -41,7 +36,7 @@ variable "s3_config_key" {
   default     = null
 
   validation {
-    condition     = var.task_definition_arn != null || var.image_mode == "supervised" || try(trimspace(var.s3_config_key) != "", false)
+    condition     = var.task_definition_arn != null || var.supervisor_enabled || try(trimspace(var.s3_config_key) != "", false)
     error_message = "s3_config_key is required in collector mode when the module creates the task definition."
   }
 }
@@ -58,7 +53,7 @@ variable "image_version" {
   default     = null
 
   validation {
-    condition     = var.task_definition_arn != null || var.image_mode == "supervised" || try(trimspace(var.image_version) != "", false)
+    condition     = var.task_definition_arn != null || var.supervisor_enabled || try(trimspace(var.image_version) != "", false)
     error_message = "image_version is required in collector mode when the module creates the task definition."
   }
 }

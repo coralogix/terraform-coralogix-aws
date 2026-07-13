@@ -22,10 +22,10 @@ variable "image_version" {
   default     = "v0.5.10"
 }
 
-variable "image_mode" {
-  description = "Collector image mode to test"
-  type        = string
-  default     = "supervised"
+variable "supervisor_enabled" {
+  description = "Whether to test Supervisor mode"
+  type        = bool
+  default     = true
 }
 
 variable "supervised_image_repository" {

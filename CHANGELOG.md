@@ -4,7 +4,7 @@
 
 #### **ecs-ec2**
 ### 💡 Enhancements 💡
-- Added Supervisor mode to `ecs-ec2` with supervised CDOT `v0.10.0`, embedded NOP bootstrap configs, and optional S3 overrides.
+- Added Supervisor mode to `ecs-ec2`, controlled by `supervisor_enabled`, with supervised CDOT `v0.10.0`, embedded NOP bootstrap configs, and optional S3 overrides.
 - S3 task roles are now created only when an S3 config is selected. Runtime S3 access includes object reads and bucket listing; the execution role no longer receives runtime S3 permissions.
 
 ## v4.4.0

@@ -16,7 +16,7 @@ module "ecs-ec2" {
   ecs_cluster_name            = var.ecs_cluster_name
   image                       = var.image
   image_version               = var.image_version
-  image_mode                  = var.image_mode
+  supervisor_enabled          = var.supervisor_enabled
   supervised_image_repository = var.supervised_image_repository
   supervised_image_version    = var.supervised_image_version
   memory                      = var.memory

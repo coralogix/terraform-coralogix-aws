@@ -22,6 +22,7 @@ INLINE_CONTAINERS=$(jq -r '.values.container_definitions' <<< "$INLINE_TASK")
 jq -e '
   any(.[];
     .name == "config-loader"
+    and any(.environment[]; .name == "SUPERVISOR_ENABLED" and .value == "true")
     and any(.environment[];
       .name == "COLLECTOR_CONFIG"
       and (.value | contains("receivers:\n  nop:"))

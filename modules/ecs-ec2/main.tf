@@ -13,7 +13,7 @@ locals {
   coralogix_region_domain_map = module.locals_variables.coralogix_domains
   coralogix_domain            = var.task_definition_arn == null ? coalesce(var.custom_domain, local.coralogix_region_domain_map[var.coralogix_region]) : null
 
-  use_supervised_image     = var.image_mode == "supervised"
+  use_supervised_image     = var.supervisor_enabled
   s3_config_bucket         = var.s3_config_bucket == null ? "" : var.s3_config_bucket
   s3_config_key            = var.s3_config_key == null ? "" : var.s3_config_key
   s3_supervisor_config_key = var.s3_supervisor_config_key == null ? "" : var.s3_supervisor_config_key
@@ -87,14 +87,14 @@ locals {
     set -e
     if [ -n "$S3_CONFIG_BUCKET" ] && [ -n "$S3_CONFIG_KEY" ]; then
       aws s3 cp "s3://$S3_CONFIG_BUCKET/$S3_CONFIG_KEY" /otel-config/collector-config.yaml
-    elif [ "$IMAGE_MODE" = "supervised" ]; then
+    elif [ "$SUPERVISOR_ENABLED" = "true" ]; then
       printf '%s\n' "$COLLECTOR_CONFIG" > /otel-config/collector-config.yaml
     else
       echo "s3_config_bucket and s3_config_key are required in collector mode" >&2
       exit 1
     fi
 
-    if [ "$IMAGE_MODE" = "supervised" ]; then
+    if [ "$SUPERVISOR_ENABLED" = "true" ]; then
       if [ -n "$S3_CONFIG_BUCKET" ] && [ -n "$S3_SUPERVISOR_CONFIG_KEY" ]; then
         aws s3 cp "s3://$S3_CONFIG_BUCKET/$S3_SUPERVISOR_CONFIG_KEY" /otel-config/supervisor.yaml
       else
@@ -277,8 +277,8 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
       environment = concat(
         [
           {
-            name  = "IMAGE_MODE"
-            value = var.image_mode
+            name  = "SUPERVISOR_ENABLED"
+            value = tostring(var.supervisor_enabled)
           },
           {
             name  = "S3_CONFIG_BUCKET"
