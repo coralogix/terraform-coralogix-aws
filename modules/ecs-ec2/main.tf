@@ -17,9 +17,6 @@ locals {
   s3_config_bucket         = var.s3_config_bucket == null ? "" : var.s3_config_bucket
   s3_config_key            = var.s3_config_key == null ? "" : var.s3_config_key
   s3_supervisor_config_key = var.s3_supervisor_config_key == null ? "" : var.s3_supervisor_config_key
-  use_s3_collector_config  = local.s3_config_bucket != "" && local.s3_config_key != ""
-  use_s3_supervisor_config = local.use_supervised_image && local.s3_config_bucket != "" && local.s3_supervisor_config_key != ""
-  use_any_s3_config        = local.use_s3_collector_config || local.use_s3_supervisor_config
   execution_role_arn       = var.task_execution_role_arn != null ? var.task_execution_role_arn : try(aws_iam_role.otel_task_execution_role_s3[0].arn, null)
   task_role_arn            = var.task_role_arn != null ? var.task_role_arn : try(aws_iam_role.otel_task_role_s3[0].arn, null)
 
@@ -192,7 +189,7 @@ resource "aws_iam_role_policy" "otel_task_execution_role_secrets" {
 
 # IAM Role for task runtime S3 access (created when module creates task definition and no custom task role provided)
 resource "aws_iam_role" "otel_task_role_s3" {
-  count = var.task_definition_arn == null && var.task_role_arn == null && local.use_any_s3_config ? 1 : 0
+  count = var.task_definition_arn == null && var.task_role_arn == null ? 1 : 0
   name  = "${local.name}-${random_string.id.result}-task-role-s3"
 
   assume_role_policy = jsonencode({
@@ -212,7 +209,7 @@ resource "aws_iam_role" "otel_task_role_s3" {
 }
 
 resource "aws_iam_role_policy" "otel_task_role_s3_s3_policy" {
-  count = var.task_definition_arn == null && var.task_role_arn == null && local.use_any_s3_config ? 1 : 0
+  count = var.task_definition_arn == null && var.task_role_arn == null ? 1 : 0
   name  = "S3ReadAccess"
   role  = aws_iam_role.otel_task_role_s3[0].id
 

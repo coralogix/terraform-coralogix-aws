@@ -46,7 +46,7 @@ jq -e '
   [.resource_changes[]
     | select(.address | contains("otel_task_role_s3"))
     | select(.change.actions | index("create"))]
-  | length == 0
+  | length == 2
 ' "$INLINE_JSON" >/dev/null
 
 terraform plan \

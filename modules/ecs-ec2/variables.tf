@@ -161,7 +161,7 @@ variable "task_execution_role_arn" {
 }
 
 variable "task_role_arn" {
-  description = "ARN of the task role that the containers can assume. When an S3 config is selected and this is not provided, the module creates a role with S3 read permissions. In service-only mode, this must be null."
+  description = "ARN of the task role that the containers can assume. When this is not provided, the module creates a role with S3 read permissions. In service-only mode, this must be null."
   type        = string
   default     = null
 
