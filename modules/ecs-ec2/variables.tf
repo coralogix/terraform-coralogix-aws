@@ -4,7 +4,7 @@ variable "ecs_cluster_name" {
 }
 
 variable "config_source" {
-  description = "Reserved for UI compatibility. Only 's3' is supported. Omit when using the module directly."
+  description = "Reserved for UI compatibility. Keep this set to 's3'. Supervised mode uses embedded configs when S3 paths are omitted."
   type        = string
   default     = "s3"
   validation {
@@ -13,43 +13,82 @@ variable "config_source" {
   }
 }
 
+variable "image_mode" {
+  description = "Image mode. Collector mode uses the standard CDOT image and requires an S3 collector config. Supervised mode uses the supervised CDOT image and embedded configs unless S3 paths are provided."
+  type        = string
+  default     = "collector"
+
+  validation {
+    condition     = contains(["collector", "supervised"], var.image_mode)
+    error_message = "image_mode must be either 'collector' or 'supervised'."
+  }
+}
+
 variable "s3_config_bucket" {
-  description = "S3 bucket name containing the OpenTelemetry configuration file. Required when the module creates the task definition (task_definition_arn is null). Ignored in service-only mode (task_definition_arn set)."
+  description = "S3 bucket containing collector and optional Supervisor configurations. Required in collector mode. In supervised mode, omit it to use embedded configs. Ignored in service-only mode."
   type        = string
   default     = null
 
   validation {
-    condition     = var.task_definition_arn != null || var.s3_config_bucket != null
-    error_message = "s3_config_bucket is required when task_definition_arn is null (module creates the task definition)."
+    condition     = var.task_definition_arn != null || var.image_mode == "supervised" || try(trimspace(var.s3_config_bucket) != "", false)
+    error_message = "s3_config_bucket is required in collector mode when the module creates the task definition."
   }
 }
 
 variable "s3_config_key" {
-  description = "S3 object key (file path) for the configuration file. Example: configs/otel-config.yaml. Required when the module creates the task definition. Ignored in service-only mode."
+  description = "S3 object key for the collector configuration. Required in collector mode. In supervised mode, omit it to use the embedded collector config. Ignored in service-only mode."
   type        = string
   default     = null
 
   validation {
-    condition     = var.task_definition_arn != null || var.s3_config_key != null
-    error_message = "s3_config_key is required when task_definition_arn is null (module creates the task definition)."
+    condition     = var.task_definition_arn != null || var.image_mode == "supervised" || try(trimspace(var.s3_config_key) != "", false)
+    error_message = "s3_config_key is required in collector mode when the module creates the task definition."
   }
 }
 
+variable "s3_supervisor_config_key" {
+  description = "Optional S3 object key for the Supervisor configuration. Used only in supervised mode when s3_config_bucket is also set. When omitted, the embedded Supervisor config is used."
+  type        = string
+  default     = null
+}
+
 variable "image_version" {
-  description = "The Coralogix Open Telemetry Distribution Image Version/Tag. Required when module creates the task definition. Ignored in service-only mode."
+  description = "The standard CDOT image version used in collector mode. Required in collector mode when the module creates the task definition."
   type        = string
   default     = null
 
   validation {
-    condition     = var.task_definition_arn != null || var.image_version != null
-    error_message = "image_version is required when task_definition_arn is null (module creates the task definition)."
+    condition     = var.task_definition_arn != null || var.image_mode == "supervised" || try(trimspace(var.image_version) != "", false)
+    error_message = "image_version is required in collector mode when the module creates the task definition."
   }
 }
 
 variable "image" {
-  description = "The OpenTelemetry Collector Image to use. Should accept default unless advised by Coralogix support."
+  description = "The OpenTelemetry Collector image used in collector mode. Keep the default unless advised by Coralogix support."
   type        = string
   default     = "coralogixrepo/coralogix-otel-collector"
+}
+
+variable "supervised_image_repository" {
+  description = "The supervised CDOT image repository used in supervised mode."
+  type        = string
+  default     = "cgx.jfrog.io/coralogix-docker-images/coralogix-otel-supervised-cdot"
+
+  validation {
+    condition     = trimspace(var.supervised_image_repository) != ""
+    error_message = "supervised_image_repository must not be empty."
+  }
+}
+
+variable "supervised_image_version" {
+  description = "The supervised CDOT image version used in supervised mode."
+  type        = string
+  default     = "v0.10.0"
+
+  validation {
+    condition     = trimspace(var.supervised_image_version) != ""
+    error_message = "supervised_image_version must not be empty."
+  }
 }
 
 variable "memory" {
@@ -116,7 +155,7 @@ variable "api_key_secret_kms_key_arn" {
 }
 
 variable "task_execution_role_arn" {
-  description = "ARN of the task execution role. When not provided and the module creates the task definition, an auto-created role with S3 and optional Secrets Manager access is used. In service-only mode (task_definition_arn set), this must be explicitly null—roles live on the task definition, not the service."
+  description = "ARN of the task execution role. When not provided and the module creates the task definition, an auto-created role with the standard ECS execution policy and optional Secrets Manager access is used. In service-only mode, this must be null."
   type        = string
   default     = null
 
@@ -127,7 +166,7 @@ variable "task_execution_role_arn" {
 }
 
 variable "task_role_arn" {
-  description = "ARN of the task role (IAM role) that the container can assume. When not provided and the module creates the task definition, an auto-created role with S3 read permissions is used. In service-only mode (task_definition_arn set), this must be explicitly null—roles live on the task definition, not the service."
+  description = "ARN of the task role that the containers can assume. When an S3 config is selected and this is not provided, the module creates a role with S3 read permissions. In service-only mode, this must be null."
   type        = string
   default     = null
 

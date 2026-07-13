@@ -22,6 +22,24 @@ variable "image_version" {
   default     = "v0.5.10"
 }
 
+variable "image_mode" {
+  description = "Collector image mode to test"
+  type        = string
+  default     = "supervised"
+}
+
+variable "supervised_image_repository" {
+  description = "Repository for the supervised CDOT image"
+  type        = string
+  default     = "cgx.jfrog.io/coralogix-docker-images/coralogix-otel-supervised-cdot"
+}
+
+variable "supervised_image_version" {
+  description = "Version tag for the supervised CDOT image"
+  type        = string
+  default     = "v0.10.0"
+}
+
 variable "coralogix_region" {
   description = "Coralogix region for data ingestion"
   type        = string
@@ -54,15 +72,21 @@ variable "api_key" {
 }
 
 variable "s3_config_bucket" {
-  description = "S3 bucket name containing the configuration file. Required when task_definition_arn is null."
+  description = "S3 bucket containing optional collector and Supervisor config overrides"
   type        = string
-  default     = "placeholder-bucket"
+  default     = null
 }
 
 variable "s3_config_key" {
-  description = "S3 object key (file path) for the configuration file. Required when task_definition_arn is null."
+  description = "Optional S3 object key for the collector config"
   type        = string
-  default     = "configs/otel-config.yaml"
+  default     = null
+}
+
+variable "s3_supervisor_config_key" {
+  description = "Optional S3 object key for the Supervisor config"
+  type        = string
+  default     = null
 }
 
 variable "task_definition_arn" {

@@ -46,7 +46,7 @@ module "otel_ecs_ec2_coralogix" {
 
 ### Using Secrets Manager for API Key
 
-The module auto-creates an execution role with S3 and Secrets Manager access when `task_execution_role_arn` is not provided:
+The module auto-creates an execution role with the standard ECS execution policy and Secrets Manager access when `task_execution_role_arn` is not provided. Runtime S3 access is granted through the task role:
 
 ```hcl
 module "otel_ecs_ec2_coralogix" {
@@ -101,7 +101,7 @@ module "otel_ecs_ec2_coralogix" {
 }
 ```
 
-**Note**: When providing a custom `task_role_arn`, ensure it has at minimum S3 read permissions (`s3:GetObject`, `s3:GetObjectVersion`) for the configuration bucket, as containers need to access S3 at runtime to read their configuration files.
+**Note**: When providing a custom `task_role_arn`, ensure it has `s3:GetObject`, `s3:GetObjectVersion`, and `s3:ListBucket` permissions for the configuration bucket, as the config-loader container accesses S3 at runtime.
 
 ## IAM Role Management
 
@@ -109,13 +109,13 @@ The module separates execution roles and task roles for better security followin
 
 ### Execution Role
 Used by ECS for infrastructure operations (pulling images, retrieving secrets, etc.):
-- **Auto-created Role**: Created with S3 read permissions for configuration files (if no custom role provided)
+- **Auto-created Role**: Created with the standard ECS task execution policy
 - **Custom Role**: Users can provide their own execution role via `task_execution_role_arn`
-- **Secrets Manager**: `task_execution_role_arn` must be provided when `use_api_key_secret` is true
+- **Secrets Manager**: The module adds secret access to the auto-created role when `use_api_key_secret` is true
 
 ### Task Role
 Used by the running container at runtime for AWS API access:
-- **Auto-created Role**: A minimal task role with S3 read-only permissions is automatically created if no custom `task_role_arn` is provided
+- **Auto-created Role**: A minimal task role with S3 read permissions is created when an S3 config is selected and no custom `task_role_arn` is provided
 - **Custom Role**: Users can provide their own task role via `task_role_arn` for additional AWS service access if needed
 
 ## Quick Start
