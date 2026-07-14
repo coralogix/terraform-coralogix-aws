@@ -1,5 +1,16 @@
 #!/usr/bin/env bash
+# Verifies that Supervisor mode embeds its default configurations and prefers S3 overrides.
+# Contract: Supervisor mode uses the supervised image, a NOP Collector bootstrap config,
+# and the embedded Supervisor config unless matching S3 paths are configured.
+#
+# Usage: ./verify-supervised-mode.sh
+#
+# Requires: terraform, jq
+
 set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
 
 TMP_DIR=$(mktemp -d)
 trap 'rm -rf "$TMP_DIR"' EXIT
@@ -9,6 +20,12 @@ INLINE_JSON="$TMP_DIR/inline.json"
 S3_PLAN="$TMP_DIR/s3.tfplan"
 S3_JSON="$TMP_DIR/s3.json"
 
+fail() {
+  echo "[FAIL] $1" >&2
+  exit 1
+}
+
+echo "[INFO] Verifying Supervisor mode with embedded configurations..."
 terraform plan -input=false -lock=false -var='health_check_enabled=true' -out="$INLINE_PLAN" >/dev/null
 terraform show -json "$INLINE_PLAN" > "$INLINE_JSON"
 
@@ -19,7 +36,7 @@ INLINE_TASK=$(jq -c --arg address "$TASK_ADDRESS" '
 ' "$INLINE_JSON")
 INLINE_CONTAINERS=$(jq -r '.values.container_definitions' <<< "$INLINE_TASK")
 
-jq -e '
+if ! jq -e '
   any(.[];
     .name == "config-loader"
     and any(.environment[]; .name == "SUPERVISOR_ENABLED" and .value == "true")
@@ -40,15 +57,20 @@ jq -e '
     and .healthCheck.command == ["CMD", "/healthcheck"]
     and any(.dependsOn[]; .containerName == "config-loader" and .condition == "SUCCESS")
   )
-' <<< "$INLINE_CONTAINERS" >/dev/null
+' <<< "$INLINE_CONTAINERS" >/dev/null; then
+  fail "Embedded Supervisor mode does not contain the expected NOP config, supervised image, or health check."
+fi
 
-jq -e '
+if ! jq -e '
   [.resource_changes[]
     | select(.address | contains("otel_task_role_s3"))
     | select(.change.actions | index("create"))]
   | length == 2
-' "$INLINE_JSON" >/dev/null
+' "$INLINE_JSON" >/dev/null; then
+  fail "Embedded Supervisor mode does not create the expected task role and S3 policy."
+fi
 
+echo "[INFO] Verifying Supervisor mode with S3 configuration overrides..."
 terraform plan \
   -input=false \
   -lock=false \
@@ -58,12 +80,14 @@ terraform plan \
   -out="$S3_PLAN" >/dev/null
 terraform show -json "$S3_PLAN" > "$S3_JSON"
 
-jq -e '
+if ! jq -e '
   any(.resource_changes[];
     .address == "module.ecs-ec2.aws_iam_role.otel_task_role_s3[0]"
     and (.change.actions | index("create"))
   )
-' "$S3_JSON" >/dev/null
+' "$S3_JSON" >/dev/null; then
+  fail "Supervisor mode with S3 overrides does not create the expected task role."
+fi
 
 S3_POLICY=$(jq -r '
   .planned_values.root_module.child_modules[].resources[]
@@ -71,7 +95,7 @@ S3_POLICY=$(jq -r '
   | .values.policy
 ' "$S3_JSON")
 
-jq -e '
+if ! jq -e '
   any(.Statement[];
     (.Action | sort) == (["s3:GetObject", "s3:GetObjectVersion"] | sort)
     and .Resource == "arn:aws:s3:::placeholder-bucket/*"
@@ -80,7 +104,9 @@ jq -e '
     .Action == ["s3:ListBucket"]
     and .Resource == "arn:aws:s3:::placeholder-bucket"
   )
-' <<< "$S3_POLICY" >/dev/null
+' <<< "$S3_POLICY" >/dev/null; then
+  fail "The task role policy does not grant the expected read access to the configured S3 bucket."
+fi
 
 S3_TASK=$(jq -c --arg address "$TASK_ADDRESS" '
   .planned_values.root_module.child_modules[].resources[]
@@ -88,7 +114,7 @@ S3_TASK=$(jq -c --arg address "$TASK_ADDRESS" '
 ' "$S3_JSON")
 S3_CONTAINERS=$(jq -r '.values.container_definitions' <<< "$S3_TASK")
 
-jq -e '
+if ! jq -e '
   any(.[];
     .name == "config-loader"
     and any(.environment[]; .name == "S3_CONFIG_BUCKET" and .value == "placeholder-bucket")
@@ -96,6 +122,8 @@ jq -e '
     and any(.environment[]; .name == "S3_SUPERVISOR_CONFIG_KEY" and .value == "configs/supervisor.yaml")
     and (.command[0] | startswith("set -e\nif [ -n \"$S3_CONFIG_BUCKET\" ]"))
   )
-' <<< "$S3_CONTAINERS" >/dev/null
+' <<< "$S3_CONTAINERS" >/dev/null; then
+  fail "The config loader does not prefer the configured S3 Collector and Supervisor paths."
+fi
 
 echo "[PASS] Supervised mode embeds configs by default and prefers configured S3 paths."
