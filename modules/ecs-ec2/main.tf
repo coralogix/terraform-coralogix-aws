@@ -99,8 +99,6 @@ locals {
       fi
     fi
   SH
-
-  collector_command = local.use_supervised_image ? "exec /opampsupervisor -config /otel-config/supervisor.yaml" : "exec /cdot --config /otel-config/collector-config.yaml"
 }
 
 module "locals_variables" {
@@ -109,6 +107,7 @@ module "locals_variables" {
   random_string    = random_string.id.result
 }
 
+data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
 # Lookup secret metadata for KMS key ID. Skipped when api_key_secret_kms_key_arn is set (avoids DescribeSecret on deploy role).
@@ -313,8 +312,7 @@ resource "aws_ecs_task_definition" "coralogix_otel_agent" {
       image      = local.use_supervised_image ? "${var.supervised_image_repository}:${var.supervised_image_version}" : "${var.image}:${coalesce(var.image_version, "v0.5.10")}"
       essential  = true
       privileged = true
-      entryPoint = ["sh", "-c"]
-      command    = [local.collector_command]
+      command    = local.use_supervised_image ? ["--config", "/otel-config/supervisor.yaml"] : ["--config", "s3://${local.s3_config_bucket}.s3.${data.aws_region.current.region}.amazonaws.com/${local.s3_config_key}"]
       dependsOn = [
         {
           containerName = "config-loader"

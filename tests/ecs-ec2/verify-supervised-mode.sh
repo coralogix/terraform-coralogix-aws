@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Verifies that Supervisor mode embeds its default configurations and prefers S3 overrides.
 # Contract: Supervisor mode uses the supervised image, a NOP Collector bootstrap config,
-# and the embedded Supervisor config unless matching S3 paths are configured.
+# and the embedded Supervisor config unless matching S3 paths are configured. Collector
+# mode keeps the custom image entrypoint and receives its configuration through arguments.
 #
 # Usage: ./verify-supervised-mode.sh
 #
@@ -19,6 +20,8 @@ INLINE_PLAN="$TMP_DIR/inline.tfplan"
 INLINE_JSON="$TMP_DIR/inline.json"
 S3_PLAN="$TMP_DIR/s3.tfplan"
 S3_JSON="$TMP_DIR/s3.json"
+COLLECTOR_PLAN="$TMP_DIR/collector.tfplan"
+COLLECTOR_JSON="$TMP_DIR/collector.json"
 
 fail() {
   echo "[FAIL] $1" >&2
@@ -39,7 +42,6 @@ INLINE_CONTAINERS=$(jq -r '.values.container_definitions' <<< "$INLINE_TASK")
 if ! jq -e '
   any(.[];
     .name == "config-loader"
-    and any(.environment[]; .name == "SUPERVISOR_ENABLED" and .value == "true")
     and any(.environment[];
       .name == "COLLECTOR_CONFIG"
       and (.value | contains("receivers:\n  nop:"))
@@ -48,13 +50,24 @@ if ! jq -e '
       and (.value | contains("metrics:"))
       and (.value | contains("logs:"))
     )
-    and any(.environment[]; .name == "SUPERVISOR_CONFIG" and (.value | contains("opamp/v1")))
+    and any(.environment[];
+      .name == "SUPERVISOR_CONFIG"
+      and (.value | contains("opamp/v1"))
+      and (.value | contains("- /otel-config/collector-config.yaml"))
+    )
+    and any(.mountPoints[]; .containerPath == "/otel-config")
   )
   and any(.[];
     .name == "coralogix-otel-agent"
     and .image == "cgx.jfrog.io/coralogix-docker-images/coralogix-otel-supervised-cdot:v0.10.0"
     and .privileged == true
+    and (has("entryPoint") | not)
+    and .command == ["--config", "/otel-config/supervisor.yaml"]
     and .healthCheck.command == ["CMD", "/healthcheck"]
+    and any(.mountPoints[];
+      .containerPath == "/otel-config"
+      and .readOnly == true
+    )
     and any(.dependsOn[]; .containerName == "config-loader" and .condition == "SUCCESS")
   )
 ' <<< "$INLINE_CONTAINERS" >/dev/null; then
@@ -120,10 +133,46 @@ if ! jq -e '
     and any(.environment[]; .name == "S3_CONFIG_BUCKET" and .value == "placeholder-bucket")
     and any(.environment[]; .name == "S3_CONFIG_KEY" and .value == "configs/collector.yaml")
     and any(.environment[]; .name == "S3_SUPERVISOR_CONFIG_KEY" and .value == "configs/supervisor.yaml")
-    and (.command[0] | startswith("set -e\nif [ -n \"$S3_CONFIG_BUCKET\" ]"))
+    and (.command[0] | contains("/otel-config/collector-config.yaml"))
+    and (.command[0] | contains("/otel-config/supervisor.yaml"))
   )
 ' <<< "$S3_CONTAINERS" >/dev/null; then
   fail "The config loader does not prefer the configured S3 Collector and Supervisor paths."
+fi
+
+echo "[INFO] Verifying collector mode keeps the image entrypoint..."
+terraform plan \
+  -input=false \
+  -lock=false \
+  -var='supervisor_enabled=false' \
+  -var='image=example.com/custom-collector' \
+  -var='image_version=latest' \
+  -var='s3_config_bucket=placeholder-bucket' \
+  -var='s3_config_key=configs/collector.yaml' \
+  -out="$COLLECTOR_PLAN" >/dev/null
+terraform show -json "$COLLECTOR_PLAN" > "$COLLECTOR_JSON"
+
+COLLECTOR_TASK=$(jq -c --arg address "$TASK_ADDRESS" '
+  .planned_values.root_module.child_modules[].resources[]
+  | select(.address == $address)
+' "$COLLECTOR_JSON")
+COLLECTOR_CONTAINERS=$(jq -r '.values.container_definitions' <<< "$COLLECTOR_TASK")
+
+if ! jq -e '
+  length == 2
+  and any(.[];
+    .name == "config-loader"
+    and any(.environment[]; .name == "SUPERVISOR_ENABLED" and .value == "false")
+  )
+  and any(.[];
+    .name == "coralogix-otel-agent"
+    and .image == "example.com/custom-collector:latest"
+    and (has("entryPoint") | not)
+    and .command == ["--config", "s3://placeholder-bucket.s3.us-east-1.amazonaws.com/configs/collector.yaml"]
+    and any(.dependsOn[]; .containerName == "config-loader" and .condition == "SUCCESS")
+  )
+' <<< "$COLLECTOR_CONTAINERS" >/dev/null; then
+  fail "Collector mode does not preserve the image entrypoint and S3 configuration argument."
 fi
 
 echo "[PASS] Supervised mode embeds configs by default and prefers configured S3 paths."
