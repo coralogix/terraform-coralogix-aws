@@ -208,10 +208,11 @@ resource "aws_iam_role" "otel_task_role_s3" {
 }
 
 resource "aws_iam_role_policy" "otel_task_role_s3_s3_policy" {
-  count = var.task_definition_arn == null && var.task_role_arn == null && !(var.supervisor_enabled &&
-var.s3_config_bucket == null) ? 1 : 0
-  name  = "S3ReadAccess"
-  role  = aws_iam_role.otel_task_role_s3[0].id
+  count = var.task_definition_arn == null && var.task_role_arn == null && !(
+    var.supervisor_enabled && var.s3_config_bucket == null
+  ) ? 1 : 0
+  name = "S3ReadAccess"
+  role = aws_iam_role.otel_task_role_s3[0].id
 
   policy = jsonencode({
     Version = "2012-10-17"
