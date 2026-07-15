@@ -6,7 +6,7 @@ This example demonstrates how to deploy the Coralogix OpenTelemetry Agent as a D
 
 Save this code in a Terraform file and change the values according to your settings.
 
-**Note**: Before deploying, ensure you have uploaded the required OpenTelemetry configuration to your S3 bucket. The config should be generated from the **Coralogix UI AWS ECS-EC2 integration**. Alternatively, you can use the [example config from the integration chart](https://github.com/coralogix/telemetry-shippers/blob/master/otel-ecs-ec2/examples/otel-config.yaml) as a reference—note that values such as domain may differ from your setup.
+**Note**: When using collector mode, ensure you have uploaded the required OpenTelemetry configuration to your S3 bucket before deploying. The config should be generated from the **Coralogix UI AWS ECS-EC2 integration**. Alternatively, you can use the [example config from the integration chart](https://github.com/coralogix/telemetry-shippers/blob/master/otel-ecs-ec2/examples/otel-config.yaml) as a reference—note that values such as domain may differ from your setup.
 
 ## Configuration Examples
 
@@ -41,6 +41,21 @@ module "otel_ecs_ec2_coralogix" {
   health_check_timeout  = 5
   health_check_retries  = 3
   memory                = 2048
+}
+```
+
+### Supervisor with Embedded Configurations
+
+Supervisor mode uses the supervised image and embeds the default Supervisor and Collector configurations when no S3 paths are provided.
+
+```hcl
+module "otel_ecs_ec2_coralogix" {
+  source = "coralogix/aws/coralogix//modules/ecs-ec2"
+
+  ecs_cluster_name    = "my-ecs-cluster"
+  supervisor_enabled = true
+  coralogix_region    = "EU1"
+  api_key             = "your-coralogix-api-key"
 }
 ```
 
