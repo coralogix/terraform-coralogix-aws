@@ -10,7 +10,9 @@ The OTEL agent is deployed as a Daemon ECS Task and connected using [```host``` 
 
 The OTEL agent uses a [filelog receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filereceiver) to read the docker logs of all containers on the EC2 host. OTLP is also accepted. Coralogix provides the ```awsecscontainermetricsd``` receiver which enables metrics collection of all tasks on the same host. The [coralogix exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/coralogixexporter) forwards telemetry to your configured Coralogix endpoint.
 
-The module loads the OpenTelemetry configuration from S3. The config should be generated from the **Coralogix UI AWS ECS-EC2 integration**. Alternatively, you can use the [example config from the integration chart](https://github.com/coralogix/telemetry-shippers/blob/master/otel-ecs-ec2/examples/otel-config.yaml) as a reference—note that values such as domain may differ from your setup.
+In `collector` mode, the module loads the OpenTelemetry configuration from S3. The config should be generated from the **Coralogix UI AWS ECS-EC2 integration**. Alternatively, you can use the [example config from the integration chart](https://github.com/coralogix/telemetry-shippers/blob/master/otel-ecs-ec2/examples/otel-config.yaml) as a reference—note that values such as domain may differ from your setup.
+
+In `supervised` mode, the module uses the supervised image, embeds a NOP Collector bootstrap config and the default Supervisor config. Set `s3_config_bucket` with `s3_config_key` or `s3_supervisor_config_key` to override either embedded config from S3. An S3 path always takes priority over the matching embedded config.
 
 The module passes these environment variables to the collector:
 - `CORALOGIX_DOMAIN` – region-specific domain (from coralogix_region)
@@ -32,6 +34,19 @@ module "ecs-ec2" {
   task_definition_arn  = "arn:aws:ecs:region:account:task-definition/name:revision"
   task_execution_role_arn = null  # required
   task_role_arn        = null     # required
+}
+```
+
+For Supervisor mode with embedded configs:
+
+```terraform
+module "ecs-ec2" {
+  source = "coralogix/aws/coralogix//modules/ecs-ec2"
+
+  ecs_cluster_name     = "my-cluster"
+  supervisor_enabled = true
+  coralogix_region     = "EU1"
+  api_key              = "your-coralogix-api-key"
 }
 ```
 
@@ -89,20 +104,24 @@ You can control health checks using:
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | ecs_cluster_name | Name of the AWS ECS Cluster | `string` | n/a | yes |
-| image_version | Coralogix OTEL Collector image version/tag | `string` | `null` | yes* |
+| supervisor_enabled | Run the Collector through the Supervisor | `bool` | `false` | no |
+| image_version | Standard Coralogix Otel Collector image version/tag used in collector mode | `string` | `null` | yes* |
+| supervised_image_repository | Supervised Coralogix Otel Collector image repository | `string` | `"cgx.jfrog.io/coralogix-docker-images/coralogix-otel-supervised-cdot"` | no |
+| supervised_image_version | Supervised Coralogix Otel Collector image version/tag | `string` | `"v0.10.0"` | no |
 | coralogix_region | Coralogix region: EU1, EU2, AP1, AP2, AP3, US1, US2, custom | `string` | `null` | yes* |
 | api_key | Send-Your-Data API key | `string` | `null` | yes** |
-| s3_config_bucket | S3 bucket containing the OTEL config | `string` | `null` | yes* |
-| s3_config_key | S3 object key for the config file | `string` | `null` | yes* |
-| config_source | Reserved for UI compatibility. Only 's3' supported. | `string` | `"s3"` | no |
+| s3_config_bucket | S3 bucket containing collector and optional Supervisor configs | `string` | `null` | yes* |
+| s3_config_key | S3 object key for the collector config | `string` | `null` | yes* |
+| s3_supervisor_config_key | Optional S3 object key for the Supervisor config | `string` | `null` | no |
+| config_source | Reserved for UI compatibility. Keep set to `s3`. | `string` | `"s3"` | no |
 | image | OTEL Collector image | `string` | `"coralogixrepo/coralogix-otel-collector"` | no |
 | memory | Task memory (MiB) | `number` | `256` | no |
 | custom_domain | Custom Coralogix domain (e.g. Private Link) | `string` | `null` | no |
 | use_api_key_secret | Use API key from Secrets Manager | `bool` | `false` | no |
 | api_key_secret_arn | ARN of Secrets Manager secret | `string` | `null` | no |
 | api_key_secret_kms_key_arn | KMS key ARN for the secret. When set, skips DescribeSecret/DescribeKey (use when deploy role cannot access secret metadata). | `string` | `null` | no |
-| task_execution_role_arn | Custom execution role. When null, module auto-creates one (S3 + optional Secrets Manager). Must be null in service-only mode. | `string` | `null` | no |
-| task_role_arn | Custom task role. When null, module auto-creates one with S3 read. Must be null in service-only mode. | `string` | `null` | no |
+| task_execution_role_arn | Custom execution role. When null, module auto-creates one with the standard ECS execution policy and optional Secrets Manager access. Must be null in service-only mode. | `string` | `null` | no |
+| task_role_arn | Custom task role. When null, module auto-creates one with S3 read access. Must be null in service-only mode. | `string` | `null` | no |
 | health_check_enabled | Enable ECS container health check | `bool` | `false` | no |
 | health_check_interval | Health check interval (seconds) | `number` | `30` | no |
 | health_check_timeout | Health check timeout (seconds) | `number` | `5` | no |
@@ -111,7 +130,7 @@ You can control health checks using:
 | tags | Resource tags | `map(string)` | `null` | no |
 | task_definition_arn | Existing task definition ARN. When set, service-only mode: module creates only the ECS service; S3/roles ignored; task_execution_role_arn and task_role_arn must be null. | `string` | `null` | no |
 
-\* Required when `task_definition_arn` is null (module creates the task definition). Ignored in service-only mode.
+\* Required in collector mode when `task_definition_arn` is null. Supervised mode uses embedded configs and its own default image when these values are omitted.
 
 \** Required unless `use_api_key_secret` is true (when module creates the task definition).
 

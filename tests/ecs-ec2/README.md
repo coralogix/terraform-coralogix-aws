@@ -4,7 +4,7 @@
 
 * ECS cluster on EC2
 * AWS profile or `AWS_DEFAULT_REGION`
-* S3 bucket with OTEL config (create via `resources/s3`)
+* S3 bucket with OTEL config for collector mode or S3 override tests (create via `resources/s3`)
 
 ## Setup
 
@@ -27,6 +27,7 @@
 terraform init
 terraform plan
 terraform apply
+./verify-supervised-mode.sh
 ```
 
 Expected: ECS Service `coralogix-otel-agent-<UUID>` runs as a Daemon; logs/traces/metrics sent to Coralogix.
@@ -35,6 +36,8 @@ Expected: ECS Service `coralogix-otel-agent-<UUID>` runs as a Daemon; logs/trace
 
 | Scenario | Var file | Prerequisite |
 |----------|----------|--------------|
+| Supervised + embedded configs | Default test variables | None |
+| Supervised + S3 overrides | Pass all three S3 variables | `resources/s3` |
 | 1. S3 + inline API key | `terraform.tfvars` | `resources/s3` |
 | 2. S3 + Secrets Manager (module auto-creates execution role) | `vars/example-secrets-manager.tfvars.template` | `resources/s3`, `resources/parameter-store` |
 | 3. Service-only (existing task definition) | `vars/example-service-only.tfvars.template` | Existing task definition ARN. Run `./verify-service-only-mode.sh` to assert no task definition or IAM resources are planned. |
