@@ -17,8 +17,8 @@ locals {
   s3_config_bucket         = var.s3_config_bucket == null ? "" : var.s3_config_bucket
   s3_config_key            = var.s3_config_key == null ? "" : var.s3_config_key
   s3_supervisor_config_key = var.s3_supervisor_config_key == null ? "" : var.s3_supervisor_config_key
-  # Format matching CloudFormation: initial_fallback_configs: [url1, url2] or []
-  initial_fallback_configs = length(var.initial_fallback_configs) == 0 ? "[]" : "[${join(", ", var.initial_fallback_configs)}]"
+  # JSON array is valid YAML and correctly escapes commas/special chars in URLs.
+  initial_fallback_configs = jsonencode(var.initial_fallback_configs)
   execution_role_arn       = var.task_execution_role_arn != null ? var.task_execution_role_arn : try(aws_iam_role.otel_task_execution_role_s3[0].arn, null)
   task_role_arn            = var.task_role_arn != null ? var.task_role_arn : try(aws_iam_role.otel_task_role_s3[0].arn, null)
 

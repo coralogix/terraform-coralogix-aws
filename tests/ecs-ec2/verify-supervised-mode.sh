@@ -165,7 +165,8 @@ if ! jq -e --arg url "$FALLBACK_URL" '
     .name == "config-loader"
     and any(.environment[];
       .name == "SUPERVISOR_CONFIG"
-      and (.value | contains("initial_fallback_configs: [" + $url + "]"))
+      and (.value | contains("initial_fallback_configs:"))
+      and (.value | contains($url))
     )
   )
 ' <<< "$FALLBACK_CONTAINERS" >/dev/null; then
