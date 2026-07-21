@@ -47,6 +47,29 @@ variable "s3_supervisor_config_key" {
   default     = null
 }
 
+variable "initial_fallback_configs" {
+  description = "Initial Supervisor fallback configuration URLs for the collector agent (full s3:// object paths). Applied only to the embedded Supervisor config; an S3-provided Supervisor config is used as-is. Requires s3_config_bucket when non-empty so the auto-created task role can read those objects. Ignored in service-only mode."
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = length(var.initial_fallback_configs) == 0 || var.task_definition_arn != null || var.supervisor_enabled
+    error_message = "initial_fallback_configs requires supervisor_enabled = true when the module creates the task definition."
+  }
+
+  validation {
+    condition     = length(var.initial_fallback_configs) == 0 || var.task_definition_arn != null || try(trimspace(var.s3_config_bucket) != "", false)
+    error_message = "s3_config_bucket is required when initial_fallback_configs is set."
+  }
+
+  validation {
+    condition = alltrue([
+      for url in var.initial_fallback_configs : can(regex("^s3://.+", trimspace(url)))
+    ])
+    error_message = "Each initial_fallback_configs entry must be a non-empty s3:// URL."
+  }
+}
+
 variable "image_version" {
   description = "The standard CDOT image version used in collector mode. Required in collector mode when the module creates the task definition."
   type        = string

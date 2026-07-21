@@ -89,6 +89,12 @@ variable "s3_supervisor_config_key" {
   default     = null
 }
 
+variable "initial_fallback_configs" {
+  description = "Initial Supervisor fallback configuration URLs"
+  type        = list(string)
+  default     = []
+}
+
 variable "task_definition_arn" {
   description = "Existing task definition ARN. When set, service-only mode: module creates only the ECS service."
   type        = string
