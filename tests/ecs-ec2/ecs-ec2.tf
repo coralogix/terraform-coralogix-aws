@@ -31,6 +31,7 @@ module "ecs-ec2" {
   s3_config_bucket         = var.s3_config_bucket
   s3_config_key            = var.s3_config_key
   s3_supervisor_config_key = var.s3_supervisor_config_key
+  initial_fallback_configs = var.initial_fallback_configs
 
   task_execution_role_arn = var.task_execution_role_arn
   task_role_arn           = var.task_role_arn

@@ -52,10 +52,31 @@ Supervisor mode uses the supervised image and embeds the default Supervisor and 
 module "otel_ecs_ec2_coralogix" {
   source = "coralogix/aws/coralogix//modules/ecs-ec2"
 
-  ecs_cluster_name    = "my-ecs-cluster"
+  ecs_cluster_name   = "my-ecs-cluster"
   supervisor_enabled = true
-  coralogix_region    = "EU1"
-  api_key             = "your-coralogix-api-key"
+  coralogix_region   = "EU1"
+  api_key            = "your-coralogix-api-key"
+}
+```
+
+### Supervisor with Initial Fallback Configurations
+
+When OpAMP remote config is unavailable, the Supervisor can fall back to collector configs hosted in S3. Provide full `s3://` object URLs and set `s3_config_bucket` so the auto-created task role can read them. This applies only to the embedded Supervisor config.
+
+```hcl
+module "otel_ecs_ec2_coralogix" {
+  source = "coralogix/aws/coralogix//modules/ecs-ec2"
+
+  ecs_cluster_name   = "my-ecs-cluster"
+  supervisor_enabled = true
+  coralogix_region   = "EU1"
+  api_key            = "your-coralogix-api-key"
+
+  s3_config_bucket = "my-otel-config-bucket"
+  initial_fallback_configs = [
+    "s3://my-otel-config-bucket.s3.eu-north-1.amazonaws.com/<ACCOUNT_ID>/<GROUP_NAME>/<COLLECTOR_VERSION>/<REMOTE_CONFIG_NAME>/config.yaml",
+    "s3://my-otel-config-bucket.s3.eu-north-1.amazonaws.com/<ACCOUNT_ID>/<GROUP_NAME>/EMPTY_VERSION/<REMOTE_CONFIG_NAME>/config.yaml",
+  ]
 }
 ```
 

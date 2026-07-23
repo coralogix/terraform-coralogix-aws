@@ -14,6 +14,8 @@ In `collector` mode, the module loads the OpenTelemetry configuration from S3. T
 
 In `supervised` mode, the module uses the supervised image, embeds a NOP Collector bootstrap config and the default Supervisor config. Set `s3_config_bucket` with `s3_config_key` or `s3_supervisor_config_key` to override either embedded config from S3. An S3 path always takes priority over the matching embedded config.
 
+`initial_fallback_configs` is a list of full `s3://` object URLs injected into the embedded Supervisor config as `agent.initial_fallback_configs`. The default is an empty list (no startup fallback). This applies only to the embedded Supervisor configuration; an S3-provided Supervisor configuration is used as-is. When the list is non-empty, `s3_config_bucket` is required and every fallback URL must reference that bucket so the auto-created task role can read the objects. When `task_role_arn` is provided, that custom role must grant `s3:GetObject` access to the fallback objects.
+
 The module passes these environment variables to the collector:
 - `CORALOGIX_DOMAIN` – region-specific domain (from coralogix_region)
 - `CORALOGIX_PRIVATE_KEY` – your API key
@@ -43,10 +45,28 @@ For Supervisor mode with embedded configs:
 module "ecs-ec2" {
   source = "coralogix/aws/coralogix//modules/ecs-ec2"
 
-  ecs_cluster_name     = "my-cluster"
+  ecs_cluster_name   = "my-cluster"
   supervisor_enabled = true
-  coralogix_region     = "EU1"
-  api_key              = "your-coralogix-api-key"
+  coralogix_region   = "EU1"
+  api_key            = "your-coralogix-api-key"
+}
+```
+
+For Supervisor mode with initial fallback configurations:
+
+```terraform
+module "ecs-ec2" {
+  source = "coralogix/aws/coralogix//modules/ecs-ec2"
+
+  ecs_cluster_name   = "my-cluster"
+  supervisor_enabled = true
+  coralogix_region   = "EU1"
+  api_key            = "your-coralogix-api-key"
+
+  s3_config_bucket = "my-otel-config-bucket"
+  initial_fallback_configs = [
+    "s3://my-otel-config-bucket.s3.eu-north-1.amazonaws.com/<ACCOUNT_ID>/<GROUP_NAME>/<COLLECTOR_VERSION>/<REMOTE_CONFIG_NAME>/config.yaml",
+  ]
 }
 ```
 
@@ -110,9 +130,10 @@ You can control health checks using:
 | supervised_image_version | Supervised Coralogix Otel Collector image version/tag | `string` | `"v0.10.0"` | no |
 | coralogix_region | Coralogix region: EU1, EU2, AP1, AP2, AP3, US1, US2, custom | `string` | `null` | yes* |
 | api_key | Send-Your-Data API key | `string` | `null` | yes** |
-| s3_config_bucket | S3 bucket containing collector and optional Supervisor configs | `string` | `null` | yes* |
+| s3_config_bucket | S3 bucket containing collector and optional Supervisor configs. Also required when `initial_fallback_configs` is set. | `string` | `null` | yes* |
 | s3_config_key | S3 object key for the collector config | `string` | `null` | yes* |
 | s3_supervisor_config_key | Optional S3 object key for the Supervisor config | `string` | `null` | no |
+| initial_fallback_configs | Initial Supervisor fallback configuration URLs (`s3://` paths). Applied only to the embedded Supervisor config. Requires `s3_config_bucket` when non-empty. | `list(string)` | `[]` | no |
 | config_source | Reserved for UI compatibility. Keep set to `s3`. | `string` | `"s3"` | no |
 | image | OTEL Collector image | `string` | `"coralogixrepo/coralogix-otel-collector"` | no |
 | memory | Task memory (MiB) | `number` | `256` | no |

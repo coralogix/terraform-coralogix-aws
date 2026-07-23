@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.6.0
+
+#### **ecs-ec2**
+### 💡 Enhancements 💡
+- Added `initial_fallback_configs` for Supervisor mode. When set, the embedded Supervisor config receives `agent.initial_fallback_configs` with the provided `s3://` URLs. Requires `s3_config_bucket`.
+
 ## v4.5.0
 
 #### **ecs-ec2**

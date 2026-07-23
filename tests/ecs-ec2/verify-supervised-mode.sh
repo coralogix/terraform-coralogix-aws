@@ -54,6 +54,7 @@ if ! jq -e '
       .name == "SUPERVISOR_CONFIG"
       and (.value | contains("opamp/v1"))
       and (.value | contains("- /otel-config/collector-config.yaml"))
+      and (.value | contains("initial_fallback_configs: []"))
     )
     and any(.mountPoints[]; .containerPath == "/otel-config")
   )
@@ -140,6 +141,53 @@ if ! jq -e '
   fail "The config loader does not prefer the configured S3 Collector and Supervisor paths."
 fi
 
+echo "[INFO] Verifying Supervisor mode with initial fallback configurations..."
+FALLBACK_PLAN="$TMP_DIR/fallback.tfplan"
+FALLBACK_JSON="$TMP_DIR/fallback.json"
+FALLBACK_URL="s3://placeholder-bucket.s3.us-east-1.amazonaws.com/account/group/EMPTY_VERSION/remote/config.yaml"
+
+terraform plan \
+  -input=false \
+  -lock=false \
+  -var='s3_config_bucket=placeholder-bucket' \
+  -var="initial_fallback_configs=[\"$FALLBACK_URL\"]" \
+  -out="$FALLBACK_PLAN" >/dev/null
+terraform show -json "$FALLBACK_PLAN" > "$FALLBACK_JSON"
+
+FALLBACK_TASK=$(jq -c --arg address "$TASK_ADDRESS" '
+  .planned_values.root_module.child_modules[].resources[]
+  | select(.address == $address)
+' "$FALLBACK_JSON")
+FALLBACK_CONTAINERS=$(jq -r '.values.container_definitions' <<< "$FALLBACK_TASK")
+
+if ! jq -e --arg url "$FALLBACK_URL" '
+  any(.[];
+    .name == "config-loader"
+    and any(.environment[];
+      .name == "SUPERVISOR_CONFIG"
+      and (.value | contains("initial_fallback_configs:"))
+      and (.value | contains($url))
+    )
+  )
+' <<< "$FALLBACK_CONTAINERS" >/dev/null; then
+  fail "Supervisor mode with initial_fallback_configs does not embed the expected fallback URLs."
+fi
+
+FALLBACK_POLICY=$(jq -r '
+  .planned_values.root_module.child_modules[].resources[]
+  | select(.address == "module.ecs-ec2.aws_iam_role_policy.otel_task_role_s3_s3_policy[0]")
+  | .values.policy
+' "$FALLBACK_JSON")
+
+if ! jq -e '
+  any(.Statement[];
+    (.Action | sort) == (["s3:GetObject", "s3:GetObjectVersion"] | sort)
+    and .Resource == "arn:aws:s3:::placeholder-bucket/*"
+  )
+' <<< "$FALLBACK_POLICY" >/dev/null; then
+  fail "initial_fallback_configs does not grant the expected S3 read access via s3_config_bucket."
+fi
+
 echo "[INFO] Verifying collector mode keeps the image entrypoint..."
 terraform plan \
   -input=false \
@@ -175,4 +223,4 @@ if ! jq -e '
   fail "Collector mode does not preserve the image entrypoint and S3 configuration argument."
 fi
 
-echo "[PASS] Supervised mode embeds configs by default and prefers configured S3 paths."
+echo "[PASS] Supervised mode embeds configs by default, supports initial_fallback_configs, and prefers configured S3 paths."
