@@ -53,10 +53,20 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 | <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | The Coralogix location region, available options: [`EU1`, `EU2`, `AP1`, `AP2`, `AP3`, `US1`, `US2`, `Custom`] | `string` | n/a | yes |
 | <a name="input_custom_domain"></a> [custom_domain](#input\_custom\_domain) | If using a custom domain name for your private cluster, Coralogix will send telemetry from the specified address (e.g. custom.coralogix.com). There is no need to add `ingress.` to the domain.| `string` | n/a | no |
 | <a name="input_integration_type"></a> [integration_type](#input\_data\_type) | The AWS service to integrate with Coralogix. Possible values: S3, CloudTrail, VpcFlow, CloudWatch, S3Csv, SNS, SQS, Kinesis, CloudFront, MSK, Kafka, EcrScan. | `string` | `S3` | yes |
-| <a name="input_api_key"></a> [api\_key](#input\_api_\_key) | The Coralogix Send Your Data - [API key](https://coralogix.com/docs/send-your-data-api-key/) validates your authenticity. This value can be a direct Coralogix API key or an AWS secret manager ARN containing the API key.| `string` | n/a | yes |
+| <a name="input_api_key"></a> [api\_key](#input\_api_\_key) | The Coralogix Send Your Data - [API key](https://coralogix.com/docs/send-your-data-api-key/) validates your authenticity. This value can be a direct Coralogix API key or an AWS secret manager ARN containing the API key. Required for metrics, REST logs, and direct Coralogix OTLP; leave empty for Collector OTLP.| `string` | n/a | yes |
 | <a name="input_store_api_key_in_secrets_manager"></a> [store\_api\_key\_in\_secrets\_manager](#input\_store\_api\_key\_in\_secrets\_manager) | Enable this to store your API key securely. Otherwise, it will remain exposed in plain text as an environment variable in the Lambda function console.| bool | true | no |
+| <a name="input_log_export_protocol"></a> [log\_export\_protocol](#input\_log\_export\_protocol) | Log delivery protocol when `telemetry_mode` is `logs`: `coralogix_rest` (default) or `otlp_grpc`. Ignored for metrics.| `string` | `coralogix_rest` | no |
+| <a name="input_otlp_endpoint"></a> [otlp\_endpoint](#input\_otlp\_endpoint) | Optional Collector `http://` or `https://` origin for `otlp_grpc`. Empty selects direct Coralogix OTLP; non-empty selects unauthenticated Collector delivery.| `string` | `""` | no |
 | <a name="application_name"></a> [application\_name](#input\_application\_name) | The [name](https://coralogix.com/docs/application-and-subsystem-names/) of your application. For a dynamic value, use `$.my_log.field`. This option is not supported since version `1.1.0` for the [source code](https://github.com/coralogix/coralogix-aws-shipper/blob/master/CHANGELOG.md) | string | n\a | yes | 
 | <a name="subsystem_name"></a> [subsystem\_name](#input\_subsysten_\_name) | The [name](https://coralogix.com/docs/application-and-subsystem-names/) of your subsystem. For a dynamic value, use `$.my_log.field` for CloudWatch log group leave empty. This option is not supported since version `1.1.0` for the [source code](https://github.com/coralogix/coralogix-aws-shipper/blob/master/CHANGELOG.md) | string | n\a | yes |
+
+When `telemetry_mode` is `logs`, three export routes are available (matching the [shipper CloudFormation template](https://github.com/coralogix/coralogix-aws-shipper)):
+
+1. **Coralogix REST (default):** `log_export_protocol = "coralogix_rest"`.
+2. **Direct Coralogix OTLP/gRPC:** `log_export_protocol = "otlp_grpc"` with empty `otlp_endpoint` (uses `coralogix_region`/`custom_domain` and `api_key`).
+3. **Collector OTLP/gRPC:** `log_export_protocol = "otlp_grpc"` with a non-empty `otlp_endpoint` (no Coralogix API key).
+
+OTLP routes require a shipper binary that supports them; pin `source_code_version` after that shipper release is published.
 
 <!-- /static-modules-readme-end-description -->
 
