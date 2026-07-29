@@ -40,7 +40,7 @@ resource "aws_s3_bucket_policy" "logs_bucket_policy" {
   bucket = aws_s3_bucket.logs_bucket_name[count.index].id
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [
+    Statement = concat([
       {
         Effect = "Allow"
         Principal = {
@@ -62,7 +62,24 @@ resource "aws_s3_bucket_policy" "logs_bucket_policy" {
           "${aws_s3_bucket.logs_bucket_name[count.index].arn}/*",
         ]
       }
-    ]
+      ],
+      var.enforce_https ? [
+        {
+          Sid       = "AllowSSLRequestsOnly"
+          Effect    = "Deny"
+          Principal = "*"
+          Action    = "s3:*"
+          Resource = [
+            aws_s3_bucket.logs_bucket_name[count.index].arn,
+            "${aws_s3_bucket.logs_bucket_name[count.index].arn}/*",
+          ]
+          Condition = {
+            Bool = {
+              "aws:SecureTransport" = "false"
+            }
+          }
+        }
+    ] : [])
   })
 }
 
@@ -83,7 +100,7 @@ resource "aws_s3_bucket_policy" "metrics_bucket_policy" {
   bucket = aws_s3_bucket.metrics_bucket_name[count.index].id
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [
+    Statement = concat([
       {
         Effect = "Allow"
         Principal = {
@@ -105,7 +122,24 @@ resource "aws_s3_bucket_policy" "metrics_bucket_policy" {
           "${aws_s3_bucket.metrics_bucket_name[count.index].arn}/*",
         ]
       }
-    ]
+      ],
+      var.enforce_https ? [
+        {
+          Sid       = "AllowSSLRequestsOnly"
+          Effect    = "Deny"
+          Principal = "*"
+          Action    = "s3:*"
+          Resource = [
+            aws_s3_bucket.metrics_bucket_name[count.index].arn,
+            "${aws_s3_bucket.metrics_bucket_name[count.index].arn}/*",
+          ]
+          Condition = {
+            Bool = {
+              "aws:SecureTransport" = "false"
+            }
+          }
+        }
+    ] : [])
   })
 }
 

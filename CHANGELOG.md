@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.7.0
+
+#### **s3-archive**
+### 💡 Enhancements 💡
+- Added `enforce_https` variable (default `true`) that appends an `AllowSSLRequestsOnly` statement to the logs and metrics archive bucket policies, denying any request made with `aws:SecureTransport = false`. Set it to `false` to keep the previous policies unchanged.
+
 ## v4.6.0
 
 #### **ecs-ec2**

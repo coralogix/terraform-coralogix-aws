@@ -82,4 +82,9 @@ variable "aws_role_region" {
     "ap-southeast-3" = "ap3"
   }
 }
-  
+
+variable "enforce_https" {
+  type        = bool
+  description = "If true, add a bucket policy statement that denies all non-HTTPS requests (aws:SecureTransport = false) on the archive buckets."
+  default     = true
+}

@@ -28,6 +28,7 @@ The module can run only on the following regions eu-west-1,eu-north-1,ap-southea
 | metrics_bucket_force_destroy | enable force destroy to the metrics S3 bucekt, to not allow delete if there is files in the bucket | `bool` | false | |
 | logs_kms_arn |  The arn of your kms for the logs bucket , Note: make sure that the kms is in the same region as your bucket | `string` | n/a | |
 | metrics_kms_arn | The arn of your kms for the metrics bucket , Note: make sure that the kms is in the same region as your bucket | `string` | n/a | |
+| enforce_https | If true, add a bucket policy statement that denies all non-HTTPS requests (`aws:SecureTransport = false`) on the archive buckets | `bool` | true | |
 
 ## Outputs
 
