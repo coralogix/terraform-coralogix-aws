@@ -294,8 +294,8 @@ module "lambda" {
         : "https://ingress.private.${lookup(module.locals[each.key].coralogix_domains, var.coralogix_region, "EU1")}"
       )
     ) : null
-    INTEGRATION_TYPE  = each.value.integration_type
-    RUST_LOG          = var.log_level
+    INTEGRATION_TYPE = each.value.integration_type
+    RUST_LOG         = var.log_level
     CORALOGIX_API_KEY = local.needs_coralogix_api_key ? (
       !local.api_key_is_arn && (each.value.store_api_key_in_secrets_manager == null || each.value.store_api_key_in_secrets_manager == true)
       ? aws_secretsmanager_secret.coralogix_secret[each.key].arn
