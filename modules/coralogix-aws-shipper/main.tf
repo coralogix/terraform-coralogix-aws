@@ -301,8 +301,9 @@ module "lambda" {
       ? aws_secretsmanager_secret.coralogix_secret[each.key].arn
       : each.value.api_key
     ) : null
-    LOG_EXPORT_PROTOCOL = var.telemetry_mode == "logs" ? var.log_export_protocol : null
-    OTLP_ENDPOINT       = local.use_collector_otlp_logs ? var.otlp_endpoint : null
+    LOG_EXPORT_PROTOCOL            = var.telemetry_mode == "logs" ? var.log_export_protocol : null
+    OTLP_ENDPOINT                  = local.use_collector_otlp_logs ? var.otlp_endpoint : null
+    DISABLE_LOG_SEVERITY_DETECTION = var.telemetry_mode == "logs" ? tostring(var.disable_log_severity_detection) : null
     CORALOGIX_DOMAIN = local.use_coralogix_otlp_logs ? (
       var.custom_domain != ""
       ? var.custom_domain

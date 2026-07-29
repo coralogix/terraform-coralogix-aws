@@ -483,6 +483,12 @@ variable "otlp_endpoint" {
   default     = ""
 }
 
+variable "disable_log_severity_detection" {
+  description = "Disable keyword-based severity detection for logs. When true, logs use protocol-level Info severity without modifying the original log body. Ignored for metrics."
+  type        = bool
+  default     = false
+}
+
 variable "batch_metrics" {
   description = "Enable batching of OpenTelemetry metric messages when telemetry_mode is set to metrics."
   type        = bool

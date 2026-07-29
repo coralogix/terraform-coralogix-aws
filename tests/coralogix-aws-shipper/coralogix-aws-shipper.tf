@@ -39,12 +39,13 @@ module "s3-sqs-external-policy" {
 module "cloudwatch" {
   source = "../../modules/coralogix-aws-shipper"
 
-  coralogix_region = "EU1"
-  api_key          = "{{ secrets.TESTING_PRIVATE_KEY }}"
-  application_name = "cloudwatch-logs"
-  subsystem_name   = "logs"
-  log_groups       = ["github-action-testing-log-stream"]
-  integration_type = "CloudWatch"
+  coralogix_region               = "EU1"
+  api_key                        = "{{ secrets.TESTING_PRIVATE_KEY }}"
+  application_name               = "cloudwatch-logs"
+  subsystem_name                 = "logs"
+  log_groups                     = ["github-action-testing-log-stream"]
+  integration_type               = "CloudWatch"
+  disable_log_severity_detection = true
 }
 
 module "metrics" {

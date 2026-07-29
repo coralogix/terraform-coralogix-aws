@@ -446,6 +446,12 @@ variable "otlp_endpoint" {
   default     = ""
 }
 
+variable "disable_log_severity_detection" {
+  description = "Disable keyword-based severity detection for logs. When true, logs use protocol-level Info severity without modifying the original log body. Ignored for metrics."
+  type        = bool
+  default     = false
+}
+
 variable "include_metric_stream_filter" {
   description = "List of inclusive metric filters. If you specify this parameter, the stream sends only the conditional metric names from the metric namespaces that you specify here. Leave empty to send all metrics"
   type = list(object({
