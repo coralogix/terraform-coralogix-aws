@@ -115,7 +115,7 @@ jobs:
         run:  |
           if [[ ${{ matrix.package }} != "locals_variables" ]];then
             cd "tests/${{ matrix.package }}"
-            terraform plan
+            terraform plan -parallelism=1
           fi
 
       - if: ${{ github.event.pull_request.head.repo.full_name == github.repository && matrix.package == 'ecs-ec2' }}
