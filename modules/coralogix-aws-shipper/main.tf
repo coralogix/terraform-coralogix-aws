@@ -366,7 +366,13 @@ module "lambda" {
 
 check "direct_otlp_requires_credentials" {
   assert {
-    condition     = !local.use_coralogix_otlp_logs || (var.api_key != "" && (var.coralogix_region != "Custom" || var.custom_domain != ""))
+    condition = !local.use_coralogix_otlp_logs || (
+      alltrue([
+        for integration in values(local.integration_info) :
+        integration.api_key != null && integration.api_key != ""
+      ]) &&
+      (var.coralogix_region != "Custom" || var.custom_domain != "")
+    )
     error_message = "Direct Coralogix OTLP requires api_key and either a non-Custom coralogix_region or custom_domain."
   }
 }
