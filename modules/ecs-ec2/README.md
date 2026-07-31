@@ -178,8 +178,8 @@ You can control health checks using:
 | s3_supervisor_config_key | Optional S3 object key for the Supervisor config | `string` | `null` | no |
 | initial_fallback_configs | Initial Supervisor fallback configuration URLs (`s3://` paths). Applied only to the embedded Supervisor config. Requires `s3_config_bucket` when non-empty. | `list(string)` | `[]` | no |
 | profiling_enabled | Enable a separate profiling collector daemon service | `bool` | `false` | no |
-| profiling_s3_config_bucket | S3 bucket for the profiling collector config. Required in collector mode; optional override in supervised mode. | `string` | `null` | no |
-| profiling_s3_config_key | S3 object key for the profiling collector config. Required in collector mode; optional override in supervised mode. | `string` | `null` | no |
+| profiling_s3_config_bucket | S3 bucket for the profiling collector config. Required in collector mode; optional override in supervised mode. Must be set with `profiling_s3_config_key`. | `string` | `null` | no |
+| profiling_s3_config_key | S3 object key for the profiling collector config. Required in collector mode; optional override in supervised mode. Must be set with `profiling_s3_config_bucket`. | `string` | `null` | no |
 | profiling_initial_fallback_configs | Initial Supervisor fallback URLs for the profiling agent. Requires `s3_config_bucket` when non-empty. | `list(string)` | `[]` | no |
 | profiling_memory | Profiling task memory (MiB) | `number` | `512` | no |
 | config_source | Reserved for UI compatibility. Keep set to `s3`. | `string` | `"s3"` | no |
@@ -210,6 +210,7 @@ You can control health checks using:
 | `task_execution_role_arn must be null in service-only mode` | You set `task_definition_arn` but left `task_execution_role_arn` non-null. | Set `task_execution_role_arn = null` and `task_role_arn = null` when using `task_definition_arn`. |
 | `task_role_arn must be null in service-only mode` | Same as above for task role. | Same fix. |
 | `profiling_enabled cannot be used with task_definition_arn` | You enabled profiling in service-only mode. | Disable profiling or omit `task_definition_arn` so the module can create the profiling task. |
+| `profiling_s3_config_bucket and profiling_s3_config_key must both be set or both be null` | You set only one of the profiling S3 path inputs. | Set both values, or leave both unset. |
 
 ## Outputs
 

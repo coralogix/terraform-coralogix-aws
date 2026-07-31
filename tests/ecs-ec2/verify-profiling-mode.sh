@@ -244,4 +244,19 @@ if ! grep -q "profiling_enabled cannot be used with task_definition_arn" "$TMP_D
   fail "Service-only profiling rejection did not report the expected validation error."
 fi
 
+echo "[INFO] Verifying partial profiling S3 path overrides are rejected..."
+if terraform plan \
+  -input=false \
+  -lock=false \
+  -var='supervisor_enabled=true' \
+  -var='profiling_enabled=true' \
+  -var='profiling_s3_config_bucket=profiling-bucket' \
+  -out="$TMP_DIR/partial-profiling-s3.tfplan" >/dev/null 2>"$TMP_DIR/partial-profiling-s3.err"; then
+  fail "Setting only profiling_s3_config_bucket should fail validation."
+fi
+
+if ! grep -q "profiling_s3_config_bucket and profiling_s3_config_key must both be set" "$TMP_DIR/partial-profiling-s3.err"; then
+  fail "Partial profiling S3 override rejection did not report the expected validation error."
+fi
+
 echo "[PASS] Profiling mode creates the expected daemon, Supervisor wiring, IAM scope, and validations."

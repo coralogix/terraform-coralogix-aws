@@ -127,7 +127,7 @@ variable "profiling_enabled" {
 }
 
 variable "profiling_s3_config_bucket" {
-  description = "S3 bucket containing the profiling collector configuration. Required when profiling is enabled in collector mode. Optional override in supervised mode."
+  description = "S3 bucket containing the profiling collector configuration. Required when profiling is enabled in collector mode. Optional override in supervised mode. Must be set together with profiling_s3_config_key."
   type        = string
   default     = null
 
@@ -135,10 +135,18 @@ variable "profiling_s3_config_bucket" {
     condition     = !var.profiling_enabled || var.supervisor_enabled || try(trimspace(var.profiling_s3_config_bucket) != "", false)
     error_message = "profiling_s3_config_bucket is required when profiling is enabled in collector mode."
   }
+
+  validation {
+    condition = (
+      try(trimspace(var.profiling_s3_config_bucket) != "", false) ==
+      try(trimspace(var.profiling_s3_config_key) != "", false)
+    )
+    error_message = "profiling_s3_config_bucket and profiling_s3_config_key must both be set or both be null."
+  }
 }
 
 variable "profiling_s3_config_key" {
-  description = "S3 object key for the profiling collector configuration. Required when profiling is enabled in collector mode. Optional override in supervised mode."
+  description = "S3 object key for the profiling collector configuration. Required when profiling is enabled in collector mode. Optional override in supervised mode. Must be set together with profiling_s3_config_bucket."
   type        = string
   default     = null
 
