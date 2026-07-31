@@ -57,7 +57,7 @@ resource "random_string" "id" {
 resource "aws_cloudwatch_log_group" "otel_agent" {
   count             = var.cloudwatch_log_group_name == null ? 1 : 0
   name              = "/ecs/${local.name}-${random_string.id.result}"
-  retention_in_days  = var.cloudwatch_log_retention_days
+  retention_in_days = var.cloudwatch_log_retention_days
   tags              = local.tags
 }
 

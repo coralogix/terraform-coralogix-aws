@@ -44,8 +44,8 @@ locals {
   task_role_s3_object_resources = length(local.s3_object_resources) > 0 ? local.s3_object_resources : ["arn:aws:s3:::${local.s3_config_bucket}/*"]
   task_role_s3_bucket_resources = length(local.s3_bucket_resources) > 0 ? local.s3_bucket_resources : ["arn:aws:s3:::${local.s3_config_bucket}"]
   profiling_name                = "coralogix-otel-profiling-agent"
-  execution_role_arn = var.task_execution_role_arn != null ? var.task_execution_role_arn : try(aws_iam_role.otel_task_execution_role_s3[0].arn, null)
-  task_role_arn      = var.task_role_arn != null ? var.task_role_arn : try(aws_iam_role.otel_task_role_s3[0].arn, null)
+  execution_role_arn            = var.task_execution_role_arn != null ? var.task_execution_role_arn : try(aws_iam_role.otel_task_execution_role_s3[0].arn, null)
+  task_role_arn                 = var.task_role_arn != null ? var.task_role_arn : try(aws_iam_role.otel_task_role_s3[0].arn, null)
 
   collector_config = <<-YAML
     receivers:
