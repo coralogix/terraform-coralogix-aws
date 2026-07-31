@@ -13,14 +13,36 @@ locals {
   coralogix_region_domain_map = module.locals_variables.coralogix_domains
   coralogix_domain            = var.task_definition_arn == null ? coalesce(var.custom_domain, local.coralogix_region_domain_map[var.coralogix_region]) : null
 
-  use_supervised_image     = var.supervisor_enabled
-  s3_config_bucket         = var.s3_config_bucket == null ? "" : var.s3_config_bucket
-  s3_config_key            = var.s3_config_key == null ? "" : var.s3_config_key
-  s3_supervisor_config_key = var.s3_supervisor_config_key == null ? "" : var.s3_supervisor_config_key
+  use_supervised_image       = var.supervisor_enabled
+  s3_config_bucket           = var.s3_config_bucket == null ? "" : var.s3_config_bucket
+  s3_config_key              = var.s3_config_key == null ? "" : var.s3_config_key
+  s3_supervisor_config_key   = var.s3_supervisor_config_key == null ? "" : var.s3_supervisor_config_key
+  profiling_s3_config_bucket = var.profiling_s3_config_bucket == null ? "" : var.profiling_s3_config_bucket
+  profiling_s3_config_key    = var.profiling_s3_config_key == null ? "" : var.profiling_s3_config_key
   # JSON array is valid YAML and correctly escapes commas/special chars in URLs.
-  initial_fallback_configs = jsonencode(var.initial_fallback_configs)
-  execution_role_arn       = var.task_execution_role_arn != null ? var.task_execution_role_arn : try(aws_iam_role.otel_task_execution_role_s3[0].arn, null)
-  task_role_arn            = var.task_role_arn != null ? var.task_role_arn : try(aws_iam_role.otel_task_role_s3[0].arn, null)
+  initial_fallback_configs           = jsonencode(var.initial_fallback_configs)
+  profiling_initial_fallback_configs = jsonencode(var.profiling_initial_fallback_configs)
+  use_s3_collector_config            = trimspace(local.s3_config_bucket) != "" && trimspace(local.s3_config_key) != ""
+  use_s3_supervisor_config           = local.use_supervised_image && trimspace(local.s3_config_bucket) != "" && trimspace(local.s3_supervisor_config_key) != ""
+  use_s3_profiling_config            = var.profiling_enabled && trimspace(local.profiling_s3_config_bucket) != "" && trimspace(local.profiling_s3_config_key) != ""
+  use_main_s3_bucket = (
+    local.use_s3_collector_config ||
+    local.use_s3_supervisor_config ||
+    length(var.initial_fallback_configs) > 0 ||
+    length(var.profiling_initial_fallback_configs) > 0
+  )
+  s3_object_resources = distinct(compact([
+    local.use_main_s3_bucket ? "arn:aws:s3:::${local.s3_config_bucket}/*" : null,
+    local.use_s3_profiling_config ? "arn:aws:s3:::${local.profiling_s3_config_bucket}/*" : null,
+  ]))
+  s3_bucket_resources = distinct(compact([
+    local.use_main_s3_bucket ? "arn:aws:s3:::${local.s3_config_bucket}" : null,
+    local.use_s3_profiling_config ? "arn:aws:s3:::${local.profiling_s3_config_bucket}" : null,
+  ]))
+  use_any_s3_config  = length(local.s3_object_resources) > 0
+  profiling_name     = "coralogix-otel-profiling-agent"
+  execution_role_arn = var.task_execution_role_arn != null ? var.task_execution_role_arn : try(aws_iam_role.otel_task_execution_role_s3[0].arn, null)
+  task_role_arn      = var.task_role_arn != null ? var.task_role_arn : try(aws_iam_role.otel_task_role_s3[0].arn, null)
 
   collector_config = <<-YAML
     receivers:
@@ -71,9 +93,43 @@ locals {
     agent:
       executable: /cdot
       passthrough_logs: true
+      args: ["--feature-gates=+service.profilesSupport"]
       config_files:
         - /otel-config/collector-config.yaml
       initial_fallback_configs: ${local.initial_fallback_configs}
+
+    storage:
+      directory: /etc/otelcol-contrib/supervisor-data/
+
+    telemetry:
+      logs:
+        level: info
+  YAML
+
+  profiling_supervisor_config = <<-YAML
+    server:
+      endpoint: "https://ingress.$${env:CORALOGIX_DOMAIN}/opamp/v1"
+      headers:
+        Authorization: "Bearer $${env:CORALOGIX_PRIVATE_KEY}"
+      tls:
+        insecure_skip_verify: false
+
+    capabilities:
+      reports_effective_config: true
+      reports_own_metrics: true
+      reports_own_logs: true
+      reports_own_traces: true
+      reports_health: true
+      accepts_remote_config: true
+      reports_remote_config: true
+
+    agent:
+      executable: /cdot
+      passthrough_logs: true
+      args: ["--feature-gates=+service.profilesSupport"]
+      config_files:
+        - /otel-config/collector-config.yaml
+      initial_fallback_configs: ${local.profiling_initial_fallback_configs}
 
     storage:
       directory: /etc/otelcol-contrib/supervisor-data/
@@ -102,6 +158,23 @@ locals {
       fi
     fi
   SH
+
+  profiling_config_loader_command = <<-SH
+    set -e
+    if [ -n "$PROFILING_S3_CONFIG_BUCKET" ] && [ -n "$PROFILING_S3_CONFIG_KEY" ]; then
+      aws s3 cp "s3://$PROFILING_S3_CONFIG_BUCKET/$PROFILING_S3_CONFIG_KEY" /otel-config/collector-config.yaml
+    elif [ "$SUPERVISOR_ENABLED" = "true" ]; then
+      printf '%s\n' "$COLLECTOR_CONFIG" > /otel-config/collector-config.yaml
+    else
+      echo "profiling_s3_config_bucket and profiling_s3_config_key are required in collector mode" >&2
+      exit 1
+    fi
+    if [ "$SUPERVISOR_ENABLED" = "true" ]; then
+      printf '%s\n' "$SUPERVISOR_CONFIG" > /otel-config/supervisor.yaml
+    fi
+  SH
+
+  profiling_agent_command = local.use_supervised_image ? "mkdir -p /sys/kernel/debug /sys/kernel/tracing && mount -t debugfs debugfs /sys/kernel/debug 2>/dev/null || true; mount -t tracefs tracefs /sys/kernel/tracing 2>/dev/null || true; exec /opampsupervisor -config /otel-config/supervisor.yaml" : "mkdir -p /sys/kernel/debug /sys/kernel/tracing && mount -t debugfs debugfs /sys/kernel/debug 2>/dev/null || true; mount -t tracefs tracefs /sys/kernel/tracing 2>/dev/null || true; exec /cdot --feature-gates=+service.profilesSupport --config /otel-config/collector-config.yaml"
 }
 
 module "locals_variables" {
@@ -189,9 +262,9 @@ resource "aws_iam_role_policy" "otel_task_execution_role_secrets" {
   })
 }
 
-# IAM Role for task runtime S3 access (created when module creates task definition and no custom task role provided)
+# IAM Role for task runtime S3 access (created when module creates task definition, no custom task role, and S3 access is needed)
 resource "aws_iam_role" "otel_task_role_s3" {
-  count = var.task_definition_arn == null && var.task_role_arn == null ? 1 : 0
+  count = var.task_definition_arn == null && var.task_role_arn == null && local.use_any_s3_config ? 1 : 0
   name  = "${local.name}-${random_string.id.result}-task-role-s3"
 
   assume_role_policy = jsonencode({
@@ -211,7 +284,7 @@ resource "aws_iam_role" "otel_task_role_s3" {
 }
 
 resource "aws_iam_role_policy" "otel_task_role_s3_s3_policy" {
-  count = var.task_definition_arn == null && var.task_role_arn == null ? 1 : 0
+  count = var.task_definition_arn == null && var.task_role_arn == null && local.use_any_s3_config ? 1 : 0
   name  = "S3ReadAccess"
   role  = aws_iam_role.otel_task_role_s3[0].id
 
@@ -224,14 +297,14 @@ resource "aws_iam_role_policy" "otel_task_role_s3_s3_policy" {
           "s3:GetObject",
           "s3:GetObjectVersion"
         ]
-        Resource = "arn:aws:s3:::${local.s3_config_bucket}/*"
+        Resource = local.s3_object_resources
       },
       {
         Effect = "Allow"
         Action = [
           "s3:ListBucket"
         ]
-        Resource = "arn:aws:s3:::${local.s3_config_bucket}"
+        Resource = local.s3_bucket_resources
       }
     ]
   })
@@ -417,6 +490,187 @@ resource "aws_ecs_service" "coralogix_otel_agent" {
   tags = merge(
     {
       Name = "${local.name}-${random_string.id.result}"
+    },
+    var.tags
+  )
+}
+
+resource "aws_ecs_task_definition" "coralogix_otel_profiling_agent" {
+  count                    = var.task_definition_arn == null && var.profiling_enabled ? 1 : 0
+  family                   = "${local.profiling_name}-${random_string.id.result}"
+  cpu                      = max(var.profiling_memory, 256)
+  memory                   = var.profiling_memory
+  requires_compatibilities = ["EC2"]
+  network_mode             = "bridge"
+  execution_role_arn       = local.execution_role_arn
+  task_role_arn            = local.task_role_arn
+
+  volume {
+    name = "otel-config"
+  }
+  volume {
+    name      = "hostfs"
+    host_path = "/var/lib/docker/"
+  }
+  volume {
+    name      = "docker-socket"
+    host_path = "/var/run/docker.sock"
+  }
+  volume {
+    name      = "tracefs"
+    host_path = "/sys/kernel/tracing"
+  }
+  volume {
+    name      = "debugfs"
+    host_path = "/sys/kernel/debug"
+  }
+
+  tags = merge(
+    {
+      Name = "${local.profiling_name}-${random_string.id.result}"
+    },
+    var.tags
+  )
+
+  container_definitions = jsonencode([
+    {
+      name              = "profiling-config-loader"
+      image             = "public.ecr.aws/aws-cli/aws-cli:2.28.17"
+      essential         = false
+      memoryReservation = 32
+      entryPoint        = ["sh", "-c"]
+      command           = [local.profiling_config_loader_command]
+      environment = concat(
+        [
+          {
+            name  = "SUPERVISOR_ENABLED"
+            value = tostring(var.supervisor_enabled)
+          },
+          {
+            name  = "PROFILING_S3_CONFIG_BUCKET"
+            value = local.profiling_s3_config_bucket
+          },
+          {
+            name  = "PROFILING_S3_CONFIG_KEY"
+            value = local.profiling_s3_config_key
+          }
+        ],
+        local.use_supervised_image ? [
+          {
+            name  = "COLLECTOR_CONFIG"
+            value = local.collector_config
+          },
+          {
+            name  = "SUPERVISOR_CONFIG"
+            value = local.profiling_supervisor_config
+          }
+        ] : []
+      )
+      mountPoints = [
+        {
+          sourceVolume  = "otel-config"
+          containerPath = "/otel-config"
+        }
+      ]
+    },
+    {
+      name       = local.profiling_name
+      image      = local.use_supervised_image ? "${var.supervised_image_repository}:${var.supervised_image_version}" : "${var.image}:${coalesce(var.image_version, "v0.5.10")}"
+      essential  = true
+      privileged = true
+      user       = "0"
+      entryPoint = ["sh", "-c"]
+      command    = [local.profiling_agent_command]
+      memory     = var.profiling_memory
+      dependsOn = [
+        {
+          containerName = "profiling-config-loader"
+          condition     = "SUCCESS"
+        }
+      ]
+      mountPoints = [
+        {
+          sourceVolume  = "otel-config"
+          containerPath = "/otel-config"
+          readOnly      = true
+        },
+        {
+          sourceVolume  = "hostfs"
+          containerPath = "/hostfs/var/lib/docker"
+          readOnly      = true
+        },
+        {
+          sourceVolume  = "docker-socket"
+          containerPath = "/var/run/docker.sock"
+        },
+        {
+          sourceVolume  = "tracefs"
+          containerPath = "/sys/kernel/tracing"
+          readOnly      = true
+        },
+        {
+          sourceVolume  = "debugfs"
+          containerPath = "/sys/kernel/debug"
+          readOnly      = true
+        }
+      ]
+      environment = concat(
+        [
+          {
+            name  = "CORALOGIX_DOMAIN"
+            value = local.coralogix_domain
+          }
+        ],
+        var.use_api_key_secret != true ? [
+          {
+            name  = "CORALOGIX_PRIVATE_KEY"
+            value = var.api_key
+          }
+        ] : []
+      )
+      secrets = var.use_api_key_secret == true ? [
+        {
+          name      = "CORALOGIX_PRIVATE_KEY"
+          valueFrom = var.api_key_secret_arn
+        }
+      ] : []
+      healthCheck = var.health_check_enabled ? {
+        command     = ["CMD", "/healthcheck"]
+        startPeriod = var.health_check_start_period
+        interval    = var.health_check_interval
+        timeout     = var.health_check_timeout
+        retries     = var.health_check_retries
+      } : null
+      logConfiguration = {
+        logDriver = "json-file"
+      }
+    }
+  ])
+}
+
+resource "aws_ecs_service" "coralogix_otel_profiling_agent" {
+  count                              = var.task_definition_arn == null && var.profiling_enabled ? 1 : 0
+  name                               = "${local.profiling_name}-${random_string.id.result}"
+  cluster                            = var.ecs_cluster_name
+  launch_type                        = "EC2"
+  task_definition                    = aws_ecs_task_definition.coralogix_otel_profiling_agent[0].arn
+  scheduling_strategy                = "DAEMON"
+  deployment_maximum_percent         = 100
+  deployment_minimum_healthy_percent = 0
+  deployment_circuit_breaker {
+    enable   = true
+    rollback = true
+  }
+  deployment_controller {
+    type = "ECS"
+  }
+  service_connect_configuration {
+    enabled = false
+  }
+  enable_ecs_managed_tags = true
+  tags = merge(
+    {
+      Name = "${local.profiling_name}-${random_string.id.result}"
     },
     var.tags
   )

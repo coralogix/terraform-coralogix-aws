@@ -37,7 +37,7 @@ variable "supervised_image_repository" {
 variable "supervised_image_version" {
   description = "Version tag for the supervised CDOT image"
   type        = string
-  default     = "v0.10.0"
+  default     = "v0.11.0"
 }
 
 variable "coralogix_region" {
@@ -93,6 +93,36 @@ variable "initial_fallback_configs" {
   description = "Initial Supervisor fallback configuration URLs"
   type        = list(string)
   default     = []
+}
+
+variable "profiling_enabled" {
+  description = "Whether to enable the profiling daemon"
+  type        = bool
+  default     = false
+}
+
+variable "profiling_s3_config_bucket" {
+  description = "S3 bucket for the profiling collector configuration"
+  type        = string
+  default     = null
+}
+
+variable "profiling_s3_config_key" {
+  description = "S3 object key for the profiling collector configuration"
+  type        = string
+  default     = null
+}
+
+variable "profiling_initial_fallback_configs" {
+  description = "Initial Supervisor fallback configuration URLs for the profiling agent"
+  type        = list(string)
+  default     = []
+}
+
+variable "profiling_memory" {
+  description = "Memory in MiB for the profiling task"
+  type        = number
+  default     = 512
 }
 
 variable "task_definition_arn" {

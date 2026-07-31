@@ -28,6 +28,7 @@ terraform init
 terraform plan
 terraform apply
 ./verify-supervised-mode.sh
+./verify-profiling-mode.sh
 ```
 
 Expected: ECS Service `coralogix-otel-agent-<UUID>` runs as a Daemon; logs/traces/metrics sent to Coralogix.
@@ -38,6 +39,8 @@ Expected: ECS Service `coralogix-otel-agent-<UUID>` runs as a Daemon; logs/trace
 |----------|----------|--------------|
 | Supervised + embedded configs | Default test variables | None |
 | Supervised + S3 overrides | Pass all three S3 variables | `resources/s3` |
+| Profiling collector mode | `profiling_enabled=true` plus profiling S3 vars | `resources/s3` with a profiling config object |
+| Profiling Supervisor mode | `profiling_enabled=true` with default supervised vars | None |
 | 1. S3 + inline API key | `terraform.tfvars` | `resources/s3` |
 | 2. S3 + Secrets Manager (module auto-creates execution role) | `vars/example-secrets-manager.tfvars.template` | `resources/s3`, `resources/parameter-store` |
 | 3. Service-only (existing task definition) | `vars/example-service-only.tfvars.template` | Existing task definition ARN. Run `./verify-service-only-mode.sh` to assert no task definition or IAM resources are planned. |

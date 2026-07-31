@@ -1,5 +1,14 @@
 # Changelog
 
+## v4.8.0
+
+#### **ecs-ec2**
+### 💡 Enhancements 💡
+- Added optional profiling support with `profiling_enabled`, a separate profiling daemon service, profiling S3 config overrides, and `profiling_initial_fallback_configs`.
+- Profiling follows `supervisor_enabled`: collector mode requires profiling S3 paths; supervised mode embeds a NOP bootstrap and profiling Supervisor config with `service.profilesSupport`.
+- Default `supervised_image_version` is now `v0.11.0`.
+- The auto-created task role is created only when S3 access is needed, and its policy includes the profiling bucket when profiling S3 paths are set.
+
 ## v4.7.0
 
 #### **s3-archive**

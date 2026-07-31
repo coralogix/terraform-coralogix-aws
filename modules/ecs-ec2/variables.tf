@@ -20,7 +20,7 @@ variable "supervisor_enabled" {
 }
 
 variable "s3_config_bucket" {
-  description = "S3 bucket containing collector and optional Supervisor configurations. Required in collector mode. In supervised mode, omit it to use embedded configs. Ignored in service-only mode."
+  description = "S3 bucket containing collector and optional Supervisor configurations. Required in collector mode and when initial_fallback_configs or profiling_initial_fallback_configs is set. In supervised mode, omit it to use embedded configs. Ignored in service-only mode."
   type        = string
   default     = null
 
@@ -99,9 +99,9 @@ variable "supervised_image_repository" {
 }
 
 variable "supervised_image_version" {
-  description = "The supervised CDOT image version used in supervised mode."
+  description = "The supervised CDOT image version used in supervised mode. Use v0.11.0 or later when profiling_enabled is true and initial fallback configurations are set."
   type        = string
-  default     = "v0.10.0"
+  default     = "v0.11.0"
 
   validation {
     condition     = trimspace(var.supervised_image_version) != ""
@@ -113,6 +113,68 @@ variable "memory" {
   description = "The amount of memory (in MiB) used by the task. Note that your cluster must have sufficient memory available to support the given value. Minimum __256__ MiB. CPU Units will be allocated directly proportional to Memory."
   type        = number
   default     = 256
+}
+
+variable "profiling_enabled" {
+  description = "Enable a separate profiling collector daemon service. Follows supervisor_enabled for collector vs supervised mode. Not supported in service-only mode."
+  type        = bool
+  default     = false
+
+  validation {
+    condition     = !var.profiling_enabled || var.task_definition_arn == null
+    error_message = "profiling_enabled cannot be used with task_definition_arn. Service-only mode manages only the main ECS service."
+  }
+}
+
+variable "profiling_s3_config_bucket" {
+  description = "S3 bucket containing the profiling collector configuration. Required when profiling is enabled in collector mode. Optional override in supervised mode."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = !var.profiling_enabled || var.supervisor_enabled || try(trimspace(var.profiling_s3_config_bucket) != "", false)
+    error_message = "profiling_s3_config_bucket is required when profiling is enabled in collector mode."
+  }
+}
+
+variable "profiling_s3_config_key" {
+  description = "S3 object key for the profiling collector configuration. Required when profiling is enabled in collector mode. Optional override in supervised mode."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = !var.profiling_enabled || var.supervisor_enabled || try(trimspace(var.profiling_s3_config_key) != "", false)
+    error_message = "profiling_s3_config_key is required when profiling is enabled in collector mode."
+  }
+}
+
+variable "profiling_initial_fallback_configs" {
+  description = "Initial Supervisor fallback configuration URLs for the profiling agent (full s3:// object paths). Applied only to the embedded profiling Supervisor config. Requires s3_config_bucket when non-empty. Ignored when profiling is disabled or in service-only mode."
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = length(var.profiling_initial_fallback_configs) == 0 || var.task_definition_arn != null || (var.profiling_enabled && var.supervisor_enabled)
+    error_message = "profiling_initial_fallback_configs requires profiling_enabled = true and supervisor_enabled = true when the module creates the task definition."
+  }
+
+  validation {
+    condition     = length(var.profiling_initial_fallback_configs) == 0 || var.task_definition_arn != null || try(trimspace(var.s3_config_bucket) != "", false)
+    error_message = "s3_config_bucket is required when profiling_initial_fallback_configs is set."
+  }
+
+  validation {
+    condition = alltrue([
+      for url in var.profiling_initial_fallback_configs : can(regex("^s3://.+", trimspace(url)))
+    ])
+    error_message = "Each profiling_initial_fallback_configs entry must be a non-empty s3:// URL."
+  }
+}
+
+variable "profiling_memory" {
+  description = "The amount of memory (in MiB) used by the profiling task."
+  type        = number
+  default     = 512
 }
 
 variable "coralogix_region" {
