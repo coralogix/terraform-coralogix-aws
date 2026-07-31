@@ -82,6 +82,8 @@ module "otel_ecs_ec2_coralogix" {
 
 ### Profiling in Collector Mode
 
+Upload the included [`profiling-config.yaml`](./profiling-config.yaml) file to S3. Set `profiling_s3_config_key` to its object key.
+
 ```hcl
 module "otel_ecs_ec2_coralogix" {
   source = "coralogix/aws/coralogix//modules/ecs-ec2"
@@ -100,6 +102,8 @@ module "otel_ecs_ec2_coralogix" {
 ```
 
 ### Profiling in Supervisor Mode
+
+The profiling Supervisor starts with a NOP configuration. After deployment, assign the included [`profiling-config.yaml`](./profiling-config.yaml) file to the profiling agent through Coralogix remote configuration.
 
 ```hcl
 module "otel_ecs_ec2_coralogix" {
