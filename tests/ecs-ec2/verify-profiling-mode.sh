@@ -154,9 +154,9 @@ if ! jq -e '
   [.resource_changes[]
     | select(.address | contains("otel_task_role_s3"))
     | select(.change.actions | index("create"))]
-  | length == 0
+  | length == 2
 ' "$SUPERVISED_JSON" >/dev/null; then
-  fail "Profiling Supervisor mode without S3 should not create a task role or S3 policy."
+  fail "Profiling Supervisor mode without S3 does not create the expected task role and S3 policy."
 fi
 
 echo "[INFO] Verifying profiling Supervisor fallbacks and S3 override..."

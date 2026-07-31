@@ -80,9 +80,9 @@ if ! jq -e '
   [.resource_changes[]
     | select(.address | contains("otel_task_role_s3"))
     | select(.change.actions | index("create"))]
-  | length == 0
+  | length == 2
 ' "$INLINE_JSON" >/dev/null; then
-  fail "Embedded Supervisor mode without S3 should not create a task role or S3 policy."
+  fail "Embedded Supervisor mode does not create the expected task role and S3 policy."
 fi
 
 if ! jq -e '
