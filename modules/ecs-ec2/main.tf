@@ -505,6 +505,7 @@ resource "aws_ecs_task_definition" "coralogix_otel_profiling_agent" {
   memory                   = var.profiling_memory
   requires_compatibilities = ["EC2"]
   network_mode             = "bridge"
+  pid_mode                 = "host"
   execution_role_arn       = local.execution_role_arn
   task_role_arn            = local.task_role_arn
 
@@ -518,6 +519,18 @@ resource "aws_ecs_task_definition" "coralogix_otel_profiling_agent" {
   volume {
     name      = "docker-socket"
     host_path = "/var/run/docker.sock"
+  }
+  volume {
+    name      = "procfs"
+    host_path = "/proc"
+  }
+  volume {
+    name      = "sysfs"
+    host_path = "/sys"
+  }
+  volume {
+    name      = "cgroupfs"
+    host_path = "/sys/fs/cgroup"
   }
   volume {
     name      = "tracefs"
@@ -605,6 +618,21 @@ resource "aws_ecs_task_definition" "coralogix_otel_profiling_agent" {
         {
           sourceVolume  = "docker-socket"
           containerPath = "/var/run/docker.sock"
+        },
+        {
+          sourceVolume  = "procfs"
+          containerPath = "/hostfs/proc"
+          readOnly      = true
+        },
+        {
+          sourceVolume  = "sysfs"
+          containerPath = "/hostfs/sys"
+          readOnly      = true
+        },
+        {
+          sourceVolume  = "cgroupfs"
+          containerPath = "/hostfs/sys/fs/cgroup"
+          readOnly      = true
         },
         {
           sourceVolume  = "tracefs"

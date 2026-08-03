@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Verifies profiling daemon task and service planning for collector and Supervisor modes.
-# Contract: profiling_enabled creates a bridge-network daemon with kernel mounts and
-# profilesSupport. Supervisor mode embeds a profiling-specific Supervisor config with
-# separate fallback URLs. Collector mode requires profiling S3 config paths.
+# Contract: profiling_enabled creates a bridge-network daemon with host PID visibility,
+# host process/kernel mounts, and profilesSupport. Supervisor mode embeds a
+# profiling-specific Supervisor config with separate fallback URLs. Collector mode
+# requires profiling S3 config paths.
 #
 # Usage: ./verify-profiling-mode.sh
 #
@@ -57,10 +58,14 @@ PROFILE_CONTAINERS=$(jq -r '.values.container_definitions' <<< "$PROFILE_TASK")
 
 if ! jq -e '
   (.values.network_mode == "bridge")
+  and (.values.pid_mode == "host")
+  and any(.values.volume[]; .name == "procfs" and .host_path == "/proc")
+  and any(.values.volume[]; .name == "sysfs" and .host_path == "/sys")
+  and any(.values.volume[]; .name == "cgroupfs" and .host_path == "/sys/fs/cgroup")
   and any(.values.volume[]; .name == "tracefs" and .host_path == "/sys/kernel/tracing")
   and any(.values.volume[]; .name == "debugfs" and .host_path == "/sys/kernel/debug")
 ' <<< "$PROFILE_TASK" >/dev/null; then
-  fail "Profiling task definition is missing bridge networking or kernel volumes."
+  fail "Profiling task definition is missing host PID visibility or host filesystem volumes."
 fi
 
 if ! jq -e '
@@ -79,6 +84,9 @@ if ! jq -e '
     and (.command[0] | contains("exec /cdot --feature-gates=+service.profilesSupport --config /otel-config/collector-config.yaml"))
     and (.command[0] | contains("mount -t debugfs"))
     and (.command[0] | contains("mount -t tracefs"))
+    and any(.mountPoints[]; .containerPath == "/hostfs/proc" and .readOnly == true)
+    and any(.mountPoints[]; .containerPath == "/hostfs/sys" and .readOnly == true)
+    and any(.mountPoints[]; .containerPath == "/hostfs/sys/fs/cgroup" and .readOnly == true)
     and any(.mountPoints[]; .containerPath == "/sys/kernel/tracing" and .readOnly == true)
     and any(.mountPoints[]; .containerPath == "/sys/kernel/debug" and .readOnly == true)
     and .healthCheck.command == ["CMD", "/healthcheck"]
