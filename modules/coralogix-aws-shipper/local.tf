@@ -76,4 +76,12 @@ locals {
 
   # Parse Starlark S3 script bucket when using s3:// format
   starlark_s3_bucket = startswith(var.starlark_script, "s3://") ? regex("^s3://([^/]+)", var.starlark_script)[0] : null
+
+  # Log export routes (parity with coralogix-aws-shipper CloudFormation conditions)
+  use_coralogix_rest_logs       = var.telemetry_mode == "logs" && var.log_export_protocol == "coralogix_rest"
+  use_otlp_grpc_logs            = var.telemetry_mode == "logs" && var.log_export_protocol == "otlp_grpc"
+  use_collector_otlp_logs       = local.use_otlp_grpc_logs && var.otlp_endpoint != ""
+  use_coralogix_otlp_logs       = local.use_otlp_grpc_logs && var.otlp_endpoint == ""
+  needs_coralogix_api_key       = var.telemetry_mode == "metrics" || local.use_coralogix_rest_logs || local.use_coralogix_otlp_logs
+  needs_coralogix_rest_endpoint = var.telemetry_mode == "metrics" || local.use_coralogix_rest_logs
 }

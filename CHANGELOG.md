@@ -1,5 +1,12 @@
 # Changelog
 
+## v4.8.0
+
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 💡
+- Added `log_export_protocol` and `otlp_endpoint` to support Coralogix REST, direct Coralogix OTLP/gRPC, and Collector OTLP/gRPC log export routes (parity with the shipper CloudFormation template). Default remains `coralogix_rest`.
+- Added `disable_log_severity_detection` to optionally disable keyword-based log severity detection while retaining protocol-level `Info` severity. Default remains `false`.
+
 ## v4.7.0
 
 #### **s3-archive**
