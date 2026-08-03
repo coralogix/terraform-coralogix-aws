@@ -39,13 +39,9 @@ locals {
     local.use_main_s3_bucket ? "arn:aws:s3:::${local.s3_config_bucket}" : null,
     local.use_s3_profiling_config ? "arn:aws:s3:::${local.profiling_s3_config_bucket}" : null,
   ]))
-  # Keep previous empty-bucket ARNs when no S3 paths are configured so existing
-  # supervised-without-S3 installs do not destroy the auto-created task role/policy.
-  task_role_s3_object_resources = length(local.s3_object_resources) > 0 ? local.s3_object_resources : ["arn:aws:s3:::${local.s3_config_bucket}/*"]
-  task_role_s3_bucket_resources = length(local.s3_bucket_resources) > 0 ? local.s3_bucket_resources : ["arn:aws:s3:::${local.s3_config_bucket}"]
-  profiling_name                = "coralogix-otel-profiling-agent"
-  execution_role_arn            = var.task_execution_role_arn != null ? var.task_execution_role_arn : try(aws_iam_role.otel_task_execution_role_s3[0].arn, null)
-  task_role_arn                 = var.task_role_arn != null ? var.task_role_arn : try(aws_iam_role.otel_task_role_s3[0].arn, null)
+  profiling_name     = "coralogix-otel-profiling-agent"
+  execution_role_arn = var.task_execution_role_arn != null ? var.task_execution_role_arn : try(aws_iam_role.otel_task_execution_role_s3[0].arn, null)
+  task_role_arn      = var.task_role_arn != null ? var.task_role_arn : try(aws_iam_role.otel_task_role_s3[0].arn, null)
 
   collector_config = <<-YAML
     receivers:
@@ -265,7 +261,7 @@ resource "aws_iam_role_policy" "otel_task_execution_role_secrets" {
   })
 }
 
-# IAM Role for task runtime S3 access (created when module creates task definition and no custom task role)
+# Keep the task role when S3 is unused to avoid replacing existing task definitions.
 resource "aws_iam_role" "otel_task_role_s3" {
   count = var.task_definition_arn == null && var.task_role_arn == null ? 1 : 0
   name  = "${local.name}-${random_string.id.result}-task-role-s3"
@@ -287,7 +283,7 @@ resource "aws_iam_role" "otel_task_role_s3" {
 }
 
 resource "aws_iam_role_policy" "otel_task_role_s3_s3_policy" {
-  count = var.task_definition_arn == null && var.task_role_arn == null ? 1 : 0
+  count = var.task_definition_arn == null && var.task_role_arn == null && length(local.s3_object_resources) > 0 ? 1 : 0
   name  = "S3ReadAccess"
   role  = aws_iam_role.otel_task_role_s3[0].id
 
@@ -300,14 +296,14 @@ resource "aws_iam_role_policy" "otel_task_role_s3_s3_policy" {
           "s3:GetObject",
           "s3:GetObjectVersion"
         ]
-        Resource = local.task_role_s3_object_resources
+        Resource = local.s3_object_resources
       },
       {
         Effect = "Allow"
         Action = [
           "s3:ListBucket"
         ]
-        Resource = local.task_role_s3_bucket_resources
+        Resource = local.s3_bucket_resources
       }
     ]
   })
