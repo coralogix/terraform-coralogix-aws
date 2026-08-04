@@ -16,6 +16,8 @@ In `supervised` mode, the module uses the supervised image, embeds a NOP Collect
 
 `initial_fallback_configs` is a list of full `s3://` object URLs injected into the embedded Supervisor config as `agent.initial_fallback_configs`. The default is an empty list (no startup fallback). This applies only to the embedded Supervisor configuration; an S3-provided Supervisor configuration is used as-is. When the list is non-empty, `s3_config_bucket` is required and every fallback URL must reference that bucket so the auto-created task role can read the objects. When `task_role_arn` is provided, that custom role must grant `s3:GetObject` access to the fallback objects.
 
+Set `profiling_enabled = true` to deploy a second daemon service for continuous profiling. The profiling agent follows `supervisor_enabled`. In collector mode, `profiling_s3_config_bucket` and `profiling_s3_config_key` are required. In supervised mode, those paths are optional overrides for the embedded NOP collector config. The profiling Supervisor config is always embedded and cannot be overridden from S3. Use `profiling_initial_fallback_configs` for profiling-specific fallback URLs. Supervised CDOT `v0.11.0` or later is required when using initial fallback configuration with profiling enabled. Profiling is not supported with `task_definition_arn`.
+
 The module passes these environment variables to the collector:
 - `CORALOGIX_DOMAIN` – region-specific domain (from coralogix_region)
 - `CORALOGIX_PRIVATE_KEY` – your API key
@@ -66,6 +68,47 @@ module "ecs-ec2" {
   s3_config_bucket = "my-otel-config-bucket"
   initial_fallback_configs = [
     "s3://my-otel-config-bucket.s3.eu-north-1.amazonaws.com/<ACCOUNT_ID>/<GROUP_NAME>/<COLLECTOR_VERSION>/<REMOTE_CONFIG_NAME>/config.yaml",
+  ]
+}
+```
+
+For profiling in collector mode:
+
+```terraform
+module "ecs-ec2" {
+  source = "coralogix/aws/coralogix//modules/ecs-ec2"
+
+  ecs_cluster_name  = "my-cluster"
+  image_version     = "v0.5.10"
+  coralogix_region  = "EU1"
+  api_key           = "your-coralogix-api-key"
+  s3_config_bucket  = "my-otel-config-bucket"
+  s3_config_key     = "configs/otel-config.yaml"
+
+  profiling_enabled          = true
+  profiling_s3_config_bucket = "my-otel-config-bucket"
+  profiling_s3_config_key    = "configs/profiling-config.yaml"
+}
+```
+
+For profiling in Supervisor mode:
+
+```terraform
+module "ecs-ec2" {
+  source = "coralogix/aws/coralogix//modules/ecs-ec2"
+
+  ecs_cluster_name   = "my-cluster"
+  supervisor_enabled = true
+  coralogix_region   = "EU1"
+  api_key            = "your-coralogix-api-key"
+  profiling_enabled  = true
+
+  s3_config_bucket = "my-otel-config-bucket"
+  initial_fallback_configs = [
+    "s3://my-otel-config-bucket.s3.eu-north-1.amazonaws.com/<ACCOUNT_ID>/<GROUP_NAME>/<COLLECTOR_VERSION>/main/config.yaml",
+  ]
+  profiling_initial_fallback_configs = [
+    "s3://my-otel-config-bucket.s3.eu-north-1.amazonaws.com/<ACCOUNT_ID>/<GROUP_NAME>/<COLLECTOR_VERSION>/profiling/config.yaml",
   ]
 }
 ```
@@ -127,13 +170,18 @@ You can control health checks using:
 | supervisor_enabled | Run the Collector through the Supervisor | `bool` | `false` | no |
 | image_version | Standard Coralogix Otel Collector image version/tag used in collector mode | `string` | `null` | yes* |
 | supervised_image_repository | Supervised Coralogix Otel Collector image repository | `string` | `"cgx.jfrog.io/coralogix-docker-images/coralogix-otel-supervised-cdot"` | no |
-| supervised_image_version | Supervised Coralogix Otel Collector image version/tag | `string` | `"v0.10.0"` | no |
+| supervised_image_version | Supervised Coralogix Otel Collector image version/tag. Use `v0.11.0` or later with profiling fallbacks. | `string` | `"v0.11.0"` | no |
 | coralogix_region | Coralogix region: EU1, EU2, AP1, AP2, AP3, US1, US2, custom | `string` | `null` | yes* |
 | api_key | Send-Your-Data API key | `string` | `null` | yes** |
-| s3_config_bucket | S3 bucket containing collector and optional Supervisor configs. Also required when `initial_fallback_configs` is set. | `string` | `null` | yes* |
+| s3_config_bucket | S3 bucket containing collector and optional Supervisor configs. Also required when `initial_fallback_configs` or `profiling_initial_fallback_configs` is set. | `string` | `null` | yes* |
 | s3_config_key | S3 object key for the collector config | `string` | `null` | yes* |
 | s3_supervisor_config_key | Optional S3 object key for the Supervisor config | `string` | `null` | no |
 | initial_fallback_configs | Initial Supervisor fallback configuration URLs (`s3://` paths). Applied only to the embedded Supervisor config. Requires `s3_config_bucket` when non-empty. | `list(string)` | `[]` | no |
+| profiling_enabled | Enable a separate profiling collector daemon service | `bool` | `false` | no |
+| profiling_s3_config_bucket | S3 bucket for the profiling collector config. Required in collector mode; optional override in supervised mode. Must be set with `profiling_s3_config_key`. | `string` | `null` | no |
+| profiling_s3_config_key | S3 object key for the profiling collector config. Required in collector mode; optional override in supervised mode. Must be set with `profiling_s3_config_bucket`. | `string` | `null` | no |
+| profiling_initial_fallback_configs | Initial Supervisor fallback URLs for the profiling agent. Requires `s3_config_bucket` when non-empty. | `list(string)` | `[]` | no |
+| profiling_memory | Profiling task memory (MiB) | `number` | `512` | no |
 | config_source | Reserved for UI compatibility. Keep set to `s3`. | `string` | `"s3"` | no |
 | image | OTEL Collector image | `string` | `"coralogixrepo/coralogix-otel-collector"` | no |
 | memory | Task memory (MiB) | `number` | `256` | no |
@@ -161,6 +209,8 @@ You can control health checks using:
 |-------|-------|-----|
 | `task_execution_role_arn must be null in service-only mode` | You set `task_definition_arn` but left `task_execution_role_arn` non-null. | Set `task_execution_role_arn = null` and `task_role_arn = null` when using `task_definition_arn`. |
 | `task_role_arn must be null in service-only mode` | Same as above for task role. | Same fix. |
+| `profiling_enabled cannot be used with task_definition_arn` | You enabled profiling in service-only mode. | Disable profiling or omit `task_definition_arn` so the module can create the profiling task. |
+| `profiling_s3_config_bucket and profiling_s3_config_key must both be set or both be null` | You set only one of the profiling S3 path inputs. | Set both values, or leave both unset. |
 
 ## Outputs
 
@@ -168,3 +218,5 @@ You can control health checks using:
 |------|-------------|
 | coralogix_otel_agent_service_id | ID of the ECS Service |
 | coralogix_otel_agent_task_definition_arn | ARN of the ECS Task Definition |
+| coralogix_otel_profiling_agent_service_id | ID of the profiling ECS Service. Null when profiling is disabled. |
+| coralogix_otel_profiling_agent_task_definition_arn | ARN of the profiling ECS Task Definition. Null when profiling is disabled. |

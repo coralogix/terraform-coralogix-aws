@@ -33,6 +33,12 @@ module "ecs-ec2" {
   s3_supervisor_config_key = var.s3_supervisor_config_key
   initial_fallback_configs = var.initial_fallback_configs
 
+  profiling_enabled                  = var.profiling_enabled
+  profiling_s3_config_bucket         = var.profiling_s3_config_bucket
+  profiling_s3_config_key            = var.profiling_s3_config_key
+  profiling_initial_fallback_configs = var.profiling_initial_fallback_configs
+  profiling_memory                   = var.profiling_memory
+
   task_execution_role_arn = var.task_execution_role_arn
   task_role_arn           = var.task_role_arn
   task_definition_arn     = var.task_definition_arn

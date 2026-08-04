@@ -1,5 +1,15 @@
 # Changelog
 
+## v4.9.0
+
+#### **ecs-ec2**
+### 💡 Enhancements 💡
+- Added optional profiling support with `profiling_enabled`, a separate profiling daemon service, profiling S3 config overrides, and `profiling_initial_fallback_configs`.
+- Profiling follows `supervisor_enabled`: collector mode requires profiling S3 paths; supervised mode embeds a NOP bootstrap and profiling Supervisor config with `service.profilesSupport`.
+- When Supervisor is enabled, all deployed agents run with `service.profilesSupport`, even when `profiling_enabled = false`. This allows the usage of profiling components via Fleet Management or S3 configuration without redeploying the ECS service.
+- Default `supervised_image_version` is now `v0.11.0`.
+- The auto-created task role policy includes the profiling bucket when profiling S3 paths are set.
+
 ## v4.8.0
 
 #### **coralogix-aws-shipper**

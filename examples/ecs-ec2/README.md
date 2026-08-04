@@ -80,6 +80,43 @@ module "otel_ecs_ec2_coralogix" {
 }
 ```
 
+### Profiling in Collector Mode
+
+Upload the included [`profiling-config.yaml`](./profiling-config.yaml) file to S3. Set `profiling_s3_config_key` to its object key.
+
+```hcl
+module "otel_ecs_ec2_coralogix" {
+  source = "coralogix/aws/coralogix//modules/ecs-ec2"
+
+  ecs_cluster_name  = "my-ecs-cluster"
+  image_version     = "v0.5.10"
+  coralogix_region  = "EU1"
+  api_key           = "your-coralogix-api-key"
+  s3_config_bucket  = "my-otel-config-bucket"
+  s3_config_key     = "configs/otel-config.yaml"
+
+  profiling_enabled          = true
+  profiling_s3_config_bucket = "my-otel-config-bucket"
+  profiling_s3_config_key    = "configs/profiling-config.yaml"
+}
+```
+
+### Profiling in Supervisor Mode
+
+The profiling Supervisor starts with a NOP configuration. After deployment, assign the included [`profiling-config.yaml`](./profiling-config.yaml) file to the profiling agent through Coralogix remote configuration.
+
+```hcl
+module "otel_ecs_ec2_coralogix" {
+  source = "coralogix/aws/coralogix//modules/ecs-ec2"
+
+  ecs_cluster_name   = "my-ecs-cluster"
+  supervisor_enabled = true
+  coralogix_region   = "EU1"
+  api_key            = "your-coralogix-api-key"
+  profiling_enabled  = true
+}
+```
+
 ### Using Secrets Manager for API Key
 
 The module auto-creates an execution role with the standard ECS execution policy and Secrets Manager access when `task_execution_role_arn` is not provided. Runtime S3 access is granted through the task role:
@@ -137,7 +174,7 @@ module "otel_ecs_ec2_coralogix" {
 }
 ```
 
-**Note**: When providing a custom `task_role_arn`, ensure it has `s3:GetObject`, `s3:GetObjectVersion`, and `s3:ListBucket` permissions for the configuration bucket, as the config-loader container accesses S3 at runtime.
+**Note**: When providing a custom `task_role_arn`, ensure it has `s3:GetObject`, `s3:GetObjectVersion`, and `s3:ListBucket` permissions for the configuration bucket, as the config-loader container accesses S3 at runtime. When profiling uses a separate S3 bucket, grant the same permissions for that bucket as well.
 
 ## IAM Role Management
 

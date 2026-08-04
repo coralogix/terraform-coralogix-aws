@@ -55,12 +55,13 @@ if ! jq -e '
       and (.value | contains("opamp/v1"))
       and (.value | contains("- /otel-config/collector-config.yaml"))
       and (.value | contains("initial_fallback_configs: []"))
+      and (.value | contains("--feature-gates=+service.profilesSupport"))
     )
     and any(.mountPoints[]; .containerPath == "/otel-config")
   )
   and any(.[];
     .name == "coralogix-otel-agent"
-    and .image == "cgx.jfrog.io/coralogix-docker-images/coralogix-otel-supervised-cdot:v0.10.0"
+    and .image == "cgx.jfrog.io/coralogix-docker-images/coralogix-otel-supervised-cdot:v0.11.0"
     and .privileged == true
     and (has("entryPoint") | not)
     and .command == ["--config", "/otel-config/supervisor.yaml"]
@@ -76,12 +77,25 @@ if ! jq -e '
 fi
 
 if ! jq -e '
-  [.resource_changes[]
-    | select(.address | contains("otel_task_role_s3"))
+  any(.resource_changes[];
+    .address == "module.ecs-ec2.aws_iam_role.otel_task_role_s3[0]"
+    and (.change.actions | index("create"))
+  )
+  and ([.resource_changes[]
+    | select(.address == "module.ecs-ec2.aws_iam_role_policy.otel_task_role_s3_s3_policy[0]")
     | select(.change.actions | index("create"))]
-  | length == 2
+    | length == 0)
 ' "$INLINE_JSON" >/dev/null; then
-  fail "Embedded Supervisor mode does not create the expected task role and S3 policy."
+  fail "Embedded Supervisor mode without S3 must create the task role without an S3 policy."
+fi
+
+if ! jq -e '
+  [.resource_changes[]
+    | select(.address | contains("coralogix_otel_profiling_agent"))
+    | select(.change.actions | index("create"))]
+  | length == 0
+' "$INLINE_JSON" >/dev/null; then
+  fail "Profiling resources should not be created when profiling_enabled is false."
 fi
 
 echo "[INFO] Verifying Supervisor mode with S3 configuration overrides..."
@@ -112,11 +126,11 @@ S3_POLICY=$(jq -r '
 if ! jq -e '
   any(.Statement[];
     (.Action | sort) == (["s3:GetObject", "s3:GetObjectVersion"] | sort)
-    and .Resource == "arn:aws:s3:::placeholder-bucket/*"
+    and ((.Resource | if type == "array" then . else [.] end) | sort) == ["arn:aws:s3:::placeholder-bucket/*"]
   )
   and any(.Statement[];
-    .Action == ["s3:ListBucket"]
-    and .Resource == "arn:aws:s3:::placeholder-bucket"
+    (.Action | if type == "array" then . else [.] end) == ["s3:ListBucket"]
+    and ((.Resource | if type == "array" then . else [.] end) | sort) == ["arn:aws:s3:::placeholder-bucket"]
   )
 ' <<< "$S3_POLICY" >/dev/null; then
   fail "The task role policy does not grant the expected read access to the configured S3 bucket."
@@ -182,7 +196,7 @@ FALLBACK_POLICY=$(jq -r '
 if ! jq -e '
   any(.Statement[];
     (.Action | sort) == (["s3:GetObject", "s3:GetObjectVersion"] | sort)
-    and .Resource == "arn:aws:s3:::placeholder-bucket/*"
+    and ((.Resource | if type == "array" then . else [.] end) | sort) == ["arn:aws:s3:::placeholder-bucket/*"]
   )
 ' <<< "$FALLBACK_POLICY" >/dev/null; then
   fail "initial_fallback_configs does not grant the expected S3 read access via s3_config_bucket."

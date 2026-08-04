@@ -138,3 +138,10 @@ jobs:
           cd "tests/ecs-ec2"
           chmod +x verify-supervised-mode.sh
           ./verify-supervised-mode.sh
+
+      - if: ${{ github.event.pull_request.head.repo.full_name == github.repository && matrix.package == 'ecs-ec2' }}
+        name: Verify profiling mode configs and permissions
+        run: |
+          cd "tests/ecs-ec2"
+          chmod +x verify-profiling-mode.sh
+          ./verify-profiling-mode.sh

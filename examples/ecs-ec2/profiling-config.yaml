@@ -1,0 +1,35 @@
+receivers:
+  profiling:
+    samples_per_second: 20
+    reporter_interval: 5s
+    monitor_interval: 5s
+    probabilistic_interval: 1m
+    probabilistic_threshold: 100
+    tracers: all
+
+exporters:
+  coralogix:
+    domain: "${CORALOGIX_DOMAIN}"
+    private_key: "${CORALOGIX_PRIVATE_KEY}"
+    application_name: "myapplication"
+    subsystem_name: "profiler"
+    application_name_attributes:
+      - "aws.ecs.cluster"
+      - "aws.ecs.task.definition.family"
+    subsystem_name_attributes:
+      - "aws.ecs.container.name"
+      - "aws.ecs.docker.name"
+      - "docker.name"
+    timeout: 30s
+  debug: {}
+
+extensions:
+  health_check:
+    endpoint: "localhost:13133"
+
+service:
+  extensions: [health_check]
+  pipelines:
+    profiles:
+      receivers: [profiling]
+      exporters: [coralogix, debug]
