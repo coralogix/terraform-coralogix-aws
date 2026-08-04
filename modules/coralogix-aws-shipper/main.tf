@@ -58,7 +58,7 @@ resource "aws_iam_policy" "lambda_policy" {
       ],
 
       # Secrets Access Policy
-      each.value.store_api_key_in_secrets_manager == null || each.value.store_api_key_in_secrets_manager == true || local.api_key_is_arn ? [
+      local.needs_coralogix_api_key && (each.value.store_api_key_in_secrets_manager == null || each.value.store_api_key_in_secrets_manager == true || local.api_key_is_arn) ? [
         {
           Effect   = "Allow",
           Action   = ["secretsmanager:GetSecretValue"],
@@ -287,10 +287,28 @@ module "lambda" {
   tracing_mode                   = var.tracing_mode
   dead_letter_target_arn         = var.enable_dlq ? aws_sqs_queue.DLQ[0].arn : null
   environment_variables = {
-    CORALOGIX_ENDPOINT             = var.custom_domain != "" ? "https://ingress.${var.custom_domain}" : var.subnet_ids == null ? "https://ingress.${lookup(module.locals[each.key].coralogix_domains, var.coralogix_region, "EU1")}" : "https://ingress.private.${lookup(module.locals[each.key].coralogix_domains, var.coralogix_region, "EU1")}"
-    INTEGRATION_TYPE               = each.value.integration_type
-    RUST_LOG                       = var.log_level
-    CORALOGIX_API_KEY              = !local.api_key_is_arn && (each.value.store_api_key_in_secrets_manager == null || each.value.store_api_key_in_secrets_manager == true) ? aws_secretsmanager_secret.coralogix_secret[each.key].arn : each.value.api_key
+    CORALOGIX_ENDPOINT = local.needs_coralogix_rest_endpoint ? (
+      var.custom_domain != "" ? "https://ingress.${var.custom_domain}" : (
+        var.subnet_ids == null
+        ? "https://ingress.${lookup(module.locals[each.key].coralogix_domains, var.coralogix_region, "EU1")}"
+        : "https://ingress.private.${lookup(module.locals[each.key].coralogix_domains, var.coralogix_region, "EU1")}"
+      )
+    ) : null
+    INTEGRATION_TYPE = each.value.integration_type
+    RUST_LOG         = var.log_level
+    CORALOGIX_API_KEY = local.needs_coralogix_api_key ? (
+      !local.api_key_is_arn && (each.value.store_api_key_in_secrets_manager == null || each.value.store_api_key_in_secrets_manager == true)
+      ? aws_secretsmanager_secret.coralogix_secret[each.key].arn
+      : each.value.api_key
+    ) : null
+    LOG_EXPORT_PROTOCOL            = var.telemetry_mode == "logs" ? var.log_export_protocol : null
+    OTLP_ENDPOINT                  = local.use_collector_otlp_logs ? var.otlp_endpoint : null
+    DISABLE_LOG_SEVERITY_DETECTION = var.telemetry_mode == "logs" ? tostring(var.disable_log_severity_detection) : null
+    CORALOGIX_DOMAIN = local.use_coralogix_otlp_logs ? (
+      var.custom_domain != ""
+      ? var.custom_domain
+      : lookup(module.locals[each.key].coralogix_domains, var.coralogix_region, "eu1.coralogix.com")
+    ) : null
     APP_NAME                       = each.value.application_name
     SUB_NAME                       = each.value.subsystem_name
     NEWLINE_PATTERN                = each.value.newline_pattern != null ? each.value.newline_pattern : null
@@ -346,6 +364,19 @@ module "lambda" {
   tags = merge(var.tags, module.locals[each.key].tags)
 }
 
+check "direct_otlp_requires_credentials" {
+  assert {
+    condition = !local.use_coralogix_otlp_logs || (
+      alltrue([
+        for integration in values(local.integration_info) :
+        integration.api_key != null && integration.api_key != ""
+      ]) &&
+      (var.coralogix_region != "Custom" || var.custom_domain != "")
+    )
+    error_message = "Direct Coralogix OTLP requires api_key and either a non-Custom coralogix_region or custom_domain."
+  }
+}
+
 resource "aws_lambda_function_event_invoke_config" "invoke_on_failure" {
   for_each = {
     for key, integration_info in var.integration_info != null ? var.integration_info : local.integration_info : key => integration_info
@@ -392,7 +423,7 @@ resource "aws_sns_topic_policy" "test" {
 resource "aws_secretsmanager_secret" "coralogix_secret" {
   for_each = {
     for key, integration_info in var.integration_info != null ? var.integration_info : local.integration_info : key => integration_info
-    if !local.api_key_is_arn && (integration_info.store_api_key_in_secrets_manager == null || integration_info.store_api_key_in_secrets_manager == true)
+    if local.needs_coralogix_api_key && !local.api_key_is_arn && (integration_info.store_api_key_in_secrets_manager == null || integration_info.store_api_key_in_secrets_manager == true)
   }
   name        = "lambda/coralogix/${data.aws_region.this.id}/coralogix-aws-shipper/coralogix-${random_string.this[each.key].result}"
   description = "Coralogix Send Your Data key Secret"
@@ -405,7 +436,7 @@ resource "aws_secretsmanager_secret" "coralogix_secret" {
 resource "aws_secretsmanager_secret_version" "service_user" {
   for_each = {
     for key, integration_info in var.integration_info != null ? var.integration_info : local.integration_info : key => integration_info
-    if !local.api_key_is_arn && (integration_info.store_api_key_in_secrets_manager == null || integration_info.store_api_key_in_secrets_manager == true)
+    if local.needs_coralogix_api_key && !local.api_key_is_arn && (integration_info.store_api_key_in_secrets_manager == null || integration_info.store_api_key_in_secrets_manager == true)
   }
   depends_on    = [aws_secretsmanager_secret.coralogix_secret]
   secret_id     = aws_secretsmanager_secret.coralogix_secret[each.key].id
@@ -413,7 +444,7 @@ resource "aws_secretsmanager_secret_version" "service_user" {
 }
 
 resource "aws_vpc_endpoint" "secretsmanager" {
-  count               = (var.store_api_key_in_secrets_manager || local.api_key_is_arn) && var.subnet_ids != null && var.create_endpoint ? 1 : 0
+  count               = local.needs_coralogix_api_key && (var.store_api_key_in_secrets_manager || local.api_key_is_arn) && var.subnet_ids != null && var.create_endpoint ? 1 : 0
   vpc_id              = data.aws_subnet.subnet[0].vpc_id
   service_name        = "com.amazonaws.${data.aws_region.this.id}.secretsmanager"
   vpc_endpoint_type   = "Interface"

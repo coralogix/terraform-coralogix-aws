@@ -1,6 +1,6 @@
 # Changelog
 
-## v4.8.0
+## v4.9.0
 
 #### **ecs-ec2**
 ### 💡 Enhancements 💡
@@ -9,6 +9,13 @@
 - When Supervisor is enabled, all deployed agents run with `service.profilesSupport`, even when `profiling_enabled = false`. This allows the usage of profiling components via Fleet Management or S3 configuration without redeploying the ECS service.
 - Default `supervised_image_version` is now `v0.11.0`.
 - The auto-created task role policy includes the profiling bucket when profiling S3 paths are set.
+
+## v4.8.0
+
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 💡
+- Added `log_export_protocol` and `otlp_endpoint` to support Coralogix REST, direct Coralogix OTLP/gRPC, and Collector OTLP/gRPC log export routes (parity with the shipper CloudFormation template). Default remains `coralogix_rest`.
+- Added `disable_log_severity_detection` to optionally disable keyword-based log severity detection while retaining protocol-level `Info` severity. Default remains `false`.
 
 ## v4.7.0
 

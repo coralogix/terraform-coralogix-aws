@@ -430,6 +430,28 @@ variable "telemetry_mode" {
   }
 }
 
+variable "log_export_protocol" {
+  description = "Log delivery protocol when telemetry_mode is logs: coralogix_rest (default) or otlp_grpc. Ignored for metrics."
+  type        = string
+  default     = "coralogix_rest"
+  validation {
+    condition     = contains(["coralogix_rest", "otlp_grpc"], var.log_export_protocol)
+    error_message = "log_export_protocol must be one of: [coralogix_rest, otlp_grpc]."
+  }
+}
+
+variable "otlp_endpoint" {
+  description = "Optional Collector http:// or https:// origin for otlp_grpc. Empty selects direct Coralogix OTLP (uses coralogix_region/custom_domain + api_key). Non-empty selects unauthenticated Collector delivery."
+  type        = string
+  default     = ""
+}
+
+variable "disable_log_severity_detection" {
+  description = "Disable keyword-based severity detection for logs. When true, logs use protocol-level Info severity without modifying the original log body. Ignored for metrics."
+  type        = bool
+  default     = false
+}
+
 variable "include_metric_stream_filter" {
   description = "List of inclusive metric filters. If you specify this parameter, the stream sends only the conditional metric names from the metric namespaces that you specify here. Leave empty to send all metrics"
   type = list(object({
