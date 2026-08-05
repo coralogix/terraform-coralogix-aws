@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.10.0
+
+#### **firehose-logs**, **firehose-metrics**
+### 💡 Enhancements 💡
+- Added optional Secrets Manager support for the Coralogix API key via `api_key_secret_arn` (and optional `api_key_secret_kms_key_arn` for CMK-encrypted secrets). When set, Firehose uses `secrets_manager_configuration` to fetch `{"api_key": "..."}` at runtime instead of freezing a literal `access_key` at apply time. `api_key` remains supported and is required unless a secret ARN is provided.
+
 ## v4.9.0
 
 #### **ecs-ec2**

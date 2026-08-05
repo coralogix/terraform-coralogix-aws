@@ -43,6 +43,9 @@ locals {
   new_metric_stream_iam_name    = var.metric_streams_iam_custom_name != null ? var.metric_streams_iam_custom_name : "${var.firehose_stream}-cw-iam"
 
   arn_prefix = "arn:${data.aws_partition.current.partition}"
+
+  use_secrets_manager = var.api_key_secret_arn != null && var.api_key_secret_arn != ""
+  use_api_key_kms     = var.api_key_secret_kms_key_arn != null && var.api_key_secret_kms_key_arn != ""
 }
 
 data "aws_caller_identity" "current_identity" {}
@@ -212,7 +215,24 @@ resource "aws_iam_policy" "new_firehose_iam" {
           ],
           "Resource": "${aws_lambda_function.lambda_processor[0].arn}:*"
         }
-        %{else}
+        %{endif}
+        %{if local.use_secrets_manager},
+        {
+          "Effect": "Allow",
+          "Action": [
+              "secretsmanager:GetSecretValue"
+          ],
+          "Resource": "${var.api_key_secret_arn}"
+        }
+        %{endif}
+        %{if local.use_secrets_manager && local.use_api_key_kms},
+        {
+          "Effect": "Allow",
+          "Action": [
+              "kms:Decrypt"
+          ],
+          "Resource": "${var.api_key_secret_kms_key_arn}"
+        }
         %{endif}
     ]
 }
@@ -346,12 +366,21 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_metrics" {
   http_endpoint_configuration {
     url                = local.endpoint_url
     name               = "Coralogix"
-    access_key         = var.api_key
+    access_key         = local.use_secrets_manager ? null : var.api_key
     buffering_size     = 1
     buffering_interval = 60
     s3_backup_mode     = "FailedDataOnly"
     role_arn           = local.firehose_iam_role_arn
     retry_duration     = 300
+
+    dynamic "secrets_manager_configuration" {
+      for_each = local.use_secrets_manager ? [1] : []
+      content {
+        enabled    = true
+        secret_arn = var.api_key_secret_arn
+        role_arn   = local.firehose_iam_role_arn
+      }
+    }
 
     s3_configuration {
       role_arn           = local.firehose_iam_role_arn

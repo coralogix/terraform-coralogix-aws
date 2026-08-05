@@ -16,6 +16,19 @@ module "cloudwatch_firehose_metrics_coralogix" {
 }
 ```
 
+### Secrets Manager API key
+
+Optionally pass `api_key_secret_arn` instead of `api_key` so Firehose fetches the key at runtime via `SecretsManagerConfiguration`. The secret value must be JSON: `{"api_key": "..."}`. Rotating the secret then takes effect without a Terraform apply. If the secret is encrypted with a customer managed KMS key, also set `api_key_secret_kms_key_arn`. When the module creates the Firehose IAM role, it grants `secretsmanager:GetSecretValue` (and `kms:Decrypt` when a CMK ARN is set). If you pass `existing_firehose_iam`, that role must already allow those actions.
+
+```terraform
+module "cloudwatch_firehose_metrics_coralogix" {
+  source             = "coralogix/aws/coralogix//modules/firehose-metrics"
+  firehose_stream    = var.coralogix_firehose_stream_name
+  api_key_secret_arn = var.api_key_secret_arn
+  coralogix_region   = var.coralogix_region
+}
+```
+
 By default, the metric stream includes all namespaces [AWS/EC2, AWS/EBS, etc..] and metric names.
 
 
