@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.6.0"
+  required_version = ">= 1.9.0"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -35,6 +35,9 @@ locals {
   new_firehose_iam_name     = var.firehose_iam_custom_name != null ? var.firehose_iam_custom_name : "${var.firehose_stream}-firehose-logs-iam"
 
   arn_prefix = var.govcloud_deployment ? "arn:aws-us-gov" : "arn:aws"
+
+  use_secrets_manager = var.api_key_secret_arn != null && var.api_key_secret_arn != ""
+  use_api_key_kms     = var.api_key_secret_kms_key_arn != null && var.api_key_secret_kms_key_arn != ""
 }
 
 data "aws_caller_identity" "current_identity" {}
@@ -184,6 +187,32 @@ data "aws_iam_policy_document" "new_firehose_policy" {
       aws_cloudwatch_log_group.firehose_loggroup.arn,
     ]
   }
+
+  dynamic "statement" {
+    for_each = local.use_secrets_manager ? [1] : []
+    content {
+      effect = "Allow"
+      actions = [
+        "secretsmanager:GetSecretValue",
+      ]
+      resources = [
+        var.api_key_secret_arn,
+      ]
+    }
+  }
+
+  dynamic "statement" {
+    for_each = local.use_secrets_manager && local.use_api_key_kms ? [1] : []
+    content {
+      effect = "Allow"
+      actions = [
+        "kms:Decrypt",
+      ]
+      resources = [
+        var.api_key_secret_kms_key_arn,
+      ]
+    }
+  }
 }
 
 resource "aws_iam_role_policy" "new_firehose_policy" {
@@ -228,12 +257,21 @@ resource "aws_kinesis_firehose_delivery_stream" "coralogix_stream_logs" {
   http_endpoint_configuration {
     url                = local.endpoint_url
     name               = "Coralogix"
-    access_key         = var.api_key
+    access_key         = local.use_secrets_manager ? null : var.api_key
     buffering_size     = 1
     buffering_interval = 60
     s3_backup_mode     = "FailedDataOnly"
     role_arn           = local.firehose_iam_role_arn
     retry_duration     = 300
+
+    dynamic "secrets_manager_configuration" {
+      for_each = local.use_secrets_manager ? [1] : []
+      content {
+        enabled    = true
+        secret_arn = var.api_key_secret_arn
+        role_arn   = local.firehose_iam_role_arn
+      }
+    }
 
     s3_configuration {
       role_arn           = local.firehose_iam_role_arn

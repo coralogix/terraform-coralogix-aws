@@ -19,6 +19,21 @@ module "cloudwatch_firehose_logs_coralogix" {
 }
 ```
 
+### Secrets Manager API key
+
+Optionally pass `api_key_secret_arn` instead of `api_key` so Firehose fetches the key at runtime via `SecretsManagerConfiguration`. The secret value must be JSON: `{"api_key": "..."}`. Rotating the secret then takes effect without a Terraform apply. If the secret is encrypted with a customer managed KMS key, also set `api_key_secret_kms_key_arn`. When the module creates the Firehose IAM role, it grants `secretsmanager:GetSecretValue` (and `kms:Decrypt` when a CMK ARN is set). If you pass `existing_firehose_iam`, that role must already allow those actions.
+
+```terraform
+module "cloudwatch_firehose_logs_coralogix" {
+  source              = "coralogix/aws/coralogix//modules/firehose-logs"
+  firehose_stream     = var.coralogix_firehose_stream_name
+  api_key_secret_arn  = var.api_key_secret_arn
+  coralogix_region    = var.coralogix_region
+  integration_type_logs = "Default"
+  source_type_logs      = "DirectPut"
+}
+```
+
 ### Dynamic Values Table for Logs
 
 For `application_name` and/or `subsystem_name` to be set dynamically in relation to their `integrationType`'s resource fields (e.g. CloudWatch_JSON's loggroup name, EksFargate's k8s namespace). The source's `var` has to be mapped as a string literal to the `integrationType`'s as a DynamicFromField with pre-defined values:
@@ -75,7 +90,7 @@ It is possible to pass a custom Coralogix domain by using the `custom_domain` va
 | Name | Version |
 |------|---------|
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 4.17.1 |
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.6.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.9.0 |
 
 ## Providers
 
