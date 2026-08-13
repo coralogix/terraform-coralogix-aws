@@ -2,8 +2,14 @@ data "aws_region" "this" {}
 
 data "aws_caller_identity" "current" {}
 
+data "aws_partition" "current" {}
+
 locals {
   log_groups_prefix_string = join(",", var.log_group_permissions_prefix)
+  sns_kms_key_resource = coalesce(
+    var.sns_kms_key_arn,
+    "arn:${data.aws_partition.current.partition}:kms:${data.aws_region.this.id}:${data.aws_caller_identity.current.account_id}:key/00000000-0000-0000-0000-000000000000"
+  )
 }
 
 resource "random_string" "this" {
@@ -43,32 +49,28 @@ module "lambda" {
   role_description                        = "Role for serverlessrepo-Coralogix-Lambda-Man-${random_string.this.result} Lambda Function."
   create_current_version_allowed_triggers = false
   attach_policy_statements                = true
-  policy_statements = merge(
-    {
-      CXLambdaUpdateConfig = {
-        effect    = "Allow"
-        actions   = ["lambda:UpdateFunctionConfiguration", "lambda:GetFunctionConfiguration", "lambda:AddPermission"]
-        resources = ["arn:aws:lambda:${data.aws_region.this.id}:${data.aws_caller_identity.current.account_id}:function:*"]
-      },
-      CXLogConfig = {
-        effect    = "Allow"
-        actions   = ["logs:PutSubscriptionFilter", "logs:DescribeLogGroups", "logs:DescribeSubscriptionFilters"]
-        resources = ["arn:aws:logs:*:*:*"]
-      },
-      CXPassRole = {
-        effect    = "Allow"
-        actions   = ["iam:PassRole"]
-        resources = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/*"]
-      }
+  policy_statements = {
+    CXLambdaUpdateConfig = {
+      effect    = "Allow"
+      actions   = ["lambda:UpdateFunctionConfiguration", "lambda:GetFunctionConfiguration", "lambda:AddPermission"]
+      resources = ["arn:aws:lambda:${data.aws_region.this.id}:${data.aws_caller_identity.current.account_id}:function:*"]
     },
-    var.sns_kms_key_arn != null ? {
-      SnsKms = {
-        effect    = "Allow"
-        actions   = ["kms:Decrypt", "kms:GenerateDataKey*"]
-        resources = [var.sns_kms_key_arn]
-      }
-    } : {}
-  )
+    CXLogConfig = {
+      effect    = "Allow"
+      actions   = ["logs:PutSubscriptionFilter", "logs:DescribeLogGroups", "logs:DescribeSubscriptionFilters"]
+      resources = ["arn:aws:logs:*:*:*"]
+    },
+    CXPassRole = {
+      effect    = "Allow"
+      actions   = ["iam:PassRole"]
+      resources = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/*"]
+    },
+    SnsKms = {
+      effect    = "Allow"
+      actions   = ["kms:Decrypt", "kms:GenerateDataKey*"]
+      resources = [local.sns_kms_key_resource]
+    }
+  }
   allowed_triggers = {
     AllowExecutionEventBridge = {
       principal  = "events.amazonaws.com"

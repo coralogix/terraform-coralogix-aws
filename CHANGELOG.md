@@ -4,7 +4,7 @@
 
 #### **coralogix-aws-shipper**, **resource-metadata**, **resource-metadata-sqs**, **lambda-manager**
 ### 💡 Enhancements 💡
-- Added optional `sns_kms_key_arn` to encrypt the Lambda failure-notification SNS topic with a customer-managed KMS key. Leave unset for no encryption. The key policy must allow `sns.amazonaws.com` and the Lambda execution role to use `kms:Decrypt` and `kms:GenerateDataKey*`.
+- Added optional `sns_kms_key_arn` (KMS key ARN, not an alias) to encrypt the Lambda failure-notification SNS topic. Leave unset for no encryption. The key policy must allow `sns.amazonaws.com` and the Lambda execution role to use `kms:Decrypt` and `kms:GenerateDataKey*`.
 
 ## v4.10.0
 

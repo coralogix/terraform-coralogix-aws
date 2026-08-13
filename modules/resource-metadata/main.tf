@@ -14,6 +14,11 @@ locals {
     License  = "Apache-2.0"
   }
 
+  sns_kms_key_resource = coalesce(
+    var.sns_kms_key_arn,
+    "arn:${data.aws_partition.current.partition}:kms:${data.aws_region.this.id}:${data.aws_caller_identity.current.account_id}:key/00000000-0000-0000-0000-000000000000"
+  )
+
   # Base environment variables (common to both scenarios)
   base_environment_variables = {
     CORALOGIX_METADATA_URL               = lookup(local.coralogix_regions, var.coralogix_region, "Europe")
@@ -115,32 +120,28 @@ module "lambda" {
   create_async_event_config               = true
   attach_async_event_policy               = true
   attach_policy_statements                = true
-  policy_statements = merge(
-    {
-      allow = {
-        sid    = "GetLambdaMetadata"
-        effect = "Allow"
-        actions = [
-          "ec2:DescribeInstances",
-          "lambda:ListFunctions",
-          "lambda:ListVersionsByFunction",
-          "lambda:GetFunction",
-          "lambda:ListAliases",
-          "lambda:ListEventSourceMappings",
-          "lambda:GetPolicy"
-        ]
-        resources = ["*"]
-      }
+  policy_statements = {
+    allow = {
+      sid    = "GetLambdaMetadata"
+      effect = "Allow"
+      actions = [
+        "ec2:DescribeInstances",
+        "lambda:ListFunctions",
+        "lambda:ListVersionsByFunction",
+        "lambda:GetFunction",
+        "lambda:ListAliases",
+        "lambda:ListEventSourceMappings",
+        "lambda:GetPolicy"
+      ]
+      resources = ["*"]
     },
-    var.sns_kms_key_arn != null ? {
-      sns_kms = {
-        sid       = "SnsKms"
-        effect    = "Allow"
-        actions   = ["kms:Decrypt", "kms:GenerateDataKey*"]
-        resources = [var.sns_kms_key_arn]
-      }
-    } : {}
-  )
+    sns_kms = {
+      sid       = "SnsKms"
+      effect    = "Allow"
+      actions   = ["kms:Decrypt", "kms:GenerateDataKey*"]
+      resources = [local.sns_kms_key_resource]
+    }
+  }
   allowed_triggers = {
     ScanAmiRule = {
       principal  = "events.amazonaws.com"
