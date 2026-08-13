@@ -43,23 +43,32 @@ module "lambda" {
   role_description                        = "Role for serverlessrepo-Coralogix-Lambda-Man-${random_string.this.result} Lambda Function."
   create_current_version_allowed_triggers = false
   attach_policy_statements                = true
-  policy_statements = {
-    CXLambdaUpdateConfig = {
-      effect    = "Allow"
-      actions   = ["lambda:UpdateFunctionConfiguration", "lambda:GetFunctionConfiguration", "lambda:AddPermission"]
-      resources = ["arn:aws:lambda:${data.aws_region.this.id}:${data.aws_caller_identity.current.account_id}:function:*"]
+  policy_statements = merge(
+    {
+      CXLambdaUpdateConfig = {
+        effect    = "Allow"
+        actions   = ["lambda:UpdateFunctionConfiguration", "lambda:GetFunctionConfiguration", "lambda:AddPermission"]
+        resources = ["arn:aws:lambda:${data.aws_region.this.id}:${data.aws_caller_identity.current.account_id}:function:*"]
+      },
+      CXLogConfig = {
+        effect    = "Allow"
+        actions   = ["logs:PutSubscriptionFilter", "logs:DescribeLogGroups", "logs:DescribeSubscriptionFilters"]
+        resources = ["arn:aws:logs:*:*:*"]
+      },
+      CXPassRole = {
+        effect    = "Allow"
+        actions   = ["iam:PassRole"]
+        resources = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/*"]
+      }
     },
-    CXLogConfig = {
-      effect    = "Allow"
-      actions   = ["logs:PutSubscriptionFilter", "logs:DescribeLogGroups", "logs:DescribeSubscriptionFilters"]
-      resources = ["arn:aws:logs:*:*:*"]
-    },
-    CXPassRole = {
-      effect    = "Allow"
-      actions   = ["iam:PassRole"]
-      resources = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/*"]
-    }
-  }
+    var.sns_kms_key_arn != null ? {
+      SnsKms = {
+        effect    = "Allow"
+        actions   = ["kms:Decrypt", "kms:GenerateDataKey*"]
+        resources = [var.sns_kms_key_arn]
+      }
+    } : {}
+  )
   allowed_triggers = {
     AllowExecutionEventBridge = {
       principal  = "events.amazonaws.com"
@@ -94,8 +103,9 @@ resource "aws_cloudwatch_event_target" "EventBridgeRuleTarget" {
 }
 
 resource "aws_sns_topic" "this" {
-  name_prefix  = "serverlessrepo-Coralogix-Lambda-Man-LambdaFunction-${random_string.this.result}-Failure"
-  display_name = "serverlessrepo-Coralogix-Lambda-Man-LambdaFunction-${random_string.this.result}-Failure"
+  name_prefix       = "serverlessrepo-Coralogix-Lambda-Man-LambdaFunction-${random_string.this.result}-Failure"
+  display_name      = "serverlessrepo-Coralogix-Lambda-Man-LambdaFunction-${random_string.this.result}-Failure"
+  kms_master_key_id = var.sns_kms_key_arn
 }
 
 resource "aws_sns_topic_subscription" "this" {

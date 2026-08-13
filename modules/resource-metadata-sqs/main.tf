@@ -185,6 +185,14 @@ module "collector_lambda" {
         ]
         resources = [var.crossaccount_config_assume_role]
       }
+    } : {},
+    var.sns_kms_key_arn != null ? {
+      sns_kms = {
+        sid       = "SnsKms"
+        effect    = "Allow"
+        actions   = ["kms:Decrypt", "kms:GenerateDataKey*"]
+        resources = [var.sns_kms_key_arn]
+      }
     } : {}
   )
 
@@ -272,6 +280,14 @@ module "generator_lambda" {
           "sts:AssumeRole"
         ]
         resources = ["arn:aws:iam::*:role/${var.crossaccount_iam_role_name}"]
+      }
+    } : {},
+    var.sns_kms_key_arn != null ? {
+      sns_kms = {
+        sid       = "SnsKms"
+        effect    = "Allow"
+        actions   = ["kms:Decrypt", "kms:GenerateDataKey*"]
+        resources = [var.sns_kms_key_arn]
       }
     } : {}
   )
@@ -384,6 +400,14 @@ module "generator_lambda_sm" {
         ]
         resources = ["arn:aws:iam::*:role/${var.crossaccount_iam_role_name}"]
       }
+    } : {},
+    var.sns_kms_key_arn != null ? {
+      sns_kms = {
+        sid       = "SnsKms"
+        effect    = "Allow"
+        actions   = ["kms:Decrypt", "kms:GenerateDataKey*"]
+        resources = [var.sns_kms_key_arn]
+      }
     } : {}
   )
 
@@ -407,9 +431,10 @@ module "generator_lambda_sm" {
 }
 
 resource "aws_sns_topic" "this" {
-  name_prefix  = "${local.function_name}-Failure"
-  display_name = "${local.function_name}-Failure"
-  tags         = merge(var.tags, local.tags)
+  name_prefix       = "${local.function_name}-Failure"
+  display_name      = "${local.function_name}-Failure"
+  kms_master_key_id = var.sns_kms_key_arn
+  tags              = merge(var.tags, local.tags)
 }
 
 resource "aws_secretsmanager_secret" "api_key_secret" {

@@ -115,22 +115,32 @@ module "lambda" {
   create_async_event_config               = true
   attach_async_event_policy               = true
   attach_policy_statements                = true
-  policy_statements = {
-    allow = {
-      sid    = "GetLambdaMetadata"
-      effect = "Allow"
-      actions = [
-        "ec2:DescribeInstances",
-        "lambda:ListFunctions",
-        "lambda:ListVersionsByFunction",
-        "lambda:GetFunction",
-        "lambda:ListAliases",
-        "lambda:ListEventSourceMappings",
-        "lambda:GetPolicy"
-      ]
-      resources = ["*"]
-    }
-  }
+  policy_statements = merge(
+    {
+      allow = {
+        sid    = "GetLambdaMetadata"
+        effect = "Allow"
+        actions = [
+          "ec2:DescribeInstances",
+          "lambda:ListFunctions",
+          "lambda:ListVersionsByFunction",
+          "lambda:GetFunction",
+          "lambda:ListAliases",
+          "lambda:ListEventSourceMappings",
+          "lambda:GetPolicy"
+        ]
+        resources = ["*"]
+      }
+    },
+    var.sns_kms_key_arn != null ? {
+      sns_kms = {
+        sid       = "SnsKms"
+        effect    = "Allow"
+        actions   = ["kms:Decrypt", "kms:GenerateDataKey*"]
+        resources = [var.sns_kms_key_arn]
+      }
+    } : {}
+  )
   allowed_triggers = {
     ScanAmiRule = {
       principal  = "events.amazonaws.com"
@@ -142,9 +152,10 @@ module "lambda" {
 }
 
 resource "aws_sns_topic" "this" {
-  name_prefix  = "${local.function_name}-Failure"
-  display_name = "${local.function_name}-Failure"
-  tags         = merge(var.tags, local.tags)
+  name_prefix       = "${local.function_name}-Failure"
+  display_name      = "${local.function_name}-Failure"
+  kms_master_key_id = var.sns_kms_key_arn
+  tags              = merge(var.tags, local.tags)
 }
 
 resource "aws_secretsmanager_secret" "private_key_secret" {

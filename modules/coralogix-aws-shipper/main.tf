@@ -189,6 +189,15 @@ resource "aws_iam_policy" "lambda_policy" {
         }
       ] : [],
 
+      # SNS failure-notification topic KMS Policy
+      var.sns_kms_key_arn != null ? [
+        {
+          Effect   = "Allow",
+          Action   = ["kms:Decrypt", "kms:GenerateDataKey*"],
+          Resource = [var.sns_kms_key_arn]
+        }
+      ] : [],
+
       # Starlark S3 Script Policy
       startswith(var.starlark_script, "s3://") ? [
         {

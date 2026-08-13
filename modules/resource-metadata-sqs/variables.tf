@@ -146,6 +146,12 @@ variable "notification_email" {
   default     = ""
 }
 
+variable "sns_kms_key_arn" {
+  description = "Optional KMS key ARN to encrypt the Lambda failure-notification SNS topic. Leave null for no encryption. The key policy must allow sns.amazonaws.com and the Lambda execution role to use kms:Decrypt and kms:GenerateDataKey*."
+  type        = string
+  default     = null
+}
+
 variable "package_name" {
   description = "Package name for the Lambda function"
   type        = string
