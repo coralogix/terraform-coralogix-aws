@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.11.1
+
+#### **resource-metadata**
+### 💡 Bug fix 💡
+- Add `lambda:ListTags` permission
+
 ## v4.11.0
 
 #### **coralogix-aws-shipper**, **resource-metadata**, **resource-metadata-sqs**, **lambda-manager**
