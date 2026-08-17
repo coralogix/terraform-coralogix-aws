@@ -73,6 +73,17 @@ variable "notification_email" {
   default     = null
 }
 
+variable "sns_kms_key_arn" {
+  description = "Optional KMS key ARN (not an alias) to encrypt the Lambda failure-notification SNS topic. Leave null for no encryption. The key policy must allow sns.amazonaws.com and the Lambda execution role to use kms:Decrypt and kms:GenerateDataKey*."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.sns_kms_key_arn == null || can(regex("^arn:[^:]+:kms:[^:]+:[0-9]{12}:key/", var.sns_kms_key_arn))
+    error_message = "sns_kms_key_arn must be a KMS key ARN (arn:...:kms:...:key/...), not an alias."
+  }
+}
+
 variable "package_name" {
   description = "Failure notification email address"
   type        = string

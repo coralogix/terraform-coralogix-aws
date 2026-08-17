@@ -39,6 +39,7 @@ This Lambda Function was created to pick up newly created and existing log group
 | memory_size | The maximum allocated memory this lambda may consume. Default value is the minimum recommended setting please consult coralogix support before changing. | 1024 |  |
 | timeout | The maximum time in seconds the function may be allowed to run. Default value is the minimum recommended setting please consult coralogix support before changing. | 300 |  |
 | notification_email | Failure notification email address | | |
+| sns_kms_key_arn | Optional KMS key ARN (not an alias) to encrypt the Lambda failure-notification SNS topic. Leave null for no encryption. The key policy must allow `sns.amazonaws.com` and the Lambda execution role to use `kms:Decrypt` and `kms:GenerateDataKey*`. | | |
 
 > [!Note]
 > If the destination is a Lambda function, the code will identify log groups that match the specified `regex_pattern` and configure them as triggers for the destination Lambda. Each matching log group is also granted the necessary permission to invoke the Lambda.

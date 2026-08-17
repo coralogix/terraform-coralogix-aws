@@ -14,6 +14,11 @@ locals {
     License  = "Apache-2.0"
   }
 
+  sns_kms_key_resource = coalesce(
+    var.sns_kms_key_arn,
+    "arn:${data.aws_partition.current.partition}:kms:${data.aws_region.this.id}:${data.aws_caller_identity.current.account_id}:key/00000000-0000-0000-0000-000000000000"
+  )
+
   # Base environment variables (common to both scenarios)
   base_environment_variables = {
     CORALOGIX_METADATA_URL               = lookup(local.coralogix_regions, var.coralogix_region, "Europe")
@@ -129,6 +134,12 @@ module "lambda" {
         "lambda:GetPolicy"
       ]
       resources = ["*"]
+    },
+    sns_kms = {
+      sid       = "SnsKms"
+      effect    = "Allow"
+      actions   = ["kms:Decrypt", "kms:GenerateDataKey*"]
+      resources = [local.sns_kms_key_resource]
     }
   }
   allowed_triggers = {
@@ -142,9 +153,10 @@ module "lambda" {
 }
 
 resource "aws_sns_topic" "this" {
-  name_prefix  = "${local.function_name}-Failure"
-  display_name = "${local.function_name}-Failure"
-  tags         = merge(var.tags, local.tags)
+  name_prefix       = "${local.function_name}-Failure"
+  display_name      = "${local.function_name}-Failure"
+  kms_master_key_id = var.sns_kms_key_arn
+  tags              = merge(var.tags, local.tags)
 }
 
 resource "aws_secretsmanager_secret" "private_key_secret" {

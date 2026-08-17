@@ -2,8 +2,14 @@ data "aws_region" "this" {}
 
 data "aws_caller_identity" "current" {}
 
+data "aws_partition" "current" {}
+
 locals {
   log_groups_prefix_string = join(",", var.log_group_permissions_prefix)
+  sns_kms_key_resource = coalesce(
+    var.sns_kms_key_arn,
+    "arn:${data.aws_partition.current.partition}:kms:${data.aws_region.this.id}:${data.aws_caller_identity.current.account_id}:key/00000000-0000-0000-0000-000000000000"
+  )
 }
 
 resource "random_string" "this" {
@@ -58,6 +64,11 @@ module "lambda" {
       effect    = "Allow"
       actions   = ["iam:PassRole"]
       resources = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/*"]
+    },
+    SnsKms = {
+      effect    = "Allow"
+      actions   = ["kms:Decrypt", "kms:GenerateDataKey*"]
+      resources = [local.sns_kms_key_resource]
     }
   }
   allowed_triggers = {
@@ -94,8 +105,9 @@ resource "aws_cloudwatch_event_target" "EventBridgeRuleTarget" {
 }
 
 resource "aws_sns_topic" "this" {
-  name_prefix  = "serverlessrepo-Coralogix-Lambda-Man-LambdaFunction-${random_string.this.result}-Failure"
-  display_name = "serverlessrepo-Coralogix-Lambda-Man-LambdaFunction-${random_string.this.result}-Failure"
+  name_prefix       = "serverlessrepo-Coralogix-Lambda-Man-LambdaFunction-${random_string.this.result}-Failure"
+  display_name      = "serverlessrepo-Coralogix-Lambda-Man-LambdaFunction-${random_string.this.result}-Failure"
+  kms_master_key_id = var.sns_kms_key_arn
 }
 
 resource "aws_sns_topic_subscription" "this" {
