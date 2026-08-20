@@ -170,8 +170,10 @@ resource "aws_kinesis_firehose_delivery_stream" "extended_s3_stream" {
   lifecycle {
     # The Firehose Lambda processor's RoleArn parameter is normalized by AWS
     # after apply, which otherwise produces a perpetual diff on every plan.
+    # Only the RoleArn parameter's value (parameters[1]) is suppressed so that
+    # changes to LambdaArn (parameters[0]) are still applied.
     ignore_changes = [
-      extended_s3_configuration[0].processing_configuration[0].processors[0].parameters,
+      extended_s3_configuration[0].processing_configuration[0].processors[0].parameters[1].parameter_value,
     ]
   }
 }
