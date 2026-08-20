@@ -41,6 +41,7 @@ resource "null_resource" "s3_bucket_copy" {
 }
 
 resource "aws_iam_policy" "lambda_policy" {
+  path     = var.iam_path
   for_each = var.integration_info != null ? var.integration_info : local.integration_info
 
   name        = "policy-for-coralogix-lambda-${random_string.this[each.key].result}"
@@ -245,6 +246,7 @@ resource "aws_iam_policy" "lambda_policy" {
 }
 
 resource "aws_iam_role" "lambda_role" {
+  path  = var.iam_path
   count = local.effective_create_role ? 1 : 0
   name  = "Coralogix-lambda-role-${random_string.id.result}"
   assume_role_policy = jsonencode({

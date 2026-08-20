@@ -26,6 +26,7 @@ resource "aws_iam_role_policy" "s3_firehose_metrics_policy" {
 }
 
 resource "aws_iam_role" "s3_firehose_metrics_role" {
+  path  = var.iam_path
   count = local.effective_create_firehose_role ? 1 : 0
 
   name_prefix = "s3-firehose-metrics-"
@@ -99,6 +100,7 @@ resource "aws_cloudwatch_metric_stream" "cloudWatch_metric_stream" {
 }
 
 resource "aws_iam_role" "cloudwatch_metrics_role" {
+  path  = var.iam_path
   count = var.telemetry_mode == "metrics" ? 1 : 0
 
   name = "metrics-firehose-shipper-test-FirehoseAccessRole-${random_string.id.result}"

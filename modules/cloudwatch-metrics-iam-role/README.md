@@ -55,6 +55,7 @@ E.g.,
 | <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | Location of Coralogix account. | `string` | `"US2"` | no |
 | <a name="input_external_id_secret"></a> [external\_id\_secret](#input\_external\_id\_secret) | ExternalIdSecret for sts:AssumeRole. Use a random value. | `string` | n/a | yes |
 | <a name="input_role_name"></a> [role\_name](#input\_role\_name) | The name of the AWS IAM Role that will be created. Must be at most 64 characters and may only contain alphanumeric characters and the symbols +, =, ,, ., @, \_, -. | `string` | `"coralogix-aws-metrics-integration-role"` | no |
+| <a name="input_iam_path"></a> [iam\_path](#input\_iam\_path) | Path under which to create the IAM role. Defaults to `null` (the AWS default path `/`). | `string` | `null` | no |
 
 ## Outputs
 

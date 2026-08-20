@@ -93,6 +93,7 @@ resource "aws_service_discovery_service" "receiver" {
 
 # Task Execution Role (only created if external role not provided)
 resource "aws_iam_role" "task_execution_role" {
+  path  = var.iam_path
   count = local.create_iam_role ? 1 : 0
   name  = "${local.name}-${random_string.id.result}-task-execution-role"
 
@@ -166,6 +167,7 @@ resource "aws_iam_role_policy" "task_execution_role_cloudmap_policy" {
 # IAM Role for task runtime S3 access (only created when no custom task role provided)
 # This is a minimal role with only S3 read permissions for the container runtime
 resource "aws_iam_role" "otel_task_role_s3" {
+  path  = var.iam_path
   count = var.task_role_arn == null ? 1 : 0
   name  = "${local.name}-${random_string.id.result}-task-role-s3"
 

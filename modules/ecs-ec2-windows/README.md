@@ -133,6 +133,7 @@ module "ecs_ec2_windows_s3" {
 | enable_traces_db | Enable DB traces (template config) | `bool` | `false` | no |
 | task_definition_arn | Use existing task definition ARN instead of creating one | `string` | `null` | no |
 | tags | Resource tags | `map(string)` | `null` | no |
+| iam_path | Path under which to create the auto-created IAM roles. Defaults to the AWS default path `/`. | `string` | `null` | no |
 
 ## Outputs
 

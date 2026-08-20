@@ -323,6 +323,7 @@ Then, the application name value will be `application_value`.
 | <a name="input_subnet_ids"></a> [vpc\_subnet\_ids](#input\_subnet\_ids) | The ID of the subnet where the integration will be deployed. | `list(string)` | n/a | no |
 | <a name="input_security_group_ids"></a> [security\_group\_ids](#input\_security\_group\_ids) | The ID of the security group where the integration will be deployed. | `list(string)` | n/a | no |
 | <a name="input_create_endpoint"></a> [security\_create\_endpoint](#input\_create\_endpoint) | Set to `true` if you store your ApiKey in a secret (you can have only one of this endpoints per region) | `bool` | false | no |
+| <a name="input_iam_path"></a> [iam\_path](#input\_iam\_path) | Path under which to create the IAM roles and policies. Defaults to `null` (the AWS default path `/`). | `string` | `null` | no |
 
 ### DLQ
 

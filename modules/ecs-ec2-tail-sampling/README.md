@@ -188,6 +188,7 @@ module "otel_tail_sampling" {
 | health_check_retries | Health check retries. Only used if health_check_enabled is true | `number` | `3` | no |
 | health_check_start_period | Health check start period in seconds. Only used if health_check_enabled is true | `number` | `10` | no |
 | tags | A map of tags to assign to the resources | `map(string)` | `{}` | no |
+| iam_path | Path under which to create the auto-created IAM roles. Defaults to the AWS default path `/`. | `string` | `null` | no |
 
 ## Outputs
 

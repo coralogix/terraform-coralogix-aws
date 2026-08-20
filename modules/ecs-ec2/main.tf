@@ -207,6 +207,7 @@ resource "random_string" "id" {
 
 # ECS task execution role (created when the module manages the task definition and no custom role is provided)
 resource "aws_iam_role" "otel_task_execution_role_s3" {
+  path  = var.iam_path
   count = var.task_definition_arn == null && var.task_execution_role_arn == null ? 1 : 0
   name  = "${local.name}-${random_string.id.result}-task-execution-role-s3"
 
@@ -263,6 +264,7 @@ resource "aws_iam_role_policy" "otel_task_execution_role_secrets" {
 
 # Keep the task role when S3 is unused to avoid replacing existing task definitions.
 resource "aws_iam_role" "otel_task_role_s3" {
+  path  = var.iam_path
   count = var.task_definition_arn == null && var.task_role_arn == null ? 1 : 0
   name  = "${local.name}-${random_string.id.result}-task-role-s3"
 

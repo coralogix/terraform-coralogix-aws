@@ -178,7 +178,7 @@ resource "aws_iam_policy" "secret_access_policy" {
   count = var.secret_manager_enabled ? 1 : 0
 
   name        = "${local.function_name}-SecretAccess"
-  path        = "/coralogix/"
+  path        = coalesce(var.iam_path, "/coralogix/")
   description = "Policy for Lambda to access Coralogix secret"
 
   policy = jsonencode({

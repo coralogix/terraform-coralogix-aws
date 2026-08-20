@@ -112,6 +112,7 @@ locals {
 }
 
 resource "aws_iam_role" "this" {
+  path               = var.iam_path
   name               = var.role_name
   description        = "AWS IAM Role to allow Coralogix to collect metrics"
   assume_role_policy = local.assume_role_policy
