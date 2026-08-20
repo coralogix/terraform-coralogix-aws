@@ -1,8 +1,8 @@
 # firehose access role to S3 lambda and cloudwatch
 resource "aws_iam_role_policy" "s3_firehose_metrics_policy" {
-  count = var.telemetry_mode == "metrics" ? 1 : 0
-  name  = "s3_firehose_metrics_policy"
-  role  = aws_iam_role.s3_firehose_metrics_role[0].id
+  count       = local.effective_create_firehose_role ? 1 : 0
+  name_prefix = "s3-firehose-metrics-policy-"
+  role        = aws_iam_role.s3_firehose_metrics_role[0].id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -19,16 +19,16 @@ resource "aws_iam_role_policy" "s3_firehose_metrics_policy" {
       {
         Effect   = "Allow"
         Action   = ["lambda:InvokeFunction", "lambda:GetFunctionConfiguration"]
-        Resource = var.lambda_name != null ? ["${local.arn_prefix}:lambda:*:*:${var.lambda_name}:$LATEST"] : ["${local.arn_prefix}:lambda:*:*:${module.locals.integration.function_name}:$LATEST"]
+        Resource = var.lambda_name != null ? ["${local.arn_prefix}:lambda:*:*:function:${var.lambda_name}"] : ["${local.arn_prefix}:lambda:*:*:function:${module.locals.integration.function_name}"]
       },
     ]
   })
 }
 
 resource "aws_iam_role" "s3_firehose_metrics_role" {
-  count = var.telemetry_mode == "metrics" ? 1 : 0
+  count = local.effective_create_firehose_role ? 1 : 0
 
-  name = "s3_firehose_metrics_role"
+  name_prefix = "s3-firehose-metrics-"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -125,7 +125,7 @@ resource "aws_kinesis_firehose_delivery_stream" "extended_s3_stream" {
 
   extended_s3_configuration {
     s3_backup_mode     = "Enabled"
-    role_arn           = aws_iam_role.s3_firehose_metrics_role[0].arn
+    role_arn           = local.firehose_metrics_role_arn
     bucket_arn         = one(values(data.aws_s3_bucket.this)).arn
     compression_format = "GZIP"
     prefix             = "coralogix-aws-shipper-metrics"
@@ -134,7 +134,7 @@ resource "aws_kinesis_firehose_delivery_stream" "extended_s3_stream" {
 
     s3_backup_configuration {
       bucket_arn         = one(values(data.aws_s3_bucket.this)).arn
-      role_arn           = aws_iam_role.s3_firehose_metrics_role[0].arn
+      role_arn           = local.firehose_metrics_role_arn
       buffering_size     = 5
       buffering_interval = 60
       compression_format = "GZIP"
@@ -149,7 +149,7 @@ resource "aws_kinesis_firehose_delivery_stream" "extended_s3_stream" {
           parameter_value = "${module.lambda.integration.lambda_function_arn}:$LATEST"
         }
         parameters {
-          parameter_value = aws_iam_role.s3_firehose_metrics_role[0].arn
+          parameter_value = local.firehose_metrics_role_arn
           parameter_name  = "RoleArn"
         }
       }
@@ -165,5 +165,13 @@ resource "aws_kinesis_firehose_delivery_stream" "extended_s3_stream" {
     enabled  = var.kinesis_server_side_encryption.enabled
     key_type = var.kinesis_server_side_encryption.key_type
     key_arn  = var.kinesis_server_side_encryption.key_arn
+  }
+
+  lifecycle {
+    # The Firehose Lambda processor's RoleArn parameter is normalized by AWS
+    # after apply, which otherwise produces a perpetual diff on every plan.
+    ignore_changes = [
+      extended_s3_configuration[0].processing_configuration[0].processors[0].parameters,
+    ]
   }
 }

@@ -1,5 +1,13 @@
 # Changelog
 
+## v4.11.1
+
+#### **coralogix-aws-shipper**
+### 🛠️ Bug fixes 🛠️
+- Fixed a perpetual Firehose diff (CDS-3168): the metrics delivery stream now ignores AWS-normalized changes to the Lambda processor `RoleArn` parameter, and the processor/invoke IAM policy references the Lambda by its `function:` ARN form.
+- Switched the metrics Firehose IAM role and policy to `name_prefix` so repeated deploys no longer collide on a fixed name.
+- Added optional `firehose_role_arn` and `create_firehose_role` variables to bring your own metrics Firehose delivery role instead of having the module create one. Only relevant when `telemetry_mode = "metrics"`.
+
 ## v4.11.0
 
 #### **coralogix-aws-shipper**, **resource-metadata**, **resource-metadata-sqs**, **lambda-manager**
