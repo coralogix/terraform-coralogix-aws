@@ -257,6 +257,7 @@ then the CloudWatch metric stream must be configured with the same format, confi
 | <a name="input_existing_metric_streams_iam"></a> [existing\_metric\_streams\_iam](variables.tf#L197) | Use an existing IAM role to use as a metric streams role. | `string` | n/a | no |
 | <a name="input_user_supplied_tags"></a> [user\_supplied\_tags](variables.tf#L203) | Tags supplied by the user to populate to all generated resources | `map(string)` | n/a | no |
 | <a name="input_override_default_tags"></a> [override\_default\_tags](variables.tf#L209) | Override and remove the default tags by setting to true | `bool` | `false` | no |
+| <a name="input_iam_path"></a> [iam\_path](#input\_iam\_path) | Path under which to create the IAM roles and policy. Defaults to `null` (the AWS default path `/`). | `string` | `null` | no |
 
 ## Region name mapping
 

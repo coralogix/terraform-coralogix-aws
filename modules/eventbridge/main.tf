@@ -29,6 +29,7 @@ data "aws_caller_identity" "current_identity" {}
 data "aws_region" "current_region" {}
 
 resource "aws_iam_policy" "eventbridge_policy" {
+  path = var.iam_path
   name = var.policy_name
   policy = jsonencode({
     Version = "2012-10-17"
@@ -45,6 +46,7 @@ resource "aws_iam_policy" "eventbridge_policy" {
 }
 
 resource "aws_iam_role" "eventbridge_role" {
+  path = var.iam_path
   name = var.role_name
 
   assume_role_policy = jsonencode({

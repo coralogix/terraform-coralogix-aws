@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.12.0
+
+#### **cloudwatch-metrics-iam-role**, **coralogix-aws-shipper**, **ecs-ec2**, **ecs-ec2-tail-sampling**, **ecs-ec2-windows**, **eventbridge**, **firehose-logs**, **firehose-metrics**, **resource-metadata**
+### 💡 Enhancements 💡
+- Added optional `iam_path` variable to set the [IAM path](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-friendly-names) on the IAM roles and policies each module creates. Defaults to `null`, which keeps the AWS default path (`/`), so existing deployments are unchanged. In `resource-metadata` the value overrides the previous hardcoded `/coralogix/` path only when explicitly set.
+
 ## v4.11.1
 
 #### **coralogix-aws-shipper**

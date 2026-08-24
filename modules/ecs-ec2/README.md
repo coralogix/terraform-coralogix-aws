@@ -198,6 +198,7 @@ You can control health checks using:
 | health_check_start_period | Health check start period (seconds) | `number` | `10` | no |
 | tags | Resource tags | `map(string)` | `null` | no |
 | task_definition_arn | Existing task definition ARN. When set, service-only mode: module creates only the ECS service; S3/roles ignored; task_execution_role_arn and task_role_arn must be null. | `string` | `null` | no |
+| iam_path | Path under which to create the auto-created IAM roles. Defaults to the AWS default path `/`. | `string` | `null` | no |
 
 \* Required in collector mode when `task_definition_arn` is null. Supervised mode uses embedded configs and its own default image when these values are omitted.
 

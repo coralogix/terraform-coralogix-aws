@@ -126,6 +126,7 @@ data "aws_iam_role" "existing_firehose_iam" {
 }
 
 resource "aws_iam_role" "new_firehose_iam" {
+  path               = var.iam_path
   count              = var.existing_firehose_iam != null ? 0 : 1
   tags               = local.tags
   name               = local.new_firehose_iam_name
@@ -146,6 +147,7 @@ data "aws_iam_policy_document" "assume_new_firehose_iam" {
 }
 
 resource "aws_iam_policy" "new_firehose_iam" {
+  path   = var.iam_path
   count  = var.existing_firehose_iam != null ? 0 : 1
   name   = local.new_firehose_iam_name
   tags   = local.tags
@@ -265,6 +267,7 @@ data "aws_iam_role" "existing_lambda_iam" {
 }
 
 resource "aws_iam_role" "new_lambda_iam" {
+  path               = var.iam_path
   count              = var.lambda_processor_enable && var.existing_lambda_processor_iam == null ? 1 : 0
   name               = local.new_lambda_processor_iam_name
   tags               = local.tags
@@ -469,6 +472,7 @@ data "aws_iam_role" "existing_metric_streams_iam" {
 }
 
 resource "aws_iam_role" "new_metric_streams_iam" {
+  path               = var.iam_path
   tags               = local.tags
   count              = var.enable_cloudwatch_metricstream && var.existing_metric_streams_iam == null ? 1 : 0
   name               = local.new_metric_stream_iam_name

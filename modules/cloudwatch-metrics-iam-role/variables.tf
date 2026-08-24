@@ -40,3 +40,13 @@ variable "role_name" {
     error_message = "role_name must be at most 64 characters and may only contain alphanumeric characters and the symbols +, =, ,, ., @, _, -."
   }
 }
+
+variable "iam_path" {
+  description = "Path under which to create IAM roles and policies (e.g. \"/coralogix/\"). Defaults to the AWS default \"/\"."
+  type        = string
+  default     = null
+  validation {
+    condition     = var.iam_path == null || can(regex("^(/|/[\\x21-\\x7F]+/)$", var.iam_path))
+    error_message = "iam_path must be null, \"/\", or a string that begins and ends with a forward slash (/)."
+  }
+}

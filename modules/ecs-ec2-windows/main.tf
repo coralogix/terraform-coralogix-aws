@@ -63,6 +63,7 @@ resource "aws_cloudwatch_log_group" "otel_agent" {
 
 # Default task execution role (ECR pull + CloudWatch Logs) when not provided
 resource "aws_iam_role" "otel_task_execution" {
+  path  = var.iam_path
   count = var.task_execution_role_arn == null ? 1 : 0
   name  = "${local.name}-${random_string.id.result}-task-execution"
 
@@ -90,6 +91,7 @@ resource "aws_iam_role_policy_attachment" "otel_task_execution" {
 
 # IAM Role for task runtime S3 access (only when config_source=s3 AND no custom task role provided)
 resource "aws_iam_role" "otel_task_role_s3" {
+  path  = var.iam_path
   count = (var.config_source == "s3" && var.task_role_arn == null) ? 1 : 0
   name  = "${local.name}-${random_string.id.result}-task-role-s3"
 
