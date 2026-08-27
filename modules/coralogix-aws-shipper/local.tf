@@ -74,6 +74,15 @@ locals {
     var.execution_role_name != null ? data.aws_iam_role.LambdaExecutionRole[0].name : aws_iam_role.lambda_role[0].name
   )
 
+  # Firehose (metrics) delivery role. Callers can bring their own role via
+  # firehose_role_arn; otherwise the module creates one when telemetry_mode is
+  # metrics. create_firehose_role lets callers short-circuit creation.
+  effective_create_firehose_role = var.telemetry_mode == "metrics" && var.create_firehose_role && var.firehose_role_arn == null
+
+  firehose_metrics_role_arn = var.firehose_role_arn != null ? var.firehose_role_arn : (
+    local.effective_create_firehose_role ? aws_iam_role.s3_firehose_metrics_role[0].arn : null
+  )
+
   # Parse Starlark S3 script bucket when using s3:// format
   starlark_s3_bucket = startswith(var.starlark_script, "s3://") ? regex("^s3://([^/]+)", var.starlark_script)[0] : null
 

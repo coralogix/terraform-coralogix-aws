@@ -467,3 +467,15 @@ variable "include_metric_stream_filter" {
   )
   default = []
 }
+
+variable "firehose_role_arn" {
+  description = "(Optional) ARN of a user-defined IAM role for the metrics Firehose delivery stream to assume. When provided, the module does not create its own Firehose role. Only relevant when telemetry_mode is metrics."
+  type        = string
+  default     = null
+}
+
+variable "create_firehose_role" {
+  description = "Whether the module should create its own IAM role for the metrics Firehose delivery stream. Set to false and provide firehose_role_arn to bring your own role. Only relevant when telemetry_mode is metrics."
+  type        = bool
+  default     = true
+}
