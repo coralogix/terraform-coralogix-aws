@@ -2,6 +2,10 @@
 
 ## v4.11.1
 
+#### **resource-metadata**
+### 💡 Bug fix 💡
+- Add `lambda:ListTags` permission
+
 #### **coralogix-aws-shipper**
 ### 🛠️ Bug fixes 🛠️
 - Fixed a perpetual Firehose diff (CDS-3168): removed the explicit `RoleArn` parameter from the Firehose Lambda processor to fix perpetual diffs. The processor/invoke IAM policy references the Lambda by its `function:` ARN form.
