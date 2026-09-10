@@ -147,14 +147,17 @@ resource "aws_sns_topic_subscription" "this" {
 }
 
 resource "time_sleep" "iam_propagation" {
-  # ponytail: flat 10s wait beats a retry wrapper, raise it if a first apply still races
-  count           = var.enable_reconcile ? 1 : 0
+  # ponytail: flat 10s wait beats a retry wrapper, raise it if an apply still races
   depends_on      = [module.lambda]
   create_duration = "10s"
+
+  # Wait again whenever the role policy changes, not only on the first apply.
+  triggers = {
+    policy = sha256(jsonencode(local.policy_statements))
+  }
 }
 
 resource "aws_lambda_invocation" "trigger_lambda_for_first_time" {
-  count           = var.enable_reconcile ? 1 : 0
   depends_on      = [time_sleep.iam_propagation]
   function_name   = module.lambda.lambda_function_arn
   lifecycle_scope = "CRUD"
@@ -171,6 +174,7 @@ resource "aws_lambda_invocation" "trigger_lambda_for_first_time" {
       add_permissions_to_all_log_groups = var.add_permissions_to_all_log_groups
       log_group_permissions_prefix      = local.log_groups_prefix_string
       adopt_legacy_filters              = var.adopt_legacy_filters
+      aws_api_requests_limit            = var.aws_api_requests_limit
       lambda_manager_version            = var.lambda_manager_version
     }))
   }

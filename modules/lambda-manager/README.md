@@ -21,8 +21,6 @@ The module runs Lambda Manager 3.0.0, which reconciles instead of scanning once:
 - **On new log groups**, an EventBridge rule on `CreateLogGroup` invokes the function for that one group.
 - **On destroy**, the module invokes cleanup, which removes only the subscription filters it owns.
 
-Reconcile is skipped when `enable_reconcile = false`, for example when you invoke the function from your own pipeline.
-
 `scan_old_loggroups` no longer does anything. Reconcile always covers existing log groups.
 
 ## Requirements
@@ -60,7 +58,6 @@ Reconcile is skipped when `enable_reconcile = false`, for example when you invok
 | add_permissions_to_all_log_groups | Add one wildcard permission for all log groups in this account and region instead of one per log group. Lambda destinations only. | false | |
 | adopt_legacy_filters | Take over old Coralogix UUID subscription filters. Keep false unless you are migrating. | false | |
 | aws_api_requests_limit | Max AWS API requests the function may send. Raise it if you see ThrottlingException. | 10 | |
-| enable_reconcile | Invoke the function after apply to subscribe existing log groups, and clean up on destroy. Set false to run it yourself. | true | |
 | lambda_manager_version | Lambda Manager package version to deploy from the Coralogix S3 bucket | 3.0.0 | |
 | disable_add_permission | Disable add permission to loggroup| false | |
 | architecture | Lambda function architecture, possible options are [x86_64, arm64] | x86_64 | |

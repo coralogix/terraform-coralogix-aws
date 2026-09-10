@@ -16,7 +16,6 @@
 ### 💡 Enhancements 💡
 - Added `adopt_legacy_filters` to take over old Coralogix UUID subscription filters during a migration.
 - Added `aws_api_requests_limit` to raise the function's AWS API request limit when it hits `ThrottlingException`.
-- Added `enable_reconcile` to skip the apply-time invocation when you invoke the function yourself.
 - `add_permissions_to_all_log_groups` is now a `bool`. Version 3.0.0 accepts only `true` or `false`.
 - `regex_pattern` and `destination_type` are now validated. 3.0.0 rejects an empty regex.
 - `scan_old_loggroups` is deprecated and ignored. Reconcile always covers existing log groups.

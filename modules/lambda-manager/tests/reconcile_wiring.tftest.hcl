@@ -25,12 +25,12 @@ run "lambda_destination_wiring" {
   }
 
   assert {
-    condition     = jsondecode(aws_lambda_invocation.trigger_lambda_for_first_time[0].input).RequestType == "Reconcile"
+    condition     = jsondecode(aws_lambda_invocation.trigger_lambda_for_first_time.input).RequestType == "Reconcile"
     error_message = "Lambda Manager 3.0.0 rejects any request type other than Reconcile."
   }
 
   assert {
-    condition     = aws_lambda_invocation.trigger_lambda_for_first_time[0].lifecycle_scope == "CRUD"
+    condition     = aws_lambda_invocation.trigger_lambda_for_first_time.lifecycle_scope == "CRUD"
     error_message = "CRUD scope is what runs cleanup on destroy."
   }
 
@@ -76,20 +76,6 @@ run "firehose_destination_wiring" {
   assert {
     condition     = !contains(flatten([for statement in output.lambda_policy_statements : statement.actions]), "lambda:AddPermission")
     error_message = "lambda:AddPermission is only needed for Lambda destinations."
-  }
-}
-
-run "reconcile_can_be_skipped" {
-  command = plan
-
-  variables {
-    destination_type = "lambda"
-    enable_reconcile = false
-  }
-
-  assert {
-    condition     = length(aws_lambda_invocation.trigger_lambda_for_first_time) == 0
-    error_message = "enable_reconcile = false must not invoke the function."
   }
 }
 

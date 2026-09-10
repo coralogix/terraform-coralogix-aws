@@ -111,9 +111,3 @@ variable "aws_api_requests_limit" {
   type        = number
   default     = 10
 }
-
-variable "enable_reconcile" {
-  description = "Invoke the function after apply to subscribe existing log groups, and clean up on destroy. Set false to run it yourself."
-  type        = bool
-  default     = true
-}
