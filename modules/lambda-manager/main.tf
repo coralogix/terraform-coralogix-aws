@@ -161,13 +161,15 @@ resource "aws_lambda_invocation" "trigger_lambda_for_first_time" {
   depends_on      = [time_sleep.iam_propagation]
   function_name   = module.lambda.lambda_function_arn
   lifecycle_scope = "CRUD"
+
+  # The config hash rides in the payload, not in triggers. A triggers change
+  # replaces the resource, and replacing a CRUD invocation runs the delete path
+  # first, which unsubscribes every managed log group before resubscribing it.
+  # An input change is an update invocation, which only reconciles. The function
+  # ignores keys it does not read.
   input = jsonencode({
     RequestType = "Reconcile"
-  })
-  # Hash every input the module feeds the function, so any change that can
-  # affect what it subscribes, or its capacity to finish, reconciles again.
-  triggers = {
-    config = sha256(jsonencode({
+    ConfigHash = sha256(jsonencode({
       regex_pattern                     = var.regex_pattern
       logs_filter                       = var.logs_filter
       destination_arn                   = var.destination_arn
@@ -182,5 +184,5 @@ resource "aws_lambda_invocation" "trigger_lambda_for_first_time" {
       timeout                           = var.timeout
       architecture                      = var.architecture
     }))
-  }
+  })
 }

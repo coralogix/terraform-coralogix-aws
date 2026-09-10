@@ -9,7 +9,7 @@
 - Added the IAM actions 3.0.0 needs: `tag:GetResources`, `logs:DeleteSubscriptionFilter`, `logs:TagResource` and `logs:UntagResource`. Moved `logs:DescribeLogGroups` to its own statement on `*`, since a list call has no log group to scope to.
 - Removed `lambda:UpdateFunctionConfiguration` and `lambda:GetFunctionConfiguration` from the role. The function no longer calls them.
 - `iam:PassRole` is now granted only for Firehose destinations, and `lambda:AddPermission` only for Lambda destinations, scoped to `destination_arn`.
-- The invocation now uses `lifecycle_scope = "CRUD"`, so a settings change re-runs reconcile and `terraform destroy` removes the subscription filters the function owns. It also waits 10 seconds after the role policy is written, which avoids an IAM propagation failure on a first apply.
+- The invocation now uses `lifecycle_scope = "CRUD"`, so a settings change re-runs reconcile and `terraform destroy` removes the subscription filters the function owns. The settings hash travels in the invocation payload rather than in `triggers`, because a `triggers` change replaces the resource, and replacing a `CRUD` invocation unsubscribes every managed log group before resubscribing it. It also waits 10 seconds after the role policy is written, which avoids an IAM propagation failure on a first apply.
 - Pinned the package to `lambda-manager-3.0.0.zip` via the new `lambda_manager_version` variable, so a new Lambda release no longer changes existing deployments.
 - Set `reserved_concurrent_executions = 1`, runtime `python3.14` and the `timeout` default to 900, matching the 3.0.0 template.
 

@@ -35,6 +35,13 @@ run "lambda_destination_wiring" {
   }
 
   assert {
+    # triggers is ForceNew, and replacing a CRUD invocation unsubscribes every
+    # managed log group before resubscribing it. The hash belongs in the input.
+    condition     = aws_lambda_invocation.trigger_lambda_for_first_time.triggers == null && jsondecode(aws_lambda_invocation.trigger_lambda_for_first_time.input).ConfigHash != ""
+    error_message = "The config hash must ride in input, never in triggers."
+  }
+
+  assert {
     condition = alltrue([
       for action in [
         "tag:GetResources",

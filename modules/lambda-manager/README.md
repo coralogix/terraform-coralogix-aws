@@ -23,6 +23,8 @@ The module runs Lambda Manager 3.0.0, which reconciles instead of scanning once:
 
 `scan_old_loggroups` no longer does anything. Reconcile always covers existing log groups.
 
+The function tags every log group it manages. If you also manage those log groups in Terraform, that tag reads as drift and the next apply strips it, which drops the group out of the manager's index until the next reconcile re-tags it. Add `lifecycle { ignore_changes = [tags, tags_all] }` to those log group resources.
+
 ## Requirements
 
 | Name | Version |
