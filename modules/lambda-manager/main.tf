@@ -164,6 +164,8 @@ resource "aws_lambda_invocation" "trigger_lambda_for_first_time" {
   input = jsonencode({
     RequestType = "Reconcile"
   })
+  # Hash every input the module feeds the function, so any change that can
+  # affect what it subscribes, or its capacity to finish, reconciles again.
   triggers = {
     config = sha256(jsonencode({
       regex_pattern                     = var.regex_pattern
@@ -176,6 +178,9 @@ resource "aws_lambda_invocation" "trigger_lambda_for_first_time" {
       adopt_legacy_filters              = var.adopt_legacy_filters
       aws_api_requests_limit            = var.aws_api_requests_limit
       lambda_manager_version            = var.lambda_manager_version
+      memory_size                       = var.memory_size
+      timeout                           = var.timeout
+      architecture                      = var.architecture
     }))
   }
 }

@@ -17,7 +17,7 @@ This Lambda Function was created to pick up newly created and existing log group
 
 The module runs Lambda Manager 3.0.0, which reconciles instead of scanning once:
 
-- **On apply**, the module invokes the function with `{"RequestType": "Reconcile"}`. The function lists every `STANDARD` log group, subscribes the ones matching `regex_pattern`, and tags them so it knows what it owns. It is safe to run again, so the module re-invokes it whenever a setting below changes.
+- **On apply**, the module invokes the function with `{"RequestType": "Reconcile"}`. The function lists every `STANDARD` log group, subscribes the ones matching `regex_pattern`, and tags them so it knows what it owns. It is safe to run again, so the module re-invokes it whenever any input it passes to the function changes. That covers the settings the function reads and the limits it runs under, because raising a limit is how you recover log groups an earlier run could not finish.
 - **On new log groups**, an EventBridge rule on `CreateLogGroup` invokes the function for that one group.
 - **On destroy**, the module invokes cleanup, which removes only the subscription filters it owns.
 
