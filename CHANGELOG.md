@@ -1,5 +1,25 @@
 # Changelog
 
+## v4.11.2
+
+#### **lambda-manager**
+### 🛠️ Bug fixes 🛠️
+- Fixed the module against Lambda Manager 3.0.0, which is now the package in the Coralogix S3 bucket. Every apply failed before this fix.
+- The apply invocation now sends `{"RequestType": "Reconcile"}`. Version 3.0.0 dropped the old `Create` verb and rejects it.
+- Added the IAM actions 3.0.0 needs: `tag:GetResources`, `logs:DeleteSubscriptionFilter`, `logs:TagResource` and `logs:UntagResource`. Moved `logs:DescribeLogGroups` to its own statement on `*`, since a list call has no log group to scope to.
+- Removed `lambda:UpdateFunctionConfiguration` and `lambda:GetFunctionConfiguration` from the role. The function no longer calls them.
+- `iam:PassRole` is now granted only for Firehose destinations, and `lambda:AddPermission` only for Lambda destinations, scoped to `destination_arn`.
+- The invocation now uses `lifecycle_scope = "CRUD"`, so a settings change re-runs reconcile and `terraform destroy` removes the subscription filters the function owns. The settings hash travels in the invocation payload rather than in `triggers`, because a `triggers` change replaces the resource, and replacing a `CRUD` invocation unsubscribes every managed log group before resubscribing it. It also waits 10 seconds after the role policy is written, which avoids an IAM propagation failure on a first apply.
+- Pinned the package to `lambda-manager-3.0.0.zip` via the new `lambda_manager_version` variable, so a new Lambda release no longer changes existing deployments.
+- Set `reserved_concurrent_executions = 1`, runtime `python3.14` and the `timeout` default to 900, matching the 3.0.0 template.
+
+### 💡 Enhancements 💡
+- Added `adopt_legacy_filters` to take over old Coralogix UUID subscription filters during a migration.
+- Added `aws_api_requests_limit` to raise the function's AWS API request limit when it hits `ThrottlingException`.
+- `add_permissions_to_all_log_groups` is now a `bool`. Version 3.0.0 accepts only `true` or `false`.
+- `regex_pattern` and `destination_type` are now validated. 3.0.0 rejects an empty regex.
+- `scan_old_loggroups` is deprecated and ignored. Reconcile always covers existing log groups.
+
 ## v4.11.1
 
 #### **coralogix-aws-shipper**
