@@ -58,7 +58,7 @@ variable "memory_size" {
 variable "timeout" {
   description = "The maximum time in seconds the function may be allowed to run. Default value is the minimum recommended setting please consult coralogix support before changing."
   type        = number
-  default     = 300
+  default     = 900
 }
 
 variable "architecture" {

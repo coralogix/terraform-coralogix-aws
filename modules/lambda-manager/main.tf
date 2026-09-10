@@ -56,9 +56,29 @@ module "lambda" {
       resources = ["arn:aws:lambda:${data.aws_region.this.id}:${data.aws_caller_identity.current.account_id}:function:*"]
     },
     CXLogConfig = {
-      effect    = "Allow"
-      actions   = ["logs:PutSubscriptionFilter", "logs:DescribeLogGroups", "logs:DescribeSubscriptionFilters"]
+      effect = "Allow"
+      actions = [
+        "logs:PutSubscriptionFilter",
+        "logs:DeleteSubscriptionFilter",
+        "logs:DescribeSubscriptionFilters",
+        "logs:TagResource",
+        "logs:UntagResource",
+      ]
       resources = ["arn:aws:logs:*:*:*"]
+    },
+    # DescribeLogGroups is a list operation and is not evaluated against a log
+    # group ARN, so it needs its own statement on "*".
+    CXLogList = {
+      effect    = "Allow"
+      actions   = ["logs:DescribeLogGroups"]
+      resources = ["*"]
+    },
+    # The Lambda locates the log groups it already manages through the Resource
+    # Groups Tagging API rather than by scanning.
+    CXTagIndex = {
+      effect    = "Allow"
+      actions   = ["tag:GetResources"]
+      resources = ["*"]
     },
     CXPassRole = {
       effect    = "Allow"
@@ -121,6 +141,6 @@ resource "aws_sns_topic_subscription" "this" {
 resource "aws_lambda_invocation" "trigger_lambda_for_first_time" {
   function_name = module.lambda.lambda_function_arn
   input = jsonencode({
-    RequestType = "Create"
+    RequestType = "Reconcile"
   })
 }
