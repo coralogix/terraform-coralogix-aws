@@ -11,8 +11,13 @@ variable "disable_add_permission" {
 }
 
 variable "regex_pattern" {
-  description = "Set up this regex to match the Log Groups names that you want to automatically subscribe to the destination"
+  description = "Regex that matches the log group names to subscribe to the destination"
   type        = string
+
+  validation {
+    condition     = trimspace(var.regex_pattern) != ""
+    error_message = "regex_pattern must not be empty."
+  }
 }
 
 variable "destination_role" {
@@ -33,20 +38,25 @@ variable "destination_arn" {
 }
 
 variable "destination_type" {
-  description = "Type of destination (Lambda or Firehose)"
+  description = "Destination type: lambda or firehose. Must match the service in destination_arn."
   type        = string
+
+  validation {
+    condition     = contains(["lambda", "firehose"], lower(var.destination_type))
+    error_message = "destination_type must be lambda or firehose."
+  }
 }
 
 variable "scan_old_loggroups" {
-  description = "This will scan all LogGroups in the account and apply the subscription configured, will only run Once and set to false. Default is false"
+  description = "Deprecated and ignored. Lambda Manager 3.0.0 always scans existing log groups. This variable will be removed in the next major release."
   type        = string
   default     = "false"
 }
 
 variable "add_permissions_to_all_log_groups" {
-  description = "When set to true, grants subscription permissions to the destination for all current and future log groups using a wildcard"
-  type        = string
-  default     = "false"
+  description = "Add one wildcard permission for all log groups in this account and region instead of one per log group. Lambda destinations only."
+  type        = bool
+  default     = false
 }
 
 variable "memory_size" {
@@ -58,7 +68,7 @@ variable "memory_size" {
 variable "timeout" {
   description = "The maximum time in seconds the function may be allowed to run. Default value is the minimum recommended setting please consult coralogix support before changing."
   type        = number
-  default     = 300
+  default     = 900
 }
 
 variable "architecture" {
@@ -82,4 +92,28 @@ variable "sns_kms_key_arn" {
     condition     = var.sns_kms_key_arn == null || can(regex("^arn:[^:]+:kms:[^:]+:[0-9]{12}:key/", var.sns_kms_key_arn))
     error_message = "sns_kms_key_arn must be a KMS key ARN (arn:...:kms:...:key/...), not an alias."
   }
+}
+
+variable "lambda_manager_version" {
+  description = "Lambda Manager package version to deploy from the Coralogix S3 bucket"
+  type        = string
+  default     = "3.0.0"
+}
+
+variable "adopt_legacy_filters" {
+  description = "Take over old Coralogix UUID subscription filters. Keep false unless you are migrating."
+  type        = bool
+  default     = false
+}
+
+variable "aws_api_requests_limit" {
+  description = "Max AWS API requests the function may send. Raise it if you see ThrottlingException."
+  type        = number
+  default     = 10
+}
+
+variable "enable_reconcile" {
+  description = "Invoke the function after apply to subscribe existing log groups, and clean up on destroy. Set false to run it yourself."
+  type        = bool
+  default     = true
 }

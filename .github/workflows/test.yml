@@ -51,9 +51,12 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
 
-      - if: ${{ matrix.package == 'coralogix-aws-shipper' }}
-        name: Terraform native tests
+      - name: Terraform native tests
         run: |
+          if [ ! -d "modules/${{ matrix.package }}/tests" ]; then
+            echo "[INFO] No native tests for ${{ matrix.package }}."
+            exit 0
+          fi
           cd "modules/${{ matrix.package }}"
           terraform init -backend=false
           terraform test

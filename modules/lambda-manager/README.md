@@ -2,6 +2,29 @@
 
 This Lambda Function was created to pick up newly created and existing log groups and attach them to Firehose or Lambda integration
 
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| lambda_function_arn | ARN of the Lambda Function |
+| lambda_function_name | Name of the Lambda Function |
+| lambda_role_arn | ARN of the IAM role created for the Lambda Function |
+| lambda_role_name | Name of the IAM role created for the Lambda Function |
+| lambda_policy_statements | IAM statements attached to the Lambda Function role |
+| lambda_package_key | S3 key of the deployed Lambda Manager package |
+
+## How it works
+
+The module runs Lambda Manager 3.0.0, which reconciles instead of scanning once:
+
+- **On apply**, the module invokes the function with `{"RequestType": "Reconcile"}`. The function lists every `STANDARD` log group, subscribes the ones matching `regex_pattern`, and tags them so it knows what it owns. It is safe to run again, so the module re-invokes it whenever a setting below changes.
+- **On new log groups**, an EventBridge rule on `CreateLogGroup` invokes the function for that one group.
+- **On destroy**, the module invokes cleanup, which removes only the subscription filters it owns.
+
+Reconcile is skipped when `enable_reconcile = false`, for example when you invoke the function from your own pipeline.
+
+`scan_old_loggroups` no longer does anything. Reconcile always covers existing log groups.
+
 ## Requirements
 
 | Name | Version |
@@ -15,6 +38,7 @@ This Lambda Function was created to pick up newly created and existing log group
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.15.1 |
 | <a name="provider_random"></a> [random](#provider\_random) | >= 3.1.0 |
+| <a name="provider_time"></a> [time](#provider\_time) | >= 0.9 |
 
 ## Modules
 
@@ -31,13 +55,17 @@ This Lambda Function was created to pick up newly created and existing log group
 | log_group_permissions_prefix | A list of strings of log group prefixes. The code will use these prefixes to create permissions for the Lambda instead of creating for each log group permission it will use the prefix with a wild card to give the Lambda access for all of the log groups that start with these prefix. This parameter doesn't replace the regex_pattern parameter.  For more information, refer to the Note below.| | no |
 | destination_arn | Arn for the firehose to subscribe the log groups (By default, is the firehose created by Serverless Template) | | yes |
 | destination_role | Arn for the role to allow destination subscription to be pushed (In case you use Firehose) | n/a | no |
-| destination_type | Type of destination (Lambda or Firehose) | | yes |
-| scan_old_loggroups | This will scan all LogGroups in the account and apply the subscription configured, will only run Once and set to false. Default is false | false | yes |
-| add_permissions_to_all_log_groups | When set to true, grants subscription permissions to the destination for all current and future log groups using a wildcard | false | |
+| destination_type | Destination type: `lambda` or `firehose`. Must match the service in `destination_arn`. | | yes |
+| scan_old_loggroups | Deprecated and ignored. Lambda Manager 3.0.0 always scans existing log groups. Will be removed in the next major release. | false | no |
+| add_permissions_to_all_log_groups | Add one wildcard permission for all log groups in this account and region instead of one per log group. Lambda destinations only. | false | |
+| adopt_legacy_filters | Take over old Coralogix UUID subscription filters. Keep false unless you are migrating. | false | |
+| aws_api_requests_limit | Max AWS API requests the function may send. Raise it if you see ThrottlingException. | 10 | |
+| enable_reconcile | Invoke the function after apply to subscribe existing log groups, and clean up on destroy. Set false to run it yourself. | true | |
+| lambda_manager_version | Lambda Manager package version to deploy from the Coralogix S3 bucket | 3.0.0 | |
 | disable_add_permission | Disable add permission to loggroup| false | |
 | architecture | Lambda function architecture, possible options are [x86_64, arm64] | x86_64 | |
 | memory_size | The maximum allocated memory this lambda may consume. Default value is the minimum recommended setting please consult coralogix support before changing. | 1024 |  |
-| timeout | The maximum time in seconds the function may be allowed to run. Default value is the minimum recommended setting please consult coralogix support before changing. | 300 |  |
+| timeout | The maximum time in seconds the function may be allowed to run. Default value is the minimum recommended setting please consult coralogix support before changing. | 900 |  |
 | notification_email | Failure notification email address | | |
 | sns_kms_key_arn | Optional KMS key ARN (not an alias) to encrypt the Lambda failure-notification SNS topic. Leave null for no encryption. The key policy must allow `sns.amazonaws.com` and the Lambda execution role to use `kms:Decrypt` and `kms:GenerateDataKey*`. | | |
 
