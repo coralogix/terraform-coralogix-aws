@@ -41,6 +41,9 @@ jobs:
     name: Validate
     runs-on: ubuntu-latest
     needs: check
+    permissions:
+      contents: read
+      id-token: write
     strategy:
       fail-fast: false
       matrix:
@@ -86,12 +89,10 @@ jobs:
         
       - if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
         name: Configure AWS credentials
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.TESTING_ACCESS_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.TESTING_SECRET_ACCESS_KEY }}
-        run: |
-          echo "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" >> $GITHUB_ENV
-          echo "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" >> $GITHUB_ENV
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::035955823196:role/github-actions-terraform-coralogix-aws-test
+          aws-region: us-east-1
 
       - if: ${{ github.event.pull_request.head.repo.full_name == github.repository }} 
         name: Terraform fmt check
