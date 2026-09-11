@@ -1,4 +1,9 @@
 # Changelog
+## v3.10.2
+#### **firehose-metrics**
+###  Bug fixes
+- Raise AWS provider ceiling from `< 6.0` to `< 7.0`. Checked against the official v6.0.0 upgrade guide for every resource and data source this module uses: no breaking changes apply, only a non-breaking deprecation on the `aws_region` data source's `name` attribute. Unlike `resource-metadata`'s `< 6.0` pin (see v3.8.0 below), this cap wasn't tied to a known incompatibility, so accounts pinned to provider `>= 6.x` (e.g. Xapo's secure-edge-workload accounts) can now use this module.
+
 ## v3.10.1
 #### **ecs-ec2-tail-sampling**
 ### 💡 Enhancements 💡
