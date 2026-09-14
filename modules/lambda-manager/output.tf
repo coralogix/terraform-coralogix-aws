@@ -17,3 +17,13 @@ output "lambda_role_name" {
   description = "The name of the IAM role created for the Lambda Function"
   value       = module.lambda.lambda_role_name
 }
+
+output "lambda_policy_statements" {
+  description = "IAM statements attached to the Lambda Function role"
+  value       = local.policy_statements
+}
+
+output "lambda_package_key" {
+  description = "S3 key of the deployed Lambda Manager package"
+  value       = local.package_key
+}

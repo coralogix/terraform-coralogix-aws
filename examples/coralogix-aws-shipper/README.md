@@ -208,7 +208,6 @@ module "coralogix-lambda-manager" {
   regex_pattern                = "log_groups_name*"
   destination_arn              = module.coralogix-shipper-cloudwatch.lambda_function_arn[0]
   destination_type             = "lambda"
-  scan_old_loggroups           = true
   log_group_permissions_prefix = ["log_groups_name"]
 }
 

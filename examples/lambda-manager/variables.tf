@@ -38,15 +38,15 @@ variable "destination_type" {
 }
 
 variable "scan_old_loggroups" {
-  description = "This will scan all LogGroups in the account and apply the subscription configured, will only run Once and set to false. Default is false"
+  description = "Deprecated and ignored. Lambda Manager 3.0.0 always scans existing log groups. Will be removed in the next major release."
   type        = string
   default     = "false"
 }
 
 variable "add_permissions_to_all_log_groups" {
-  description = "When set to true, grants subscription permissions to the destination for all current and future log groups using a wildcard"
-  type        = string
-  default     = "false"
+  description = "Add one wildcard permission for all log groups in this account and region instead of one per log group. Lambda destinations only."
+  type        = bool
+  default     = false
 }
 
 variable "memory_size" {
@@ -58,7 +58,7 @@ variable "memory_size" {
 variable "timeout" {
   description = "The maximum time in seconds the function may be allowed to run. Default value is the minimum recommended setting please consult coralogix support before changing."
   type        = number
-  default     = 300
+  default     = 900
 }
 
 variable "architecture" {
