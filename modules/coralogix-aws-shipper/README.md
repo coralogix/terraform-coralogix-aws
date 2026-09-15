@@ -91,8 +91,12 @@ sends through a Collector, which is what makes traces work from a lambda in a pr
 subnet.
 
 Traces mode fails at plan time on a non-CloudWatch `integration_type`, `log_groups`
-other than `["aws/spans"]`, a Kinesis, Kafka or MSK trigger, `enable_dlq`, or
-`subnet_ids` without an `otlp_endpoint`.
+other than `["aws/spans"]`, an S3, SNS, Kinesis, Kafka or MSK trigger, `enable_dlq`, or
+direct delivery without an `api_key`.
+
+Running in a VPC is supported. With an empty `otlp_endpoint` the lambda resolves the
+public `ingress.<domain>`, so the subnets need egress to it - a NAT gateway or an
+equivalent route. Otherwise set `otlp_endpoint` to a Collector reachable from the VPC.
 
 **Known limitation:** AWS records `service.name` only on the root span of a trace, so
 child spans arrive unnamed. Traces render correctly - structure, timings, errors and

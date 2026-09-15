@@ -376,9 +376,15 @@ module "lambda" {
 # Preconditions rather than a check block: a check only warns, and these combinations
 # do not merely ship nothing - an event source left attached in traces mode delivers
 # events the handler cannot read, so every delivery fails and retries until the queue's
-# retention expires. Kinesis, Kafka, MSK and the DLQ mapping are created from their own
-# variables alone, without consulting telemetry_mode; SQS and SNS are already safe
-# because is_sqs_integration/is_sns_integration require a matching integration_type.
+# retention expires. Kinesis, Kafka, MSK, the DLQ mapping, the S3 bucket notification
+# and the SNS subscription are all created from their own variables without consulting
+# telemetry_mode. SQS is the exception: aws_lambda_event_source_mapping.sqs is gated on
+# is_sqs_integration, which requires a matching integration_type.
+#
+# subnet_ids is deliberately not restricted. It means "run in a VPC", not "no public
+# egress" - a subnet with a NAT gateway reaches the Coralogix ingress fine, and the
+# module does not restrict direct OTLP logs either. Reaching the endpoint is the
+# deployer's concern, documented in the README.
 resource "terraform_data" "traces_mode_guardrails" {
   count = var.telemetry_mode == "traces" ? 1 : 0
 
@@ -396,12 +402,19 @@ resource "terraform_data" "traces_mode_guardrails" {
       error_message = "Kinesis, Kafka and MSK triggers are not supported when telemetry_mode is traces; their event source mappings are created regardless of telemetry_mode and would deliver events the traces handler cannot read."
     }
     precondition {
+      condition     = var.s3_bucket_name == null && var.sns_topic_name == null
+      error_message = "S3 and SNS triggers are not supported when telemetry_mode is traces; the bucket notification and the SNS subscription are created from these variables alone and would deliver events the traces handler cannot read."
+    }
+    precondition {
       condition     = !var.enable_dlq
       error_message = "enable_dlq is not supported when telemetry_mode is traces: the dead-letter queue is mapped back to the lambda, so replays arrive as SQS events that the traces handler cannot read."
     }
     precondition {
-      condition     = var.subnet_ids == null || var.otlp_endpoint != ""
-      error_message = "Direct Coralogix OTLP traces resolve the public ingress.<domain>, which a lambda in a private subnet cannot reach; set otlp_endpoint to a Collector reachable from the VPC."
+      condition = var.otlp_endpoint != "" || alltrue([
+        for integration in values(local.integration_info) :
+        integration.api_key != null && integration.api_key != ""
+      ])
+      error_message = "Direct Coralogix OTLP traces require an api_key; set otlp_endpoint to use a Collector instead."
     }
   }
 }

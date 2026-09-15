@@ -11,6 +11,20 @@ mock_provider "aws" {
       arn = "arn:aws:logs:eu-west-1:123456789012:log-group:aws/spans"
     }
   }
+
+  # The S3 and SNS runs below reach resources that build a lambda permission from these
+  # ARNs before the precondition is reported; the default mock returns "".
+  mock_data "aws_s3_bucket" {
+    defaults = {
+      arn = "arn:aws:s3:::test-bucket"
+    }
+  }
+
+  mock_data "aws_sns_topic" {
+    defaults = {
+      arn = "arn:aws:sns:eu-west-1:123456789012:test-topic"
+    }
+  }
 }
 
 mock_provider "external" {}
@@ -79,21 +93,56 @@ run "rejects_the_dead_letter_queue" {
   expect_failures = [terraform_data.traces_mode_guardrails]
 }
 
-run "rejects_privatelink_without_a_collector" {
+run "rejects_an_s3_trigger" {
   command = plan
 
   variables {
-    subnet_ids = ["subnet-0123456789abcdef0"]
+    s3_bucket_name = "test-bucket"
   }
 
   expect_failures = [terraform_data.traces_mode_guardrails]
 }
 
-run "accepts_privatelink_with_a_collector" {
+run "rejects_an_sns_trigger" {
   command = plan
 
   variables {
-    subnet_ids    = ["subnet-0123456789abcdef0"]
+    sns_topic_name = "test-topic"
+    # Unrelated pre-existing bug: aws_sns_topic_policy.test is created for a CloudWatch
+    # integration while data.aws_iam_policy_document.topic is gated on is_s3_integration,
+    # so the plan fails on an index before the precondition is reported.
+    create_sns_topic_policy = false
+  }
+
+  expect_failures = [terraform_data.traces_mode_guardrails]
+}
+
+run "rejects_direct_delivery_without_an_api_key" {
+  command = plan
+
+  variables {
+    api_key = ""
+  }
+
+  expect_failures = [terraform_data.traces_mode_guardrails]
+}
+
+run "accepts_a_collector_without_an_api_key" {
+  command = plan
+
+  variables {
+    api_key       = ""
     otlp_endpoint = "http://collector.internal:4317"
+  }
+}
+
+# subnet_ids means "run in a VPC", not "no public egress" - a NAT gateway reaches the
+# Coralogix ingress, and the module does not restrict direct OTLP logs either.
+run "accepts_a_vpc_deployment_without_a_collector" {
+  command = plan
+
+  variables {
+    subnet_ids         = ["subnet-0123456789abcdef0"]
+    security_group_ids = ["sg-0123456789abcdef0"]
   }
 }
