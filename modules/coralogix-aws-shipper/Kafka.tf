@@ -1,5 +1,5 @@
 resource "aws_lambda_event_source_mapping" "kafka" {
-  count             = var.kafka_brokers != null ? 1 : 0
+  count             = !local.is_traces && var.kafka_brokers != null ? 1 : 0
   function_name     = local.integration_info.integration.lambda_name == null ? module.locals.integration.function_name : local.integration_info.integration.lambda_name
   depends_on        = [module.lambda]
   topics            = [var.kafka_topic]

@@ -12,6 +12,9 @@ variable "custom_domain" {
   description = "Your Custom domain for the Coralogix account."
   type        = string
   default     = ""
+  # Compared against "" when choosing between the custom and regional domain; a null
+  # would select the custom branch and assign null.
+  nullable = false
 }
 
 variable "api_key" {
@@ -336,6 +339,9 @@ variable "source_code_version" {
   description = "The source code for the shipper lambda version, the varible need to be in the formate of x.x.x and is only suppordet since version 1.0.8"
   type        = string
   default     = ""
+  # Compared against "" when building the artifact key, so a null would produce the
+  # literal "null" in the object name.
+  nullable = false
 }
 
 # Integration Generic Config (Optional)
@@ -469,12 +475,12 @@ variable "reserved_concurrent_executions" {
 
 # firehose metrics varialbe
 variable "telemetry_mode" {
-  description = "The telemetry mode for the shipper, i.e metrics or logs"
+  description = "The telemetry mode for the shipper, i.e logs, metrics or traces. Use traces to ship AWS Transaction Search spans from the aws/spans CloudWatch log group."
   type        = string
   default     = "logs"
   validation {
-    condition     = contains(["logs", "metrics"], var.telemetry_mode)
-    error_message = "The telemetry_mode must be one of these values: [logs, metrics]."
+    condition     = contains(["logs", "metrics", "traces"], var.telemetry_mode)
+    error_message = "The telemetry_mode must be one of these values: [logs, metrics, traces]."
   }
 }
 
@@ -492,6 +498,9 @@ variable "otlp_endpoint" {
   description = "Optional Collector http:// or https:// origin for otlp_grpc. Empty selects direct Coralogix OTLP (uses coralogix_region/custom_domain + api_key). Non-empty selects unauthenticated Collector delivery."
   type        = string
   default     = ""
+  # Every route decision compares this against "", so a null would read as a configured
+  # Collector and leave the lambda with neither an endpoint nor a domain.
+  nullable = false
 }
 
 variable "disable_log_severity_detection" {

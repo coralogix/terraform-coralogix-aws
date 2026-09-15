@@ -270,7 +270,7 @@ resource "aws_iam_role_policy_attachment" "attach_to_existing_role" {
 }
 
 resource "aws_iam_role_policy_attachment" "attach_msk_policy" {
-  count      = var.msk_cluster_arn != null ? 1 : 0
+  count      = !local.is_traces && var.msk_cluster_arn != null ? 1 : 0
   role       = local.lambda_role_name
   policy_arn = data.aws_iam_policy.AWSLambdaMSKExecutionRole[0].arn
 }
@@ -311,9 +311,9 @@ module "lambda" {
       : each.value.api_key
     ) : null
     LOG_EXPORT_PROTOCOL            = var.telemetry_mode == "logs" ? var.log_export_protocol : null
-    OTLP_ENDPOINT                  = local.use_collector_otlp_logs ? var.otlp_endpoint : null
+    OTLP_ENDPOINT                  = local.use_collector_otlp_logs || local.use_collector_otlp_traces ? var.otlp_endpoint : null
     DISABLE_LOG_SEVERITY_DETECTION = var.telemetry_mode == "logs" ? tostring(var.disable_log_severity_detection) : null
-    CORALOGIX_DOMAIN = local.use_coralogix_otlp_logs ? (
+    CORALOGIX_DOMAIN = local.use_coralogix_otlp_logs || local.use_coralogix_otlp_traces ? (
       var.custom_domain != ""
       ? var.custom_domain
       : lookup(module.locals[each.key].coralogix_domains, var.coralogix_region, "eu1.coralogix.com")
@@ -353,7 +353,9 @@ module "lambda" {
   attach_policy_statements                = false
   create_role                             = false
   lambda_role                             = local.lambda_role_arn
-  allowed_triggers = local.s3_bucket_names != toset([]) && local.sns_enable != true ? {
+  # is_traces first: the S3, MSK and ECR branches below reference resources that are
+  # gated off in traces mode, so the chain has to agree with them.
+  allowed_triggers = local.is_traces ? {} : local.s3_bucket_names != toset([]) && local.sns_enable != true ? {
     for bucket in data.aws_s3_bucket.this : "AllowExecutionFromS3_${replace(bucket.bucket, ".", "_")}" => {
       principal  = "s3.amazonaws.com"
       source_arn = bucket.arn
@@ -371,6 +373,83 @@ module "lambda" {
   } : {}
 
   tags = merge(var.tags, module.locals[each.key].tags)
+}
+
+# Safety comes from local.is_traces, which every trigger-creating resource is gated on,
+# so an event source cannot be attached in traces mode by setting its own variable. These
+# preconditions exist to say so out loud: without them a leftover sqs_name or
+# kinesis_stream_name would be silently dropped rather than explained. They are a
+# courtesy, not the mechanism - an input missed here no longer creates a broken
+# deployment, which is why the previous enumerate-every-input approach kept springing
+# leaks as each fix moved which variable was authoritative.
+#
+# Preconditions rather than a check block: a check only warns.
+#
+# subnet_ids is deliberately not restricted. It means "run in a VPC", not "no public
+# egress" - a subnet with a NAT gateway reaches the Coralogix ingress fine, and the
+# module does not restrict direct OTLP logs either. Reaching the endpoint is the
+# deployer's concern, documented in the README.
+resource "terraform_data" "traces_mode_guardrails" {
+  count = var.telemetry_mode == "traces" ? 1 : 0
+
+  lifecycle {
+    precondition {
+      condition     = var.integration_type == "CloudWatch"
+      error_message = "integration_type must be CloudWatch when telemetry_mode is traces."
+    }
+    # integration_info deploys one lambda per entry, but traces has a single log group,
+    # so extra entries would only stack subscription filters on aws/spans. Rejecting it
+    # also keeps two module-wide assumptions true: CloudWatch.tf addresses the entry by
+    # the literal key "integration", and api_key_is_arn reads only the top-level
+    # api_key - a per-entry ARN would be wrapped in a new secret the lambda cannot read.
+    # 1.4.15 and earlier do not recognise TELEMETRY_MODE=traces: the shipper falls
+    # through to its logs path and ships span records as log lines. An unpinned
+    # source_code_version tracks the latest artifact and is always fine.
+    precondition {
+      condition     = var.source_code_version == "" || coalesce(local.source_code_version_number, 0) >= 1004016
+      error_message = "telemetry_mode = \"traces\" requires shipper 1.4.16 or later; set source_code_version to 1.4.16 or above, or leave it empty to track the latest."
+    }
+    precondition {
+      condition     = var.integration_info == null
+      error_message = "integration_info is not supported when telemetry_mode is traces; configure the single aws/spans integration with the top-level variables."
+    }
+    precondition {
+      condition     = var.log_groups != null && length(var.log_groups) == 1 && contains(var.log_groups, "aws/spans")
+      error_message = "log_groups must be exactly [\"aws/spans\"] when telemetry_mode is traces."
+    }
+    precondition {
+      condition     = var.kinesis_stream_name == null && var.kafka_brokers == null && var.msk_topic_name == null && var.msk_cluster_arn == null
+      error_message = "Kinesis, Kafka and MSK triggers are not supported when telemetry_mode is traces."
+    }
+    precondition {
+      condition     = var.s3_bucket_name == null && var.sns_topic_name == null && var.sqs_name == null
+      error_message = "S3, SNS and SQS triggers are not supported when telemetry_mode is traces."
+    }
+    # The invoke permission is built from log_group_prefix when it is set, while the
+    # subscription filter always comes from log_groups - a prefix not covering aws/spans
+    # leaves the subscription without a permission and the apply fails.
+    precondition {
+      condition     = var.log_group_prefix == null
+      error_message = "log_group_prefix is not supported when telemetry_mode is traces; the aws/spans subscription needs its invoke permission to come from log_groups."
+    }
+    precondition {
+      condition     = !var.enable_dlq
+      error_message = "enable_dlq is not supported when telemetry_mode is traces: the dead-letter queue is mapped back to the lambda, so replays arrive as SQS events that the traces handler cannot read."
+    }
+    precondition {
+      condition = var.otlp_endpoint != "" || alltrue([
+        for integration in values(local.integration_info) :
+        integration.api_key != null && integration.api_key != ""
+      ])
+      error_message = "Direct Coralogix OTLP traces require an api_key; set otlp_endpoint to use a Collector instead."
+    }
+    # The domain map has no Custom key, so lookup falls back to eu1.coralogix.com and a
+    # custom cluster would silently receive nothing.
+    precondition {
+      condition     = var.otlp_endpoint != "" || var.coralogix_region != "Custom" || var.custom_domain != ""
+      error_message = "Direct Coralogix OTLP traces with coralogix_region = \"Custom\" require custom_domain."
+    }
+  }
 }
 
 check "direct_otlp_requires_credentials" {
@@ -413,7 +492,7 @@ resource "aws_sns_topic_subscription" "this" {
 }
 
 resource "aws_lambda_permission" "sns_lambda_permission" {
-  count         = local.sns_enable ? 1 : 0
+  count         = !local.is_traces && local.sns_enable ? 1 : 0
   statement_id  = "AllowExecutionFromSNS"
   action        = "lambda:InvokeFunction"
   function_name = local.integration_info.integration.lambda_name == null ? module.locals.integration.function_name : local.integration_info.integration.lambda_name
@@ -423,7 +502,7 @@ resource "aws_lambda_permission" "sns_lambda_permission" {
 }
 
 resource "aws_sns_topic_policy" "test" {
-  count  = local.sns_enable && var.integration_type != "Sns" && var.create_sns_topic_policy ? 1 : 0
+  count  = !local.is_traces && local.sns_enable && var.integration_type != "Sns" && var.create_sns_topic_policy ? 1 : 0
   arn    = data.aws_sns_topic.sns_topic[count.index].arn
   policy = data.aws_iam_policy_document.topic[count.index].json
 }
@@ -472,7 +551,7 @@ resource "aws_sqs_queue" "DLQ" {
 
 resource "aws_lambda_event_source_mapping" "dlq_sqs" {
   depends_on       = [module.lambda]
-  count            = var.enable_dlq ? 1 : 0
+  count            = !local.is_traces && var.enable_dlq ? 1 : 0
   event_source_arn = aws_sqs_queue.DLQ[0].arn
   function_name    = local.integration_info.integration.lambda_name == null ? module.locals.integration.function_name : local.integration_info.integration.lambda_name
   enabled          = true
