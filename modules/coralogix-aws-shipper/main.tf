@@ -430,7 +430,7 @@ resource "terraform_data" "traces_mode_guardrails" {
       error_message = "enable_dlq is not supported when telemetry_mode is traces: the dead-letter queue is mapped back to the lambda, so replays arrive as SQS events that the traces handler cannot read."
     }
     precondition {
-      condition = (var.otlp_endpoint != null && var.otlp_endpoint != "") || alltrue([
+      condition = var.otlp_endpoint != "" || alltrue([
         for integration in values(local.integration_info) :
         integration.api_key != null && integration.api_key != ""
       ])
@@ -439,7 +439,7 @@ resource "terraform_data" "traces_mode_guardrails" {
     # The domain map has no Custom key, so lookup falls back to eu1.coralogix.com and a
     # custom cluster would silently receive nothing.
     precondition {
-      condition     = (var.otlp_endpoint != null && var.otlp_endpoint != "") || var.coralogix_region != "Custom" || (var.custom_domain != null && var.custom_domain != "")
+      condition     = var.otlp_endpoint != "" || var.coralogix_region != "Custom" || var.custom_domain != ""
       error_message = "Direct Coralogix OTLP traces with coralogix_region = \"Custom\" require custom_domain."
     }
   }

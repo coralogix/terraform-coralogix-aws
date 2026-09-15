@@ -339,3 +339,37 @@ run "accepts_a_vpc_deployment_without_a_collector" {
     security_group_ids = ["sg-0123456789abcdef0"]
   }
 }
+
+# nullable = false substitutes the default when a caller passes null, so null and ""
+# behave identically. Without it, null != "" reads as a configured Collector and the
+# lambda ends up with neither an endpoint nor a domain.
+run "a_null_otlp_endpoint_selects_direct_delivery" {
+  command = plan
+
+  variables {
+    otlp_endpoint = null
+  }
+
+  assert {
+    condition     = local.use_coralogix_otlp_traces && !local.use_collector_otlp_traces
+    error_message = "a null otlp_endpoint must behave as empty and select direct delivery"
+  }
+
+  assert {
+    condition     = local.needs_coralogix_api_key
+    error_message = "direct delivery via a null otlp_endpoint must still require an api key"
+  }
+}
+
+run "a_null_custom_domain_falls_back_to_the_regional_domain" {
+  command = plan
+
+  variables {
+    custom_domain = null
+  }
+
+  assert {
+    condition     = local.use_coralogix_otlp_traces
+    error_message = "a null custom_domain must not change the delivery route"
+  }
+}

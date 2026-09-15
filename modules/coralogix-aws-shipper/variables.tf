@@ -12,6 +12,9 @@ variable "custom_domain" {
   description = "Your Custom domain for the Coralogix account."
   type        = string
   default     = ""
+  # Compared against "" when choosing between the custom and regional domain; a null
+  # would select the custom branch and assign null.
+  nullable = false
 }
 
 variable "api_key" {
@@ -492,6 +495,9 @@ variable "otlp_endpoint" {
   description = "Optional Collector http:// or https:// origin for otlp_grpc. Empty selects direct Coralogix OTLP (uses coralogix_region/custom_domain + api_key). Non-empty selects unauthenticated Collector delivery."
   type        = string
   default     = ""
+  # Every route decision compares this against "", so a null would read as a configured
+  # Collector and leave the lambda with neither an endpoint nor a domain.
+  nullable = false
 }
 
 variable "disable_log_severity_detection" {
