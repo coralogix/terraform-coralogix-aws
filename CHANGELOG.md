@@ -4,8 +4,8 @@
 
 #### **coralogix-aws-shipper**
 ### 💡 Enhancements 💡
-- Added `telemetry_mode = "traces"`, which forwards AWS CloudWatch Transaction Search spans from the `aws/spans` log group to Coralogix as traces over OTLP/gRPC. Requires shipper `1.4.16` or later. The route follows the same `otlp_endpoint` rule as OTLP logs: empty sends direct to Coralogix, non-empty sends through a Collector.
-- Traces mode refuses, at plan time, the combinations that would silently misbehave: a non-CloudWatch `integration_type`, any `log_groups` other than `["aws/spans"]`, a Kinesis, Kafka or MSK trigger, `enable_dlq`, and `subnet_ids` without an `otlp_endpoint`. Those event source mappings are created from their own variables without consulting `telemetry_mode`, so each would attach a source whose deliveries fail and retry until the queue's retention expires. `preconditions` rather than a `check` block, because a check only warns.
+- Added `telemetry_mode = "traces"`, which forwards AWS CloudWatch Transaction Search spans from the `aws/spans` log group to Coralogix as traces over OTLP/gRPC. Requires shipper `1.4.16` or later. As with OTLP logs, an empty `otlp_endpoint` sends direct to Coralogix and a non-empty one sends through a Collector.
+- Traces mode fails at plan time on: a non-CloudWatch `integration_type`, `log_groups` other than `["aws/spans"]`, a Kinesis, Kafka or MSK trigger, `enable_dlq`, or `subnet_ids` without an `otlp_endpoint`.
 
 ## v4.11.2
 

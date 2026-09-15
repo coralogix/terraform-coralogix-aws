@@ -88,9 +88,11 @@ log_groups       = ["aws/spans"]
 
 As with logs, an empty `otlp_endpoint` sends direct to Coralogix and a non-empty one
 sends through a Collector, which is what makes traces work from a lambda in a private
-subnet. Only the `aws/spans` trigger is supported: Kinesis, Kafka, MSK and `enable_dlq`
-are refused at plan time, because their event source mappings are created independently
-of `telemetry_mode` and would deliver events the traces handler cannot read.
+subnet.
+
+Traces mode fails at plan time on a non-CloudWatch `integration_type`, `log_groups`
+other than `["aws/spans"]`, a Kinesis, Kafka or MSK trigger, `enable_dlq`, or
+`subnet_ids` without an `otlp_endpoint`.
 
 **Known limitation:** AWS records `service.name` only on the root span of a trace, so
 child spans arrive unnamed. Traces render correctly - structure, timings, errors and
