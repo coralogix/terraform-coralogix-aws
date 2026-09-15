@@ -389,8 +389,14 @@ resource "terraform_data" "traces_mode_guardrails" {
   count = var.telemetry_mode == "traces" ? 1 : 0
 
   lifecycle {
+    # local.integration_info, not var.integration_type: INTEGRATION_TYPE reaching the
+    # lambda comes from each integration entry, so a caller supplying integration_info
+    # would otherwise pass this guard while configuring the lambda for another source.
     precondition {
-      condition     = var.integration_type == "CloudWatch"
+      condition = alltrue([
+        for integration in values(local.integration_info) :
+        integration.integration_type == "CloudWatch"
+      ])
       error_message = "integration_type must be CloudWatch when telemetry_mode is traces."
     }
     precondition {
@@ -415,6 +421,12 @@ resource "terraform_data" "traces_mode_guardrails" {
         integration.api_key != null && integration.api_key != ""
       ])
       error_message = "Direct Coralogix OTLP traces require an api_key; set otlp_endpoint to use a Collector instead."
+    }
+    # The domain map has no Custom key, so lookup falls back to eu1.coralogix.com and a
+    # custom cluster would silently receive nothing.
+    precondition {
+      condition     = var.otlp_endpoint != "" || var.coralogix_region != "Custom" || var.custom_domain != ""
+      error_message = "Direct Coralogix OTLP traces with coralogix_region = \"Custom\" require custom_domain."
     }
   }
 }

@@ -136,6 +136,47 @@ run "accepts_a_collector_without_an_api_key" {
   }
 }
 
+run "rejects_a_custom_region_without_a_domain" {
+  command = plan
+
+  variables {
+    coralogix_region = "Custom"
+    custom_domain    = ""
+  }
+
+  expect_failures = [terraform_data.traces_mode_guardrails]
+}
+
+run "accepts_a_custom_region_with_a_domain" {
+  command = plan
+
+  variables {
+    coralogix_region = "Custom"
+    custom_domain    = "cx123.coralogix.com"
+  }
+}
+
+# The lambda takes INTEGRATION_TYPE from the integration entry, so the guard has to read
+# local.integration_info rather than var.integration_type.
+run "rejects_a_non_cloudwatch_integration_info_entry" {
+  command = plan
+
+  variables {
+    integration_type = "CloudWatch"
+    integration_info = {
+      integration = {
+        application_name = "tf-traces-e2e"
+        subsystem_name   = "aws-spans"
+        integration_type = "S3"
+        s3_bucket_name   = "test-bucket"
+        api_key          = "test-api-key"
+      }
+    }
+  }
+
+  expect_failures = [terraform_data.traces_mode_guardrails]
+}
+
 # subnet_ids means "run in a VPC", not "no public egress" - a NAT gateway reaches the
 # Coralogix ingress, and the module does not restrict direct OTLP logs either.
 run "accepts_a_vpc_deployment_without_a_collector" {
