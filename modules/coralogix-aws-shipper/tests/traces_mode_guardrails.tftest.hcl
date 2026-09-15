@@ -25,6 +25,28 @@ mock_provider "aws" {
       arn = "arn:aws:sns:eu-west-1:123456789012:test-topic"
     }
   }
+
+  # The log_group_prefix run builds an ARN from these; random mock values are rejected
+  # by the provider's ARN validation before the precondition is reported.
+  mock_data "aws_region" {
+    defaults = {
+      id = "eu-west-1"
+    }
+  }
+
+  mock_data "aws_caller_identity" {
+    defaults = {
+      account_id = "123456789012"
+    }
+  }
+
+  # local.arn_prefix is built from this; a random mock value fails the provider's
+  # partition validation before any precondition is reported.
+  mock_data "aws_partition" {
+    defaults = {
+      partition = "aws"
+    }
+  }
 }
 
 mock_provider "external" {}
@@ -50,6 +72,55 @@ variables {
 
 run "accepts_a_valid_traces_deployment" {
   command = plan
+
+  # The preconditions reject every input that would otherwise reach the gating, so
+  # without these asserts the whole !local.is_traces mechanism is untested - removing it
+  # from all seven files leaves the suite green.
+  assert {
+    condition = (
+      length(aws_lambda_event_source_mapping.example) == 0 &&
+      length(aws_lambda_event_source_mapping.kafka) == 0 &&
+      length(aws_lambda_event_source_mapping.msk_event_mapping) == 0 &&
+      length(aws_lambda_event_source_mapping.sqs) == 0 &&
+      length(aws_lambda_event_source_mapping.dlq_sqs) == 0
+    )
+    error_message = "no event source mapping may exist in traces mode"
+  }
+
+  assert {
+    condition = (
+      length(aws_sns_topic_subscription.lambda_sns_subscription) == 0 &&
+      length(aws_s3_bucket_notification.lambda_notification) == 0 &&
+      length(aws_s3_bucket_notification.topic_notification) == 0 &&
+      length(aws_s3_bucket_notification.sqs_notification) == 0
+    )
+    error_message = "no notification or subscription may exist in traces mode"
+  }
+
+  assert {
+    condition = (
+      length(aws_cloudwatch_event_rule.EventBridgeRule) == 0 &&
+      length(aws_cloudwatch_event_target.EventBridgeRuleTarget) == 0
+    )
+    error_message = "no EventBridge trigger may exist in traces mode"
+  }
+
+  # The aws/spans trigger itself must still be created.
+  assert {
+    condition     = length(aws_cloudwatch_log_subscription_filter.this) == 1
+    error_message = "the aws/spans subscription filter must be created"
+  }
+
+  # E3: without these the env wiring could be reverted to master and this still passes.
+  assert {
+    condition     = local.use_coralogix_otlp_traces && !local.use_collector_otlp_traces
+    error_message = "an empty otlp_endpoint must select the direct Coralogix route"
+  }
+
+  assert {
+    condition     = local.needs_coralogix_api_key
+    error_message = "direct traces must require an api key"
+  }
 }
 
 run "rejects_a_non_cloudwatch_integration" {
@@ -77,6 +148,38 @@ run "rejects_a_kinesis_trigger" {
 
   variables {
     kinesis_stream_name = "some-stream"
+  }
+
+  expect_failures = [terraform_data.traces_mode_guardrails]
+}
+
+run "rejects_a_kafka_trigger" {
+  command = plan
+
+  variables {
+    kafka_brokers = "b-1.example:9092"
+  }
+
+  expect_failures = [terraform_data.traces_mode_guardrails]
+}
+
+run "rejects_an_msk_topic" {
+  command = plan
+
+  variables {
+    msk_topic_name = ["test-topic"]
+  }
+
+  expect_failures = [terraform_data.traces_mode_guardrails]
+}
+
+# msk_cluster_arn attaches the MSK execution role without creating any trigger, so it
+# reaches neither the gating nor the other precondition members.
+run "rejects_an_msk_cluster_arn" {
+  command = plan
+
+  variables {
+    msk_cluster_arn = "arn:aws:kafka:eu-west-1:123456789012:cluster/test/abc-1"
   }
 
   expect_failures = [terraform_data.traces_mode_guardrails]
@@ -134,6 +237,56 @@ run "accepts_a_collector_without_an_api_key" {
     api_key       = ""
     otlp_endpoint = "http://collector.internal:4317"
   }
+
+  assert {
+    condition     = local.use_collector_otlp_traces && !local.use_coralogix_otlp_traces
+    error_message = "a non-empty otlp_endpoint must select the collector route"
+  }
+
+  assert {
+    condition     = !local.needs_coralogix_api_key
+    error_message = "the collector route must not require an api key"
+  }
+}
+
+run "rejects_an_sqs_trigger" {
+  command = plan
+
+  variables {
+    sqs_name = "test-queue"
+  }
+
+  expect_failures = [terraform_data.traces_mode_guardrails]
+}
+
+run "rejects_a_log_group_prefix" {
+  command = plan
+
+  variables {
+    log_group_prefix = ["my-app-"]
+  }
+
+  expect_failures = [terraform_data.traces_mode_guardrails]
+}
+
+# Sqs.tf and Ecr.tf read the top-level integration_type, so a CloudWatch entry in
+# integration_info must not be enough to pass on its own.
+run "rejects_a_trigger_producing_top_level_integration_type" {
+  command = plan
+
+  variables {
+    integration_type = "EcrScan"
+    integration_info = {
+      integration = {
+        application_name = "tf-traces-e2e"
+        subsystem_name   = "aws-spans"
+        integration_type = "CloudWatch"
+        api_key          = "test-api-key"
+      }
+    }
+  }
+
+  expect_failures = [terraform_data.traces_mode_guardrails]
 }
 
 run "rejects_a_custom_region_without_a_domain" {
