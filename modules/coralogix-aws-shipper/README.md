@@ -93,7 +93,8 @@ subnet.
 Traces mode fails at plan time on a non-CloudWatch `integration_type`, `log_groups`
 other than `["aws/spans"]`, an S3, SNS, Kinesis, Kafka or MSK trigger, `enable_dlq`, or
 direct delivery without an `api_key` or without a `custom_domain` when
-`coralogix_region = "Custom"`.
+`coralogix_region = "Custom"`. `integration_info` is not supported - traces has a single
+log group, so configure it with the top-level variables.
 
 Running in a VPC is supported. With an empty `otlp_endpoint` the lambda resolves the
 public `ingress.<domain>`, so the subnets need egress to it - a NAT gateway or an

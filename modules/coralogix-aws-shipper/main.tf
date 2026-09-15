@@ -393,14 +393,18 @@ resource "terraform_data" "traces_mode_guardrails" {
   count = var.telemetry_mode == "traces" ? 1 : 0
 
   lifecycle {
-    # Both the top-level value and every entry: the lambda takes INTEGRATION_TYPE from
-    # the entries, while Sqs.tf and Ecr.tf read the top-level variable.
     precondition {
-      condition = var.integration_type == "CloudWatch" && alltrue([
-        for integration in values(local.integration_info) :
-        integration.integration_type == "CloudWatch"
-      ])
+      condition     = var.integration_type == "CloudWatch"
       error_message = "integration_type must be CloudWatch when telemetry_mode is traces."
+    }
+    # integration_info deploys one lambda per entry, but traces has a single log group,
+    # so extra entries would only stack subscription filters on aws/spans. Rejecting it
+    # also keeps two module-wide assumptions true: CloudWatch.tf addresses the entry by
+    # the literal key "integration", and api_key_is_arn reads only the top-level
+    # api_key - a per-entry ARN would be wrapped in a new secret the lambda cannot read.
+    precondition {
+      condition     = var.integration_info == null
+      error_message = "integration_info is not supported when telemetry_mode is traces; configure the single aws/spans integration with the top-level variables."
     }
     precondition {
       condition     = var.log_groups != null && length(var.log_groups) == 1 && contains(var.log_groups, "aws/spans")

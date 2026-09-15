@@ -5,7 +5,7 @@
 #### **coralogix-aws-shipper**
 ### 💡 Enhancements 💡
 - Added `telemetry_mode = "traces"`, which forwards AWS CloudWatch Transaction Search spans from the `aws/spans` log group to Coralogix as traces over OTLP/gRPC. Requires shipper `1.4.16` or later. As with OTLP logs, an empty `otlp_endpoint` sends direct to Coralogix and a non-empty one sends through a Collector.
-- Traces mode fails at plan time on: a non-CloudWatch `integration_type`, `log_groups` other than `["aws/spans"]`, an S3, SNS, Kinesis, Kafka or MSK trigger, `enable_dlq`, or direct delivery without an `api_key` or without a `custom_domain` when `coralogix_region = "Custom"`.
+- Traces mode fails at plan time on: a non-CloudWatch `integration_type`, `log_groups` other than `["aws/spans"]`, an S3, SNS, Kinesis, Kafka or MSK trigger, `enable_dlq`, `integration_info`, or direct delivery without an `api_key` or without a `custom_domain` when `coralogix_region = "Custom"`.
 
 ## v4.11.2
 

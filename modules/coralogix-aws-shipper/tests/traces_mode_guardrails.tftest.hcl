@@ -269,8 +269,7 @@ run "rejects_a_log_group_prefix" {
   expect_failures = [terraform_data.traces_mode_guardrails]
 }
 
-# Sqs.tf and Ecr.tf read the top-level integration_type, so a CloudWatch entry in
-# integration_info must not be enough to pass on its own.
+# Sqs.tf and Ecr.tf read the top-level integration_type.
 run "rejects_a_trigger_producing_top_level_integration_type" {
   command = plan
 
@@ -309,9 +308,9 @@ run "accepts_a_custom_region_with_a_domain" {
   }
 }
 
-# The lambda takes INTEGRATION_TYPE from the integration entry, so the guard has to read
-# local.integration_info rather than var.integration_type.
-run "rejects_a_non_cloudwatch_integration_info_entry" {
+# CloudWatch.tf addresses the entry by the literal key "integration" and api_key_is_arn
+# reads only the top-level api_key, so integration_info is refused outright.
+run "rejects_integration_info" {
   command = plan
 
   variables {
