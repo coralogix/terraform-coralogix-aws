@@ -94,7 +94,15 @@ locals {
   # Traces reads span records from the aws/spans log group only. Every other event
   # source is gated on this, so a trigger cannot be attached by setting its own
   # variable - see the guardrails in main.tf.
-  is_traces                     = var.telemetry_mode == "traces"
+  is_traces = var.telemetry_mode == "traces"
+  # x.y.z as a single comparable number, or null when unpinned or unparseable. The 1000
+  # multipliers keep 1.4.100 above 1.5.0 from colliding.
+  source_code_version_number = var.source_code_version == "" ? null : try(
+    tonumber(split(".", var.source_code_version)[0]) * 1000000 +
+    tonumber(split(".", var.source_code_version)[1]) * 1000 +
+    tonumber(split(".", var.source_code_version)[2]),
+    null
+  )
   use_collector_otlp_traces     = var.telemetry_mode == "traces" && var.otlp_endpoint != ""
   use_coralogix_otlp_traces     = var.telemetry_mode == "traces" && var.otlp_endpoint == ""
   needs_coralogix_api_key       = var.telemetry_mode == "metrics" || local.use_coralogix_rest_logs || local.use_coralogix_otlp_logs || local.use_coralogix_otlp_traces

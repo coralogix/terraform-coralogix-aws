@@ -339,6 +339,9 @@ variable "source_code_version" {
   description = "The source code for the shipper lambda version, the varible need to be in the formate of x.x.x and is only suppordet since version 1.0.8"
   type        = string
   default     = ""
+  # Compared against "" when building the artifact key, so a null would produce the
+  # literal "null" in the object name.
+  nullable = false
 }
 
 # Integration Generic Config (Optional)

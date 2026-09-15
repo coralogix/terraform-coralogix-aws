@@ -402,6 +402,13 @@ resource "terraform_data" "traces_mode_guardrails" {
     # also keeps two module-wide assumptions true: CloudWatch.tf addresses the entry by
     # the literal key "integration", and api_key_is_arn reads only the top-level
     # api_key - a per-entry ARN would be wrapped in a new secret the lambda cannot read.
+    # 1.4.15 and earlier do not recognise TELEMETRY_MODE=traces: the shipper falls
+    # through to its logs path and ships span records as log lines. An unpinned
+    # source_code_version tracks the latest artifact and is always fine.
+    precondition {
+      condition     = var.source_code_version == "" || coalesce(local.source_code_version_number, 0) >= 1004016
+      error_message = "telemetry_mode = \"traces\" requires shipper 1.4.16 or later; set source_code_version to 1.4.16 or above, or leave it empty to track the latest."
+    }
     precondition {
       condition     = var.integration_info == null
       error_message = "integration_info is not supported when telemetry_mode is traces; configure the single aws/spans integration with the top-level variables."

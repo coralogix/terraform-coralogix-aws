@@ -76,7 +76,9 @@ OTLP routes require a shipper binary that supports them; pin `source_code_versio
 AWS-managed services that cannot be instrumented directly - Step Functions, API Gateway,
 AppSync - with no application code changes.
 
-Requires shipper `1.4.16` or later. Enable
+Requires shipper `1.4.16` or later - a pinned `source_code_version` below that is
+refused, since earlier binaries do not recognise the mode and ship spans as log lines.
+Enable
 [Transaction Search](https://docs.aws.amazon.com/xray/latest/devguide/transaction-search.html)
 and X-Ray tracing on the services you want traced, then:
 

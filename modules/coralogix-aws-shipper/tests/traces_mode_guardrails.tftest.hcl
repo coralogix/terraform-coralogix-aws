@@ -310,6 +310,44 @@ run "accepts_a_custom_region_with_a_domain" {
 
 # CloudWatch.tf addresses the entry by the literal key "integration" and api_key_is_arn
 # reads only the top-level api_key, so integration_info is refused outright.
+# 1.4.15 and earlier silently ship spans as log lines rather than failing.
+run "rejects_a_shipper_version_without_traces_support" {
+  command = plan
+
+  variables {
+    source_code_version = "1.4.15"
+  }
+
+  expect_failures = [terraform_data.traces_mode_guardrails]
+}
+
+run "rejects_a_much_older_shipper_version" {
+  command = plan
+
+  variables {
+    source_code_version = "1.3.9"
+  }
+
+  expect_failures = [terraform_data.traces_mode_guardrails]
+}
+
+run "accepts_the_minimum_supported_shipper_version" {
+  command = plan
+
+  variables {
+    source_code_version = "1.4.16"
+  }
+}
+
+# A later patch must not read as older: 1.4.100 > 1.4.16 numerically, not lexically.
+run "accepts_a_later_patch_version" {
+  command = plan
+
+  variables {
+    source_code_version = "1.4.100"
+  }
+}
+
 run "rejects_integration_info" {
   command = plan
 
