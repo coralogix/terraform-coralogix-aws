@@ -69,6 +69,34 @@ When `telemetry_mode` is `logs`, three export routes are available (matching the
 
 OTLP routes require a shipper binary that supports them; pin `source_code_version` after that shipper release is published.
 
+### Traces
+
+`telemetry_mode = "traces"` forwards AWS CloudWatch Transaction Search spans from the
+`aws/spans` log group to Coralogix as traces over OTLP/gRPC. It gives trace coverage for
+AWS-managed services that cannot be instrumented directly - Step Functions, API Gateway,
+AppSync - with no application code changes.
+
+Requires shipper `1.4.16` or later. Enable
+[Transaction Search](https://docs.aws.amazon.com/xray/latest/devguide/transaction-search.html)
+and X-Ray tracing on the services you want traced, then:
+
+```hcl
+telemetry_mode   = "traces"
+integration_type = "CloudWatch"
+log_groups       = ["aws/spans"]
+```
+
+As with logs, an empty `otlp_endpoint` sends direct to Coralogix and a non-empty one
+sends through a Collector, which is what makes traces work from a lambda in a private
+subnet. Only the `aws/spans` trigger is supported: Kinesis, Kafka, MSK and `enable_dlq`
+are refused at plan time, because their event source mappings are created independently
+of `telemetry_mode` and would deliver events the traces handler cannot read.
+
+**Known limitation:** AWS records `service.name` only on the root span of a trace, so
+child spans arrive unnamed. Traces render correctly - structure, timings, errors and
+stacktraces are intact - but service-level views are incomplete. See the
+[shipper README](https://github.com/coralogix/coralogix-aws-shipper#aws-transaction-search-traces-beta).
+
 <!-- /static-modules-readme-end-description -->
 
 <!-- description id="S3-integration" title="AWS Shipper Terraform Module for S3 Integration" examples_path="examples/coralogix-aws-shipper/README.md" -->
@@ -364,7 +392,7 @@ To enable CloudWatch metrics streaming via Firehose (PrivateLink), you must prov
 
 | Parameter | Description | Default Value | Required |
 |-----------|-------------|---------------|--------------------|
-| telemetry_mode | Specify the telemetry collection modes, supported values (`metrics`, `logs`). Note that this value must be set to `metrics` for the Cloudwatch metric stream workflow | logs. | :heavy_check_mark: |
+| telemetry_mode | Specify the telemetry collection modes, supported values (`metrics`, `logs`, `traces`). Note that this value must be set to `metrics` for the Cloudwatch metric stream workflow | logs. | :heavy_check_mark: |
 | batch_metrics | Enable batching of OpenTelemetry metric messages before they are sent to Coralogix. Available only when `telemetry_mode = "metrics"`. | `false` | |
 | metrics_batch_max_size | Maximum size (in MB) of the aggregated metrics payload before the batch is flushed. Used only when `batch_metrics` is enabled. | `4` | |
 | api_key | The Coralogix Send Your Data - [API key](https://coralogix.com/docs/send-your-data-api-key/) validates your authenticity. This value can be a direct Coralogix API key or an AWS secret manager ARN containing the API key.| `string` | n/a | yes |

@@ -311,9 +311,9 @@ module "lambda" {
       : each.value.api_key
     ) : null
     LOG_EXPORT_PROTOCOL            = var.telemetry_mode == "logs" ? var.log_export_protocol : null
-    OTLP_ENDPOINT                  = local.use_collector_otlp_logs ? var.otlp_endpoint : null
+    OTLP_ENDPOINT                  = local.use_collector_otlp_logs || local.use_collector_otlp_traces ? var.otlp_endpoint : null
     DISABLE_LOG_SEVERITY_DETECTION = var.telemetry_mode == "logs" ? tostring(var.disable_log_severity_detection) : null
-    CORALOGIX_DOMAIN = local.use_coralogix_otlp_logs ? (
+    CORALOGIX_DOMAIN = local.use_coralogix_otlp_logs || local.use_coralogix_otlp_traces ? (
       var.custom_domain != ""
       ? var.custom_domain
       : lookup(module.locals[each.key].coralogix_domains, var.coralogix_region, "eu1.coralogix.com")
@@ -371,6 +371,39 @@ module "lambda" {
   } : {}
 
   tags = merge(var.tags, module.locals[each.key].tags)
+}
+
+# Preconditions rather than a check block: a check only warns, and these combinations
+# do not merely ship nothing - an event source left attached in traces mode delivers
+# events the handler cannot read, so every delivery fails and retries until the queue's
+# retention expires. Kinesis, Kafka, MSK and the DLQ mapping are created from their own
+# variables alone, without consulting telemetry_mode; SQS and SNS are already safe
+# because is_sqs_integration/is_sns_integration require a matching integration_type.
+resource "terraform_data" "traces_mode_guardrails" {
+  count = var.telemetry_mode == "traces" ? 1 : 0
+
+  lifecycle {
+    precondition {
+      condition     = var.integration_type == "CloudWatch"
+      error_message = "integration_type must be CloudWatch when telemetry_mode is traces."
+    }
+    precondition {
+      condition     = length(var.log_groups) == 1 && contains(var.log_groups, "aws/spans")
+      error_message = "log_groups must be exactly [\"aws/spans\"] when telemetry_mode is traces."
+    }
+    precondition {
+      condition     = var.kinesis_stream_name == null && var.kafka_brokers == null && var.msk_topic_name == null
+      error_message = "Kinesis, Kafka and MSK triggers are not supported when telemetry_mode is traces; their event source mappings are created regardless of telemetry_mode and would deliver events the traces handler cannot read."
+    }
+    precondition {
+      condition     = !var.enable_dlq
+      error_message = "enable_dlq is not supported when telemetry_mode is traces: the dead-letter queue is mapped back to the lambda, so replays arrive as SQS events that the traces handler cannot read."
+    }
+    precondition {
+      condition     = var.subnet_ids == null || var.otlp_endpoint != ""
+      error_message = "Direct Coralogix OTLP traces resolve the public ingress.<domain>, which a lambda in a private subnet cannot reach; set otlp_endpoint to a Collector reachable from the VPC."
+    }
+  }
 }
 
 check "direct_otlp_requires_credentials" {

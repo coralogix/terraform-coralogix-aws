@@ -469,12 +469,12 @@ variable "reserved_concurrent_executions" {
 
 # firehose metrics varialbe
 variable "telemetry_mode" {
-  description = "The telemetry mode for the shipper, i.e metrics or logs"
+  description = "The telemetry mode for the shipper, i.e logs, metrics or traces. Use traces to ship AWS Transaction Search spans from the aws/spans CloudWatch log group."
   type        = string
   default     = "logs"
   validation {
-    condition     = contains(["logs", "metrics"], var.telemetry_mode)
-    error_message = "The telemetry_mode must be one of these values: [logs, metrics]."
+    condition     = contains(["logs", "metrics", "traces"], var.telemetry_mode)
+    error_message = "The telemetry_mode must be one of these values: [logs, metrics, traces]."
   }
 }
 

@@ -91,6 +91,8 @@ locals {
   use_otlp_grpc_logs            = var.telemetry_mode == "logs" && var.log_export_protocol == "otlp_grpc"
   use_collector_otlp_logs       = local.use_otlp_grpc_logs && var.otlp_endpoint != ""
   use_coralogix_otlp_logs       = local.use_otlp_grpc_logs && var.otlp_endpoint == ""
-  needs_coralogix_api_key       = var.telemetry_mode == "metrics" || local.use_coralogix_rest_logs || local.use_coralogix_otlp_logs
+  use_collector_otlp_traces     = var.telemetry_mode == "traces" && var.otlp_endpoint != ""
+  use_coralogix_otlp_traces     = var.telemetry_mode == "traces" && var.otlp_endpoint == ""
+  needs_coralogix_api_key       = var.telemetry_mode == "metrics" || local.use_coralogix_rest_logs || local.use_coralogix_otlp_logs || local.use_coralogix_otlp_traces
   needs_coralogix_rest_endpoint = var.telemetry_mode == "metrics" || local.use_coralogix_rest_logs
 }
