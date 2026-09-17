@@ -1,6 +1,6 @@
 resource "aws_s3_bucket_notification" "topic_notification" {
   depends_on = [module.lambda]
-  count      = local.sns_enable == true && (var.integration_type == "S3" || var.integration_type == "CloudTrail") && var.s3_notification != false ? 1 : 0
+  count      = !local.is_traces && local.sns_enable == true && (var.integration_type == "S3" || var.integration_type == "CloudTrail") && var.s3_notification != false ? 1 : 0
   bucket     = one(values(data.aws_s3_bucket.this)).bucket
   topic {
     topic_arn     = data.aws_sns_topic.sns_topic[0].arn
@@ -19,7 +19,7 @@ resource "aws_sns_topic" "this" {
 }
 
 resource "aws_sns_topic_subscription" "lambda_sns_subscription" {
-  count               = local.sns_enable ? 1 : 0
+  count               = !local.is_traces && local.sns_enable ? 1 : 0
   depends_on          = [module.lambda]
   topic_arn           = data.aws_sns_topic.sns_topic[count.index].arn
   protocol            = "lambda"
