@@ -348,7 +348,6 @@ resource "aws_lambda_function" "lambda_processor" {
   tags          = local.tags
 
   environment {
-    # DERIVED_LABELS is only added when set, so existing deployments see no plan change.
     variables = merge({
       FILE_CACHE_PATH       = "/tmp"
       STATIC_LABELS         = jsonencode(var.static_labels)
