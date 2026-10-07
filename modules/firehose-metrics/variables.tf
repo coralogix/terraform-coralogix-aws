@@ -276,6 +276,26 @@ variable "static_labels" {
   default     = []
 }
 
+variable "derived_labels" {
+  description = "Rules that add a label copied from the first resource tag in `sources` that exists, isn't empty and isn't in `exclude_values` (case-insensitive). Passed to the Lambda processor as DERIVED_LABELS. Requires lambda_processor_enable."
+  type = list(object({
+    target         = string
+    sources        = list(string)
+    exclude_values = optional(list(string), [])
+  }))
+  default = []
+
+  validation {
+    condition     = alltrue([for r in var.derived_labels : trimspace(r.target) != "" && length(r.sources) > 0])
+    error_message = "Each derived_labels rule needs a non-empty target and at least one source."
+  }
+
+  validation {
+    condition     = length(var.derived_labels) == 0 || var.lambda_processor_enable
+    error_message = "derived_labels can only be set when lambda_processor_enable is true."
+  }
+}
+
 variable "cross_account_enabled" {
   description = "Enable cross-account resource tag enrichment for OAM. When true, the Lambda will assume roles in linked accounts to fetch resource tags. Requires cross_account_roles to be set."
   type        = bool

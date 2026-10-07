@@ -348,12 +348,13 @@ resource "aws_lambda_function" "lambda_processor" {
   tags          = local.tags
 
   environment {
-    variables = {
+    # DERIVED_LABELS is only added when set, so existing deployments see no plan change.
+    variables = merge({
       FILE_CACHE_PATH       = "/tmp"
       STATIC_LABELS         = jsonencode(var.static_labels)
       CROSS_ACCOUNT_ENABLED = tostring(var.cross_account_enabled)
       CROSS_ACCOUNT_ROLES   = jsonencode(var.cross_account_roles)
-    }
+    }, length(var.derived_labels) > 0 ? { DERIVED_LABELS = jsonencode(var.derived_labels) } : {})
   }
 
 }

@@ -1,5 +1,12 @@
 # Changelog
 
+## v4.13.0
+
+#### **firehose-metrics**
+### 💡 Enhancements 💡
+- Added `derived_labels`, passed to the Lambda processor as `DERIVED_LABELS` (requires processor v0.1.16 or later). Each rule adds the `target` label from the first resource tag in `sources` that exists, isn't empty and isn't in `exclude_values`. Not set by default, so existing deployments see no plan change.
+- Added the missing inputs to the README table (`api_key_secret_arn`, `api_key_secret_kms_key_arn`, `server_side_encryption`, `static_labels`, `cross_account_enabled`, `cross_account_roles`) and fixed the `include_linked_accounts_metrics` row.
+
 ## v4.12.0
 
 #### **coralogix-aws-shipper**
