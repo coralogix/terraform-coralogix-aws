@@ -80,7 +80,7 @@ module "cloudwatch_firehose_metrics_coralogix" {
 ```
 
 ### Additional Statistics
-Also, `additional_metric_statistics` provide a means to configure additional statistics to a given metric. This is done by specifying the metric_name and namespace and corresponding list of additional statistics. Read [metric streams](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html) for more infomation. Set `additional_metric_statistics_enable` to true to enable this feature.
+Also, `additional_metric_statistics` provide a means to configure additional statistics to a given metric. This is done by specifying the metric_name and namespace and corresponding list of additional statistics. Read [metric streams](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html) for more information. Set `additional_metric_statistics_enable` to true to enable this feature.
 
 Depending on the `output_format` variable configured (default opentelemetry0.7). The `json` format would support streaming of statistics provided by CloudWatch and the `opentelemetry0.7` (default) supports streaming percentile statistics (p99.). 
 
@@ -151,6 +151,16 @@ Required permissions:
 - Each linked account role trust policy must allow the monitoring account Lambda processor role to assume it.
 - Linked account role policy should include at least `tag:GetResources` and service-specific read actions used for resource discovery.
 
+### Derived Labels
+
+Add a label copied from existing resource tags. Each rule sets `target` from the first tag in `sources` that exists, isn't empty and isn't in `exclude_values` (case-insensitive). Requires `lambda_processor_enable` (default `true`) and Lambda processor v0.1.16 or later.
+
+```terraform
+derived_labels = [
+  { target = "cost_center", sources = ["CostCenter", "Department"], exclude_values = ["none"] },
+]
+```
+
 ### Removal of CloudWatch Metric Streams Lambda transformation
 By default, a [Coralogix Lambda Transformation Function](https://github.com/coralogix/cloudwatch-metric-streams-lambda-transformation) has been added to the [Kinesis Firehose Data Transformation](https://docs.aws.amazon.com/firehose/latest/dev/data-transformation.html) as a `processing_configuration`. This is done, to enrich the metrics from CloudWatch Metric Streams with AWS resource tags. The optional lambda function is deployed as part of the module, and can be removed by setting the variable `lambda_processor_enable` to `false`.
 
@@ -175,7 +185,7 @@ Read more about the following:
 Examples can be found under the [firehose-metrics examples directory](https://github.com/coralogix/terraform-coralogix-aws/tree/master/examples/firehose-metrics)
 
 ## Override Coralogix `applicationName` and `subsystemName`
-The application name and subsystem name by default is the firehose delivery stream arn and name, but it can be overriden by setting an environment variable called `application_name` and `subsystem_name`. 
+The application name and subsystem name by default is the firehose delivery stream arn and name, but it can be overridden by setting the `application_name` and `subsystem_name` variables.
 
 ## Coralogix account region
 The Coralogix region variable accepts one of the following regions:
@@ -189,24 +199,21 @@ The Coralogix region variable accepts one of the following regions:
 
 ### Coralogix regions and endpoints
 
-| Region    | Domain                 |  Endpoint                                          |
-|-----------|------------------------|----------------------------------------------------|
-| EU1       | `eu1.coralogix.com`        | `https://ingress.coralogix.com/aws/firehose`       |
-| EU2       | `eu2.coralogix.com`    | `https://ingress.eu2.coralogix.com/aws/firehose`   |
-| AP1       | `ap1.coralogix.com`         | `https://ingress.app.ap1.coralogix.com/aws/firehose`    |
-| AP2       | `ap2.coralogix.com`      | `https://ingress.ap2.coralogix.com/aws/firehose`     |
-| AP3       | `ap3.coralogix.com`    | `https://ingress.ap3.coralogix.com/aws/firehose`   |
-| US1       | `us1.coralogix.com`         | `https://ingress.us1.coralogix.com/aws/firehose`        |
-| US2       | `us2.coralogix.com`  | `https://ingress.us2.coralogix.com/aws/firehose` |
+| Region | Domain | Endpoint |
+|--------|--------|----------|
+| EU1 | `eu1.coralogix.com` | `https://ingress.eu1.coralogix.com/aws/firehose` |
+| EU2 | `eu2.coralogix.com` | `https://ingress.eu2.coralogix.com/aws/firehose` |
+| AP1 | `ap1.coralogix.com` | `https://ingress.ap1.coralogix.com/aws/firehose` |
+| AP2 | `ap2.coralogix.com` | `https://ingress.ap2.coralogix.com/aws/firehose` |
+| AP3 | `ap3.coralogix.com` | `https://ingress.ap3.coralogix.com/aws/firehose` |
+| US1 | `us1.coralogix.com` | `https://ingress.us1.coralogix.com/aws/firehose` |
+| US2 | `us2.coralogix.com` | `https://ingress.us2.coralogix.com/aws/firehose` |
 
 ### Custom endpoints
-It is possible to pass a custom firehose ingress endpoint with by using the `coralogix_firehose_custom_endpoint` variable.
+To use a custom domain, set the `custom_domain` variable (e.g. `cust.coralogix-123.net:8443`). The endpoint becomes `https://ingress.<custom_domain>/aws/firehose`. This does not work for PrivateLink.
 
 ## Metrics output format
-Coralogix supports both `JSON` format and `OpenTelemetry` format. 
-The default format configured here is `OpenTelemetry`. 
-If using `Json` in the firehose output format, which is configured via the `integration_type_metrics` variable,
-then the CloudWatch metric stream must be configured with the same format, configured via the `output_format` variable.
+The CloudWatch metric stream format is set with `output_format` (`opentelemetry0.7`, the default, or `json`). The Firehose integration type is set with `integration_type_metrics`: `CloudWatch_Metrics_OpenTelemetry070_WithAggregations` (default) or `CloudWatch_Metrics_OpenTelemetry070`. Both integration types expect OpenTelemetry 0.7, so keep `output_format` at `opentelemetry0.7`.
 
 
 <!-- BEGIN_TF_DOCS -->
@@ -214,72 +221,61 @@ then the CloudWatch metric stream must be configured with the same format, confi
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 4.17.1 |
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.6.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.9.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 4.17.1 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.0 |
+| <a name="provider_null"></a> [null](#provider\_null) | n/a |
+| <a name="provider_random"></a> [random](#provider\_random) | n/a |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_coralogix_region"></a> [coralogix\_region](variables.tf#L1) | Coralogix account region: EU1, EU2, AP1, AP2, AP3, US1, US2 [exact] | `any` | n/a | yes |
-| <a name="input_api_key"></a> [api\_key](variables.tf#L10) | Coralogix account logs api key | `string` | n/a | yes |
+| <a name="input_coralogix_region"></a> [coralogix\_region](variables.tf#L1) | Coralogix account region: EU1, EU2, AP1, AP2, AP3, US1, US2 | `string` | n/a | yes |
+| <a name="input_api_key"></a> [api\_key](variables.tf#L10) | Coralogix account API key. Ignored when api\_key\_secret\_arn is set. Required unless api\_key\_secret\_arn is provided. | `string` | `null` | no |
 | <a name="input_api_key_secret_arn"></a> [api\_key\_secret\_arn](variables.tf#L22) | ARN of a Secrets Manager secret holding the Coralogix API key as JSON, {"api\_key": "..."}.<br/>When set, Firehose reads the key at runtime and api\_key is ignored, so rotating the secret<br/>takes effect without a Terraform apply. This must be a separate secret from any plaintext<br/>value used with api\_key. Must be in the same region as the delivery stream. | `string` | `null` | no |
 | <a name="input_api_key_secret_kms_key_arn"></a> [api\_key\_secret\_kms\_key\_arn](variables.tf#L33) | Optional ARN of the KMS key used to encrypt the Secrets Manager secret. Required only if the secret uses a customer managed key (CMK). | `string` | `null` | no |
-| <a name="input_firehose_stream"></a> [firehose\_stream](variables.tf#L16) | AWS Kinesis firehose delivery stream name | `string` | n/a | yes |
-| <a name="input_application_name"></a> [application\_name](variables.tf#L21) | The name of your application in Coralogix | `string` | n/a | yes |
-| <a name="input_subsystem_name"></a> [subsystem\_name](variables.tf#L27) | The subsystem name of your application in Coralogix | `string` | n/a | yes |
-| <a name="input_cloudwatch_retention_days"></a> [cloudwatch\_retention\_days](variables.tf#L33) | Days of retention in Cloudwatch retention days | `number` | n/a | no |
-| <a name="input_custom_domain"></a> [custom\_domain](variables.tf#L39) | Custom domain for Coralogix firehose integration endpoint (private.coralogix.net:8443) | `string` | `null` | no |
-| <a name="input_integration_type_metrics"></a> [integration\_type\_metrics](variables.tf#L45) | The integration type of the firehose delivery stream: `CloudWatch_Metrics_OpenTelemetry070` or `CloudWatch_Metrics_OpenTelemetry070_WithAggregations`. For `_WithAggregations` choice, additional aggregations here are `_min`, `_max`, `_avg` recorded as gauges. See https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-metric-streams-formats-opentelemetry-translation.html | `string` | `"CloudWatch_Metrics_OpenTelemetry070_WithAggregations"` | no |
-| <a name="input_output_format"></a> [output\_format](variables.tf#L51) | The output format of the cloudwatch metric stream: 'json' or 'opentelemetry0.7' | `string` | `"opentelemetry0.7"` | no |
-| <a name="input_enable_cloudwatch_metricstream"></a> [enable\_cloudwatch\_metricstream](variables.tf#L57) | Should be true if you want to create a new CloudWatch metric stream and attach it to Firehose | `bool` | `true` | no |
-| <a name="input_cloudwatch_metric_stream_custom_name"></a> [cloudwatch\_metric\_stream\_custom\_name](variables.tf#L63) | Set the name of the CloudWatch Metric Stream resource, otherwise variable firehose_stream will be used | `string` | `null` | no |
-| <a name="input_include_metric_stream_namespaces"></a> [include\_metric\_stream\_namespaces](variables.tf#L69) | List of specific namespaces to include in the CloudWatch metric stream, see https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html | `list(string)` | `[]` | no |
-| <a name="input_include_metric_stream_filter"></a> [include\_metric\_stream\_filter](variables.tf#L75) | Guide to view specific metric names of namespaces, see https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/viewing_metrics_with_cloudwatch.html | `list(object({namespace=string, metric_names=list(string)})` | `[]` | no |
+| <a name="input_firehose_stream"></a> [firehose\_stream](variables.tf#L44) | AWS Kinesis firehose delivery stream name | `string` | n/a | yes |
+| <a name="input_application_name"></a> [application\_name](variables.tf#L49) | The name of your application in Coralogix | `string` | `null` | no |
+| <a name="input_subsystem_name"></a> [subsystem\_name](variables.tf#L55) | The subsystem name of your application in Coralogix | `string` | `null` | no |
+| <a name="input_cloudwatch_retention_days"></a> [cloudwatch\_retention\_days](variables.tf#L61) | Days of retention in Cloudwatch retention days | `number` | `1` | no |
+| <a name="input_custom_domain"></a> [custom\_domain](variables.tf#L67) | Custom domain for Coralogix firehose integration endpoints, does not work for privatelink (e.g. cust.coralogix-123.net:8443 for https://ingress.cust.coralogix-123.net:8443/aws/firehose) | `string` | `null` | no |
+| <a name="input_integration_type_metrics"></a> [integration\_type\_metrics](variables.tf#L73) | The integration type of the firehose delivery stream: 'CloudWatch\_Metrics\_OpenTelemetry070' or 'CloudWatch\_Metrics\_OpenTelemetry070\_WithAggregations' | `string` | `"CloudWatch_Metrics_OpenTelemetry070_WithAggregations"` | no |
+| <a name="input_output_format"></a> [output\_format](variables.tf#L79) | The output format of the cloudwatch metric stream: 'json' or 'opentelemetry0.7' | `string` | `"opentelemetry0.7"` | no |
+| <a name="input_enable_cloudwatch_metricstream"></a> [enable\_cloudwatch\_metricstream](variables.tf#L85) | Should be true if you want to create a new Cloud Watch metric stream and attach it to Firehose | `bool` | `true` | no |
+| <a name="input_cloudwatch_metric_stream_custom_name"></a> [cloudwatch\_metric\_stream\_custom\_name](variables.tf#L91) | Set the name of the CloudWatch metric stream, otherwise variable '{firehose\_stream}-cw' will be used | `string` | `null` | no |
+| <a name="input_include_metric_stream_namespaces"></a> [include\_metric\_stream\_namespaces](variables.tf#L97) | List of specific namespaces to include in the CloudWatch metric stream, see https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html | `list(string)` | `[]` | no |
+| <a name="input_include_metric_stream_filter"></a> [include\_metric\_stream\_filter](variables.tf#L103) | List of inclusive metric filters for namespace and metric\_names. Specify this parameter, the stream sends only the conditional metric names from the metric namespaces that you specify here. If metric names is empty or not specified, the whole metric namespace is included | <pre>list(object({<br/>    namespace    = string<br/>    metric_names = list(string)<br/>    })<br/>  )</pre> | `[]` | no |
 | <a name="input_include_linked_accounts_metrics"></a> [include\_linked\_accounts\_metrics](variables.tf#L113) | include\_linked\_accounts\_metrics (Optional) If you are creating a metric stream in a monitoring account, specify true to include metrics from source accounts that are linked to this monitoring account, in the metric stream. The default is false. | `bool` | `false` | no |
-| <a name="input_additional_metric_statistics_enable"></a> [additional\_metric\_statistics\_enable](variables.tf#L91) | To enable the inclusion of additional statistics to the streaming metrics | `bool` | `true` | no |
-| <a name="input_additional_metric_statistics"></a> [additional\_metric\_statistics](variables.tf#L97) | For each entry, specify one or more metrics (metric_name and namespace) and the list of additional statistics to stream for those metrics. Each configuration of metric name and namespace can have a list of additional_statistics included into the AWS CloudWatch Metric Stream. | `list(object({additional_statistics=list(string), metric_name=string, namespace=string}))` | See variables.tf | no |
-| <a name="input_s3_backup_custom_name"></a> [s3\_backup\_custom\_name](variables.tf#L143) | Set the name of the S3 backup bucket, otherwise variable '{firehose_stream}-backup-metrics' will be used. | `string` | n/a | no |
-| <a name="input_existing_s3_backup"></a> [existing\_s3\_backup](variables.tf#L149) | Use an existing S3 bucket to use as a backup bucket. | `string` | n/a | no |
-| <a name="input_govcloud_deployment"></a> [govcloud\_deployment](#input\_govcloud\_deployment) | Enable if you deploy the integration in govcloud | `bool` | false | no |
-| <a name="input_custom_s3_bucket"></a> [custom\_s3\_bucket](variables.tf#L215) | The name of the s3 bucket that exists in your account to save the lambda zip code in | `string` | n/a | no |
+| <a name="input_additional_metric_statistics_enable"></a> [additional\_metric\_statistics\_enable](variables.tf#L119) | To enable the inclusion of additional statistics to the streaming metrics | `bool` | `false` | no |
+| <a name="input_additional_metric_statistics"></a> [additional\_metric\_statistics](variables.tf#L125) | For each entry, specify one or more metrics (metric\_name and namespace) and the list of additional statistics to stream for those metrics. Each configuration of metric name and namespace can have a list of additional\_statistics included into the AWS CloudWatch Metric Stream | <pre>list(object({<br/>    additional_statistics = list(string)<br/>    metric_name           = string<br/>    namespace             = string<br/>  }))</pre> | <pre>[<br/>  {<br/>    "additional_statistics": [<br/>      "p50",<br/>      "p75",<br/>      "p95",<br/>      "p99"<br/>    ],<br/>    "metric_name": "VolumeTotalReadTime",<br/>    "namespace": "AWS/EBS"<br/>  },<br/>  {<br/>    "additional_statistics": [<br/>      "p50",<br/>      "p75",<br/>      "p95",<br/>      "p99"<br/>    ],<br/>    "metric_name": "VolumeTotalWriteTime",<br/>    "namespace": "AWS/EBS"<br/>  },<br/>  {<br/>    "additional_statistics": [<br/>      "p50",<br/>      "p75",<br/>      "p95",<br/>      "p99"<br/>    ],<br/>    "metric_name": "Latency",<br/>    "namespace": "AWS/ELB"<br/>  },<br/>  {<br/>    "additional_statistics": [<br/>      "p50",<br/>      "p75",<br/>      "p95",<br/>      "p99"<br/>    ],<br/>    "metric_name": "Duration",<br/>    "namespace": "AWS/ELB"<br/>  },<br/>  {<br/>    "additional_statistics": [<br/>      "p50",<br/>      "p75",<br/>      "p95",<br/>      "p99"<br/>    ],<br/>    "metric_name": "PostRuntimeExtensionsDuration",<br/>    "namespace": "AWS/Lambda"<br/>  },<br/>  {<br/>    "additional_statistics": [<br/>      "p50",<br/>      "p75",<br/>      "p95",<br/>      "p99"<br/>    ],<br/>    "metric_name": "FirstByteLatency",<br/>    "namespace": "AWS/S3"<br/>  },<br/>  {<br/>    "additional_statistics": [<br/>      "p50",<br/>      "p75",<br/>      "p95",<br/>      "p99"<br/>    ],<br/>    "metric_name": "TotalRequestLatency",<br/>    "namespace": "AWS/S3"<br/>  }<br/>]</pre> | no |
+| <a name="input_s3_backup_custom_name"></a> [s3\_backup\_custom\_name](variables.tf#L171) | Set the name of the S3 backup bucket, otherwise variable '{firehose\_stream}-backup-metrics' will be used | `string` | `null` | no |
+| <a name="input_existing_s3_backup"></a> [existing\_s3\_backup](variables.tf#L177) | Use an existing S3 bucket to use as a backup bucket | `string` | `null` | no |
+| <a name="input_govcloud_deployment"></a> [govcloud\_deployment](variables.tf#L183) | Enable if you deploy the integration in govcloud | `bool` | `false` | no |
+| <a name="input_custom_s3_bucket"></a> [custom\_s3\_bucket](variables.tf#L249) | Custom S3 bucket to use for the lambda processor | `string` | `null` | no |
 | <a name="input_server_side_encryption"></a> [server\_side\_encryption](variables.tf#L255) | Server side encryption configuration | <pre>object({<br/>    enabled  = bool<br/>    key_type = optional(string)<br/>    key_arn  = optional(string)<br/>  })</pre> | <pre>{<br/>  "enabled": false,<br/>  "key_type": "AWS_OWNED_CMK"<br/>}</pre> | no |
 | <a name="input_static_labels"></a> [static\_labels](variables.tf#L273) | List of key-value pairs that will be added as labels to every metric in the integration. | `list(string)` | `[]` | no |
 | <a name="input_derived_labels"></a> [derived\_labels](variables.tf#L279) | Rules that add a label copied from the first resource tag in `sources` that exists, isn't empty and isn't in `exclude_values` (case-insensitive). Passed to the Lambda processor as DERIVED\_LABELS. Requires lambda\_processor\_enable. | <pre>list(object({<br/>    target         = string<br/>    sources        = list(string)<br/>    exclude_values = optional(list(string), [])<br/>  }))</pre> | `[]` | no |
 | <a name="input_cross_account_enabled"></a> [cross\_account\_enabled](variables.tf#L299) | Enable cross-account resource tag enrichment for OAM. When true, the Lambda will assume roles in linked accounts to fetch resource tags. Requires cross\_account\_roles to be set. | `bool` | `false` | no |
 | <a name="input_cross_account_roles"></a> [cross\_account\_roles](variables.tf#L305) | Map of AWS account IDs to IAM role ARNs for cross-account tag enrichment. Example: {"123456789012" = "arn:aws:iam::123456789012:role/CoralogixMetricsReader"} | `map(string)` | `{}` | no |
-| <a name="input_lambda_processor_enable"></a> [lambda\_processor\_enable](variables.tf#L155) | Enable the lambda processor function. Set to false to remove the lambda and all associated resources. | `bool` | `true` | no |
-| <a name="input_lambda_processor_custom_name"></a> [lambda\_processor\_custom\_name](variables.tf#L161) | Set the name of the lambda processor function, otherwise variable '{firehose_stream}-metrics-transform' will be used | `string` | `null` | no |
-| <a name="input_lambda_processor_iam_custom_name"></a> [lambda\_processor\_iam\_custom\_name](variables.tf#L167) | Set the name of the lambda processor IAM role, otherwise variable '{firehose_stream}-lambda-processor-iam' will be used. | `string` | n/a | no |
-| <a name="input_existing_lambda_processor_iam"></a> [existing\_lambda\_processor\_iam](variables.tf#L173) | Use an existing lambda processor IAM role. | `string` | n/a | no |
-| <a name="input_firehose_iam_custom_name"></a> [firehose\_iam\_custom\_name](variables.tf#L179) | Set the name of the IAM role & policy, otherwise variable '{firehose_stream}-firehose-metrics-iam' will be used. | `string` | n/a | no |
-| <a name="input_existing_firehose_iam"></a> [existing\_firehose\_iam](variables.tf#L185) | Use an existing IAM role to use as a firehose role. | `string` | n/a | no |
-| <a name="input_metric_streams_iam_custom_name"></a> [metric\_streams\_iam\_custom\_name](variables.tf#L191) | Set the name of the cloudwatch metric streams IAM role & policy, otherwise variable '{firehose_stream}-cw-iam. | `string` | n/a | no |
-| <a name="input_existing_metric_streams_iam"></a> [existing\_metric\_streams\_iam](variables.tf#L197) | Use an existing IAM role to use as a metric streams role. | `string` | n/a | no |
-| <a name="input_user_supplied_tags"></a> [user\_supplied\_tags](variables.tf#L203) | Tags supplied by the user to populate to all generated resources | `map(string)` | n/a | no |
-| <a name="input_override_default_tags"></a> [override\_default\_tags](variables.tf#L209) | Override and remove the default tags by setting to true | `bool` | `false` | no |
-
-## Region name mapping
-
-| Coralogix region | AWS Region | Coralogix Domain |
-|------------------|------------|------------------|
-| `Europe` | `eu-west-1` | eu1.coralogix.com |
-| `Europe2` | `eu-north-1` | eu2.coralogix.com |
-| `India` | `ap-south-1` | ap1.coralogix.com |
-| `Singapore` | `ap-southeast-1` | ap2.coralogix.com |
-| `AP3` | `ap-southeast-3` | ap3.coralogix.com |
-| `US` | `us-east-2` | us1.coralogix.com |
-| `US2` | `us-west-2` | us2.coralogix.com |
-
+| <a name="input_lambda_processor_enable"></a> [lambda\_processor\_enable](variables.tf#L189) | Enable lambda processor function, defaults to true | `bool` | `true` | no |
+| <a name="input_lambda_processor_custom_name"></a> [lambda\_processor\_custom\_name](variables.tf#L195) | Set the name of the lambda processor function, otherwise variable '{firehose\_stream}-metrics-transform' will be used | `string` | `null` | no |
+| <a name="input_lambda_processor_iam_custom_name"></a> [lambda\_processor\_iam\_custom\_name](variables.tf#L201) | Set the name of the lambda processor IAM role & policy, otherwise variable '{firehose\_stream}-lambda-processor-iam' will be used | `string` | `null` | no |
+| <a name="input_existing_lambda_processor_iam"></a> [existing\_lambda\_processor\_iam](variables.tf#L207) | Use an existing lambda processor IAM role | `string` | `null` | no |
+| <a name="input_firehose_iam_custom_name"></a> [firehose\_iam\_custom\_name](variables.tf#L213) | Set the name of the firehose IAM role & policy, otherwise variable '{firehose\_stream}-firehose-metrics-iam' will be used | `string` | `null` | no |
+| <a name="input_existing_firehose_iam"></a> [existing\_firehose\_iam](variables.tf#L219) | Use an existing IAM role to use as a firehose role | `string` | `null` | no |
+| <a name="input_metric_streams_iam_custom_name"></a> [metric\_streams\_iam\_custom\_name](variables.tf#L225) | Set the name of the cloudwatch metric streams IAM role & policy, otherwise variable '{firehose\_stream}-cw-iam' will be used | `string` | `null` | no |
+| <a name="input_existing_metric_streams_iam"></a> [existing\_metric\_streams\_iam](variables.tf#L231) | Use an existing IAM role to use as a metric streams role | `string` | `null` | no |
+| <a name="input_user_supplied_tags"></a> [user\_supplied\_tags](variables.tf#L237) | Tags supplied by the user to populate to all generated resources | `map(string)` | `{}` | no |
+| <a name="input_override_default_tags"></a> [override\_default\_tags](variables.tf#L243) | Override and remove the default tags by setting to true | `bool` | `false` | no |
 
 > [!NOTE]
-> When trying to deploy the lambda in govcloud, you will need to set the variable `govcloud_deployment` to `true` and set the variable `custom_s3_bucket` to a bucket that exists in your account, the module will upload the function source code into this bucket
+> To deploy in GovCloud, set `custom_s3_bucket` to a bucket that exists in your account. The module downloads the Lambda processor and uploads it to that bucket.
 
 ## Outputs
 
@@ -292,6 +288,6 @@ then the CloudWatch metric stream must be configured with the same format, confi
 | <a name="output_lambda_processor_arn"></a> [lambda\_processor\_arn](#output\_lambda\_processor\_arn) | ARN of the Lambda Processor |
 | <a name="output_lambda_processor_iam_arn"></a> [lambda\_processor\_iam\_arn](#output\_lambda\_processor\_iam\_arn) | ARN of the Lambda Processor IAM role |
 | <a name="output_metric_stream_arn"></a> [metric\_stream\_arn](#output\_metric\_stream\_arn) | ARN of the CloudWatch Metric Stream |
-| <a name="output_metric_stream_iam_role_arn"></a> [metric\_stream\_iam\_role\_arn](#output\_metric\_stream\_iam\_role\_arn) | ARN of the CloudWatch Metric Stream IAM role |
+| <a name="output_metrics_stream_iam_role_arn"></a> [metrics\_stream\_iam\_role\_arn](#output\_metrics\_stream\_iam\_role\_arn) | ARN of the CloudWatch Metric Stream IAM role |
 
 <!-- END_TF_DOCS -->
