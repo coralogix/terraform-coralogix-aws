@@ -283,7 +283,8 @@ variable "derived_labels" {
     sources        = list(string)
     exclude_values = optional(list(string), [])
   }))
-  default = []
+  default  = []
+  nullable = false
 
   validation {
     condition     = alltrue([for r in var.derived_labels : trimspace(r.target) != "" && length(r.sources) > 0])
