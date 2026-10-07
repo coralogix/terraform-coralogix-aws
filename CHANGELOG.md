@@ -1,5 +1,12 @@
 # Changelog
 
+## v4.13.0
+
+#### **firehose-metrics**
+### 💡 Enhancements 💡
+- Added `derived_labels`, passed to the Lambda processor as `DERIVED_LABELS` (requires processor v0.1.16 or later). Each rule adds the `target` label from the first resource tag in `sources` that exists, isn't empty and isn't in `exclude_values`. Not set by default, so existing deployments see no plan change.
+- README: added the missing inputs, refreshed the inputs table from `variables.tf`, and fixed outdated docs (requirements, region endpoints, `custom_domain`, `application_name`/`subsystem_name`, output format, GovCloud note, `metrics_stream_iam_role_arn` output). Removed the obsolete region-name table.
+
 ## v4.12.0
 
 #### **coralogix-aws-shipper**
