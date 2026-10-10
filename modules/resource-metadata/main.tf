@@ -129,6 +129,7 @@ module "lambda" {
         "lambda:ListFunctions",
         "lambda:ListVersionsByFunction",
         "lambda:GetFunction",
+        "lambda:ListTags",
         "lambda:ListAliases",
         "lambda:ListEventSourceMappings",
         "lambda:GetPolicy"
