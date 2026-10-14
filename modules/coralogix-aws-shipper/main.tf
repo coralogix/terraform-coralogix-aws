@@ -346,7 +346,13 @@ module "lambda" {
   }
   s3_existing_package = {
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.id}" : var.custom_s3_bucket
-    key    = var.cpu_arch == "arm64" ? "coralogix-aws-shipper${var.source_code_version != "" ? "-${var.cpu_arch}-${var.source_code_version}" : ""}.zip" : "coralogix-aws-shipper-x86-64${var.source_code_version != "" ? "-${var.cpu_arch}-${var.source_code_version}" : ""}.zip"
+    # Published keys spell the architecture "x86-64", while cpu_arch is "x86_64", and the
+    # unversioned arm64 artifact carries no architecture at all. Built from local.artifact_arch
+    # rather than interpolating cpu_arch, which the x86 branch used to do on top of a name
+    # that already contained it, producing coralogix-aws-shipper-x86-64-x86_64-<version>.zip.
+    key = var.source_code_version != "" ? "coralogix-aws-shipper-${local.artifact_arch}-${var.source_code_version}.zip" : (
+      var.cpu_arch == "arm64" ? "coralogix-aws-shipper.zip" : "coralogix-aws-shipper-${local.artifact_arch}.zip"
+    )
   }
   cloudwatch_logs_retention_in_days       = each.value.lambda_log_retention
   create_current_version_allowed_triggers = false

@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.13.1
+
+#### **coralogix-aws-shipper**
+### 🧰 Bug fixes 🧰
+- Fixed the Lambda artifact key for `cpu_arch = "x86_64"` with `source_code_version` set. The key already carried the architecture and then appended `var.cpu_arch` to it, resolving to `coralogix-aws-shipper-x86-64-x86_64-<version>.zip`, which has never been published — the deployment failed at Lambda creation with `NoSuchKey`. Pinned x86_64 deployments now resolve `coralogix-aws-shipper-x86-64-<version>.zip`. arm64 and unpinned deployments were unaffected.
+
 ## v4.13.0
 
 #### **firehose-metrics**
