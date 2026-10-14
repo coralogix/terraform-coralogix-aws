@@ -1,4 +1,7 @@
 locals {
+  # Artifact keys spell it "x86-64"; var.cpu_arch is "x86_64".
+  artifact_arch = var.cpu_arch == "arm64" ? "arm64" : "x86-64"
+
   s3_suffix_map = {
     CloudTrail = ".json.gz"
     VpcFlow    = ".log.gz"
