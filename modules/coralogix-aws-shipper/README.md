@@ -539,8 +539,8 @@ When `starlark_script` is empty, logs pass through unchanged.
 By default the transformation runs on the **raw log** before metadata is attached. Set `starlark_transform_after_metadata = true` (shipper 1.4.19+) to run it **after** configured log metadata — `add_metadata`, `custom_metadata`, log group/stream names — is attached, so the script sees and can reshape the fully-enriched event:
 
 ```hcl
-starlark_script                      = file("${path.module}/scripts/transform.star")
-starlark_transform_after_metadata    = true
+starlark_script                   = file("${path.module}/scripts/transform.star")
+starlark_transform_after_metadata = true
 ```
 
 Either way, logs are rebatched after the transformation.

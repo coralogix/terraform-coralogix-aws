@@ -396,6 +396,21 @@ module "lambda" {
 # egress" - a subnet with a NAT gateway reaches the Coralogix ingress fine, and the
 # module does not restrict direct OTLP logs either. Reaching the endpoint is the
 # deployer's concern, documented in the README.
+resource "terraform_data" "starlark_after_metadata_guardrails" {
+  count = var.starlark_transform_after_metadata ? 1 : 0
+
+  lifecycle {
+    # 1.4.18 and earlier do not recognise STARLARK_TRANSFORM_AFTER_METADATA: the shipper
+    # silently keeps running the Starlark transformation on the raw log, so a script
+    # written for the metadata-enriched shape would transform the wrong input. An
+    # unpinned source_code_version tracks the latest artifact and is always fine.
+    precondition {
+      condition     = var.source_code_version == "" || coalesce(local.source_code_version_number, 0) >= 1004019
+      error_message = "starlark_transform_after_metadata requires shipper 1.4.19 or later; set source_code_version to 1.4.19 or above, or leave it empty to track the latest."
+    }
+  }
+}
+
 resource "terraform_data" "traces_mode_guardrails" {
   count = var.telemetry_mode == "traces" ? 1 : 0
 
