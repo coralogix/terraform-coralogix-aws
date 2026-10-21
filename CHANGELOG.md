@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.14.0
+
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 💡
+- Added `starlark_transform_after_metadata` (default `false`), passed to the Lambda as `STARLARK_TRANSFORM_AFTER_METADATA`. When `true`, the Starlark transformation runs after configured log metadata (`add_metadata`, `custom_metadata`, log group/stream names) is attached instead of on the raw log first, so scripts see and can reshape the fully-enriched event. Requires shipper `1.4.19` or later; logs are rebatched after the transform either way. Not set by default, so existing deployments see no plan change.
+
 ## v4.13.1
 
 #### **coralogix-aws-shipper**

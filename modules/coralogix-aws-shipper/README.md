@@ -227,6 +227,7 @@ stacktraces are intact - but service-level views are incomplete. See the
 | <a name="input_lambda_name"></a> [lambda\_name](#input\_lambda\_name) | The name the Lambda function to create. | `string` | n/a | no |
 | <a name="input_blocking_pattern"></a> [blocking\_pattern](#input\_blocking\_pattern) | A regular expression to identify lines excluded from being sent to Coralogix. For example, use `MainActivity.java:\d{3}` to match log lines with MainActivity followed by exactly three digits. | `string` | n/a | no |
 | <a name="input_starlark_script"></a> [starlark\_script](#input\_starlark\_script) | Starlark transformation script. Accepts raw content (heredoc), S3 path, HTTP URL, base64, or file() for local files. See [Log Transformation (Starlark)](#log-transformation-starlark). | `string` | `""` | no |
+| <a name="input_starlark_transform_after_metadata"></a> [starlark\_transform\_after\_metadata](#input\_starlark\_transform\_after\_metadata) | When true, run the Starlark transformation after configured log metadata is attached instead of on the raw log first. Requires shipper 1.4.19+. | `bool` | `false` | no |
 | <a name="input_sampling_rate"></a> [sampling\_rate](#input\_sampling\_rate) | A message rate, such as 1 out of every N logs. For example, if your value is 10, a message will be sent for every 10th log. | `number` | `1` | no |
 | <a name="input_notification_email"></a> [notification_email](#input\_notification\_email) | A failure notification to be sent to the email address. | `string` |  n/a | no |
 | <a name="input_sns_kms_key_arn"></a> [sns\_kms\_key\_arn](#input\_sns\_kms\_key\_arn) | Optional KMS key ARN (not an alias) to encrypt the Lambda failure-notification SNS topic. Leave null for no encryption. The key policy must allow `sns.amazonaws.com` and the Lambda execution role to use `kms:Decrypt` and `kms:GenerateDataKey*`. | `string` | `null` | no |
@@ -532,6 +533,17 @@ def transform(event):
 For the complete Starlark language reference — including all built-in functions, operators, data types, and control flow — see the [Starlark language specification](https://github.com/bazelbuild/starlark/blob/master/spec.md).
 
 When `starlark_script` is empty, logs pass through unchanged.
+
+### Transform ordering
+
+By default the transformation runs on the **raw log** before metadata is attached. Set `starlark_transform_after_metadata = true` (shipper 1.4.19+) to run it **after** configured log metadata — `add_metadata`, `custom_metadata`, log group/stream names — is attached, so the script sees and can reshape the fully-enriched event:
+
+```hcl
+starlark_script                      = file("${path.module}/scripts/transform.star")
+starlark_transform_after_metadata    = true
+```
+
+Either way, logs are rebatched after the transformation.
 
 ## Custom SNS Topic Policy Management
 
