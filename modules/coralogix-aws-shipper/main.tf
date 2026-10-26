@@ -318,31 +318,32 @@ module "lambda" {
       ? var.custom_domain
       : lookup(module.locals[each.key].coralogix_domains, var.coralogix_region, "eu1.coralogix.com")
     ) : null
-    APP_NAME                       = each.value.application_name
-    SUB_NAME                       = each.value.subsystem_name
-    NEWLINE_PATTERN                = each.value.newline_pattern != null ? each.value.newline_pattern : null
-    BLOCKING_PATTERN               = var.blocking_pattern
-    SAMPLING                       = tostring(var.sampling_rate)
-    ADD_METADATA                   = var.add_metadata
-    CUSTOM_METADATA                = var.custom_metadata
-    CUSTOM_CSV_HEADER              = var.custom_csv_header
-    DLQ_ARN                        = var.enable_dlq ? aws_sqs_queue.DLQ[0].arn : null
-    DLQ_RETRY_LIMIT                = var.enable_dlq ? var.dlq_retry_limit : null
-    DLQ_S3_BUCKET                  = var.enable_dlq ? var.dlq_s3_bucket : null
-    DLQ_URL                        = var.enable_dlq ? aws_sqs_queue.DLQ[0].url : null
-    ASSUME_ROLE_ARN                = var.lambda_assume_role_arn
-    TELEMETRY_MODE                 = var.telemetry_mode
-    BATCH_METRICS                  = var.telemetry_mode == "metrics" && var.batch_metrics ? "1" : null
-    METRICS_BATCH_MAX_SIZE         = var.telemetry_mode == "metrics" && var.batch_metrics ? tostring(var.metrics_batch_max_size) : null
-    METRICS_TAG_ENRICHMENT_ENABLED = var.telemetry_mode == "metrics" ? (var.metrics_tag_enrichment_enabled ? "true" : "false") : null
-    CONTINUE_ON_RESOURCE_FAILURE   = var.telemetry_mode == "metrics" ? (var.metrics_continue_on_resource_failure ? "true" : "false") : null
-    FILE_CACHE_ENABLED             = var.telemetry_mode == "metrics" ? (var.metrics_file_cache_enabled ? "true" : "false") : null
-    FILE_CACHE_PATH                = var.telemetry_mode == "metrics" ? var.metrics_file_cache_path : null
-    FILE_CACHE_EXPIRATION          = var.telemetry_mode == "metrics" ? var.metrics_file_cache_expiration : null
-    STARLARK_SCRIPT                = var.starlark_script != "" ? var.starlark_script : null
-    LOG_STREAM_FILTER              = var.log_stream_filter != "" ? var.log_stream_filter : null
-    ENABLE_AWS_FIPS                = var.govcloud_deployment ? (var.enable_aws_fips == null ? "true" : tostring(var.enable_aws_fips)) : null
-    AWS_USE_FIPS_ENDPOINT          = var.govcloud_deployment ? (var.aws_use_fips_endpoint == null ? "true" : tostring(var.aws_use_fips_endpoint)) : null
+    APP_NAME                          = each.value.application_name
+    SUB_NAME                          = each.value.subsystem_name
+    NEWLINE_PATTERN                   = each.value.newline_pattern != null ? each.value.newline_pattern : null
+    BLOCKING_PATTERN                  = var.blocking_pattern
+    SAMPLING                          = tostring(var.sampling_rate)
+    ADD_METADATA                      = var.add_metadata
+    CUSTOM_METADATA                   = var.custom_metadata
+    CUSTOM_CSV_HEADER                 = var.custom_csv_header
+    DLQ_ARN                           = var.enable_dlq ? aws_sqs_queue.DLQ[0].arn : null
+    DLQ_RETRY_LIMIT                   = var.enable_dlq ? var.dlq_retry_limit : null
+    DLQ_S3_BUCKET                     = var.enable_dlq ? var.dlq_s3_bucket : null
+    DLQ_URL                           = var.enable_dlq ? aws_sqs_queue.DLQ[0].url : null
+    ASSUME_ROLE_ARN                   = var.lambda_assume_role_arn
+    TELEMETRY_MODE                    = var.telemetry_mode
+    BATCH_METRICS                     = var.telemetry_mode == "metrics" && var.batch_metrics ? "1" : null
+    METRICS_BATCH_MAX_SIZE            = var.telemetry_mode == "metrics" && var.batch_metrics ? tostring(var.metrics_batch_max_size) : null
+    METRICS_TAG_ENRICHMENT_ENABLED    = var.telemetry_mode == "metrics" ? (var.metrics_tag_enrichment_enabled ? "true" : "false") : null
+    CONTINUE_ON_RESOURCE_FAILURE      = var.telemetry_mode == "metrics" ? (var.metrics_continue_on_resource_failure ? "true" : "false") : null
+    FILE_CACHE_ENABLED                = var.telemetry_mode == "metrics" ? (var.metrics_file_cache_enabled ? "true" : "false") : null
+    FILE_CACHE_PATH                   = var.telemetry_mode == "metrics" ? var.metrics_file_cache_path : null
+    FILE_CACHE_EXPIRATION             = var.telemetry_mode == "metrics" ? var.metrics_file_cache_expiration : null
+    STARLARK_SCRIPT                   = var.starlark_script != "" ? var.starlark_script : null
+    STARLARK_TRANSFORM_AFTER_METADATA = var.starlark_transform_after_metadata ? "true" : null
+    LOG_STREAM_FILTER                 = var.log_stream_filter != "" ? var.log_stream_filter : null
+    ENABLE_AWS_FIPS                   = var.govcloud_deployment ? (var.enable_aws_fips == null ? "true" : tostring(var.enable_aws_fips)) : null
+    AWS_USE_FIPS_ENDPOINT             = var.govcloud_deployment ? (var.aws_use_fips_endpoint == null ? "true" : tostring(var.aws_use_fips_endpoint)) : null
   }
   s3_existing_package = {
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.id}" : var.custom_s3_bucket
@@ -395,6 +396,21 @@ module "lambda" {
 # egress" - a subnet with a NAT gateway reaches the Coralogix ingress fine, and the
 # module does not restrict direct OTLP logs either. Reaching the endpoint is the
 # deployer's concern, documented in the README.
+resource "terraform_data" "starlark_after_metadata_guardrails" {
+  count = var.starlark_transform_after_metadata ? 1 : 0
+
+  lifecycle {
+    # 1.4.18 and earlier do not recognise STARLARK_TRANSFORM_AFTER_METADATA: the shipper
+    # silently keeps running the Starlark transformation on the raw log, so a script
+    # written for the metadata-enriched shape would transform the wrong input. An
+    # unpinned source_code_version tracks the latest artifact and is always fine.
+    precondition {
+      condition     = var.source_code_version == "" || coalesce(local.source_code_version_number, 0) >= 1004019
+      error_message = "starlark_transform_after_metadata requires shipper 1.4.19 or later; set source_code_version to 1.4.19 or above, or leave it empty to track the latest."
+    }
+  }
+}
+
 resource "terraform_data" "traces_mode_guardrails" {
   count = var.telemetry_mode == "traces" ? 1 : 0
 

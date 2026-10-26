@@ -62,6 +62,13 @@ variable "starlark_script" {
   default     = ""
 }
 
+variable "starlark_transform_after_metadata" {
+  description = "When true, run the Starlark transformation after configured log metadata is attached instead of on the raw log first. Requires shipper 1.4.19 or newer; the default false preserves the pre-1.4.19 behavior. Logs are rebatched after the transform either way."
+  type        = bool
+  default     = false
+  nullable    = false
+}
+
 variable "s3_bucket_name" {
   description = "The name of the S3 bucket to watch, this accepts also a comma separated list of bucket names."
   type        = string
