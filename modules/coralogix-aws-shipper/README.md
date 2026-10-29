@@ -246,10 +246,15 @@ The upload into your bucket runs the AWS CLI on the machine executing Terraform,
 
 In commercial regions the download itself is unauthenticated, so the CLI identity needs only write access to your own bucket. In GovCloud the download is signed, because those buckets refuse anonymous requests; the CLI identity there also needs `s3:GetObject` on `coralogix-serverless-repo-us-gov-west-1` and must be in the `aws-us-gov` partition.
 
-Separately, when `source_code_version` is **not** set, the **AWS provider's** identity — the one Terraform itself authenticates with — needs `s3:GetObject` on your bucket. The module reads the staged object back to pick up its version, which is what makes a restaged artifact redeploy under an unchanging key. Pin `source_code_version` and that read does not happen, so a provider identity with write-only access to this bucket keeps working.
+Separately, when `source_code_version` is **not** set, the **AWS provider's** identity — the one Terraform itself authenticates with — needs both `s3:GetObject` and `s3:GetObjectVersion` on your bucket:
+
+- `s3:GetObject` for the module's read of the staged object, which picks up its version and is what makes a restaged artifact redeploy under an unchanging key.
+- `s3:GetObjectVersion` because the Lambda is then created against that specific version, and S3 requires this action for any request carrying a `versionId`. Granting only `s3:GetObject` fails with `AccessDenied` at function creation.
+
+Pin `source_code_version` and neither applies: the read does not happen and no version is passed, so a provider identity with write-only access to this bucket keeps working.
 
 > [!IMPORTANT]
-> **Grant the provider `s3:GetObject` on this bucket**, and **enable versioning** — or pin `source_code_version`.
+> **Grant the provider `s3:GetObject` and `s3:GetObjectVersion` on this bucket**, and **enable versioning** — or pin `source_code_version`.
 >
 > With neither, the staged object keeps the same key on every release, so Terraform sees no change to the Lambda and leaves the previous binary deployed — the bucket is updated and the function is not. With versioning on, each restage produces a new object version, which the module passes to the Lambda and which forces the code to update. Pinning `source_code_version` achieves the same thing by putting the version in the key.
 

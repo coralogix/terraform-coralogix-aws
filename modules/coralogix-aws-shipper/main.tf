@@ -373,6 +373,10 @@ module "lambda" {
     # what makes a restaged artifact reach the function: with the default empty
     # source_code_version the key never changes, so bucket and key alone would leave the
     # previous binary deployed after an upgrade restaged a different one.
+    #
+    # Setting it makes Lambda fetch that specific version, which S3 gates behind
+    # s3:GetObjectVersion rather than s3:GetObject. Both are required here; see the
+    # custom_s3_bucket section in README.md.
     version_id = local.staged_artifact_version
   }
   cloudwatch_logs_retention_in_days       = each.value.lambda_log_retention
