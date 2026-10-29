@@ -238,13 +238,31 @@ stacktraces are intact - but service-level views are incomplete. See the
 
 **Custom S3 bucket**
 
-Use the `custom_s3_bucket` variable only when deploying the integration in an AWS region where CX does not provide a public bucket (e.g., GovCloud). When using this variable, you must create an S3 bucket in the desired region for the integration. After that, pass the bucket name as `custom_s3_bucket`. The module will download the integration file to your local workspace, upload it to the custom_s3_bucket, and then remove the file from your local workspace once the process is complete.
+Use the `custom_s3_bucket` variable when the Lambda code must live in a bucket you own — for example where egress to a Coralogix-hosted bucket is restricted, or where policy requires release artifacts to sit in your own account. Coralogix hosts the artifacts in every commercial region and in both GovCloud regions, so this is a choice rather than a requirement. Create the bucket in the region you are deploying to and pass its name as `custom_s3_bucket`; the module downloads the artifact to a temporary directory, uploads it to your bucket, and discards the local copy.
 
-When using this variable you will need to create an S3 bucket in the region where you want to run the integration. Then, pass this bucket name as `custom_s3_bucket`. The module will download the integration file to your local workspace, and then upload these files to the `custom_s3_bucket`. At the end, remove the file from your local workspace once the process is complete.
+The artifact is copied from the Coralogix bucket in the same partition you are deploying to, so a GovCloud deployment stages the GovCloud build and a commercial one stages the commercial build.
+
+The upload into your bucket runs the AWS CLI on the machine executing Terraform, so it uses that machine's own credentials — the default profile or the `AWS_*` environment variables. It does **not** inherit the AWS provider's configuration: a provider alias, or credentials obtained through the provider's `assume_role` block, do not reach it.
+
+In commercial regions the download itself is unauthenticated, so the CLI identity needs only write access to your own bucket. In GovCloud the download is signed, because those buckets refuse anonymous requests; the CLI identity there also needs `s3:GetObject` on `coralogix-serverless-repo-us-gov-west-1` and must be in the `aws-us-gov` partition.
+
+Separately, when `source_code_version` is **not** set, the **AWS provider's** identity — the one Terraform itself authenticates with — needs both `s3:GetObject` and `s3:GetObjectVersion` on your bucket:
+
+- `s3:GetObject` for the module's read of the staged object, which picks up its version and is what makes a restaged artifact redeploy under an unchanging key.
+- `s3:GetObjectVersion` because the Lambda is then created against that specific version, and S3 requires this action for any request carrying a `versionId`. Granting only `s3:GetObject` fails with `AccessDenied` at function creation.
+
+Pin `source_code_version` and neither applies: the read does not happen and no version is passed, so a provider identity with write-only access to this bucket keeps working.
+
+> [!IMPORTANT]
+> **Grant the provider `s3:GetObject` and `s3:GetObjectVersion` on this bucket**, and **enable versioning** — or pin `source_code_version`.
+>
+> With neither, the staged object keeps the same key on every release, so Terraform sees no change to the Lambda and leaves the previous binary deployed — the bucket is updated and the function is not. With versioning on, each restage produces a new object version, which the module passes to the Lambda and which forces the code to update. Pinning `source_code_version` achieves the same thing by putting the version in the key.
 
 **AWS GovCloud and FIPS**
 
-A single shipper artifact supports both commercial and GovCloud deployments; FIPS is toggled at runtime via Lambda environment variables. When `govcloud_deployment = true`, the module sets both `ENABLE_AWS_FIPS=true` and `AWS_USE_FIPS_ENDPOINT=true` on the Lambda by default, which routes all AWS SDK calls to FIPS service endpoints and uses the AWS-LC FIPS-validated TLS provider.
+When `govcloud_deployment = true`, the module sets both `ENABLE_AWS_FIPS=true` and `AWS_USE_FIPS_ENDPOINT=true` on the Lambda by default, which routes all AWS SDK calls to FIPS service endpoints and uses the AWS-LC FIPS TLS provider.
+
+From shipper **1.4.23** the GovCloud artifact is a separate build. It pins the NIST-validated AWS-LC FIPS **v3** module (certificates #5314 and #5298), where the commercial build uses **v4**, which is submitted to NIST but not yet validated. The two are not interchangeable: deploying the commercial zip into GovCloud puts an unvalidated cryptographic module into a FedRAMP workload. The module handles this for you — it reads the artifact from the Coralogix bucket in the partition you are deploying to, including when `custom_s3_bucket` is set.
 
 If you need to disable FIPS in a GovCloud deployment, set the corresponding variable explicitly:
 
