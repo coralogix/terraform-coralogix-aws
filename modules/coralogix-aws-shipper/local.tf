@@ -24,8 +24,9 @@ locals {
   #
   # ap-east-1 is the commercial source this module has used since #144 (March 2024) and
   # stays as it is; only the GovCloud branch is new.
-  artifact_source_region = data.aws_partition.current.partition == "aws-us-gov" ? "us-gov-west-1" : "ap-east-1"
-  artifact_source_bucket = "coralogix-serverless-repo-${local.artifact_source_region}"
+  artifact_source_is_govcloud = data.aws_partition.current.partition == "aws-us-gov"
+  artifact_source_region      = local.artifact_source_is_govcloud ? "us-gov-west-1" : "ap-east-1"
+  artifact_source_bucket      = "coralogix-serverless-repo-${local.artifact_source_region}"
 
   s3_suffix_map = {
     CloudTrail = ".json.gz"

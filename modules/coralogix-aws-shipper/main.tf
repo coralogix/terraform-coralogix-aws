@@ -31,9 +31,16 @@ resource "null_resource" "s3_bucket_copy" {
   }
 
   provisioner "local-exec" {
-    # aws s3 cp rather than curl. The GovCloud buckets grant s3:GetObject to authenticated
-    # principals only and refuse anonymous requests, so an unsigned download returns 403
-    # there; a signed copy works in both partitions.
+    # How the artifact is fetched differs by partition, and both forms are deliberate.
+    #
+    # GovCloud grants s3:GetObject to authenticated principals only and returns 403 to an
+    # anonymous request, so that partition signs.
+    #
+    # Commercial keeps the unsigned download it has always used. ap-east-1 is an opt-in
+    # Region: an account that has not enabled it cannot make a SIGNED request there, and
+    # most accounts have not. Signing commercial would therefore break staging for them,
+    # and the triggers above would surface it as a failed upgrade rather than only on
+    # new deployments. Anonymous reads need no such enablement.
     command = <<-EOF
       set -eu
       # Staged in a private temp directory, not the working directory. Several module
@@ -44,7 +51,11 @@ resource "null_resource" "s3_bucket_copy" {
       # what the partition split above exists to prevent.
       staging=$(mktemp -d)
       trap 'rm -rf "$staging"' EXIT
+      %{if local.artifact_source_is_govcloud~}
       aws s3 cp "s3://${local.artifact_source_bucket}/${local.artifact_key}" "$staging/${local.artifact_key}" --region "${local.artifact_source_region}"
+      %{else~}
+      curl -fsS -o "$staging/${local.artifact_key}" "https://${local.artifact_source_bucket}.s3.${local.artifact_source_region}.amazonaws.com/${local.artifact_key}"
+      %{endif~}
       aws s3 cp "$staging/${local.artifact_key}" "s3://${var.custom_s3_bucket}/${local.artifact_key}"
     EOF
   }

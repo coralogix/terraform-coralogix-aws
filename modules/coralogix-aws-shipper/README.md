@@ -242,7 +242,9 @@ Use the `custom_s3_bucket` variable when the Lambda code must live in a bucket y
 
 The artifact is copied from the Coralogix bucket in the same partition you are deploying to, so a GovCloud deployment stages the GovCloud build and a commercial one stages the commercial build.
 
-The copy runs the AWS CLI on the machine executing Terraform, so it uses that machine's own credentials — the default profile or the `AWS_*` environment variables. It does **not** inherit the AWS provider's configuration: a provider alias, or credentials obtained through the provider's `assume_role` block, do not reach it. Whichever identity the CLI resolves needs `s3:GetObject` on the Coralogix source bucket and write access to your bucket, and it must be in the same partition you are deploying to.
+The upload into your bucket runs the AWS CLI on the machine executing Terraform, so it uses that machine's own credentials — the default profile or the `AWS_*` environment variables. It does **not** inherit the AWS provider's configuration: a provider alias, or credentials obtained through the provider's `assume_role` block, do not reach it.
+
+In commercial regions the download itself is unauthenticated, so only write access to your own bucket is required. In GovCloud the download is signed, because those buckets refuse anonymous requests; the identity the CLI resolves there needs `s3:GetObject` on `coralogix-serverless-repo-us-gov-west-1` and must be in the `aws-us-gov` partition.
 
 **AWS GovCloud and FIPS**
 
