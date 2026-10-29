@@ -7,7 +7,7 @@
 - Fixed `custom_s3_bucket` staging the wrong artifact in GovCloud. It copied from a commercial bucket; since shipper `1.4.23` the GovCloud build differs, pinning the NIST-validated AWS-LC FIPS v3 module where commercial uses the unvalidated v4. The artifact now comes from the partition being deployed to, signed in GovCloud and unauthenticated in commercial as before.
 - Fixed `custom_s3_bucket` with `source_code_version` set, which failed at Lambda creation with `NoSuchKey`: the copy staged the unversioned key while the Lambda requested the versioned one.
 - Fixed the staged artifact never refreshing when `source_code_version` changed. Existing `custom_s3_bucket` deployments re-run the staging step once on upgrade.
-- The Lambda now tracks the staged object's S3 version, so restaging a different artifact under an unchanged key redeploys the function instead of leaving the previous binary running. Requires versioning on the bucket; without it, pin `source_code_version`.
+- The Lambda now tracks the staged object's S3 version, so restaging a different artifact under an unchanged key redeploys the function instead of leaving the previous binary running. This applies only when `source_code_version` is unset, and needs bucket versioning plus `s3:GetObject` for the provider identity on that bucket; pinning `source_code_version` gives the same guarantee through the key and needs neither.
 
 ## v4.14.0
 

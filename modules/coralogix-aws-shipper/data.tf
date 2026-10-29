@@ -83,7 +83,11 @@ data "aws_partition" "current" {}
 # Buckets without versioning return no version, and the Lambda then behaves as it did
 # before -- see the custom_s3_bucket note in README.md.
 data "aws_s3_object" "staged_artifact" {
-  count = var.custom_s3_bucket == "" ? 0 : 1
+  # Only where the key cannot change on its own. A pinned source_code_version puts the
+  # version in the key, so the Lambda already has something to react to and this read
+  # would buy nothing -- while still costing the provider identity s3:GetObject on a
+  # bucket it may only be permitted to write to.
+  count = var.custom_s3_bucket == "" || var.source_code_version != "" ? 0 : 1
 
   bucket = var.custom_s3_bucket
   key    = local.artifact_key
