@@ -238,13 +238,17 @@ stacktraces are intact - but service-level views are incomplete. See the
 
 **Custom S3 bucket**
 
-Use the `custom_s3_bucket` variable only when deploying the integration in an AWS region where CX does not provide a public bucket (e.g., GovCloud). When using this variable, you must create an S3 bucket in the desired region for the integration. After that, pass the bucket name as `custom_s3_bucket`. The module will download the integration file to your local workspace, upload it to the custom_s3_bucket, and then remove the file from your local workspace once the process is complete.
+Use the `custom_s3_bucket` variable when the Lambda code must live in a bucket you own — for example where egress to a Coralogix-hosted bucket is restricted, or where policy requires release artifacts to sit in your own account. Coralogix hosts the artifacts in every commercial region and in both GovCloud regions, so this is a choice rather than a requirement. Create the bucket in the region you are deploying to and pass its name as `custom_s3_bucket`; the module downloads the artifact to a temporary directory, uploads it to your bucket, and discards the local copy.
 
-When using this variable you will need to create an S3 bucket in the region where you want to run the integration. Then, pass this bucket name as `custom_s3_bucket`. The module will download the integration file to your local workspace, and then upload these files to the `custom_s3_bucket`. At the end, remove the file from your local workspace once the process is complete.
+The artifact is copied from the Coralogix bucket in the same partition you are deploying to, so a GovCloud deployment stages the GovCloud build and a commercial one stages the commercial build.
+
+The copy runs the AWS CLI on the machine executing Terraform, so it uses that machine's own credentials — the default profile or the `AWS_*` environment variables. It does **not** inherit the AWS provider's configuration: a provider alias, or credentials obtained through the provider's `assume_role` block, do not reach it. Whichever identity the CLI resolves needs `s3:GetObject` on the Coralogix source bucket and write access to your bucket, and it must be in the same partition you are deploying to.
 
 **AWS GovCloud and FIPS**
 
-A single shipper artifact supports both commercial and GovCloud deployments; FIPS is toggled at runtime via Lambda environment variables. When `govcloud_deployment = true`, the module sets both `ENABLE_AWS_FIPS=true` and `AWS_USE_FIPS_ENDPOINT=true` on the Lambda by default, which routes all AWS SDK calls to FIPS service endpoints and uses the AWS-LC FIPS-validated TLS provider.
+When `govcloud_deployment = true`, the module sets both `ENABLE_AWS_FIPS=true` and `AWS_USE_FIPS_ENDPOINT=true` on the Lambda by default, which routes all AWS SDK calls to FIPS service endpoints and uses the AWS-LC FIPS TLS provider.
+
+From shipper **1.4.23** the GovCloud artifact is a separate build. It pins the NIST-validated AWS-LC FIPS **v3** module (certificates #5314 and #5298), where the commercial build uses **v4**, which is submitted to NIST but not yet validated. The two are not interchangeable: deploying the commercial zip into GovCloud puts an unvalidated cryptographic module into a FedRAMP workload. The module handles this for you — it reads the artifact from the Coralogix bucket in the partition you are deploying to, including when `custom_s3_bucket` is set.
 
 If you need to disable FIPS in a GovCloud deployment, set the corresponding variable explicitly:
 

@@ -1,5 +1,15 @@
 # Changelog
 
+## v4.14.1
+
+#### **coralogix-aws-shipper**
+### 🧰 Bug fixes 🧰
+- Fixed `custom_s3_bucket` staging the wrong artifact in GovCloud. The copy fetched from a hard-coded commercial bucket, so a GovCloud deployment staged the commercial build. Since shipper `1.4.23` the two differ: GovCloud pins the NIST-validated AWS-LC FIPS v3 module (certificates #5314 and #5298) while the commercial build uses v4, which is submitted to NIST but not yet validated. The artifact is now fetched from the Coralogix bucket in the partition being deployed to.
+- Fixed `custom_s3_bucket` combined with `source_code_version`. The copy always staged the unversioned key while the Lambda requested the versioned one, so the deployment failed with `NoSuchKey`. Both now resolve the same key.
+- Fixed the staged artifact going stale. `null_resource.s3_bucket_copy` had no `triggers`, so it ran once and never again; changing `source_code_version` left the bucket serving the previous version. Upgrading re-runs the staging step once for existing `custom_s3_bucket` deployments.
+- The download is staged in a private temporary directory rather than the working directory, so concurrent module instances resolving the same file name cannot overwrite or delete each other's copy.
+- README: `custom_s3_bucket` is a choice rather than a requirement now that Coralogix hosts artifacts in both GovCloud regions; documented the GovCloud/commercial artifact split, and that the copy uses the AWS CLI's own credentials rather than the provider's.
+
 ## v4.14.0
 
 #### **coralogix-aws-shipper**
