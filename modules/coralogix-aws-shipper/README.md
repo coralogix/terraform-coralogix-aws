@@ -246,6 +246,11 @@ The upload into your bucket runs the AWS CLI on the machine executing Terraform,
 
 In commercial regions the download itself is unauthenticated, so only write access to your own bucket is required. In GovCloud the download is signed, because those buckets refuse anonymous requests; the identity the CLI resolves there needs `s3:GetObject` on `coralogix-serverless-repo-us-gov-west-1` and must be in the `aws-us-gov` partition.
 
+> [!IMPORTANT]
+> **Enable versioning on your bucket**, or pin `source_code_version`.
+>
+> With neither, the staged object keeps the same key on every release, so Terraform sees no change to the Lambda and leaves the previous binary deployed — the bucket is updated and the function is not. With versioning on, each restage produces a new object version, which the module passes to the Lambda and which forces the code to update. Pinning `source_code_version` achieves the same thing by putting the version in the key.
+
 **AWS GovCloud and FIPS**
 
 When `govcloud_deployment = true`, the module sets both `ENABLE_AWS_FIPS=true` and `AWS_USE_FIPS_ENDPOINT=true` on the Lambda by default, which routes all AWS SDK calls to FIPS service endpoints and uses the AWS-LC FIPS TLS provider.

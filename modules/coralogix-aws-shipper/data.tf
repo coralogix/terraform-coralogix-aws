@@ -69,3 +69,24 @@ data "aws_iam_role" "LambdaExecutionRole" {
 }
 
 data "aws_partition" "current" {}
+
+# Read back AFTER the staging copy, so the Lambda sees the object that was just written
+# rather than the one that was there before.
+#
+# Its version_id is what makes an upgrade actually redeploy. With the default empty
+# source_code_version the staged key never changes, so bucket and key alone give the
+# Lambda nothing to react to: Terraform would restage the artifact and leave the
+# function running the previous binary. depends_on is what forces the read to happen
+# after the copy; it also defers it to apply, so the Lambda's package shows as known
+# after apply whenever the copy re-runs.
+#
+# Buckets without versioning return no version, and the Lambda then behaves as it did
+# before -- see the custom_s3_bucket note in README.md.
+data "aws_s3_object" "staged_artifact" {
+  count = var.custom_s3_bucket == "" ? 0 : 1
+
+  bucket = var.custom_s3_bucket
+  key    = local.artifact_key
+
+  depends_on = [null_resource.s3_bucket_copy]
+}

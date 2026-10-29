@@ -28,6 +28,14 @@ locals {
   artifact_source_region      = local.artifact_source_is_govcloud ? "us-gov-west-1" : "ap-east-1"
   artifact_source_bucket      = "coralogix-serverless-repo-${local.artifact_source_region}"
 
+  # Empty string rather than null on a bucket without versioning, which aws_lambda_function
+  # rejects, so normalise it back to null: the Lambda then tracks bucket and key alone,
+  # exactly as it did before.
+  staged_artifact_version = try(
+    data.aws_s3_object.staged_artifact[0].version_id == "" ? null : data.aws_s3_object.staged_artifact[0].version_id,
+    null
+  )
+
   s3_suffix_map = {
     CloudTrail = ".json.gz"
     VpcFlow    = ".log.gz"

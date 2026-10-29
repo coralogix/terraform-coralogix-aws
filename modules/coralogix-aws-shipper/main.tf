@@ -369,6 +369,11 @@ module "lambda" {
   s3_existing_package = {
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.id}" : var.custom_s3_bucket
     key    = local.artifact_key
+    # Set only for a custom bucket, and only where that bucket has versioning on. It is
+    # what makes a restaged artifact reach the function: with the default empty
+    # source_code_version the key never changes, so bucket and key alone would leave the
+    # previous binary deployed after an upgrade restaged a different one.
+    version_id = local.staged_artifact_version
   }
   cloudwatch_logs_retention_in_days       = each.value.lambda_log_retention
   create_current_version_allowed_triggers = false
