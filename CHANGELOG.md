@@ -4,10 +4,8 @@
 
 #### **coralogix-aws-shipper**
 ### 🧰 Bug fixes 🧰
-- Fixed `custom_s3_bucket` staging the wrong artifact in GovCloud. It copied from a commercial bucket; since shipper `1.4.23` the GovCloud build differs, pinning the NIST-validated AWS-LC FIPS v3 module where commercial uses the unvalidated v4. The artifact now comes from the partition being deployed to, signed in GovCloud and unauthenticated in commercial as before.
-- Fixed `custom_s3_bucket` with `source_code_version` set, which failed at Lambda creation with `NoSuchKey`: the copy staged the unversioned key while the Lambda requested the versioned one.
-- Fixed the staged artifact never refreshing when `source_code_version` changed. Existing `custom_s3_bucket` deployments re-run the staging step once on upgrade.
-- Fixed a restaged artifact not reaching the Lambda when the key is unchanged, which left the previous binary running. Unpinned deployments now need bucket versioning and `s3:GetObject` + `s3:GetObjectVersion` for the provider identity — see the `custom_s3_bucket` section in the README.
+- `custom_s3_bucket` staged the commercial artifact in GovCloud, failed with `NoSuchKey` when `source_code_version` was set, and did not redeploy the Lambda when the artifact changed. All fixed.
+- Unpinned `custom_s3_bucket` deployments now need bucket versioning and `s3:GetObject` + `s3:GetObjectVersion` for the Terraform identity — see the README.
 
 ## v4.14.0
 
