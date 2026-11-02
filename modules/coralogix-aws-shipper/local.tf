@@ -2,6 +2,40 @@ locals {
   # Artifact keys spell it "x86-64"; var.cpu_arch is "x86_64".
   artifact_arch = var.cpu_arch == "arm64" ? "arm64" : "x86-64"
 
+  # The artifact the Lambda will load. Published keys spell the architecture "x86-64"
+  # while cpu_arch is "x86_64", and the unversioned arm64 artifact carries no
+  # architecture at all, so this is built from artifact_arch rather than interpolating
+  # cpu_arch -- the x86 branch used to do that on top of a name that already contained
+  # it, producing coralogix-aws-shipper-x86-64-x86_64-<version>.zip.
+  #
+  # Shared with null_resource.s3_bucket_copy so the
+  # object staged into a custom bucket is exactly the one read back out of it: the copy
+  # used to upload the unversioned name unconditionally, so pinning source_code_version
+  # alongside custom_s3_bucket left the Lambda pointing at a key that was never staged.
+  artifact_key = var.source_code_version != "" ? "coralogix-aws-shipper-${local.artifact_arch}-${var.source_code_version}.zip" : (
+    var.cpu_arch == "arm64" ? "coralogix-aws-shipper.zip" : "coralogix-aws-shipper-${local.artifact_arch}.zip"
+  )
+
+  # Where a custom bucket is stocked from. GovCloud is a separate partition with its own
+  # artifacts, and since shipper 1.4.23 its binary is a different build: it pins the
+  # NIST-validated AWS-LC FIPS v3 module, where the commercial build moved to v4, which
+  # NIST has not validated. Copying the commercial zip into a GovCloud bucket therefore
+  # deploys the unvalidated module to a FedRAMP workload.
+  #
+  # ap-east-1 is the commercial source this module has used since #144 (March 2024) and
+  # stays as it is; only the GovCloud branch is new.
+  artifact_source_is_govcloud = data.aws_partition.current.partition == "aws-us-gov"
+  artifact_source_region      = local.artifact_source_is_govcloud ? "us-gov-west-1" : "ap-east-1"
+  artifact_source_bucket      = "coralogix-serverless-repo-${local.artifact_source_region}"
+
+  # Empty string rather than null on a bucket without versioning, which aws_lambda_function
+  # rejects, so normalise it back to null: the Lambda then tracks bucket and key alone,
+  # exactly as it did before.
+  staged_artifact_version = try(
+    data.aws_s3_object.staged_artifact[0].version_id == "" ? null : data.aws_s3_object.staged_artifact[0].version_id,
+    null
+  )
+
   s3_suffix_map = {
     CloudTrail = ".json.gz"
     VpcFlow    = ".log.gz"

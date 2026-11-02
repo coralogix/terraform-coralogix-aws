@@ -21,21 +21,42 @@ resource "random_string" "id" {
 resource "null_resource" "s3_bucket_copy" {
   count = var.custom_s3_bucket == "" ? 0 : 1
 
+  # Without these the copy runs once and never again, so bumping source_code_version
+  # left the custom bucket holding the previous artifact while the Lambda asked for the
+  # new key.
+  triggers = {
+    artifact      = local.artifact_key
+    source_bucket = local.artifact_source_bucket
+    target_bucket = var.custom_s3_bucket
+  }
+
   provisioner "local-exec" {
-    # command = "curl -o coralogix-aws-shipper.zip https://coralogix-serverless-repo-eu-central-1.s3.eu-central-1.amazonaws.com/coralogix-aws-shipper.zip ; aws s3 cp ./coralogix-aws-shipper.zip s3://coralogix-aws-shipper.zip ; rm ./coralogix-aws-shipper.zip"
+    # How the artifact is fetched differs by partition, and both forms are deliberate.
+    #
+    # GovCloud grants s3:GetObject to authenticated principals only and returns 403 to an
+    # anonymous request, so that partition signs.
+    #
+    # Commercial keeps the unsigned download it has always used. ap-east-1 is an opt-in
+    # Region: an account that has not enabled it cannot make a SIGNED request there, and
+    # most accounts have not. Signing commercial would therefore break staging for them,
+    # and the triggers above would surface it as a failed upgrade rather than only on
+    # new deployments. Anonymous reads need no such enablement.
     command = <<-EOF
-      if [[ "${var.cpu_arch}" == "x86_64" ]]; then
-        file_name="coralogix-aws-shipper-x86-64.zip"
-      else
-        file_name="coralogix-aws-shipper.zip"
-      fi
-      curl -o $file_name https://coralogix-serverless-repo-ap-east-1.s3.ap-east-1.amazonaws.com/$file_name
-      aws s3 cp ./$file_name s3://${var.custom_s3_bucket}
-      if [ -f $file_name ]; then
-        rm ./$file_name
-      else
-        echo "Couldn't find $file_name, skip deleting"
-      fi
+      set -eu
+      # Staged in a private temp directory, not the working directory. Several module
+      # instances can run this at once -- the same architecture and version resolve to
+      # one file name -- and a shared path lets one overwrite or delete another's
+      # download mid-flight. Where a commercial and a GovCloud instance apply together
+      # that would put the commercial build in the GovCloud bucket, which is exactly
+      # what the partition split above exists to prevent.
+      staging=$(mktemp -d)
+      trap 'rm -rf "$staging"' EXIT
+      %{if local.artifact_source_is_govcloud~}
+      aws s3 cp "s3://${local.artifact_source_bucket}/${local.artifact_key}" "$staging/${local.artifact_key}" --region "${local.artifact_source_region}"
+      %{else~}
+      curl -fsS -o "$staging/${local.artifact_key}" "https://${local.artifact_source_bucket}.s3.${local.artifact_source_region}.amazonaws.com/${local.artifact_key}"
+      %{endif~}
+      aws s3 cp "$staging/${local.artifact_key}" "s3://${var.custom_s3_bucket}/${local.artifact_key}"
     EOF
   }
 }
@@ -347,13 +368,16 @@ module "lambda" {
   }
   s3_existing_package = {
     bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.id}" : var.custom_s3_bucket
-    # Published keys spell the architecture "x86-64", while cpu_arch is "x86_64", and the
-    # unversioned arm64 artifact carries no architecture at all. Built from local.artifact_arch
-    # rather than interpolating cpu_arch, which the x86 branch used to do on top of a name
-    # that already contained it, producing coralogix-aws-shipper-x86-64-x86_64-<version>.zip.
-    key = var.source_code_version != "" ? "coralogix-aws-shipper-${local.artifact_arch}-${var.source_code_version}.zip" : (
-      var.cpu_arch == "arm64" ? "coralogix-aws-shipper.zip" : "coralogix-aws-shipper-${local.artifact_arch}.zip"
-    )
+    key    = local.artifact_key
+    # Set only for a custom bucket, and only where that bucket has versioning on. It is
+    # what makes a restaged artifact reach the function: with the default empty
+    # source_code_version the key never changes, so bucket and key alone would leave the
+    # previous binary deployed after an upgrade restaged a different one.
+    #
+    # Setting it makes Lambda fetch that specific version, which S3 gates behind
+    # s3:GetObjectVersion rather than s3:GetObject. Both are required here; see the
+    # custom_s3_bucket section in README.md.
+    version_id = local.staged_artifact_version
   }
   cloudwatch_logs_retention_in_days       = each.value.lambda_log_retention
   create_current_version_allowed_triggers = false

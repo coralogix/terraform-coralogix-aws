@@ -1,5 +1,12 @@
 # Changelog
 
+## v4.14.1
+
+#### **coralogix-aws-shipper**
+### 🧰 Bug fixes 🧰
+- `custom_s3_bucket` staged the commercial artifact in GovCloud, failed with `NoSuchKey` when `source_code_version` was set, and did not redeploy the Lambda when the artifact changed. All fixed.
+- Unpinned `custom_s3_bucket` deployments now need bucket versioning and `s3:GetObject` + `s3:GetObjectVersion` for the Terraform identity — see the README.
+
 ## v4.14.0
 
 #### **coralogix-aws-shipper**
