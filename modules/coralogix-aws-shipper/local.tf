@@ -144,4 +144,9 @@ locals {
   use_coralogix_otlp_traces     = var.telemetry_mode == "traces" && var.otlp_endpoint == ""
   needs_coralogix_api_key       = var.telemetry_mode == "metrics" || local.use_coralogix_rest_logs || local.use_coralogix_otlp_logs || local.use_coralogix_otlp_traces
   needs_coralogix_rest_endpoint = var.telemetry_mode == "metrics" || local.use_coralogix_rest_logs
+  # Only the Collector route reads OTLP_HEADERS; the direct routes ignore it, so it is
+  # neither sent nor version-gated there.
+  use_collector_otlp = local.use_collector_otlp_logs || local.use_collector_otlp_traces
+  sends_otlp_headers = local.use_collector_otlp && var.otlp_headers != ""
+  otlp_headers_env   = local.sends_otlp_headers ? var.otlp_headers : null
 }

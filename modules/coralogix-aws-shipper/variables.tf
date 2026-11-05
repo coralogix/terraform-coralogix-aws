@@ -510,6 +510,14 @@ variable "otlp_endpoint" {
   nullable = false
 }
 
+variable "otlp_headers" {
+  description = "Optional semicolon-separated key=value pairs sent as gRPC metadata on every export to otlp_endpoint, e.g. x-api-key=value;tenant=name. Collector route only; ignored by the direct Coralogix routes. Requires shipper 1.5.0 or later. Keys must be lowercase a-z, 0-9, '_', '.', '-' and values printable ASCII; the shipper rejects anything else at startup."
+  type        = string
+  default     = ""
+  sensitive   = true
+  nullable    = false
+}
+
 variable "disable_log_severity_detection" {
   description = "Disable keyword-based severity detection for logs. When true, logs use protocol-level Info severity without modifying the original log body. Ignored for metrics."
   type        = bool
