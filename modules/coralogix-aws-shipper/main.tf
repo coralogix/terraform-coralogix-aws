@@ -332,7 +332,8 @@ module "lambda" {
       : each.value.api_key
     ) : null
     LOG_EXPORT_PROTOCOL            = var.telemetry_mode == "logs" ? var.log_export_protocol : null
-    OTLP_ENDPOINT                  = local.use_collector_otlp_logs || local.use_collector_otlp_traces ? var.otlp_endpoint : null
+    OTLP_ENDPOINT                  = local.use_collector_otlp ? var.otlp_endpoint : null
+    OTLP_HEADERS                   = local.otlp_headers_env
     DISABLE_LOG_SEVERITY_DETECTION = var.telemetry_mode == "logs" ? tostring(var.disable_log_severity_detection) : null
     CORALOGIX_DOMAIN = local.use_coralogix_otlp_logs || local.use_coralogix_otlp_traces ? (
       var.custom_domain != ""
@@ -431,6 +432,21 @@ resource "terraform_data" "starlark_after_metadata_guardrails" {
     precondition {
       condition     = var.source_code_version == "" || coalesce(local.source_code_version_number, 0) >= 1004019
       error_message = "starlark_transform_after_metadata requires shipper 1.4.19 or later; set source_code_version to 1.4.19 or above, or leave it empty to track the latest."
+    }
+  }
+}
+
+# Unconditional, unlike the guardrails around it: otlp_headers is sensitive, and a count
+# derived from it fails at plan time. The precondition carries the condition instead.
+resource "terraform_data" "otlp_headers_guardrails" {
+  lifecycle {
+    # 1.4.x and earlier do not recognise OTLP_HEADERS: the shipper exports without the
+    # headers and a gateway that requires them rejects every batch. Only the Collector
+    # route sends them, so ignored headers on a direct route need no newer shipper. An
+    # unpinned source_code_version tracks the latest artifact and is always fine.
+    precondition {
+      condition     = !local.sends_otlp_headers || var.source_code_version == "" || coalesce(local.source_code_version_number, 0) >= 1005000
+      error_message = "otlp_headers requires shipper 1.5.0 or later; set source_code_version to 1.5.0 or above, or leave it empty to track the latest."
     }
   }
 }

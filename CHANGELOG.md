@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.15.0
+
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 💡
+- Added `otlp_headers` (sensitive, default `""`), passed to the Lambda as `OTLP_HEADERS` on the Collector route only: semicolon-separated `key=value` pairs sent as gRPC metadata on every export to `otlp_endpoint`, for gateways that authenticate with their own header. Requires shipper `1.5.0` or later — fails at plan time when it is set on the Collector route and `source_code_version` is pinned below 1.5.0. Direct Coralogix routes ignore it at any version. Not set by default, so the Lambda is unchanged for existing deployments; the first plan adds one `terraform_data.otlp_headers_guardrails` resource, which holds the plan-time check and creates nothing in AWS.
+
 ## v4.14.1
 
 #### **coralogix-aws-shipper**

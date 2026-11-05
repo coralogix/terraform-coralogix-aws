@@ -57,6 +57,7 @@ If you're deploying multiple integrations through the same S3 bucket, you'll nee
 | <a name="input_store_api_key_in_secrets_manager"></a> [store\_api\_key\_in\_secrets\_manager](#input\_store\_api\_key\_in\_secrets\_manager) | Enable this to store your API key securely. Otherwise, it will remain exposed in plain text as an environment variable in the Lambda function console.| bool | true | no |
 | <a name="input_log_export_protocol"></a> [log\_export\_protocol](#input\_log\_export\_protocol) | Log delivery protocol when `telemetry_mode` is `logs`: `coralogix_rest` (default) or `otlp_grpc`. Ignored for metrics.| `string` | `coralogix_rest` | no |
 | <a name="input_otlp_endpoint"></a> [otlp\_endpoint](#input\_otlp\_endpoint) | Optional Collector `http://` or `https://` origin for `otlp_grpc`. Empty selects direct Coralogix OTLP; non-empty selects unauthenticated Collector delivery.| `string` | `""` | no |
+| <a name="input_otlp_headers"></a> [otlp\_headers](#input\_otlp\_headers) | Optional semicolon-separated `key=value` pairs sent as gRPC metadata on every export to `otlp_endpoint`, e.g. `x-api-key=value;tenant=name`. Collector route only; the direct Coralogix routes ignore it. Requires shipper `1.5.0` or later. Sensitive. | `string` | `""` | no |
 | <a name="input_disable_log_severity_detection"></a> [disable\_log\_severity\_detection](#input\_disable\_log\_severity\_detection) | Disable keyword-based severity detection for logs. When `true`, logs use protocol-level `Info` severity without modifying the original log body. Ignored for metrics.| `bool` | `false` | no |
 | <a name="application_name"></a> [application\_name](#input\_application\_name) | The [name](https://coralogix.com/docs/application-and-subsystem-names/) of your application. For a dynamic value, use `$.my_log.field`. This option is not supported since version `1.1.0` for the [source code](https://github.com/coralogix/coralogix-aws-shipper/blob/master/CHANGELOG.md) | string | n\a | yes | 
 | <a name="subsystem_name"></a> [subsystem\_name](#input\_subsysten_\_name) | The [name](https://coralogix.com/docs/application-and-subsystem-names/) of your subsystem. For a dynamic value, use `$.my_log.field` for CloudWatch log group leave empty. This option is not supported since version `1.1.0` for the [source code](https://github.com/coralogix/coralogix-aws-shipper/blob/master/CHANGELOG.md) | string | n\a | yes |
@@ -68,6 +69,8 @@ When `telemetry_mode` is `logs`, three export routes are available (matching the
 3. **Collector OTLP/gRPC:** `log_export_protocol = "otlp_grpc"` with a non-empty `otlp_endpoint` (no Coralogix API key).
 
 OTLP routes require a shipper binary that supports them; pin `source_code_version` after that shipper release is published.
+
+For a gateway in front of the Collector that authenticates with its own header, set `otlp_headers` (shipper `1.5.0` or later). It applies to Collector logs and traces only, and plan fails if `source_code_version` is pinned below `1.5.0` while it is in use. Keys must be lowercase `a-z`, `0-9`, `_`, `.`, `-` and values printable ASCII; the shipper rejects anything else at startup. The variable is `sensitive`, which hides it from plan output, but the value is still stored in plaintext in Terraform state and in the Lambda's environment variables, so protect state accordingly.
 
 ### Traces
 
