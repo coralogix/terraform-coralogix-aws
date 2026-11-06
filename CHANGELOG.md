@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.15.1
+
+#### **cloudwatch-metrics-iam-role**
+### 💡 Enhancements 💡
+- Added `US3` to `coralogix_region` (trusts `coralogix-ingestion-us3` in account `826308361216`).
+
 ## v4.15.0
 
 #### **coralogix-aws-shipper**
