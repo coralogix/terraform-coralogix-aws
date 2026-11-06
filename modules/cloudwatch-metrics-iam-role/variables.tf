@@ -19,8 +19,8 @@ variable "coralogix_region" {
   type        = string
   default     = "US2"
   validation {
-    condition     = contains(["dev", "staging", "EU1", "EU2", "AP1", "AP2", "AP3", "US1", "US2"], var.coralogix_region)
-    error_message = "The coralogix_region must be one of: dev, staging, EU1, EU2, AP1, AP2, AP3, US1, US2."
+    condition     = contains(["dev", "staging", "EU1", "EU2", "AP1", "AP2", "AP3", "US1", "US2", "US3"], var.coralogix_region)
+    error_message = "The coralogix_region must be one of: dev, staging, EU1, EU2, AP1, AP2, AP3, US1, US2, US3."
   }
 }
 

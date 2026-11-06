@@ -47,6 +47,10 @@ locals {
       id          = "739076534691"
       role_suffix = "us2"
     },
+    US3 = {
+      id          = "826308361216"
+      role_suffix = "us3"
+    },
   }
 
   # Determine the Coralogix caller AWS Account ID:
