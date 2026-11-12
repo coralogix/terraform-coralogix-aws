@@ -29,12 +29,12 @@ variable "image_version" {
 }
 
 variable "coralogix_region" {
-  description = "Coralogix region (EU1, EU2, AP1, AP2, AP3, US1, US2, custom)."
+  description = "Coralogix region (EU1, EU2, AP1, AP2, AP3, US1, US2, US3, custom)."
   type        = string
   default     = null
   validation {
-    condition     = var.coralogix_region == null || can(regex("^(EU1|EU2|AP1|AP2|AP3|US1|US2|custom)$", var.coralogix_region))
-    error_message = "Must be one of [EU1|EU2|AP1|AP2|AP3|US1|US2|custom]."
+    condition     = var.coralogix_region == null || can(regex("^(EU1|EU2|AP1|AP2|AP3|US1|US2|US3|custom)$", var.coralogix_region))
+    error_message = "Must be one of [EU1|EU2|AP1|AP2|AP3|US1|US2|US3|custom]."
   }
 }
 

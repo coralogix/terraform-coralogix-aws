@@ -8,6 +8,7 @@ locals {
     Singapore = "ingress.ap2.coralogix.com"
     US        = "ingress.us1.coralogix.com"
     US2       = "ingress.us2.coralogix.com"
+    US3       = "ingress.us3.coralogix.com"
     AP3       = "ap3.coralogix.com"
   }
 
@@ -28,6 +29,7 @@ locals {
     us        = "us1.coralogix.com"
     US1       = "us1.coralogix.com"
     US2       = "us2.coralogix.com"
+    US3       = "us3.coralogix.com"
     us2       = "us2.coralogix.com"
     AP3       = "ap3.coralogix.com"
   }

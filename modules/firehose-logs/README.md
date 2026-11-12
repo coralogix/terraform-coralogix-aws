@@ -68,6 +68,7 @@ The Coralogix region variable accepts one of the following regions:
 * AP3
 * US1
 * US2
+* US3
 
 ### Coralogix regions and endpoints
 
@@ -80,6 +81,7 @@ The Coralogix region variable accepts one of the following regions:
 | AP3       | `ap3.coralogix.com`    | `https://ingress.ap3.coralogix.com/aws/firehose`   |
 | US1       | `us1.coralogix.com`         | `https://ingress.us1.coralogix.com/aws/firehose`        |
 | US2       | `us2.coralogix.com`  | `https://ingress.us2.coralogix.com/aws/firehose` |
+| US3       | `us3.coralogix.com`  | `https://ingress.us3.coralogix.com/aws/firehose` |
 
 ### Custom Domain
 It is possible to pass a custom Coralogix domain by using the `custom_domain` variable.
@@ -102,7 +104,7 @@ It is possible to pass a custom Coralogix domain by using the `custom_domain` va
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | Coralogix account region: EU1, EU2, AP1, AP2, AP3, US1, US2 [exact] | `any` | n/a | yes |
+| <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | Coralogix account region: EU1, EU2, AP1, AP2, AP3, US1, US2, US3 [exact] | `any` | n/a | yes |
 | <a name="input_api_key"></a> [api_key](#input\_api_key) | Coralogix account logs API key | `any` | n/a | yes |
 | <a name="input_firehose_stream"></a> [firehose\_stream](#input\_firehose\_stream) | AWS Kinesis firehose delivery stream name | `string` | n/a | yes |
 | <a name="input_application_name"></a> [application_name](#input\_application_name) | The name of your application in Coralogix | `string` | n/a | yes |
@@ -133,6 +135,7 @@ It is possible to pass a custom Coralogix domain by using the `custom_domain` va
 | `AP3` | `ap-southeast-3` | ap3.coralogix.com |
 | `US` | `us-east-2` | us1.coralogix.com |
 | `US2` | `us-west-2` | us2.coralogix.com |
+| `US3` | GCP `us-central1` | us3.coralogix.com |
 
 ## Outputs
 

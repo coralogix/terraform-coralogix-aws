@@ -171,7 +171,7 @@ You can control health checks using:
 | image_version | Standard Coralogix Otel Collector image version/tag used in collector mode | `string` | `null` | yes* |
 | supervised_image_repository | Supervised Coralogix Otel Collector image repository | `string` | `"cgx.jfrog.io/coralogix-docker-images/coralogix-otel-supervised-cdot"` | no |
 | supervised_image_version | Supervised Coralogix Otel Collector image version/tag. Use `v0.11.0` or later with profiling fallbacks. | `string` | `"v0.11.0"` | no |
-| coralogix_region | Coralogix region: EU1, EU2, AP1, AP2, AP3, US1, US2, custom | `string` | `null` | yes* |
+| coralogix_region | Coralogix region: EU1, EU2, AP1, AP2, AP3, US1, US2, US3, custom | `string` | `null` | yes* |
 | api_key | Send-Your-Data API key | `string` | `null` | yes** |
 | s3_config_bucket | S3 bucket containing collector and optional Supervisor configs. Also required when `initial_fallback_configs` or `profiling_initial_fallback_configs` is set. | `string` | `null` | yes* |
 | s3_config_key | S3 object key for the collector config | `string` | `null` | yes* |

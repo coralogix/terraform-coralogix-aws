@@ -103,7 +103,7 @@ module "ecs_ec2_windows_s3" {
 | security_group_ids | Security group IDs for the ECS service | `list(string)` | n/a | yes |
 | service_discovery_registry_arn | Cloud Map service ARN; when set, the agent registers so other tasks can reach it via DNS (agent.otel.local:4317) | `string` | `null` | no |
 | image_version | OTEL Collector image tag (use a Windows tag, e.g. v0.5.10-windowsserver-2022) | `string` | n/a | yes |
-| coralogix_region | Coralogix region (EU1, EU2, AP1, AP2, AP3, US1, US2, custom) | `string` | n/a | yes |
+| coralogix_region | Coralogix region (EU1, EU2, AP1, AP2, AP3, US1, US2, US3, custom) | `string` | n/a | yes |
 | api_key | Send-Your-Data API key (required unless use_api_key_secret is true) | `string` | `null` | no |
 | use_api_key_secret | Use API key from Secrets Manager | `bool` | `false` | no |
 | api_key_secret_arn | ARN of the secret (required if use_api_key_secret is true) | `string` | `null` | no |

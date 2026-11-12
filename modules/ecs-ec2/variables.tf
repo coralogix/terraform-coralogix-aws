@@ -186,13 +186,13 @@ variable "profiling_memory" {
 }
 
 variable "coralogix_region" {
-  description = "The region of the Coralogix endpoint domain: [EU1|EU2|AP1|AP2|AP3|US1|US2|custom]. Required when module creates the task definition. Ignored in service-only mode."
+  description = "The region of the Coralogix endpoint domain: [EU1|EU2|AP1|AP2|AP3|US1|US2|US3|custom]. Required when module creates the task definition. Ignored in service-only mode."
   type        = string
   default     = null
 
   validation {
-    condition     = var.task_definition_arn != null || (var.coralogix_region != null && can(regex("^(EU1|EU2|AP1|AP2|AP3|US1|US2|custom)$", var.coralogix_region)))
-    error_message = "coralogix_region is required when task_definition_arn is null. Must be one of [EU1|EU2|AP1|AP2|AP3|US1|US2|custom]."
+    condition     = var.task_definition_arn != null || (var.coralogix_region != null && can(regex("^(EU1|EU2|AP1|AP2|AP3|US1|US2|US3|custom)$", var.coralogix_region)))
+    error_message = "coralogix_region is required when task_definition_arn is null. Must be one of [EU1|EU2|AP1|AP2|AP3|US1|US2|US3|custom]."
   }
 }
 
