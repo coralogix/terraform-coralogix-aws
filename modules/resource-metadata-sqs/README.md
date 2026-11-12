@@ -40,7 +40,7 @@ It's recommended to use this module for:
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | The Coralogix location region, possible options are [`Europe`, `Europe2`, `India`, `Singapore`, `US`, `US2`, `Custom`] | `string` | n/a | yes |
+| <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | The Coralogix location region, possible options are [`Europe`, `Europe2`, `India`, `Singapore`, `US`, `US2`, `US3`, `Custom`] | `string` | n/a | yes |
 | <a name="input_api_key"></a> [api\_key](#input\_api\_key) | Your [Coralogix Send Your Data – API Key](https://coralogix.com/docs/send-your-data-api-key/) or incase you use pre created secret (created in AWS secret manager) put here the name of the secret that contains the Coralogix send your data key| `string` | n/a | yes |
 | <a name="input_custom_url"></a> [custom_url](#input\_custom\_domain) | Custom url for coralogix for example: https://<your_custom_domain>/api/v1/logs| `string` | n/a | no |
 
@@ -114,6 +114,7 @@ It's recommended to use this module for:
 | `AP3` | `ap-southeast-3` | ap3.coralogix.com |
 | `US1` | `us-east-2` | us1.coralogix.com |
 | `US2` | `us-west-2` | us2.coralogix.com |
+| `US3` | GCP `us-central1` | us3.coralogix.com |
 
 ## Outputs
 

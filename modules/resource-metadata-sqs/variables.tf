@@ -1,11 +1,11 @@
 ### Coralogix Configuration
 
 variable "coralogix_region" {
-  description = "The Coralogix location region [EU1, EU2, AP1, AP2, US1, US2, Custom]"
+  description = "The Coralogix location region [EU1, EU2, AP1, AP2, US1, US2, US3, Custom]"
   type        = string
   validation {
-    condition     = contains(["EU1", "EU2", "AP1", "AP2", "AP3", "US1", "US2", "Custom"], var.coralogix_region)
-    error_message = "The coralogix region must be one of these values: [EU1, EU2, AP1, AP2, AP3, US1, US2, Custom]."
+    condition     = contains(["EU1", "EU2", "AP1", "AP2", "AP3", "US1", "US2", "US3", "Custom"], var.coralogix_region)
+    error_message = "The coralogix region must be one of these values: [EU1, EU2, AP1, AP2, AP3, US1, US2, US3, Custom]."
   }
   default = "Custom"
 }

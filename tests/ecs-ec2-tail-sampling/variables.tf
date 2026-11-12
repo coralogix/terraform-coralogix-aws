@@ -90,12 +90,12 @@ variable "custom_image" {
 }
 
 variable "coralogix_region" {
-  description = "The region of the Coralogix endpoint domain: [EU1|EU2|AP1|AP2|AP3|US1|US2|custom]. If \"custom\" then __custom_domain__ parameter must be specified."
+  description = "The region of the Coralogix endpoint domain: [EU1|EU2|AP1|AP2|AP3|US1|US2|US3|custom]. If \"custom\" then __custom_domain__ parameter must be specified."
   type        = string
   default     = "EU2"
   validation {
-    condition     = can(regex("^(EU1|EU2|AP1|AP2|AP3|US1|US2|custom)$", var.coralogix_region))
-    error_message = "Must be one of [EU1|EU2|AP1|AP2|AP3|US1|US2|custom]."
+    condition     = can(regex("^(EU1|EU2|AP1|AP2|AP3|US1|US2|US3|custom)$", var.coralogix_region))
+    error_message = "Must be one of [EU1|EU2|AP1|AP2|AP3|US1|US2|US3|custom]."
   }
 }
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.15.2
+
+#### **coralogix-aws-shipper**, **ecs-ec2**, **ecs-ec2-tail-sampling**, **ecs-ec2-windows**, **eventbridge**, **firehose-logs**, **firehose-metrics**, **resource-metadata**, **resource-metadata-sqs**
+### 💡 Enhancements 💡
+- Added `US3` (`us3.coralogix.com`) to `coralogix_region`.
+
 ## v4.15.1
 
 #### **cloudwatch-metrics-iam-role**

@@ -196,6 +196,7 @@ The Coralogix region variable accepts one of the following regions:
 * AP3
 * US1
 * US2
+* US3
 
 ### Coralogix regions and endpoints
 
@@ -208,6 +209,7 @@ The Coralogix region variable accepts one of the following regions:
 | AP3 | `ap3.coralogix.com` | `https://ingress.ap3.coralogix.com/aws/firehose` |
 | US1 | `us1.coralogix.com` | `https://ingress.us1.coralogix.com/aws/firehose` |
 | US2 | `us2.coralogix.com` | `https://ingress.us2.coralogix.com/aws/firehose` |
+| US3 | `us3.coralogix.com` | `https://ingress.us3.coralogix.com/aws/firehose` |
 
 ### Custom endpoints
 To use a custom domain, set the `custom_domain` variable (e.g. `cust.coralogix-123.net:8443`). The endpoint becomes `https://ingress.<custom_domain>/aws/firehose`. This does not work for PrivateLink.
@@ -236,7 +238,7 @@ The CloudWatch metric stream format is set with `output_format` (`opentelemetry0
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_coralogix_region"></a> [coralogix\_region](variables.tf#L1) | Coralogix account region: EU1, EU2, AP1, AP2, AP3, US1, US2 | `string` | n/a | yes |
+| <a name="input_coralogix_region"></a> [coralogix\_region](variables.tf#L1) | Coralogix account region: EU1, EU2, AP1, AP2, AP3, US1, US2, US3 | `string` | n/a | yes |
 | <a name="input_api_key"></a> [api\_key](variables.tf#L10) | Coralogix account API key. Ignored when api\_key\_secret\_arn is set. Required unless api\_key\_secret\_arn is provided. | `string` | `null` | no |
 | <a name="input_api_key_secret_arn"></a> [api\_key\_secret\_arn](variables.tf#L22) | ARN of a Secrets Manager secret holding the Coralogix API key as JSON, {"api\_key": "..."}.<br/>When set, Firehose reads the key at runtime and api\_key is ignored, so rotating the secret<br/>takes effect without a Terraform apply. This must be a separate secret from any plaintext<br/>value used with api\_key. Must be in the same region as the delivery stream. | `string` | `null` | no |
 | <a name="input_api_key_secret_kms_key_arn"></a> [api\_key\_secret\_kms\_key\_arn](variables.tf#L33) | Optional ARN of the KMS key used to encrypt the Secrets Manager secret. Required only if the secret uses a customer managed key (CMK). | `string` | `null` | no |

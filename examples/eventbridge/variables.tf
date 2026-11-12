@@ -15,11 +15,11 @@ variable "private_key" {
 }
 
 variable "coralogix_region" {
-  description = "The Coralogix location region, possible options are [EU1, EU2, AP1, AP2, AP3, US1, US2]"
+  description = "The Coralogix location region, possible options are [EU1, EU2, AP1, AP2, AP3, US1, US2, US3]"
   type        = string
   validation {
-    condition     = contains(["EU1", "EU2", "AP1", "AP2", "AP3", "US1", "US2", "ireland", "india", "stockholm", "singapore", "us", "us2", "Custom"], var.coralogix_region)
-    error_message = "The coralogix region must be one of these values: [EU1, EU2, AP1, AP2, AP3, US1, US2, Custom]."
+    condition     = contains(["EU1", "EU2", "AP1", "AP2", "AP3", "US1", "US2", "US3", "ireland", "india", "stockholm", "singapore", "us", "us2", "Custom"], var.coralogix_region)
+    error_message = "The coralogix region must be one of these values: [EU1, EU2, AP1, AP2, AP3, US1, US2, US3, Custom]."
   }
 }
 

@@ -1,9 +1,9 @@
 variable "coralogix_region" {
-  description = "Coralogix account region: EU1, EU2, AP1, AP2, AP3, US1, US2"
+  description = "Coralogix account region: EU1, EU2, AP1, AP2, AP3, US1, US2, US3"
   type        = string
   validation {
-    condition     = contains(["EU1", "EU2", "AP1", "AP2", "AP3", "US1", "US2"], var.coralogix_region)
-    error_message = "The coralogix region must be one of these values: [EU1, EU2, AP1, AP2, AP3, US1, US2]."
+    condition     = contains(["EU1", "EU2", "AP1", "AP2", "AP3", "US1", "US2", "US3"], var.coralogix_region)
+    error_message = "The coralogix region must be one of these values: [EU1, EU2, AP1, AP2, AP3, US1, US2, US3]."
   }
 }
 

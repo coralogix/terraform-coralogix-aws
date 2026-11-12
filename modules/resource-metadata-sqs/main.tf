@@ -8,6 +8,7 @@ locals {
     AP3    = "ingress.ap3.coralogix.com:443"
     US1    = "ingress.us1.coralogix.com:443"
     US2    = "ingress.us2.coralogix.com:443"
+    US3    = "ingress.us3.coralogix.com:443"
     Custom = var.custom_url
   }
   tags = {

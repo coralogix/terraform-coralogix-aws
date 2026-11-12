@@ -28,6 +28,7 @@ The coralogix region variable accepts one of the following regions:
 * AP3
 * US1
 * US2
+* US3
 * Custom
 
 ### Endpoints
@@ -41,6 +42,7 @@ The coralogix region variable accepts one of the following regions:
 | AP3       | `https://ingress.ap3.coralogix.com/aws/event-bridge`                  |
 | US1       | `https://ingress.us1.coralogix.com/aws/event-bridge`                  |
 | US2       | `https://ingress.us2.coralogix.com/aws/event-bridge`                  |
+| US3       | `https://ingress.us3.coralogix.com/aws/event-bridge`                  |
 | Custom    | `https://ingress.<custom_domain>/aws/event-bridge`                    |
 
 
@@ -76,7 +78,7 @@ The coralogix region variable accepts one of the following regions:
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_application_name"></a> [application\_name](#input\_application\_name) | Coralogix application name | `string` | n/a | yes |
-| <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | Coralogix account region. Accepted values: `EU1`, `EU2`, `AP1`, `AP2`, `AP3`, `US1`, `US2`, `Custom` | `string` | n/a | yes |
+| <a name="input_coralogix_region"></a> [coralogix\_region](#input\_coralogix\_region) | Coralogix account region. Accepted values: `EU1`, `EU2`, `AP1`, `AP2`, `AP3`, `US1`, `US2`, `US3`, `Custom` | `string` | n/a | yes |
 | <a name="input_custom_url"></a> [custom_url](#input\_custom\_url) | Custom coralogix url | `string` | `null` | no |
 | <a name="input_eventbridge_stream"></a> [eventbridge\_stream](#input\_eventbridge\_stream) | AWS eventbridge delivery stream name | `string` | n/a | yes |
 | <a name="input_private_key"></a> [private\_key](#input\_private\_key) | Your Coralogix private key | `string` | n/a | yes |
