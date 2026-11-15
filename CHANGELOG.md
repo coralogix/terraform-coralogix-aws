@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.16.0
+
+#### **firehose-metrics**
+### 💡 Enhancements 💡
+- Added optional `drop_values` to `derived_labels` rules: data points whose final `target` label matches a value (case-insensitive) are dropped before they reach Coralogix. Requires processor v0.1.17 or later; existing Lambda functions are not updated automatically, so update the deployed function code first. Empty `drop_values` is left out of `DERIVED_LABELS`, so existing deployments see no plan change.
+
 ## v4.15.2
 
 #### **coralogix-aws-shipper**, **ecs-ec2**, **ecs-ec2-tail-sampling**, **ecs-ec2-windows**, **eventbridge**, **firehose-logs**, **firehose-metrics**, **resource-metadata**, **resource-metadata-sqs**
