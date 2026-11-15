@@ -163,7 +163,7 @@ derived_labels = [
 
 #### Dropping data points
 
-Set `drop_values` on a rule to drop data points whose final `target` label matches one of the values (case-insensitive), before they reach Coralogix:
+Set `drop_values` on a rule to drop data points where any final label with the `target` key matches one of the values (case-insensitive), before they reach Coralogix:
 
 ```terraform
 derived_labels = [
@@ -274,7 +274,7 @@ The CloudWatch metric stream format is set with `output_format` (`opentelemetry0
 | <a name="input_custom_s3_bucket"></a> [custom\_s3\_bucket](variables.tf#L249) | Custom S3 bucket to use for the lambda processor | `string` | `null` | no |
 | <a name="input_server_side_encryption"></a> [server\_side\_encryption](variables.tf#L255) | Server side encryption configuration | <pre>object({<br/>    enabled  = bool<br/>    key_type = optional(string)<br/>    key_arn  = optional(string)<br/>  })</pre> | <pre>{<br/>  "enabled": false,<br/>  "key_type": "AWS_OWNED_CMK"<br/>}</pre> | no |
 | <a name="input_static_labels"></a> [static\_labels](variables.tf#L273) | List of key-value pairs that will be added as labels to every metric in the integration. | `list(string)` | `[]` | no |
-| <a name="input_derived_labels"></a> [derived\_labels](variables.tf#L279) | Rules that add a label copied from the first resource tag in `sources` that exists, isn't empty and isn't in `exclude_values` (case-insensitive). Optional `drop_values` drops data points whose final `target` label matches (case-insensitive, requires processor v0.1.17 or later). Passed to the Lambda processor as DERIVED\_LABELS. Requires lambda\_processor\_enable. | <pre>list(object({<br/>    target         = string<br/>    sources        = list(string)<br/>    exclude_values = optional(list(string), [])<br/>    drop_values    = optional(list(string), [])<br/>  }))</pre> | `[]` | no |
+| <a name="input_derived_labels"></a> [derived\_labels](variables.tf#L279) | Rules that add a label copied from the first resource tag in `sources` that exists, isn't empty and isn't in `exclude_values` (case-insensitive). Optional `drop_values` drops data points where any final label with the `target` key matches (case-insensitive, requires processor v0.1.17 or later). Passed to the Lambda processor as DERIVED\_LABELS. Requires lambda\_processor\_enable. | <pre>list(object({<br/>    target         = string<br/>    sources        = list(string)<br/>    exclude_values = optional(list(string), [])<br/>    drop_values    = optional(list(string), [])<br/>  }))</pre> | `[]` | no |
 | <a name="input_cross_account_enabled"></a> [cross\_account\_enabled](variables.tf#L299) | Enable cross-account resource tag enrichment for OAM. When true, the Lambda will assume roles in linked accounts to fetch resource tags. Requires cross\_account\_roles to be set. | `bool` | `false` | no |
 | <a name="input_cross_account_roles"></a> [cross\_account\_roles](variables.tf#L305) | Map of AWS account IDs to IAM role ARNs for cross-account tag enrichment. Example: {"123456789012" = "arn:aws:iam::123456789012:role/CoralogixMetricsReader"} | `map(string)` | `{}` | no |
 | <a name="input_lambda_processor_enable"></a> [lambda\_processor\_enable](variables.tf#L189) | Enable lambda processor function, defaults to true | `bool` | `true` | no |

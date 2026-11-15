@@ -277,7 +277,7 @@ variable "static_labels" {
 }
 
 variable "derived_labels" {
-  description = "Rules that add a label copied from the first resource tag in `sources` that exists, isn't empty and isn't in `exclude_values` (case-insensitive). Optional `drop_values` drops data points whose final `target` label matches (case-insensitive, requires processor v0.1.17 or later). Passed to the Lambda processor as DERIVED_LABELS. Requires lambda_processor_enable."
+  description = "Rules that add a label copied from the first resource tag in `sources` that exists, isn't empty and isn't in `exclude_values` (case-insensitive). Optional `drop_values` drops data points where any final label with the `target` key matches (case-insensitive, requires processor v0.1.17 or later). Passed to the Lambda processor as DERIVED_LABELS. Requires lambda_processor_enable."
   type = list(object({
     target         = string
     sources        = list(string)
