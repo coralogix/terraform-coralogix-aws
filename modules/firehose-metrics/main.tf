@@ -16,6 +16,9 @@ module "locals" {
 }
 
 locals {
+  # drop_values is left out when empty, so the JSON stays readable by processors older than v0.1.17.
+  derived_labels = [for r in var.derived_labels : { for k, v in r : k => v if k != "drop_values" || length(v) > 0 }]
+
   endpoint_domain = var.custom_domain != null ? var.custom_domain : module.locals.coralogix_domains[var.coralogix_region]
   endpoint_url    = "https://ingress.${local.endpoint_domain}/aws/firehose"
 
@@ -331,11 +334,6 @@ resource "aws_cloudwatch_log_group" "loggroup" {
   name              = "/aws/lambda/${one(aws_lambda_function.lambda_processor[*].function_name)}"
   retention_in_days = var.cloudwatch_retention_days
   tags              = local.tags
-}
-
-locals {
-  # drop_values is left out when empty, so the JSON stays readable by processors older than v0.1.17.
-  derived_labels = [for r in var.derived_labels : { for k, v in r : k => v if k != "drop_values" || length(v) > 0 }]
 }
 
 resource "aws_lambda_function" "lambda_processor" {
