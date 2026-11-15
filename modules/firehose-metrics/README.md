@@ -173,6 +173,23 @@ derived_labels = [
 
 Requires processor v0.1.17 or later. Existing Lambda functions are not updated automatically; update the deployed function code before configuring `drop_values`. Older processors reject the entire `DERIVED_LABELS` configuration when this field is present, disabling derived labels and forwarding data without filtering. Filtering uses cached resource tags, so until the cache refreshes (`FILE_CACHE_EXPIRATION` Lambda environment variable, default one hour) new resources and tag changes are filtered using stale or missing labels, which can forward or drop data incorrectly. All Lambda environment variables together are limited to 4 KB ([AWS limit](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html)), so a large `drop_values` list can fail the apply. See [Dropping data points](https://github.com/coralogix/cloudwatch-metric-streams-lambda-transformation#dropping-data-points) for matching rules, S3 backup behaviour and limitations.
 
+To update an existing function to the latest published code (default name `<firehose_stream>-metrics-transform`, or `lambda_processor_custom_name`). With `custom_s3_bucket`, copy the new ZIP into that bucket first and use it as `--s3-bucket`:
+
+```sh
+aws lambda update-function-code --region <region> \
+  --function-name <firehose_stream>-metrics-transform \
+  --s3-bucket coralogix-serverless-repo-<region> \
+  --s3-key firehose-metrics-transformer.zip
+```
+
+To confirm, the function's `CodeSha256` must equal the SHA-256 of the published ZIP. A match shows the latest published code, not a specific version:
+
+```sh
+aws lambda get-function --region <region> --function-name <firehose_stream>-metrics-transform \
+  --query Configuration.CodeSha256 --output text
+aws s3 cp s3://coralogix-serverless-repo-<region>/firehose-metrics-transformer.zip - | openssl dgst -sha256 -binary | base64
+```
+
 ### Removal of CloudWatch Metric Streams Lambda transformation
 By default, a [Coralogix Lambda Transformation Function](https://github.com/coralogix/cloudwatch-metric-streams-lambda-transformation) has been added to the [Kinesis Firehose Data Transformation](https://docs.aws.amazon.com/firehose/latest/dev/data-transformation.html) as a `processing_configuration`. This is done, to enrich the metrics from CloudWatch Metric Streams with AWS resource tags. The optional lambda function is deployed as part of the module, and can be removed by setting the variable `lambda_processor_enable` to `false`.
 
