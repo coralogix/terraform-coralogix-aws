@@ -171,23 +171,12 @@ derived_labels = [
 ]
 ```
 
-Requires processor v0.1.17 or later. Existing Lambda functions are not updated automatically; update the deployed function code before configuring `drop_values`. Older processors forward data without filtering: v0.1.16 rejects the entire `DERIVED_LABELS` configuration when this field is present, which also disables derived labels, and v0.1.15 and earlier ignore `DERIVED_LABELS`. Filtering uses cached resource tags, so until the cache refreshes (`FILE_CACHE_EXPIRATION` Lambda environment variable, default one hour) new resources and tag changes are filtered using stale or missing labels, which can forward or drop data incorrectly. All Lambda environment variables together are limited to 4 KB ([AWS limit](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html)), so a large `drop_values` list can fail the apply. See [Dropping data points](https://github.com/coralogix/cloudwatch-metric-streams-lambda-transformation#dropping-data-points) for matching rules, S3 backup behaviour and limitations.
+Requires processor v0.1.17 or later; the default `lambda_processor_version` (0.1.18) supports it. Older processors forward data without filtering: v0.1.16 rejects the entire `DERIVED_LABELS` configuration when this field is present, which also disables derived labels, and v0.1.15 and earlier ignore `DERIVED_LABELS`. Filtering uses cached resource tags, so until the cache refreshes (`FILE_CACHE_EXPIRATION` Lambda environment variable, default one hour) new resources and tag changes are filtered using stale or missing labels, which can forward or drop data incorrectly. All Lambda environment variables together are limited to 4 KB ([AWS limit](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html)), so a large `drop_values` list can fail the apply. See [Dropping data points](https://github.com/coralogix/cloudwatch-metric-streams-lambda-transformation#dropping-data-points) for matching rules, S3 backup behaviour and limitations.
 
-To update an existing function to the latest published code (default name `<firehose_stream>-metrics-transform`, or `lambda_processor_custom_name`). With `custom_s3_bucket`, copy the new ZIP into that bucket first and use it as `--s3-bucket`:
+The Lambda processor is pinned with `lambda_processor_version` (default `0.1.18`), which deploys the write-once `firehose-metrics-transformer-<version>.zip`. To upgrade, set a newer [release](https://github.com/coralogix/cloudwatch-metric-streams-lambda-transformation/releases) and apply; the function code is updated in place:
 
-```sh
-aws lambda update-function-code --region <region> \
-  --function-name <firehose_stream>-metrics-transform \
-  --s3-bucket coralogix-serverless-repo-<region> \
-  --s3-key firehose-metrics-transformer.zip
-```
-
-To confirm, the function's `CodeSha256` must equal the SHA-256 of the published ZIP. A match shows the latest published code, not a specific version:
-
-```sh
-aws lambda get-function --region <region> --function-name <firehose_stream>-metrics-transform \
-  --query Configuration.CodeSha256 --output text
-aws s3 cp s3://coralogix-serverless-repo-<region>/firehose-metrics-transformer.zip - | openssl dgst -sha256 -binary | base64
+```hcl
+lambda_processor_version = "0.1.18"
 ```
 
 ### Removal of CloudWatch Metric Streams Lambda transformation
@@ -289,11 +278,12 @@ The CloudWatch metric stream format is set with `output_format` (`opentelemetry0
 | <a name="input_existing_s3_backup"></a> [existing\_s3\_backup](variables.tf#L177) | Use an existing S3 bucket to use as a backup bucket | `string` | `null` | no |
 | <a name="input_govcloud_deployment"></a> [govcloud\_deployment](variables.tf#L183) | Enable if you deploy the integration in govcloud | `bool` | `false` | no |
 | <a name="input_custom_s3_bucket"></a> [custom\_s3\_bucket](variables.tf#L249) | Custom S3 bucket to use for the lambda processor | `string` | `null` | no |
-| <a name="input_server_side_encryption"></a> [server\_side\_encryption](variables.tf#L255) | Server side encryption configuration | <pre>object({<br/>    enabled  = bool<br/>    key_type = optional(string)<br/>    key_arn  = optional(string)<br/>  })</pre> | <pre>{<br/>  "enabled": false,<br/>  "key_type": "AWS_OWNED_CMK"<br/>}</pre> | no |
-| <a name="input_static_labels"></a> [static\_labels](variables.tf#L273) | List of key-value pairs that will be added as labels to every metric in the integration. | `list(string)` | `[]` | no |
-| <a name="input_derived_labels"></a> [derived\_labels](variables.tf#L279) | Rules that add a label copied from the first resource tag in `sources` that exists, isn't empty and isn't in `exclude_values` (case-insensitive). Optional `drop_values` drops data points where any final label with the `target` key matches (case-insensitive, requires processor v0.1.17 or later). Passed to the Lambda processor as DERIVED\_LABELS. Requires lambda\_processor\_enable. | <pre>list(object({<br/>    target         = string<br/>    sources        = list(string)<br/>    exclude_values = optional(list(string), [])<br/>    drop_values    = optional(list(string), [])<br/>  }))</pre> | `[]` | no |
-| <a name="input_cross_account_enabled"></a> [cross\_account\_enabled](variables.tf#L299) | Enable cross-account resource tag enrichment for OAM. When true, the Lambda will assume roles in linked accounts to fetch resource tags. Requires cross\_account\_roles to be set. | `bool` | `false` | no |
-| <a name="input_cross_account_roles"></a> [cross\_account\_roles](variables.tf#L305) | Map of AWS account IDs to IAM role ARNs for cross-account tag enrichment. Example: {"123456789012" = "arn:aws:iam::123456789012:role/CoralogixMetricsReader"} | `map(string)` | `{}` | no |
+| <a name="input_lambda_processor_version"></a> [lambda\_processor\_version](variables.tf#L255) | Version of the Lambda processor to deploy (0.1.18 or later). Changing it updates the function code on the next apply. In GovCloud the FIPS build of this version is used. | `string` | `"0.1.18"` | no |
+| <a name="input_server_side_encryption"></a> [server\_side\_encryption](variables.tf#L270) | Server side encryption configuration | <pre>object({<br/>    enabled  = bool<br/>    key_type = optional(string)<br/>    key_arn  = optional(string)<br/>  })</pre> | <pre>{<br/>  "enabled": false,<br/>  "key_type": "AWS_OWNED_CMK"<br/>}</pre> | no |
+| <a name="input_static_labels"></a> [static\_labels](variables.tf#L288) | List of key-value pairs that will be added as labels to every metric in the integration. | `list(string)` | `[]` | no |
+| <a name="input_derived_labels"></a> [derived\_labels](variables.tf#L294) | Rules that add a label copied from the first resource tag in `sources` that exists, isn't empty and isn't in `exclude_values` (case-insensitive). Optional `drop_values` drops data points where any final label with the `target` key matches (case-insensitive, requires processor v0.1.17 or later). Passed to the Lambda processor as DERIVED\_LABELS. Requires lambda\_processor\_enable. | <pre>list(object({<br/>    target         = string<br/>    sources        = list(string)<br/>    exclude_values = optional(list(string), [])<br/>    drop_values    = optional(list(string), [])<br/>  }))</pre> | `[]` | no |
+| <a name="input_cross_account_enabled"></a> [cross\_account\_enabled](variables.tf#L321) | Enable cross-account resource tag enrichment for OAM. When true, the Lambda will assume roles in linked accounts to fetch resource tags. Requires cross\_account\_roles to be set. | `bool` | `false` | no |
+| <a name="input_cross_account_roles"></a> [cross\_account\_roles](variables.tf#L327) | Map of AWS account IDs to IAM role ARNs for cross-account tag enrichment. Example: {"123456789012" = "arn:aws:iam::123456789012:role/CoralogixMetricsReader"} | `map(string)` | `{}` | no |
 | <a name="input_lambda_processor_enable"></a> [lambda\_processor\_enable](variables.tf#L189) | Enable lambda processor function, defaults to true | `bool` | `true` | no |
 | <a name="input_lambda_processor_custom_name"></a> [lambda\_processor\_custom\_name](variables.tf#L195) | Set the name of the lambda processor function, otherwise variable '{firehose\_stream}-metrics-transform' will be used | `string` | `null` | no |
 | <a name="input_lambda_processor_iam_custom_name"></a> [lambda\_processor\_iam\_custom\_name](variables.tf#L201) | Set the name of the lambda processor IAM role & policy, otherwise variable '{firehose\_stream}-lambda-processor-iam' will be used | `string` | `null` | no |
@@ -306,7 +296,7 @@ The CloudWatch metric stream format is set with `output_format` (`opentelemetry0
 | <a name="input_override_default_tags"></a> [override\_default\_tags](variables.tf#L243) | Override and remove the default tags by setting to true | `bool` | `false` | no |
 
 > [!NOTE]
-> To deploy in GovCloud, set `custom_s3_bucket` to a bucket that exists in your account. The module downloads the Lambda processor and uploads it to that bucket.
+> To deploy in GovCloud, set `custom_s3_bucket` to a bucket that exists in your account. The module downloads the FIPS build of the Lambda processor (`firehose-metrics-transformer-fips-<version>.zip`), checks its published SHA-256 and uploads it to that bucket. The machine running Terraform needs `curl`, `sha256sum` or `shasum`, and the AWS CLI.
 
 ## Outputs
 

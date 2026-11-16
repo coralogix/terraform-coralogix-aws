@@ -19,6 +19,10 @@ locals {
   # drop_values is left out when empty, so the JSON stays readable by processors older than v0.1.17.
   derived_labels = [for r in var.derived_labels : { for k, v in r : k => v if k != "drop_values" || length(v) > 0 }]
 
+  # Versioned keys are write-once, so a pinned version always deploys the same code. GovCloud
+  # gets the FIPS build.
+  lambda_processor_zip = "firehose-metrics-transformer-${data.aws_partition.current.partition == "aws-us-gov" ? "fips-" : ""}${var.lambda_processor_version}.zip"
+
   endpoint_domain = var.custom_domain != null ? var.custom_domain : module.locals.coralogix_domains[var.coralogix_region]
   endpoint_url    = "https://ingress.${local.endpoint_domain}/aws/firehose"
 
@@ -64,16 +68,24 @@ resource "random_string" "this" {
 resource "null_resource" "s3_bucket_copy" {
   count = var.custom_s3_bucket != null ? 1 : 0
 
+  # Copies again when the version or bucket changes.
+  triggers = {
+    key    = local.lambda_processor_zip
+    bucket = var.custom_s3_bucket
+  }
+
+  # Downloads from the public commercial bucket and checks the published SHA-256 before uploading.
   provisioner "local-exec" {
     command = <<-EOF
-      curl -o firehose-metrics-transformer.zip https://coralogix-serverless-repo-eu-west-1.s3.eu-west-1.amazonaws.com/firehose-metrics-transformer.zip
-      aws s3 cp --region ${data.aws_region.current_region.id} ./firehose-metrics-transformer.zip s3://${var.custom_s3_bucket}/firehose-metrics-transformer.zip
-      if [ -f firehose-metrics-transformer.zip ]; then
-        rm ./firehose-metrics-transformer.zip
-      else
-        echo "Couldn't find firehose-metrics-transformer.zip, skip deleting"
-      fi
-
+      set -eu
+      dir=$(mktemp -d)
+      trap 'rm -rf "$dir"' EXIT
+      cd "$dir"
+      url=https://coralogix-serverless-repo-eu-west-1.s3.eu-west-1.amazonaws.com/${local.lambda_processor_zip}
+      curl -fsSLo ${local.lambda_processor_zip} "$url"
+      curl -fsSLo ${local.lambda_processor_zip}.sha256 "$url.sha256"
+      if command -v sha256sum >/dev/null; then sha256sum -c ${local.lambda_processor_zip}.sha256; else shasum -a 256 -c ${local.lambda_processor_zip}.sha256; fi
+      aws s3 cp --region ${data.aws_region.current_region.id} ${local.lambda_processor_zip} s3://${var.custom_s3_bucket}/${local.lambda_processor_zip}
     EOF
   }
 }
@@ -340,7 +352,7 @@ resource "aws_lambda_function" "lambda_processor" {
   depends_on    = [null_resource.s3_bucket_copy]
   count         = var.lambda_processor_enable ? 1 : 0
   s3_bucket     = coalesce(var.custom_s3_bucket, "coralogix-serverless-repo-${data.aws_region.current_region.id}")
-  s3_key        = "firehose-metrics-transformer.zip"
+  s3_key        = local.lambda_processor_zip
   function_name = local.lambda_processor_name
   role          = local.lambda_processor_iam_role_arn
   handler       = "bootstrap"
