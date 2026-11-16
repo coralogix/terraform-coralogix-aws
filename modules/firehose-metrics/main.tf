@@ -16,6 +16,9 @@ module "locals" {
 }
 
 locals {
+  # drop_values is left out when empty, so the JSON stays readable by processors older than v0.1.17.
+  derived_labels = [for r in var.derived_labels : { for k, v in r : k => v if k != "drop_values" || length(v) > 0 }]
+
   endpoint_domain = var.custom_domain != null ? var.custom_domain : module.locals.coralogix_domains[var.coralogix_region]
   endpoint_url    = "https://ingress.${local.endpoint_domain}/aws/firehose"
 
@@ -353,7 +356,7 @@ resource "aws_lambda_function" "lambda_processor" {
       STATIC_LABELS         = jsonencode(var.static_labels)
       CROSS_ACCOUNT_ENABLED = tostring(var.cross_account_enabled)
       CROSS_ACCOUNT_ROLES   = jsonencode(var.cross_account_roles)
-    }, length(var.derived_labels) > 0 ? { DERIVED_LABELS = jsonencode(var.derived_labels) } : {})
+    }, length(var.derived_labels) > 0 ? { DERIVED_LABELS = jsonencode(local.derived_labels) } : {})
   }
 
 }

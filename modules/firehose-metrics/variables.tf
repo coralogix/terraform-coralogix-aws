@@ -277,11 +277,12 @@ variable "static_labels" {
 }
 
 variable "derived_labels" {
-  description = "Rules that add a label copied from the first resource tag in `sources` that exists, isn't empty and isn't in `exclude_values` (case-insensitive). Passed to the Lambda processor as DERIVED_LABELS. Requires lambda_processor_enable."
+  description = "Rules that add a label copied from the first resource tag in `sources` that exists, isn't empty and isn't in `exclude_values` (case-insensitive). Optional `drop_values` drops data points where any final label with the `target` key matches (case-insensitive, requires processor v0.1.17 or later). Passed to the Lambda processor as DERIVED_LABELS. Requires lambda_processor_enable."
   type = list(object({
     target         = string
     sources        = list(string)
     exclude_values = optional(list(string), [])
+    drop_values    = optional(list(string), [])
   }))
   default  = []
   nullable = false
@@ -289,6 +290,11 @@ variable "derived_labels" {
   validation {
     condition     = alltrue([for r in var.derived_labels : trimspace(r.target) != "" && length(r.sources) > 0])
     error_message = "Each derived_labels rule needs a non-empty target and at least one source."
+  }
+
+  validation {
+    condition     = alltrue([for r in var.derived_labels : alltrue([for v in r.drop_values : trimspace(v) != ""])])
+    error_message = "derived_labels drop_values must not contain empty strings."
   }
 
   validation {
