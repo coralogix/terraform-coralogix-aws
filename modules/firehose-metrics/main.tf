@@ -92,7 +92,8 @@ resource "random_string" "this" {
 }
 
 resource "null_resource" "s3_bucket_copy" {
-  count = var.custom_s3_bucket != null ? 1 : 0
+  # Only when there is a processor to load: a disabled processor has nothing to stage.
+  count = var.custom_s3_bucket != null && var.lambda_processor_enable ? 1 : 0
 
   # Copies again when the version or bucket changes.
   triggers = {

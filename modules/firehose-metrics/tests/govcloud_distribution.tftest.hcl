@@ -133,3 +133,33 @@ run "commercial_custom_bucket_is_stocked_from_the_commercial_bucket" {
     error_message = "Commercial custom buckets are stocked from the commercial bucket, as before."
   }
 }
+
+# Disabling the processor while keeping a custom bucket and an old pin must not stage
+# anything: the new key for that pin isn't in the distribution bucket, so a copy would
+# fail the apply for a processor nobody wants.
+run "govcloud_disabled_processor_stages_nothing" {
+  command = plan
+
+  variables {
+    custom_s3_bucket         = "customer-owned-bucket"
+    lambda_processor_version = "0.1.18"
+    lambda_processor_enable  = false
+  }
+  override_data {
+    target = data.aws_partition.current
+    values = { partition = "aws-us-gov" }
+  }
+
+  assert {
+    condition     = length(null_resource.s3_bucket_copy) == 0
+    error_message = "A disabled processor must not stage an artifact."
+  }
+  assert {
+    condition     = length(aws_lambda_function.lambda_processor) == 0
+    error_message = "No processor Lambda when it is disabled."
+  }
+  assert {
+    condition     = length(terraform_data.govcloud_version_guardrail) == 0
+    error_message = "The version guard only applies to an enabled processor."
+  }
+}
