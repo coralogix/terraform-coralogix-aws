@@ -252,6 +252,21 @@ variable "custom_s3_bucket" {
   default     = null
 }
 
+variable "lambda_processor_version" {
+  description = "Version of the Lambda processor to deploy (0.1.18 or later). Changing it updates the function code on the next apply. In GovCloud the FIPS build of this version is used."
+  type        = string
+  default     = "0.1.18"
+
+  validation {
+    condition = can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", var.lambda_processor_version)) && (
+      try(tonumber(split(".", var.lambda_processor_version)[0]), 0) > 0 ||
+      try(tonumber(split(".", var.lambda_processor_version)[1]), 0) > 1 ||
+      (try(tonumber(split(".", var.lambda_processor_version)[1]), 0) == 1 && try(tonumber(split(".", var.lambda_processor_version)[2]), 0) >= 18)
+    )
+    error_message = "lambda_processor_version must be X.Y.Z and 0.1.18 or later (the first version published under a versioned key)."
+  }
+}
+
 variable "server_side_encryption" {
   description = "Server side encryption configuration"
   type = object({

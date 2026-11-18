@@ -1,5 +1,12 @@
 # Changelog
 
+## v4.17.0
+
+#### **firehose-metrics**
+### 💡 Enhancements 💡
+- Added `lambda_processor_version` (default `0.1.18`): the Lambda processor is deployed from the versioned, write-once `firehose-metrics-transformer-<version>.zip` instead of the unversioned `firehose-metrics-transformer.zip`. Set a newer version and apply to upgrade. On the first apply after upgrading the module, existing functions are updated to 0.1.18.
+- In GovCloud (`aws-us-gov` partition), `custom_s3_bucket` now receives the FIPS build (`firehose-metrics-transformer-fips-<version>.zip`), and the copy checks the published SHA-256 before uploading. The copy runs again when the version or bucket changes.
+
 ## v4.16.0
 
 #### **firehose-metrics**
