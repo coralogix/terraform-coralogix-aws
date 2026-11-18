@@ -63,7 +63,7 @@ run "govcloud_stages_from_the_govcloud_bucket" {
   }
 
   assert {
-    condition     = null_resource.s3_bucket_copy[0].triggers.source_bucket == "coralogix-serverless-repo-us-gov-west-1"
+    condition     = null_resource.s3_bucket_copy[0].triggers.source_bucket == "coralogix-public-artifacts-us-gov-west-1"
     error_message = "A GovCloud deployment must stage the GovCloud build; the commercial artifact carries the unvalidated AWS-LC FIPS v4 module."
   }
 }

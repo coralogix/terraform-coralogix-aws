@@ -33,8 +33,8 @@ resource "null_resource" "s3_bucket_copy" {
   provisioner "local-exec" {
     # How the artifact is fetched differs by partition, and both forms are deliberate.
     #
-    # GovCloud grants s3:GetObject to authenticated principals only and returns 403 to an
-    # anonymous request, so that partition signs.
+    # GovCloud signs with the deployer's credentials, as it did when the source bucket only
+    # served authenticated principals; the distribution bucket accepts either.
     #
     # Commercial keeps the unsigned download it has always used. ap-east-1 is an opt-in
     # Region: an account that has not enabled it cannot make a SIGNED request there, and
@@ -368,7 +368,7 @@ module "lambda" {
     AWS_USE_FIPS_ENDPOINT             = var.govcloud_deployment ? (var.aws_use_fips_endpoint == null ? "true" : tostring(var.aws_use_fips_endpoint)) : null
   }
   s3_existing_package = {
-    bucket = var.custom_s3_bucket == "" ? "coralogix-serverless-repo-${data.aws_region.this.id}" : var.custom_s3_bucket
+    bucket = var.custom_s3_bucket == "" ? local.default_code_bucket : var.custom_s3_bucket
     key    = local.artifact_key
     # Set only for a custom bucket, and only where that bucket has versioning on. It is
     # what makes a restaged artifact reach the function: with the default empty
@@ -447,6 +447,20 @@ resource "terraform_data" "otlp_headers_guardrails" {
     precondition {
       condition     = !local.sends_otlp_headers || var.source_code_version == "" || coalesce(local.source_code_version_number, 0) >= 1005000
       error_message = "otlp_headers requires shipper 1.5.0 or later; set source_code_version to 1.5.0 or above, or leave it empty to track the latest."
+    }
+  }
+}
+
+# The GovCloud distribution buckets start at 1.4.23, the first release built on the
+# NIST-validated AWS-LC FIPS v3 module with the eMudhra fix, so an older pin has nothing
+# to load there.
+resource "terraform_data" "govcloud_version_guardrail" {
+  count = local.artifact_source_is_govcloud ? 1 : 0
+
+  lifecycle {
+    precondition {
+      condition     = var.source_code_version == "" || coalesce(local.source_code_version_number, 0) >= 1004023
+      error_message = "In GovCloud, source_code_version must be 1.4.23 or later (the earliest release in the GovCloud distribution buckets), or empty to deploy ${local.govcloud_default_version}."
     }
   }
 }

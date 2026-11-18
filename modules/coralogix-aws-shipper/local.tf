@@ -12,7 +12,15 @@ locals {
   # object staged into a custom bucket is exactly the one read back out of it: the copy
   # used to upload the unversioned name unconditionally, so pinning source_code_version
   # alongside custom_s3_bucket left the Lambda pointing at a key that was never staged.
-  artifact_key = var.source_code_version != "" ? "coralogix-aws-shipper-${local.artifact_arch}-${var.source_code_version}.zip" : (
+  #
+  # GovCloud loads from the distribution buckets (coralogix-public-artifacts-<region>),
+  # which hold every release from 1.4.23 on under versioned keys only: they are write-once,
+  # so there is no unversioned "latest" key to track. An unpinned GovCloud deployment
+  # therefore gets govcloud_default_version, the release template-govcloud.yaml deploys.
+  # Bump it together with that template.
+  govcloud_default_version = "1.5.2"
+  artifact_version         = var.source_code_version != "" ? var.source_code_version : (local.artifact_source_is_govcloud ? local.govcloud_default_version : "")
+  artifact_key = local.artifact_version != "" ? "coralogix-aws-shipper-${local.artifact_arch}-${local.artifact_version}.zip" : (
     var.cpu_arch == "arm64" ? "coralogix-aws-shipper.zip" : "coralogix-aws-shipper-${local.artifact_arch}.zip"
   )
 
@@ -23,10 +31,13 @@ locals {
   # deploys the unvalidated module to a FedRAMP workload.
   #
   # ap-east-1 is the commercial source this module has used since #144 (March 2024) and
-  # stays as it is; only the GovCloud branch is new.
+  # stays as it is. GovCloud stages from the distribution bucket in us-gov-west-1.
   artifact_source_is_govcloud = data.aws_partition.current.partition == "aws-us-gov"
   artifact_source_region      = local.artifact_source_is_govcloud ? "us-gov-west-1" : "ap-east-1"
-  artifact_source_bucket      = "coralogix-serverless-repo-${local.artifact_source_region}"
+  artifact_source_bucket      = local.artifact_source_is_govcloud ? "coralogix-public-artifacts-us-gov-west-1" : "coralogix-serverless-repo-ap-east-1"
+
+  # Where the Lambda loads its code from when custom_s3_bucket is not set.
+  default_code_bucket = local.artifact_source_is_govcloud ? "coralogix-public-artifacts-${data.aws_region.this.id}" : "coralogix-serverless-repo-${data.aws_region.this.id}"
 
   # Empty string rather than null on a bucket without versioning, which aws_lambda_function
   # rejects, so normalise it back to null: the Lambda then tracks bucket and key alone,

@@ -247,17 +247,17 @@ The artifact is copied from the Coralogix bucket in the same partition you are d
 
 The upload into your bucket runs the AWS CLI on the machine executing Terraform, so it uses that machine's own credentials — the default profile or the `AWS_*` environment variables. It does **not** inherit the AWS provider's configuration: a provider alias, or credentials obtained through the provider's `assume_role` block, do not reach it.
 
-In commercial regions the download itself is unauthenticated, so the CLI identity needs only write access to your own bucket. In GovCloud the download is signed, because those buckets refuse anonymous requests; the CLI identity there also needs `s3:GetObject` on `coralogix-serverless-repo-us-gov-west-1` and must be in the `aws-us-gov` partition.
+In commercial regions the download itself is unauthenticated, so the CLI identity needs only write access to your own bucket. In GovCloud the download is signed with the CLI identity, which must be in the `aws-us-gov` partition; it reads from `coralogix-public-artifacts-us-gov-west-1`, which any identity can read.
 
-Separately, when `source_code_version` is **not** set, the **AWS provider's** identity — the one Terraform itself authenticates with — needs both `s3:GetObject` and `s3:GetObjectVersion` on your bucket:
+Separately, in commercial regions when `source_code_version` is **not** set, the **AWS provider's** identity — the one Terraform itself authenticates with — needs both `s3:GetObject` and `s3:GetObjectVersion` on your bucket:
 
 - `s3:GetObject` for the module's read of the staged object, which picks up its version and is what makes a restaged artifact redeploy under an unchanging key.
 - `s3:GetObjectVersion` because the Lambda is then created against that specific version, and S3 requires this action for any request carrying a `versionId`. Granting only `s3:GetObject` fails with `AccessDenied` at function creation.
 
-Pin `source_code_version` and neither applies: the read does not happen and no version is passed, so a provider identity with write-only access to this bucket keeps working.
+Pin `source_code_version` and neither applies: the read does not happen and no version is passed, so a provider identity with write-only access to this bucket keeps working. Neither applies in GovCloud either, because an unpinned GovCloud deployment already uses a versioned key.
 
 > [!IMPORTANT]
-> **Grant the provider `s3:GetObject` and `s3:GetObjectVersion` on this bucket**, and **enable versioning** — or pin `source_code_version`.
+> In commercial regions, **grant the provider `s3:GetObject` and `s3:GetObjectVersion` on this bucket**, and **enable versioning** — or pin `source_code_version`.
 >
 > With neither, the staged object keeps the same key on every release, so Terraform sees no change to the Lambda and leaves the previous binary deployed — the bucket is updated and the function is not. With versioning on, each restage produces a new object version, which the module passes to the Lambda and which forces the code to update. Pinning `source_code_version` achieves the same thing by putting the version in the key.
 
@@ -266,6 +266,8 @@ Pin `source_code_version` and neither applies: the read does not happen and no v
 When `govcloud_deployment = true`, the module sets both `ENABLE_AWS_FIPS=true` and `AWS_USE_FIPS_ENDPOINT=true` on the Lambda by default, which routes all AWS SDK calls to FIPS service endpoints and uses the AWS-LC FIPS TLS provider.
 
 From shipper **1.4.23** the GovCloud artifact is a separate build. It pins the NIST-validated AWS-LC FIPS **v3** module (certificates #5314 and #5298), where the commercial build uses **v4**, which is submitted to NIST but not yet validated. The two are not interchangeable: deploying the commercial zip into GovCloud puts an unvalidated cryptographic module into a FedRAMP workload. The module handles this for you — it reads the artifact from the Coralogix bucket in the partition you are deploying to, including when `custom_s3_bucket` is set.
+
+In GovCloud the Lambda loads from the Coralogix distribution bucket `coralogix-public-artifacts-<region>`, which holds every release from **1.4.23** on under versioned keys only. Leave `source_code_version` empty to deploy **1.5.2**, the release `template-govcloud.yaml` deploys, or pin 1.4.23 or later; an older pin fails at plan. Commercial regions are unchanged.
 
 If you need to disable FIPS in a GovCloud deployment, set the corresponding variable explicitly:
 

@@ -253,12 +253,12 @@ variable "custom_s3_bucket" {
 }
 
 variable "lambda_processor_version" {
-  description = "Version of the Lambda processor to deploy (0.1.18 or later). Changing it updates the function code on the next apply. In GovCloud the FIPS build of this version is used."
+  description = "Version of the Lambda processor to deploy (0.1.18 or later; in GovCloud 0.1.19 or later). Leave unset for the default: 0.1.18, or 0.1.19 in GovCloud. Changing it updates the function code on the next apply. In GovCloud the FIPS build of this version is used."
   type        = string
-  default     = "0.1.18"
+  default     = null
 
   validation {
-    condition = can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", var.lambda_processor_version)) && (
+    condition = var.lambda_processor_version == null || can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", var.lambda_processor_version)) && (
       try(tonumber(split(".", var.lambda_processor_version)[0]), 0) > 0 ||
       try(tonumber(split(".", var.lambda_processor_version)[1]), 0) > 1 ||
       (try(tonumber(split(".", var.lambda_processor_version)[1]), 0) == 1 && try(tonumber(split(".", var.lambda_processor_version)[2]), 0) >= 18)

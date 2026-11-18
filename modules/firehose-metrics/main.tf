@@ -19,9 +19,16 @@ locals {
   # drop_values is left out when empty, so the JSON stays readable by processors older than v0.1.17.
   derived_labels = [for r in var.derived_labels : { for k, v in r : k => v if k != "drop_values" || length(v) > 0 }]
 
-  # Versioned keys are write-once, so a pinned version always deploys the same code. GovCloud
-  # gets the FIPS build.
-  lambda_processor_zip = "firehose-metrics-transformer-${data.aws_partition.current.partition == "aws-us-gov" ? "fips-" : ""}${var.lambda_processor_version}.zip"
+  # Versioned keys are write-once, so a pinned version always deploys the same code.
+  # GovCloud loads from the distribution buckets (coralogix-public-artifacts-<region>), which
+  # hold only the FIPS build, under the plain key, from 0.1.19 on.
+  is_govcloud                      = data.aws_partition.current.partition == "aws-us-gov"
+  lambda_processor_default_version = local.is_govcloud ? "0.1.19" : "0.1.18"
+  lambda_processor_version         = coalesce(var.lambda_processor_version, local.lambda_processor_default_version)
+  lambda_processor_zip             = "firehose-metrics-transformer-${local.lambda_processor_version}.zip"
+  lambda_processor_bucket          = local.is_govcloud ? "coralogix-public-artifacts-${data.aws_region.current_region.id}" : "coralogix-serverless-repo-${data.aws_region.current_region.id}"
+  # Where custom_s3_bucket is stocked from: the FIPS build for GovCloud, the commercial build otherwise.
+  lambda_processor_source_url = local.is_govcloud ? "https://coralogix-public-artifacts-us-gov-west-1.s3.us-gov-west-1.amazonaws.com" : "https://coralogix-serverless-repo-eu-west-1.s3.eu-west-1.amazonaws.com"
 
   endpoint_domain = var.custom_domain != null ? var.custom_domain : module.locals.coralogix_domains[var.coralogix_region]
   endpoint_url    = "https://ingress.${local.endpoint_domain}/aws/firehose"
@@ -59,6 +66,25 @@ data "aws_caller_identity" "current_identity" {}
 data "aws_region" "current_region" {}
 data "aws_partition" "current" {}
 
+# The GovCloud distribution buckets start at 0.1.19, the first processor published there,
+# so an older pin has nothing to load.
+resource "terraform_data" "govcloud_version_guardrail" {
+  count = local.is_govcloud && var.lambda_processor_enable ? 1 : 0
+
+  lifecycle {
+    precondition {
+      # try() because HCL's || does not short-circuit: split() would still see the null.
+      condition = var.lambda_processor_version == null || try(
+        tonumber(split(".", var.lambda_processor_version)[0]) * 1000000 +
+        tonumber(split(".", var.lambda_processor_version)[1]) * 1000 +
+        tonumber(split(".", var.lambda_processor_version)[2]) >= 1019,
+        false
+      )
+      error_message = "In GovCloud, lambda_processor_version must be 0.1.19 or later (the earliest processor in the GovCloud distribution buckets), or unset to deploy 0.1.19."
+    }
+  }
+}
+
 resource "random_string" "this" {
   length  = 6
   special = false
@@ -66,7 +92,8 @@ resource "random_string" "this" {
 }
 
 resource "null_resource" "s3_bucket_copy" {
-  count = var.custom_s3_bucket != null ? 1 : 0
+  # Only when there is a processor to load: a disabled processor has nothing to stage.
+  count = var.custom_s3_bucket != null && var.lambda_processor_enable ? 1 : 0
 
   # Copies again when the version or bucket changes.
   triggers = {
@@ -74,14 +101,15 @@ resource "null_resource" "s3_bucket_copy" {
     bucket = var.custom_s3_bucket
   }
 
-  # Downloads from the public commercial bucket and checks the published SHA-256 before uploading.
+  # Downloads from the public Coralogix bucket for this partition and checks the published
+  # SHA-256 before uploading.
   provisioner "local-exec" {
     command = <<-EOF
       set -eu
       dir=$(mktemp -d)
       trap 'rm -rf "$dir"' EXIT
       cd "$dir"
-      url=https://coralogix-serverless-repo-eu-west-1.s3.eu-west-1.amazonaws.com/${local.lambda_processor_zip}
+      url=${local.lambda_processor_source_url}/${local.lambda_processor_zip}
       curl -fsSLo ${local.lambda_processor_zip} "$url"
       curl -fsSLo ${local.lambda_processor_zip}.sha256 "$url.sha256"
       if command -v sha256sum >/dev/null; then sha256sum -c ${local.lambda_processor_zip}.sha256; else shasum -a 256 -c ${local.lambda_processor_zip}.sha256; fi
@@ -351,7 +379,7 @@ resource "aws_cloudwatch_log_group" "loggroup" {
 resource "aws_lambda_function" "lambda_processor" {
   depends_on    = [null_resource.s3_bucket_copy]
   count         = var.lambda_processor_enable ? 1 : 0
-  s3_bucket     = coalesce(var.custom_s3_bucket, "coralogix-serverless-repo-${data.aws_region.current_region.id}")
+  s3_bucket     = coalesce(var.custom_s3_bucket, local.lambda_processor_bucket)
   s3_key        = local.lambda_processor_zip
   function_name = local.lambda_processor_name
   role          = local.lambda_processor_iam_role_arn
