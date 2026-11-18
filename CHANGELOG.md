@@ -1,5 +1,18 @@
 # Changelog
 
+## v4.18.0
+
+> [!IMPORTANT]
+> Upgrading to this version and applying it updates unpinned GovCloud shipper deployments to 1.5.2, and GovCloud Firehose deployments with no explicit `lambda_processor_version` to processor 0.1.19. Deployments with `custom_s3_bucket` are included: the module restages the selected artifact automatically. Explicit pins below those floors now fail at plan. Review the planned Lambda code updates before applying.
+
+#### **coralogix-aws-shipper**
+### 💡 Enhancements 💡
+- In GovCloud (`aws-us-gov` partition), the Lambda now loads from the Coralogix distribution bucket `coralogix-public-artifacts-<region>`, which holds every release from 1.4.23 on, and `custom_s3_bucket` is stocked from it. With `source_code_version` empty, GovCloud deployments now get 1.5.2 (the release `template-govcloud.yaml` deploys) instead of the unversioned key, so the next apply updates the function to 1.5.2. A `source_code_version` below 1.4.23 now fails at plan in GovCloud. Commercial regions are unchanged.
+
+#### **firehose-metrics**
+### 💡 Enhancements 💡
+- In GovCloud, the Lambda processor now loads from the Coralogix distribution bucket `coralogix-public-artifacts-<region>`, so `custom_s3_bucket` is no longer required; when set, it is stocked from that bucket. `lambda_processor_version` now defaults to unset: 0.1.18 in commercial regions, as before, and 0.1.19 in GovCloud, the first processor in the distribution buckets. A version below 0.1.19 now fails at plan in GovCloud. Commercial regions are unchanged.
+
 ## v4.17.0
 
 #### **firehose-metrics**
