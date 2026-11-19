@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.18.2
+
+#### **firehose-metrics**
+### 🧰 Bug fixes 🧰
+- Default `lambda_processor_version`: processor 0.1.20 (commercial and GovCloud). Deployments with no explicit `lambda_processor_version` update the processor on the next apply; explicit versions are kept.
+
 ## v4.18.1
 
 > [!IMPORTANT]
