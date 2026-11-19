@@ -1,6 +1,6 @@
 # GovCloud loads the Lambda processor from the distribution buckets
 # (coralogix-public-artifacts-<region>), which hold the FIPS build under the plain key
-# from 0.1.19 on. Commercial is unchanged.
+# from 0.1.19 on. Unset deploys the partition's default.
 
 mock_provider "aws" {
   mock_data "aws_iam_policy_document" {
@@ -16,7 +16,7 @@ variables {
   api_key          = "cxtp_test"
 }
 
-run "govcloud_unset_deploys_0_1_19_from_the_distribution_bucket" {
+run "govcloud_unset_deploys_the_default_from_the_distribution_bucket" {
   command = plan
 
   override_data {
@@ -33,8 +33,8 @@ run "govcloud_unset_deploys_0_1_19_from_the_distribution_bucket" {
     error_message = "GovCloud loads from the distribution bucket in its own region."
   }
   assert {
-    condition     = aws_lambda_function.lambda_processor[0].s3_key == "firehose-metrics-transformer-0.1.19.zip"
-    error_message = "Unset in GovCloud deploys 0.1.19 under the plain key (the bucket holds only the FIPS build)."
+    condition     = aws_lambda_function.lambda_processor[0].s3_key == "firehose-metrics-transformer-${local.lambda_processor_govcloud_default}.zip"
+    error_message = "Unset in GovCloud deploys the GovCloud default under the plain key (the bucket holds only the FIPS build)."
   }
 }
 
@@ -89,12 +89,12 @@ run "govcloud_custom_bucket_is_stocked_from_the_distribution_bucket" {
     error_message = "A GovCloud custom bucket is stocked from the distribution bucket, which only holds the FIPS build."
   }
   assert {
-    condition     = null_resource.s3_bucket_copy[0].triggers.key == "firehose-metrics-transformer-0.1.19.zip"
+    condition     = null_resource.s3_bucket_copy[0].triggers.key == "firehose-metrics-transformer-${local.lambda_processor_govcloud_default}.zip"
     error_message = "The copy stages the key the function loads."
   }
 }
 
-run "commercial_is_unchanged" {
+run "commercial_unset_deploys_the_commercial_default" {
   command = plan
 
   override_data {
@@ -111,8 +111,8 @@ run "commercial_is_unchanged" {
     error_message = "Commercial keeps coralogix-serverless-repo-<region>."
   }
   assert {
-    condition     = aws_lambda_function.lambda_processor[0].s3_key == "firehose-metrics-transformer-0.1.18.zip"
-    error_message = "Commercial still defaults to 0.1.18."
+    condition     = aws_lambda_function.lambda_processor[0].s3_key == "firehose-metrics-transformer-${local.lambda_processor_commercial_default}.zip"
+    error_message = "Commercial deploys the commercial default."
   }
 }
 

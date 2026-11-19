@@ -22,11 +22,18 @@ locals {
   # Versioned keys are write-once, so a pinned version always deploys the same code.
   # GovCloud loads from the distribution buckets (coralogix-public-artifacts-<region>), which
   # hold only the FIPS build, under the plain key, from 0.1.19 on.
-  is_govcloud                      = data.aws_partition.current.partition == "aws-us-gov"
-  lambda_processor_default_version = local.is_govcloud ? "0.1.19" : "0.1.18"
-  lambda_processor_version         = coalesce(var.lambda_processor_version, local.lambda_processor_default_version)
-  lambda_processor_zip             = "firehose-metrics-transformer-${local.lambda_processor_version}.zip"
-  lambda_processor_bucket          = local.is_govcloud ? "coralogix-public-artifacts-${data.aws_region.current_region.id}" : "coralogix-serverless-repo-${data.aws_region.current_region.id}"
+  is_govcloud = data.aws_partition.current.partition == "aws-us-gov"
+  # Default processor per partition. Both normally hold the same version: a release becomes
+  # the commercial default once released and the GovCloud default once it has passed the
+  # GovCloud smoke test, so a commercial-only fix or a GovCloud hold never blocks the other.
+  # cloudwatch-metric-streams-lambda-transformation's ci/bump-consumers.sh moves each line
+  # with a pull request; keep their format.
+  lambda_processor_commercial_default = "0.1.19" # bump-consumers: commercial
+  lambda_processor_govcloud_default   = "0.1.19" # bump-consumers: govcloud
+  lambda_processor_default_version    = local.is_govcloud ? local.lambda_processor_govcloud_default : local.lambda_processor_commercial_default
+  lambda_processor_version            = coalesce(var.lambda_processor_version, local.lambda_processor_default_version)
+  lambda_processor_zip                = "firehose-metrics-transformer-${local.lambda_processor_version}.zip"
+  lambda_processor_bucket             = local.is_govcloud ? "coralogix-public-artifacts-${data.aws_region.current_region.id}" : "coralogix-serverless-repo-${data.aws_region.current_region.id}"
   # Where custom_s3_bucket is stocked from: the FIPS build for GovCloud, the commercial build otherwise.
   lambda_processor_source_url = local.is_govcloud ? "https://coralogix-public-artifacts-us-gov-west-1.s3.us-gov-west-1.amazonaws.com" : "https://coralogix-serverless-repo-eu-west-1.s3.eu-west-1.amazonaws.com"
 
@@ -80,7 +87,7 @@ resource "terraform_data" "govcloud_version_guardrail" {
         tonumber(split(".", var.lambda_processor_version)[2]) >= 1019,
         false
       )
-      error_message = "In GovCloud, lambda_processor_version must be 0.1.19 or later (the earliest processor in the GovCloud distribution buckets), or unset to deploy 0.1.19."
+      error_message = "In GovCloud, lambda_processor_version must be 0.1.19 or later (the earliest processor in the GovCloud distribution buckets), or unset to deploy ${local.lambda_processor_default_version}."
     }
   }
 }
