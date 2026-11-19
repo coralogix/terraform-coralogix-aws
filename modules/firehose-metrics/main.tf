@@ -28,8 +28,8 @@ locals {
   # GovCloud smoke test, so a commercial-only fix or a GovCloud hold never blocks the other.
   # cloudwatch-metric-streams-lambda-transformation's ci/bump-consumers.sh moves each line
   # with a pull request; keep their format.
-  lambda_processor_commercial_default = "0.1.19" # bump-consumers: commercial
-  lambda_processor_govcloud_default   = "0.1.19" # bump-consumers: govcloud
+  lambda_processor_commercial_default = "0.1.20" # bump-consumers: commercial
+  lambda_processor_govcloud_default   = "0.1.20" # bump-consumers: govcloud
   lambda_processor_default_version    = local.is_govcloud ? local.lambda_processor_govcloud_default : local.lambda_processor_commercial_default
   lambda_processor_version            = coalesce(var.lambda_processor_version, local.lambda_processor_default_version)
   lambda_processor_zip                = "firehose-metrics-transformer-${local.lambda_processor_version}.zip"
