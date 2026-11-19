@@ -176,7 +176,8 @@ Requires processor v0.1.17 or later; the module's default `lambda_processor_vers
 The Lambda processor deploys the write-once `firehose-metrics-transformer-<version>.zip`. Left unset, `lambda_processor_version` is the module's default for the partition. Commercial regions and GovCloud normally have the same default; the GovCloud default moves only after a release has passed the GovCloud smoke test, so it can briefly lag or be held. The CHANGELOG lists each change. The same module version and inputs always deploy the same code. To upgrade, upgrade the module, or set a newer [release](https://github.com/coralogix/cloudwatch-metric-streams-lambda-transformation/releases) and apply; the function code is updated in place. A pinned version stays until you change it:
 
 ```hcl
-lambda_processor_version = "0.1.20"
+# A published release: 0.1.18 or later, 0.1.19 or later in GovCloud.
+lambda_processor_version = "X.Y.Z"
 ```
 
 ### Removal of CloudWatch Metric Streams Lambda transformation
