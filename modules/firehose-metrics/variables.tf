@@ -253,7 +253,7 @@ variable "custom_s3_bucket" {
 }
 
 variable "lambda_processor_version" {
-  description = "Version of the Lambda processor to deploy (0.1.18 or later; in GovCloud 0.1.19 or later). Leave unset for the default: 0.1.18, or 0.1.19 in GovCloud. Changing it updates the function code on the next apply. In GovCloud the FIPS build of this version is used."
+  description = "Version of the Lambda processor to deploy (0.1.18 or later; in GovCloud 0.1.19 or later). Leave unset for the module's default for the partition, normally the same version in commercial regions and GovCloud (see the CHANGELOG). Changing it updates the function code on the next apply. In GovCloud the FIPS build of this version is used."
   type        = string
   default     = null
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## v4.18.1
+
+> [!IMPORTANT]
+> Upgrading to this version and applying it updates commercial Firehose deployments with no explicit `lambda_processor_version` from processor 0.1.18 to 0.1.19. GovCloud deployments already default to 0.1.19 and are unchanged. Deployments with an explicit `lambda_processor_version` keep it.
+
+#### **firehose-metrics**
+### 🧰 Bug fixes 🧰
+- The default `lambda_processor_version` in commercial regions moves from 0.1.18 to 0.1.19, the same as GovCloud. From now on both defaults move through pull requests from the processor's release automation and normally hold the same version: the commercial default once a release is published, the GovCloud default once it has passed the GovCloud smoke test. Each move is listed here.
+
 ## v4.18.0
 
 > [!IMPORTANT]
